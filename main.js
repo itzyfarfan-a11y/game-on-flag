@@ -38,11 +38,9 @@
   function setText(selector, value) {
     const element = $(selector);
 
-    if (!element) {
-      return;
+    if (element) {
+      element.textContent = value ?? "";
     }
-
-    element.textContent = value ?? "";
   }
 
   function getSession() {
@@ -64,9 +62,7 @@
   }
 
   function formatDate(value) {
-    if (!value) {
-      return "—";
-    }
+    if (!value) return "—";
 
     try {
       return new Intl.DateTimeFormat(
@@ -76,17 +72,19 @@
           month: "2-digit",
           year: "numeric"
         }
-      ).format(new Date(value + "T00:00:00"));
+      ).format(
+        new Date(
+          String(value).slice(0, 10) +
+          "T00:00:00"
+        )
+      );
     } catch (error) {
       return String(value);
     }
   }
 
   function formatTime(value) {
-    if (!value) {
-      return "—";
-    }
-
+    if (!value) return "—";
     return String(value).slice(0, 5);
   }
 
@@ -104,23 +102,14 @@
     return labels[value] || value || "—";
   }
 
-  function statusClass(value) {
-    return String(value || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, "-");
-  }
-
-
   /* =====================================================
-     LOADING / ERRORES
+     ERRORES / LOADING
   ===================================================== */
 
   function showLoading(message) {
     const element = $("#app-loading");
 
-    if (!element) {
-      return;
-    }
+    if (!element) return;
 
     element.textContent =
       message || "Cargando...";
@@ -168,14 +157,22 @@
       container ||
       $("#app-error");
 
-    if (!target) {
-      return;
-    }
+    if (!target) return;
 
     target.textContent = "";
     target.hidden = true;
   }
 
+  function emptyState(message) {
+    return `
+      <div class="gof-empty-state">
+        ${escapeHtml(
+          message ||
+          "No hay información disponible."
+        )}
+      </div>
+    `;
+  }
 
   /* =====================================================
      CONTEXTO
@@ -196,7 +193,8 @@
   }
 
   function requireLeague() {
-    const league = getActiveLeague();
+    const league =
+      getActiveLeague();
 
     if (!league || !league.id) {
       throw new Error(
@@ -222,7 +220,6 @@
 
     return tournament;
   }
-
 
   /* =====================================================
      VISTAS
@@ -280,20 +277,9 @@
     }
   }
 
-
   /* =====================================================
-     RENDER GENÉRICO
+     RENDER GENERAL
   ===================================================== */
-
-  function emptyState(message) {
-    return `
-      <div class="gof-empty-state">
-        ${escapeHtml(
-          message || "No hay información disponible."
-        )}
-      </div>
-    `;
-  }
 
   function renderCards(
     containerId,
@@ -306,16 +292,16 @@
         containerId
       );
 
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
     if (
       !Array.isArray(items) ||
       items.length === 0
     ) {
       container.innerHTML =
-        emptyState(emptyMessage);
+        emptyState(
+          emptyMessage
+        );
 
       return;
     }
@@ -335,9 +321,7 @@
         containerId
       );
 
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
     if (
       data === null ||
@@ -356,47 +340,46 @@
       return;
     }
 
-    let content = "";
-
     if (Array.isArray(data)) {
-      content = data.map(
-        function (item) {
-          return `
-            <article class="gof-card">
-              <pre>${escapeHtml(
-                JSON.stringify(
-                  item,
-                  null,
-                  2
-                )
-              )}</pre>
-            </article>
-          `;
-        }
-      ).join("");
-    } else {
-      content = `
-        <article class="gof-card">
-          <h3>
-            ${escapeHtml(
-              title || "Información"
-            )}
-          </h3>
+      container.innerHTML =
+        data.map(
+          function (item) {
+            return `
+              <article class="gof-card">
+                <pre>${escapeHtml(
+                  JSON.stringify(
+                    item,
+                    null,
+                    2
+                  )
+                )}</pre>
+              </article>
+            `;
+          }
+        ).join("");
 
-          <pre>${escapeHtml(
-            JSON.stringify(
-              data,
-              null,
-              2
-            )
-          )}</pre>
-        </article>
-      `;
+      return;
     }
 
-    container.innerHTML = content;
-  }
+    container.innerHTML = `
+      <article class="gof-card">
+        <h3>
+          ${escapeHtml(
+            title ||
+            "Información"
+          )}
+        </h3>
 
+        <pre>${escapeHtml(
+          JSON.stringify(
+            data,
+            null,
+            2
+          )
+        )}</pre>
+      </article>
+    `;
+  }
 
   /* =====================================================
      DASHBOARD
@@ -423,7 +406,8 @@
       }
 
       const result =
-        await GOF.dashboard.loadDashboard();
+        await GOF.dashboard
+          .loadDashboard();
 
       GOF.context =
         GOF.context || {};
@@ -486,7 +470,6 @@
     }
   }
 
-
   /* =====================================================
      LIGAS
   ===================================================== */
@@ -512,7 +495,8 @@
       }
 
       const leagues =
-        await GOF.leagues.listMyLeagues();
+        await GOF.leagues
+          .listMyLeagues();
 
       renderLeagueSelector(
         leagues
@@ -535,9 +519,7 @@
     const container =
       $("#league-list");
 
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
     if (
       !Array.isArray(leagues) ||
@@ -567,20 +549,22 @@
                   : ""
               }"
               data-league-select="${
-                escapeHtml(league.id)
+                escapeHtml(
+                  league.id
+                )
               }"
             >
               <strong>
                 ${escapeHtml(
                   league.name ||
-                    "Liga"
+                  "Liga"
                 )}
               </strong>
 
               <small>
                 ${escapeHtml(
                   league.slug ||
-                    ""
+                  ""
                 )}
               </small>
             </button>
@@ -594,14 +578,15 @@
           button.addEventListener(
             "click",
             async function () {
-              const leagueId =
-                button.dataset
-                  .leagueSelect;
 
               try {
                 showLoading(
                   "Cambiando de liga..."
                 );
+
+                const leagueId =
+                  button.dataset
+                    .leagueSelect;
 
                 await GOF.leagues
                   .setActiveLeague(
@@ -649,7 +634,6 @@
       );
   }
 
-
   /* =====================================================
      CREAR LIGA
   ===================================================== */
@@ -662,9 +646,7 @@
         "Nombre de la liga:"
       );
 
-    if (name === null) {
-      return;
-    }
+    if (name === null) return;
 
     const cleanName =
       name.trim();
@@ -698,9 +680,7 @@
         suggestedSlug
       );
 
-    if (slug === null) {
-      return;
-    }
+    if (slug === null) return;
 
     const cleanSlug =
       slug.trim().toLowerCase();
@@ -716,12 +696,13 @@
     );
 
     const result =
-      await GOF.leagues.createLeague(
-        cleanName,
-        cleanSlug,
-        null,
-        {}
-      );
+      await GOF.leagues
+        .createLeague(
+          cleanName,
+          cleanSlug,
+          null,
+          {}
+        );
 
     const created =
       Array.isArray(result)
@@ -740,7 +721,6 @@
 
     showView("leagues");
   }
-
 
   /* =====================================================
      TORNEOS
@@ -773,9 +753,7 @@
     const container =
       $("#tournament-list");
 
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
     if (
       !Array.isArray(tournaments) ||
@@ -792,6 +770,7 @@
     container.innerHTML =
       tournaments.map(
         function (tournament) {
+
           const active =
             getActiveTournament()?.id ===
             tournament.id;
@@ -813,7 +792,7 @@
               <strong>
                 ${escapeHtml(
                   tournament.name ||
-                    "Torneo"
+                  "Torneo"
                 )}
               </strong>
 
@@ -832,17 +811,19 @@
     $$("[data-tournament-select]")
       .forEach(
         function (button) {
+
           button.addEventListener(
             "click",
             async function () {
-              const id =
-                button.dataset
-                  .tournamentSelect;
 
               try {
                 showLoading(
                   "Abriendo torneo..."
                 );
+
+                const id =
+                  button.dataset
+                    .tournamentSelect;
 
                 let tournament =
                   tournaments.find(
@@ -906,7 +887,6 @@
       );
   }
 
-
   /* =====================================================
      CREAR TORNEO
   ===================================================== */
@@ -920,9 +900,7 @@
         "Nombre del torneo:"
       );
 
-    if (name === null) {
-      return;
-    }
+    if (name === null) return;
 
     const cleanName =
       name.trim();
@@ -939,9 +917,7 @@
         "7"
       );
 
-    if (rounds === null) {
-      return;
-    }
+    if (rounds === null) return;
 
     const regularRounds =
       Number(rounds);
@@ -976,7 +952,7 @@
     setText(
       "#active-tournament-name",
       tournament?.name ||
-        cleanName
+      cleanName
     );
 
     setText(
@@ -993,26 +969,25 @@
     showView("tournament");
   }
 
-
   /* =====================================================
      EQUIPOS
   ===================================================== */
 
-  function renderTeams(
-    teams
-  ) {
+  function renderTeams(teams) {
     renderCards(
       "teams-content",
       teams,
       function (team) {
         return `
           <article class="gof-card">
+
             <div class="gof-card-header">
               <div>
+
                 <h3>
                   ${escapeHtml(
                     team.name ||
-                      "Equipo"
+                    "Equipo"
                   )}
                 </h3>
 
@@ -1025,6 +1000,7 @@
                       : "Sin club/grupo asignado"
                   }
                 </p>
+
               </div>
             </div>
 
@@ -1037,6 +1013,7 @@
                 }
               </span>
             </div>
+
           </article>
         `;
       },
@@ -1044,18 +1021,16 @@
     );
   }
 
-
   /* =====================================================
      ENFRENTAMIENTOS
   ===================================================== */
 
-  function renderMatches(
-    matches
-  ) {
+  function renderMatches(matches) {
     renderCards(
       "matches-content",
       matches,
       function (match) {
+
         const home =
           match.home_team?.name ||
           "Local";
@@ -1072,9 +1047,12 @@
 
         return `
           <article class="gof-card">
+
             <div class="gof-card-meta">
+
               <span>
-                Jornada ${escapeHtml(
+                Jornada
+                ${escapeHtml(
                   match.round_number
                 )}
               </span>
@@ -1086,9 +1064,11 @@
                   )
                 )}
               </span>
+
             </div>
 
             <div class="gof-match">
+
               <strong>
                 ${escapeHtml(home)}
               </strong>
@@ -1100,9 +1080,11 @@
               <strong>
                 ${escapeHtml(away)}
               </strong>
+
             </div>
 
             <div class="gof-card-meta">
+
               <span>
                 ${
                   match.match_date
@@ -1129,7 +1111,9 @@
                   "Sin campo"
                 }
               </span>
+
             </div>
+
           </article>
         `;
       },
@@ -1137,21 +1121,21 @@
     );
   }
 
-
   /* =====================================================
      CALENDARIO
   ===================================================== */
 
-  function renderCalendar(
-    matches
-  ) {
+  function renderCalendar(matches) {
     renderCards(
       "calendar-content",
       matches,
       function (match) {
+
         return `
           <article class="gof-card">
+
             <div class="gof-card-meta">
+
               <strong>
                 ${escapeHtml(
                   match.category_name ||
@@ -1161,25 +1145,30 @@
               </strong>
 
               <span>
-                Jornada ${escapeHtml(
+                Jornada
+                ${escapeHtml(
                   match.round_number
                 )}
               </span>
+
             </div>
 
             <h3>
               ${escapeHtml(
                 match.home_team?.name ||
-                  "Local"
+                "Local"
               )}
+
               vs
+
               ${escapeHtml(
                 match.away_team?.name ||
-                  "Visitante"
+                "Visitante"
               )}
             </h3>
 
             <div class="gof-card-meta">
+
               <span>
                 ${formatDate(
                   match.match_date
@@ -1195,10 +1184,12 @@
               <span>
                 ${escapeHtml(
                   match.field_name ||
-                    "Campo pendiente"
+                  "Campo pendiente"
                 )}
               </span>
+
             </div>
+
           </article>
         `;
       },
@@ -1206,21 +1197,21 @@
     );
   }
 
-
   /* =====================================================
      RESULTADOS
   ===================================================== */
 
-  function renderResults(
-    results
-  ) {
+  function renderResults(results) {
     renderCards(
       "results-content",
       results,
       function (match) {
+
         return `
           <article class="gof-card">
+
             <div class="gof-card-meta">
+
               <span>
                 ${escapeHtml(
                   formatDate(
@@ -1236,35 +1227,33 @@
                   )
                 )}
               </span>
+
             </div>
 
             <div class="gof-match">
+
               <strong>
                 ${escapeHtml(
                   match.home_team?.name ||
-                    "Local"
+                  "Local"
                 )}
               </strong>
 
               <b>
-                ${
-                  match.home_score ??
-                  "—"
-                }
+                ${match.home_score ?? "—"}
                 -
-                ${
-                  match.away_score ??
-                  "—"
-                }
+                ${match.away_score ?? "—"}
               </b>
 
               <strong>
                 ${escapeHtml(
                   match.away_team?.name ||
-                    "Visitante"
+                  "Visitante"
                 )}
               </strong>
+
             </div>
+
           </article>
         `;
       },
@@ -1272,20 +1261,15 @@
     );
   }
 
-
   /* =====================================================
      TABLA
   ===================================================== */
 
-  function renderStandings(
-    standings
-  ) {
+  function renderStandings(standings) {
     const container =
       $("#standings-content");
 
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
     if (
       !Array.isArray(standings) ||
@@ -1301,7 +1285,9 @@
 
     container.innerHTML = `
       <div class="gof-table-wrap">
+
         <table class="gof-table">
+
           <thead>
             <tr>
               <th>POS</th>
@@ -1316,10 +1302,13 @@
           </thead>
 
           <tbody>
+
             ${standings.map(
               function (row, index) {
+
                 return `
                   <tr>
+
                     <td>
                       ${escapeHtml(
                         row.position ??
@@ -1382,24 +1371,25 @@
                         0
                       )}
                     </td>
+
                   </tr>
                 `;
               }
             ).join("")}
+
           </tbody>
+
         </table>
+
       </div>
     `;
   }
-
 
   /* =====================================================
      PLAYOFFS
   ===================================================== */
 
-  function renderPlayoffs(
-    data
-  ) {
+  function renderPlayoffs(data) {
     renderSimpleData(
       "playoffs-content",
       data,
@@ -1408,30 +1398,576 @@
     );
   }
 
+  /* =====================================================
+     CATEGORÍA SELECCIONADA
+  ===================================================== */
+
+  function getSelectedCategoryId() {
+    const candidates = [
+      "#category-select",
+      "#active-category-id",
+      "[data-active-category-id]"
+    ];
+
+    for (
+      const selector of candidates
+    ) {
+      const element =
+        $(selector);
+
+      if (!element) continue;
+
+      const value =
+        element.value ||
+        element.dataset
+          .activeCategoryId ||
+        element.textContent;
+
+      if (
+        value &&
+        /^[0-9a-f-]{36}$/i.test(
+          String(value).trim()
+        )
+      ) {
+        return String(
+          value
+        ).trim();
+      }
+    }
+
+    return null;
+  }
 
   /* =====================================================
      ROSTER
   ===================================================== */
 
-  function renderRoster(
-    data
+  async function listTournamentTeamsForCategory(
+    tournamentId,
+    categoryId
   ) {
-    renderSimpleData(
-      "roster-content",
+    requireLeague();
+
+    if (!tournamentId) {
+      throw new Error(
+        "Torneo no válido."
+      );
+    }
+
+    if (!categoryId) {
+      throw new Error(
+        "Categoría no válida."
+      );
+    }
+
+    if (
+      !GOF.supabase
+    ) {
+      throw new Error(
+        "Supabase no está inicializado."
+      );
+    }
+
+    const {
       data,
-      "Roster del torneo",
-      "Selecciona un equipo para consultar su roster."
+      error
+    } = await GOF.supabase
+      .from("tournament_teams")
+      .select(`
+        id,
+        tournament_id,
+        category_id,
+        team_id,
+        active,
+        teams (
+          id,
+          name,
+          league_id,
+          club_name,
+          coach_id
+        )
+      `)
+      .eq(
+        "tournament_id",
+        tournamentId
+      )
+      .eq(
+        "category_id",
+        categoryId
+      )
+      .eq(
+        "active",
+        true
+      )
+      .order(
+        "teams(name)",
+        {
+          ascending: true
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    const league =
+      getActiveLeague();
+
+    return (data || [])
+      .filter(
+        function (row) {
+          return (
+            row.teams &&
+            row.teams.league_id ===
+              league?.id
+          );
+        }
+      );
+  }
+
+  function renderRosterSelector(
+    tournamentCategories
+  ) {
+    const container =
+      $("#roster-content");
+
+    if (!container) return;
+
+    if (
+      !Array.isArray(
+        tournamentCategories
+      ) ||
+      tournamentCategories.length === 0
+    ) {
+      container.innerHTML =
+        emptyState(
+          "Este torneo todavía no tiene categorías registradas."
+        );
+
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="gof-card">
+
+        <h3>
+          Selecciona una categoría
+        </h3>
+
+        <select
+          id="roster-category-select"
+          class="gof-select"
+        >
+
+          <option value="">
+            Selecciona una categoría
+          </option>
+
+          ${tournamentCategories.map(
+            function (row) {
+
+              const category =
+                row.categories ||
+                {};
+
+              return `
+                <option
+                  value="${escapeHtml(
+                    category.id ||
+                    row.category_id
+                  )}"
+                >
+                  ${escapeHtml(
+                    category.name ||
+                    "Categoría"
+                  )}
+                </option>
+              `;
+            }
+          ).join("")}
+
+        </select>
+
+      </div>
+
+      <div
+        id="roster-team-selector"
+      >
+        ${emptyState(
+          "Selecciona una categoría para ver los equipos."
+        )}
+      </div>
+
+      <div
+        id="roster-players"
+      ></div>
+    `;
+
+    const categorySelect =
+      $("#roster-category-select");
+
+    if (!categorySelect) return;
+
+    categorySelect.addEventListener(
+      "change",
+      async function () {
+
+        const categoryId =
+          categorySelect.value;
+
+        if (!categoryId) {
+          const teamSelector =
+            $("#roster-team-selector");
+
+          if (teamSelector) {
+            teamSelector.innerHTML =
+              emptyState(
+                "Selecciona una categoría para ver los equipos."
+              );
+          }
+
+          const players =
+            $("#roster-players");
+
+          if (players) {
+            players.innerHTML = "";
+          }
+
+          return;
+        }
+
+        try {
+          showLoading(
+            "Cargando equipos..."
+          );
+
+          GOF.ui.activeRosterCategoryId =
+            categoryId;
+
+          const teams =
+            await listTournamentTeamsForCategory(
+              getActiveTournament().id,
+              categoryId
+            );
+
+          renderRosterTeamSelector(
+            teams,
+            categoryId
+          );
+
+          hideLoading();
+
+        } catch (error) {
+          hideLoading();
+          showError(error);
+        }
+      }
     );
   }
 
+  function renderRosterTeamSelector(
+    registrations,
+    categoryId
+  ) {
+    const container =
+      $("#roster-team-selector");
+
+    if (!container) return;
+
+    if (
+      !Array.isArray(
+        registrations
+      ) ||
+      registrations.length === 0
+    ) {
+      container.innerHTML =
+        emptyState(
+          "No hay equipos registrados en esta categoría."
+        );
+
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="gof-card">
+
+        <h3>
+          Selecciona un equipo
+        </h3>
+
+        <div class="gof-module-list">
+
+          ${registrations.map(
+            function (registration) {
+
+              const team =
+                registration.teams ||
+                {};
+
+              return `
+                <button
+                  type="button"
+                  class="gof-card"
+                  data-roster-team-id="${
+                    escapeHtml(
+                      registration.team_id
+                    )
+                  }"
+                >
+
+                  <strong>
+                    ${escapeHtml(
+                      team.name ||
+                      "Equipo"
+                    )}
+                  </strong>
+
+                  <span>
+                    Consultar roster
+                  </span>
+
+                </button>
+              `;
+            }
+          ).join("")}
+
+        </div>
+
+      </div>
+    `;
+
+    $$("[data-roster-team-id]")
+      .forEach(
+        function (button) {
+
+          button.addEventListener(
+            "click",
+            async function () {
+
+              try {
+                showLoading(
+                  "Cargando roster..."
+                );
+
+                const tournament =
+                  requireTournament();
+
+                const teamId =
+                  button.dataset
+                    .rosterTeamId;
+
+                const roster =
+                  await GOF.roster
+                    .getTournamentTeamRoster(
+                      tournament.id,
+                      categoryId,
+                      teamId
+                    );
+
+                renderRosterPlayers(
+                  roster,
+                  categoryId,
+                  teamId
+                );
+
+                hideLoading();
+
+              } catch (error) {
+                hideLoading();
+                showError(error);
+              }
+            }
+          );
+        }
+      );
+  }
+
+  function renderRosterPlayers(
+    roster,
+    categoryId,
+    teamId
+  ) {
+    const container =
+      $("#roster-players");
+
+    if (!container) return;
+
+    if (
+      !Array.isArray(roster) ||
+      roster.length === 0
+    ) {
+      container.innerHTML =
+        emptyState(
+          "Este equipo todavía no tiene jugadores registrados."
+        );
+
+      return;
+    }
+
+    const teamName =
+      roster[0]?.team?.name ||
+      roster[0]?.teams?.name ||
+      "Equipo";
+
+    container.innerHTML = `
+      <div class="gof-card">
+
+        <div class="gof-card-header">
+
+          <div>
+            <h3>
+              Roster
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                teamName
+              )}
+            </p>
+          </div>
+
+          <span>
+            ${roster.length}/18
+          </span>
+
+        </div>
+
+        <div class="gof-module-list">
+
+          ${roster.map(
+            function (row) {
+
+              const player =
+                row.player ||
+                row.players ||
+                {};
+
+              const photo =
+                player.photo_url ||
+                "";
+
+              return `
+                <article
+                  class="gof-card"
+                >
+
+                  <div
+                    class="gof-card-row"
+                  >
+
+                    ${
+                      photo
+                        ? `
+                          <img
+                            src="${escapeHtml(
+                              photo
+                            )}"
+                            alt="${escapeHtml(
+                              player.full_name ||
+                              "Jugador"
+                            )}"
+                            class="gof-player-photo"
+                          >
+                        `
+                        : `
+                          <div
+                            class="gof-player-photo gof-player-photo-empty"
+                          >
+                            ${escapeHtml(
+                              String(
+                                player.jersey_number ??
+                                "—"
+                              )
+                            )}
+                          </div>
+                        `
+                    }
+
+                    <div
+                      class="gof-card-main"
+                    >
+
+                      <strong>
+                        ${escapeHtml(
+                          player.full_name ||
+                          "Jugador sin nombre"
+                        )}
+                      </strong>
+
+                      <span>
+                        Jersey:
+                        ${escapeHtml(
+                          String(
+                            player.jersey_number ??
+                            "—"
+                          )
+                        )}
+                      </span>
+
+                      <span>
+                        ${
+                          row.approved === true
+                            ? "Aprobado"
+                            : "Pendiente"
+                        }
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </article>
+              `;
+            }
+          ).join("")}
+
+        </div>
+
+      </div>
+    `;
+
+    GOF.ui.activeRosterCategoryId =
+      categoryId;
+
+    GOF.ui.activeRosterTeamId =
+      teamId;
+  }
+
+  async function loadRosterView() {
+    const tournament =
+      requireTournament();
+
+    requireLeague();
+
+    if (
+      !GOF.categories ||
+      typeof GOF.categories
+        .listTournamentCategories !==
+        "function"
+    ) {
+      throw new Error(
+        "El módulo de categorías no está disponible."
+      );
+    }
+
+    const categories =
+      await GOF.categories
+        .listTournamentCategories(
+          tournament.id
+        );
+
+    renderRosterSelector(
+      categories
+    );
+
+    return categories;
+  }
 
   /* =====================================================
      CREDENCIALES
   ===================================================== */
 
-  function renderCredentials(
-    data
-  ) {
+  function renderCredentials(data) {
     renderSimpleData(
       "credentials-content",
       data,
@@ -1440,14 +1976,11 @@
     );
   }
 
-
   /* =====================================================
      SPORTWEY
   ===================================================== */
 
-  function renderSportwey(
-    data
-  ) {
+  function renderSportwey(data) {
     renderSimpleData(
       "sportwey-content",
       data,
@@ -1456,14 +1989,11 @@
     );
   }
 
-
   /* =====================================================
      FINANZAS
   ===================================================== */
 
-  function renderFinance(
-    data
-  ) {
+  function renderFinance(data) {
     const summary =
       $("#finance-summary");
 
@@ -1471,6 +2001,7 @@
       $("#finance-content");
 
     if (summary) {
+
       const s =
         data?.summary ||
         data ||
@@ -1523,10 +2054,12 @@
     }
 
     if (container) {
+
       container.innerHTML =
         data
           ? `
             <article class="gof-card">
+
               <h3>
                 Resumen de contabilidad
               </h3>
@@ -1536,6 +2069,7 @@
                 están disponibles en el módulo
                 de Contabilidad.
               </p>
+
             </article>
           `
           : emptyState(
@@ -1544,26 +2078,26 @@
     }
   }
 
-
   /* =====================================================
      AVISOS
   ===================================================== */
 
-  function renderNotices(
-    notices
-  ) {
+  function renderNotices(notices) {
     renderCards(
       "notices-content",
       notices,
       function (notice) {
+
         return `
           <article class="gof-card">
 
             <div class="gof-card-meta">
               <span>
-                ${notice.published
-                  ? "Publicado"
-                  : "Borrador"}
+                ${
+                  notice.published
+                    ? "Publicado"
+                    : "Borrador"
+                }
               </span>
             </div>
 
@@ -1591,14 +2125,11 @@
     );
   }
 
-
   /* =====================================================
      CONFIGURACIÓN
   ===================================================== */
 
-  function renderSettings(
-    data
-  ) {
+  function renderSettings(data) {
     renderSimpleData(
       "settings-content",
       data,
@@ -1607,14 +2138,11 @@
     );
   }
 
-
   /* =====================================================
      PUBLICACIÓN
   ===================================================== */
 
-  function renderPublish(
-    data
-  ) {
+  function renderPublish(data) {
     const state =
       $("#publication-state");
 
@@ -1622,6 +2150,7 @@
       $("#publish-content");
 
     if (state) {
+
       const published =
         Number(
           data?.published ??
@@ -1642,6 +2171,7 @@
 
       state.innerHTML = `
         <div class="gof-card">
+
           <h3>
             Estado de publicación
           </h3>
@@ -1670,15 +2200,18 @@
             </div>
 
           </div>
+
         </div>
       `;
     }
 
     if (container) {
+
       container.innerHTML =
         data
           ? `
             <article class="gof-card">
+
               <h3>
                 Publicación del torneo
               </h3>
@@ -1695,6 +2228,7 @@
                     : "Existen elementos pendientes de publicación."
                 }
               </p>
+
             </article>
           `
           : emptyState(
@@ -1702,50 +2236,6 @@
             );
     }
   }
-
-
-  /* =====================================================
-     CATEGORÍA SELECCIONADA
-  ===================================================== */
-
-  function getSelectedCategoryId() {
-    const candidates = [
-      "#category-select",
-      "#active-category-id",
-      "[data-active-category-id]"
-    ];
-
-    for (
-      const selector of candidates
-    ) {
-      const element =
-        $(selector);
-
-      if (!element) {
-        continue;
-      }
-
-      const value =
-        element.value ||
-        element.dataset
-          .activeCategoryId ||
-        element.textContent;
-
-      if (
-        value &&
-        /^[0-9a-f-]{36}$/i.test(
-          String(value).trim()
-        )
-      ) {
-        return String(
-          value
-        ).trim();
-      }
-    }
-
-    return null;
-  }
-
 
   /* =====================================================
      CARGA DEL TORNEO
@@ -1779,27 +2269,22 @@
     };
   }
 
-
   /* =====================================================
      CARGA DE VISTAS
   ===================================================== */
 
-  async function loadViewData(
-    view
-  ) {
+  async function loadViewData(view) {
+
     switch (view) {
 
       case "dashboard":
         return refreshDashboard();
 
-
       case "leagues":
         return loadLeagues();
 
-
       case "tournaments":
         return loadTournaments();
-
 
       case "categories": {
         requireLeague();
@@ -1818,7 +2303,6 @@
         return data;
       }
 
-
       case "teams": {
         requireLeague();
 
@@ -1831,21 +2315,8 @@
         return data;
       }
 
-
-      case "roster": {
-        requireTournament();
-
-        const teams =
-          await GOF.teams
-            .listTeams();
-
-        renderRoster(
-          teams
-        );
-
-        return teams;
-      }
-
+      case "roster":
+        return loadRosterView();
 
       case "credentials": {
         requireTournament();
@@ -1861,15 +2332,15 @@
         return teams;
       }
 
-
       case "sportwey": {
+
         requireLeague();
 
         /*
-         * Sportwey requiere playerId.
-         * No ejecutamos una consulta sin jugador
-         * seleccionado porque el módulo la rechaza.
+         * Sportwey necesita un playerId.
+         * No se ejecuta una consulta inválida.
          */
+
         const data = [];
 
         renderSportwey(
@@ -1879,8 +2350,8 @@
         return data;
       }
 
-
       case "matches": {
+
         const tournament =
           requireTournament();
 
@@ -1895,8 +2366,8 @@
         return data;
       }
 
-
       case "calendar": {
+
         const tournament =
           requireTournament();
 
@@ -1911,8 +2382,8 @@
         return data;
       }
 
-
       case "schedule": {
+
         const tournament =
           requireTournament();
 
@@ -1922,6 +2393,7 @@
             .getScheduledMatches ===
             "function"
         ) {
+
           const data =
             await GOF.schedule
               .getScheduledMatches(
@@ -1936,8 +2408,8 @@
         return [];
       }
 
-
       case "results": {
+
         const tournament =
           requireTournament();
 
@@ -1952,8 +2424,8 @@
         return data;
       }
 
-
       case "standings": {
+
         const tournament =
           requireTournament();
 
@@ -1968,8 +2440,8 @@
         return data;
       }
 
-
       case "playoffs": {
+
         const tournament =
           requireTournament();
 
@@ -1977,6 +2449,7 @@
           getSelectedCategoryId();
 
         if (!categoryId) {
+
           renderPlayoffs([]);
 
           return [];
@@ -1994,8 +2467,8 @@
         return data;
       }
 
-
       case "finance": {
+
         requireLeague();
 
         const tournament =
@@ -2005,6 +2478,7 @@
           !tournament ||
           !tournament.id
         ) {
+
           renderFinance(null);
 
           return null;
@@ -2021,8 +2495,8 @@
         return data;
       }
 
-
       case "notices": {
+
         requireLeague();
 
         const data =
@@ -2034,8 +2508,8 @@
         return data;
       }
 
-
       case "settings": {
+
         requireLeague();
 
         const data =
@@ -2047,8 +2521,8 @@
         return data;
       }
 
-
       case "publish": {
+
         const tournament =
           requireTournament();
 
@@ -2069,15 +2543,13 @@
         return data;
       }
 
-
       default:
         return null;
     }
   }
 
-
   /* =====================================================
-     CONTEXTO
+     CONTEXTO ACTIVO
   ===================================================== */
 
   async function refreshCurrentContext() {
@@ -2090,6 +2562,7 @@
       !league ||
       !league.id
     ) {
+
       const leagues =
         await loadLeagues();
 
@@ -2097,6 +2570,7 @@
         Array.isArray(leagues) &&
         leagues.length === 1
       ) {
+
         league =
           leagues[0];
 
@@ -2126,12 +2600,12 @@
     return league;
   }
 
-
   /* =====================================================
      LOGIN
   ===================================================== */
 
   function bindLogin() {
+
     const form =
       $("#login-form");
 
@@ -2149,12 +2623,15 @@
     form.addEventListener(
       "submit",
       async function (event) {
+
         event.preventDefault();
 
         const errorBox =
           $("#login-error");
 
-        clearError(errorBox);
+        clearError(
+          errorBox
+        );
 
         const email =
           $("#login-email")
@@ -2167,6 +2644,7 @@
           "";
 
         if (!email) {
+
           showError(
             new Error(
               "Escribe tu correo electrónico."
@@ -2178,6 +2656,7 @@
         }
 
         if (!password) {
+
           showError(
             new Error(
               "Escribe tu contraseña."
@@ -2189,15 +2668,17 @@
         }
 
         try {
+
           showLoading(
             "Iniciando sesión..."
           );
 
           const result =
-            await GOF.auth.signIn(
-              email,
-              password
-            );
+            await GOF.auth
+              .signIn(
+                email,
+                password
+              );
 
           GOF.session =
             result.session;
@@ -2226,6 +2707,7 @@
           );
 
         } catch (error) {
+
           hideLoading();
 
           showError(
@@ -2237,12 +2719,12 @@
     );
   }
 
-
   /* =====================================================
      NAVEGACIÓN
   ===================================================== */
 
   function bindNavigation() {
+
     $$("[data-gof-nav]")
       .forEach(
         function (button) {
@@ -2264,17 +2746,17 @@
               const view =
                 button.dataset.gofNav;
 
-              if (!view) {
-                return;
-              }
+              if (!view) return;
 
               if (!getSession()) {
+
                 showLoginView();
 
                 return;
               }
 
               try {
+
                 showLoading(
                   "Cargando..."
                 );
@@ -2290,6 +2772,7 @@
                 );
 
               } catch (error) {
+
                 hideLoading();
 
                 showError(error);
@@ -2299,7 +2782,6 @@
         }
       );
   }
-
 
   /* =====================================================
      ACCIONES
@@ -2315,21 +2797,23 @@
       refresh.dataset.bound !==
         "true"
     ) {
+
       refresh.dataset.bound =
         "true";
 
       refresh.addEventListener(
         "click",
         async function () {
+
           try {
             await refreshDashboard();
           } catch (error) {
             showError(error);
           }
+
         }
       );
     }
-
 
     const logout =
       $("#btn-logout");
@@ -2339,14 +2823,18 @@
       logout.dataset.bound !==
         "true"
     ) {
+
       logout.dataset.bound =
         "true";
 
       logout.addEventListener(
         "click",
         async function () {
+
           try {
-            await GOF.auth.logout();
+
+            await GOF.auth
+              .logout();
 
             GOF.session =
               null;
@@ -2363,12 +2851,13 @@
             showLoginView();
 
           } catch (error) {
+
             showError(error);
           }
+
         }
       );
     }
-
 
     $$("[data-action]")
       .forEach(
@@ -2389,6 +2878,7 @@
             async function () {
 
               try {
+
                 clearError();
 
                 switch (
@@ -2396,14 +2886,19 @@
                 ) {
 
                   case "create-league":
+
                     await createLeagueFromAction();
+
                     break;
 
                   case "create-tournament":
+
                     await createTournamentFromAction();
+
                     break;
 
                   default:
+
                     console.warn(
                       "GAME ON FLAG: acción no implementada:",
                       button.dataset.action
@@ -2411,6 +2906,7 @@
                 }
 
               } catch (error) {
+
                 hideLoading();
 
                 showError(error);
@@ -2421,13 +2917,14 @@
       );
   }
 
-
   /* =====================================================
      INICIO
   ===================================================== */
 
   async function boot() {
+
     try {
+
       showLoading(
         "Iniciando GAME ON FLAG..."
       );
@@ -2439,6 +2936,7 @@
         typeof GOF.auth.init !==
           "function"
       ) {
+
         throw new Error(
           "El módulo de autenticación no está disponible."
         );
@@ -2455,6 +2953,7 @@
         !auth ||
         !auth.session
       ) {
+
         hideLoading();
 
         showLoginView();
@@ -2480,6 +2979,7 @@
       );
 
     } catch (error) {
+
       hideLoading();
 
       showError(error);
@@ -2490,7 +2990,6 @@
       );
     }
   }
-
 
   /* =====================================================
      API PÚBLICA
@@ -2541,9 +3040,11 @@
   GOF.ui.loadViewData =
     loadViewData;
 
+  GOF.ui.loadRosterView =
+    loadRosterView;
+
   GOF.ui.boot =
     boot;
-
 
   /* =====================================================
      ARRANQUE
@@ -2553,6 +3054,7 @@
     document.readyState ===
     "loading"
   ) {
+
     document.addEventListener(
       "DOMContentLoaded",
       boot,
@@ -2560,7 +3062,9 @@
         once: true
       }
     );
+
   } else {
+
     boot();
   }
 

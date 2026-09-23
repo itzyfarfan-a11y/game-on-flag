@@ -32,33 +32,24 @@
     ) || null;
   }
 
-  function showLoading(
-    message = "Cargando..."
-  ) {
-    const element =
-      $("#app-loading");
+  function showLoading(message = "Cargando...") {
+    const element = $("#app-loading");
 
     if (!element) return;
 
-    element.textContent =
-      message;
-
+    element.textContent = message;
     element.hidden = false;
   }
 
   function hideLoading() {
-    const element =
-      $("#app-loading");
+    const element = $("#app-loading");
 
     if (!element) return;
 
     element.hidden = true;
   }
 
-  function showError(
-    error,
-    container = null
-  ) {
+  function showError(error, container = null) {
     const message =
       error?.message ||
       String(error) ||
@@ -76,59 +67,39 @@
       return;
     }
 
-    target.textContent =
-      message;
-
+    target.textContent = message;
     target.hidden = false;
   }
 
-  function clearError(
-    container = null
-  ) {
+  function clearError(container = null) {
     const target =
       container ||
       $("#app-error");
 
     if (!target) return;
 
-    target.textContent =
-      "";
-
+    target.textContent = "";
     target.hidden = true;
   }
 
-  function setText(
-    selector,
-    value
-  ) {
-    const element =
-      $(selector);
+  function setText(selector, value) {
+    const element = $(selector);
 
     if (!element) return;
 
-    element.textContent =
-      value ?? "";
+    element.textContent = value ?? "";
   }
 
-  function setHtml(
-    selector,
-    html
-  ) {
-    const element =
-      $(selector);
+  function setHtml(selector, html) {
+    const element = $(selector);
 
     if (!element) return;
 
-    element.innerHTML =
-      html;
+    element.innerHTML = html;
   }
 
-  function showView(
-    viewName
-  ) {
-    $$(
-      "[data-gof-view]"
-    ).forEach(
+  function showView(viewName) {
+    $$("[data-gof-view]").forEach(
       view => {
         view.hidden =
           view.dataset.gofView !==
@@ -136,9 +107,7 @@
       }
     );
 
-    $$(
-      "[data-gof-nav]"
-    ).forEach(
+    $$("[data-gof-nav]").forEach(
       button => {
         button.classList.toggle(
           "active",
@@ -148,8 +117,7 @@
       }
     );
 
-    GOF.ui.currentView =
-      viewName;
+    GOF.ui.currentView = viewName;
 
     window.scrollTo({
       top: 0,
@@ -158,8 +126,7 @@
   }
 
   function requireLeague() {
-    const league =
-      getActiveLeague();
+    const league = getActiveLeague();
 
     if (
       !league ||
@@ -189,6 +156,9 @@
     return tournament;
   }
 
+  /*
+   * DASHBOARD
+   */
   async function refreshDashboard() {
     clearError();
 
@@ -199,10 +169,14 @@
 
       if (
         GOF.dashboard &&
-        typeof GOF.dashboard.load ===
+        typeof GOF.dashboard.loadDashboard ===
           "function"
       ) {
-        await GOF.dashboard.load();
+        await GOF.dashboard.loadDashboard();
+      } else {
+        throw new Error(
+          "El módulo Dashboard no está disponible."
+        );
       }
 
       hideLoading();
@@ -212,6 +186,9 @@
     }
   }
 
+  /*
+   * LIGAS
+   */
   async function loadLeagues() {
     clearError();
 
@@ -220,29 +197,23 @@
         "Cargando ligas..."
       );
 
-      if (
-        !GOF.leagues
-      ) {
+      if (!GOF.leagues) {
         throw new Error(
           "El módulo de ligas no está cargado."
         );
       }
 
-      let leagues = [];
-
       if (
-        typeof GOF.leagues.list ===
+        typeof GOF.leagues.listMyLeagues !==
         "function"
       ) {
-        leagues =
-          await GOF.leagues.list();
-      } else if (
-        typeof GOF.leagues.getLeagues ===
-        "function"
-      ) {
-        leagues =
-          await GOF.leagues.getLeagues();
+        throw new Error(
+          "La función de ligas no está disponible."
+        );
       }
+
+      const leagues =
+        await GOF.leagues.listMyLeagues();
 
       renderLeagueSelector(
         leagues
@@ -251,6 +222,7 @@
       hideLoading();
 
       return leagues;
+
     } catch (error) {
       hideLoading();
       showError(error);
@@ -258,9 +230,7 @@
     }
   }
 
-  function renderLeagueSelector(
-    leagues
-  ) {
+  function renderLeagueSelector(leagues) {
     const container =
       $("#league-list");
 
@@ -268,8 +238,7 @@
       return;
     }
 
-    container.innerHTML =
-      "";
+    container.innerHTML = "";
 
     if (
       !leagues ||
@@ -291,8 +260,7 @@
             "button"
           );
 
-        button.type =
-          "button";
+        button.type = "button";
 
         button.className =
           "gof-league-item";
@@ -337,14 +305,20 @@
                 await GOF.settings.setActiveLeague(
                   league.id
                 );
+              } else {
+                throw new Error(
+                  "La función para cambiar de liga no está disponible."
+                );
               }
 
-              if (
-                GOF.context
-              ) {
-                GOF.context.activeLeague =
-                  league;
-              }
+              GOF.context =
+                GOF.context || {};
+
+              GOF.context.activeLeague =
+                league;
+
+              GOF.context.activeTournament =
+                null;
 
               hideLoading();
 
@@ -353,11 +327,10 @@
               showView(
                 "dashboard"
               );
+
             } catch (error) {
               hideLoading();
-              showError(
-                error
-              );
+              showError(error);
             }
           }
         );
@@ -369,37 +342,30 @@
     );
   }
 
+  /*
+   * TORNEOS
+   */
   async function loadTournaments() {
     const league =
       requireLeague();
 
-    if (
-      !GOF.tournaments
-    ) {
+    if (!GOF.tournaments) {
       throw new Error(
         "El módulo de torneos no está cargado."
       );
     }
 
-    let data = [];
-
     if (
-      typeof GOF.tournaments.list ===
+      typeof GOF.tournaments.listTournaments !==
       "function"
     ) {
-      data =
-        await GOF.tournaments.list(
-          league.id
-        );
-    } else if (
-      typeof GOF.tournaments.getTournaments ===
-      "function"
-    ) {
-      data =
-        await GOF.tournaments.getTournaments(
-          league.id
-        );
+      throw new Error(
+        "La función de torneos no está disponible."
+      );
     }
+
+    const data =
+      await GOF.tournaments.listTournaments();
 
     renderTournamentSelector(
       data
@@ -418,8 +384,7 @@
       return;
     }
 
-    container.innerHTML =
-      "";
+    container.innerHTML = "";
 
     if (
       !tournaments ||
@@ -441,8 +406,7 @@
             "button"
           );
 
-        button.type =
-          "button";
+        button.type = "button";
 
         button.className =
           "gof-tournament-item";
@@ -494,11 +458,10 @@
               showView(
                 "tournament"
               );
+
             } catch (error) {
               hideLoading();
-              showError(
-                error
-              );
+              showError(error);
             }
           }
         );
@@ -510,6 +473,9 @@
     );
   }
 
+  /*
+   * MÓDULOS DEL TORNEO
+   */
   async function loadTournamentModules(
     tournament
   ) {
@@ -526,33 +492,30 @@
 
     if (
       GOF.categories &&
-      typeof GOF.categories.list ===
+      typeof GOF.categories.listCategories ===
         "function"
     ) {
       tasks.push(
-        GOF.categories.list(
-          tournament.id
-        )
+        GOF.categories.listCategories()
       );
     }
 
     if (
       GOF.teams &&
-      typeof GOF.teams.list ===
+      typeof GOF.teams.listTeams ===
         "function"
     ) {
       tasks.push(
-        GOF.teams.list(
-          tournament.id
-        )
+        GOF.teams.listTeams()
       );
     }
 
-    await Promise.all(
-      tasks
-    );
+    await Promise.all(tasks);
   }
 
+  /*
+   * CONTEXTO ACTUAL
+   */
   async function refreshCurrentContext() {
     clearError();
 
@@ -581,10 +544,11 @@
     await refreshDashboard();
   }
 
+  /*
+   * NAVEGACIÓN
+   */
   function bindNavigation() {
-    $$(
-      "[data-gof-nav]"
-    ).forEach(
+    $$("[data-gof-nav]").forEach(
       button => {
         button.addEventListener(
           "click",
@@ -598,26 +562,21 @@
 
             try {
               if (
-                view ===
-                "leagues"
+                view === "leagues"
               ) {
                 await loadLeagues();
               }
 
               if (
-                view ===
-                "tournaments"
+                view === "tournaments"
               ) {
                 await loadTournaments();
               }
 
-              showView(
-                view
-              );
+              showView(view);
+
             } catch (error) {
-              showError(
-                error
-              );
+              showError(error);
             }
           }
         );
@@ -625,6 +584,9 @@
     );
   }
 
+  /*
+   * ACCIONES BÁSICAS
+   */
   function bindBasicActions() {
     const refresh =
       $("#btn-refresh");
@@ -650,19 +612,25 @@
                 "function"
             ) {
               await GOF.auth.logout();
+            } else {
+              throw new Error(
+                "La función de cierre de sesión no está disponible."
+              );
             }
 
             window.location.reload();
+
           } catch (error) {
-            showError(
-              error
-            );
+            showError(error);
           }
         }
       );
     }
   }
 
+  /*
+   * ARRANQUE PRINCIPAL
+   */
   async function boot() {
     try {
       showLoading(
@@ -672,23 +640,19 @@
       clearError();
 
       /*
-       * app.js se encarga de inicializar Supabase.
-       * Si todavía no terminó, esperamos.
+       * Inicializamos autenticación
+       * y conexión con Supabase.
        */
-      if (
-        GOF.ready &&
-        typeof GOF.ready.then ===
-          "function"
-      ) {
-        await GOF.ready;
-      }
-
       if (
         GOF.auth &&
         typeof GOF.auth.init ===
           "function"
       ) {
         await GOF.auth.init();
+      } else {
+        throw new Error(
+          "El módulo de autenticación no está disponible."
+        );
       }
 
       bindNavigation();
@@ -699,8 +663,7 @@
       hideLoading();
 
       /*
-       * La pantalla inicial siempre es
-       * GAME ON FLAG / Dashboard.
+       * Pantalla inicial.
        */
       if (
         getActiveLeague()
@@ -713,6 +676,7 @@
           "leagues"
         );
       }
+
     } catch (error) {
       hideLoading();
       showError(error);
@@ -724,9 +688,10 @@
     }
   }
 
-  function escapeHtml(
-    value
-  ) {
+  /*
+   * ESCAPE HTML
+   */
+  function escapeHtml(value) {
     return String(
       value ?? ""
     )
@@ -752,11 +717,12 @@
       );
   }
 
-  GOF.ui.$ =
-    $;
+  /*
+   * API UI
+   */
+  GOF.ui.$ = $;
 
-  GOF.ui.$$ =
-    $$;
+  GOF.ui.$$ = $$;
 
   GOF.ui.showView =
     showView;
@@ -789,7 +755,7 @@
     boot;
 
   /*
-   * Arranque cuando el DOM esté listo.
+   * ARRANQUE CUANDO EL DOM ESTÁ LISTO
    */
   if (
     document.readyState ===
@@ -805,4 +771,5 @@
   } else {
     boot();
   }
+
 })();

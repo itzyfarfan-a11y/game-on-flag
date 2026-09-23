@@ -32,6 +32,10 @@
     ) || null;
   }
 
+  function getSession() {
+    return GOF.session || null;
+  }
+
   function showLoading(message = "Cargando...") {
     const element = $("#app-loading");
 
@@ -90,14 +94,6 @@
     element.textContent = value ?? "";
   }
 
-  function setHtml(selector, html) {
-    const element = $(selector);
-
-    if (!element) return;
-
-    element.innerHTML = html;
-  }
-
   function showView(viewName) {
     $$("[data-gof-view]").forEach(
       view => {
@@ -123,6 +119,31 @@
       top: 0,
       behavior: "smooth"
     });
+  }
+
+  function showLoginView() {
+    showView("login");
+
+    const loginEmail =
+      $("#login-email");
+
+    if (loginEmail) {
+      loginEmail.focus();
+    }
+  }
+
+  function requireSession() {
+    const session = getSession();
+
+    if (!session) {
+      showLoginView();
+
+      throw new Error(
+        "Necesitas iniciar sesión para continuar."
+      );
+    }
+
+    return session;
   }
 
   function requireLeague() {
@@ -163,6 +184,8 @@
     clearError();
 
     try {
+      requireSession();
+
       showLoading(
         "Actualizando información..."
       );
@@ -180,8 +203,15 @@
       }
 
       hideLoading();
+
     } catch (error) {
       hideLoading();
+
+      if (!getSession()) {
+        showLoginView();
+        return;
+      }
+
       showError(error);
     }
   }
@@ -190,6 +220,8 @@
    * LIGAS
    */
   async function loadLeagues() {
+    requireSession();
+
     clearError();
 
     try {
@@ -293,6 +325,8 @@
           "click",
           async () => {
             try {
+              requireSession();
+
               showLoading(
                 "Cambiando de liga..."
               );
@@ -346,6 +380,8 @@
    * TORNEOS
    */
   async function loadTournaments() {
+    requireSession();
+
     const league =
       requireLeague();
 
@@ -439,6 +475,8 @@
           "click",
           async () => {
             try {
+              requireSession();
+
               showLoading(
                 "Abriendo torneo..."
               );
@@ -479,6 +517,8 @@
   async function loadTournamentModules(
     tournament
   ) {
+    requireSession();
+
     if (
       !tournament ||
       !tournament.id
@@ -514,10 +554,15 @@
   }
 
   /*
-   * CONTEXTO ACTUAL
+   * CONTEXTO
    */
   async function refreshCurrentContext() {
     clearError();
+
+    if (!getSession()) {
+      showLoginView();
+      return;
+    }
 
     const league =
       getActiveLeague();
@@ -545,6 +590,103 @@
   }
 
   /*
+   * LOGIN
+   */
+  function bindLogin() {
+    const form =
+      $("#login-form");
+
+    if (!form) {
+      return;
+    }
+
+    form.addEventListener(
+      "submit",
+      async event => {
+        event.preventDefault();
+
+        clearError();
+
+        const email =
+          $("#login-email")?.value
+            ?.trim();
+
+        const password =
+          $("#login-password")?.value || "";
+
+        if (!email) {
+          showError(
+            new Error(
+              "Escribe tu correo electrónico."
+            ),
+            $("#login-error")
+          );
+          return;
+        }
+
+        if (!password) {
+          showError(
+            new Error(
+              "Escribe tu contraseña."
+            ),
+            $("#login-error")
+          );
+          return;
+        }
+
+        try {
+          showLoading(
+            "Iniciando sesión..."
+          );
+
+          if (
+            !GOF.auth ||
+            typeof GOF.auth.signIn !==
+              "function"
+          ) {
+            throw new Error(
+              "El módulo de autenticación no está disponible."
+            );
+          }
+
+          await GOF.auth.signIn(
+            email,
+            password
+          );
+
+          await GOF.auth.init();
+
+          hideLoading();
+
+          form.reset();
+
+          await refreshCurrentContext();
+
+          if (
+            getActiveLeague()
+          ) {
+            showView(
+              "dashboard"
+            );
+          } else {
+            showView(
+              "leagues"
+            );
+          }
+
+        } catch (error) {
+          hideLoading();
+
+          showError(
+            error,
+            $("#login-error")
+          );
+        }
+      }
+    );
+  }
+
+  /*
    * NAVEGACIÓN
    */
   function bindNavigation() {
@@ -557,6 +699,11 @@
               button.dataset.gofNav;
 
             if (!view) {
+              return;
+            }
+
+            if (!getSession()) {
+              showLoginView();
               return;
             }
 
@@ -585,7 +732,7 @@
   }
 
   /*
-   * ACCIONES BÁSICAS
+   * ACCIONES
    */
   function bindBasicActions() {
     const refresh =
@@ -618,7 +765,7 @@
               );
             }
 
-            window.location.reload();
+            showLoginView();
 
           } catch (error) {
             showError(error);
@@ -629,7 +776,7 @@
   }
 
   /*
-   * ARRANQUE PRINCIPAL
+   * ARRANQUE
    */
   async function boot() {
     try {
@@ -639,32 +786,32 @@
 
       clearError();
 
-      /*
-       * Inicializamos autenticación
-       * y conexión con Supabase.
-       */
       if (
-        GOF.auth &&
-        typeof GOF.auth.init ===
+        !GOF.auth ||
+        typeof GOF.auth.init !==
           "function"
       ) {
-        await GOF.auth.init();
-      } else {
         throw new Error(
           "El módulo de autenticación no está disponible."
         );
       }
 
+      const auth =
+        await GOF.auth.init();
+
+      bindLogin();
       bindNavigation();
       bindBasicActions();
 
-      await refreshCurrentContext();
-
       hideLoading();
 
-      /*
-       * Pantalla inicial.
-       */
+      if (!auth.session) {
+        showLoginView();
+        return;
+      }
+
+      await refreshCurrentContext();
+
       if (
         getActiveLeague()
       ) {
@@ -688,9 +835,6 @@
     }
   }
 
-  /*
-   * ESCAPE HTML
-   */
   function escapeHtml(value) {
     return String(
       value ?? ""
@@ -718,45 +862,28 @@
   }
 
   /*
-   * API UI
+   * API
    */
   GOF.ui.$ = $;
-
   GOF.ui.$$ = $$;
-
-  GOF.ui.showView =
-    showView;
-
-  GOF.ui.showLoading =
-    showLoading;
-
-  GOF.ui.hideLoading =
-    hideLoading;
-
-  GOF.ui.showError =
-    showError;
-
-  GOF.ui.clearError =
-    clearError;
-
+  GOF.ui.showView = showView;
+  GOF.ui.showLoginView = showLoginView;
+  GOF.ui.showLoading = showLoading;
+  GOF.ui.hideLoading = hideLoading;
+  GOF.ui.showError = showError;
+  GOF.ui.clearError = clearError;
   GOF.ui.refreshDashboard =
     refreshDashboard;
-
   GOF.ui.refreshCurrentContext =
     refreshCurrentContext;
-
+  GOF.ui.requireSession =
+    requireSession;
   GOF.ui.requireLeague =
     requireLeague;
-
   GOF.ui.requireTournament =
     requireTournament;
+  GOF.ui.boot = boot;
 
-  GOF.ui.boot =
-    boot;
-
-  /*
-   * ARRANQUE CUANDO EL DOM ESTÁ LISTO
-   */
   if (
     document.readyState ===
     "loading"

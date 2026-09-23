@@ -30,7 +30,7 @@
      * de tu proyecto Supabase.
      */
     supabaseAnonKey:
-  "AQUÍ_VA_TU_CLAVE_DE_SUPABASE",
+  "sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl",,
 
       
 

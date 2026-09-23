@@ -1962,18 +1962,814 @@
 
     return categories;
   }
-
   /* =====================================================
      CREDENCIALES
   ===================================================== */
 
-  function renderCredentials(data) {
-    renderSimpleData(
-      "credentials-content",
+  function getCredentialState() {
+    GOF.ui.credentials =
+      GOF.ui.credentials || {
+        categoryId: null,
+        teamId: null,
+        categories: [],
+        teams: [],
+        roster: []
+      };
+
+    return GOF.ui.credentials;
+  }
+
+  async function listCredentialTeams(
+    tournamentId,
+    categoryId
+  ) {
+    requireLeague();
+
+    if (!tournamentId) {
+      throw new Error(
+        "Torneo no válido."
+      );
+    }
+
+    if (!categoryId) {
+      throw new Error(
+        "Categoría no válida."
+      );
+    }
+
+    const {
       data,
-      "Credenciales",
-      "No hay jugadores disponibles para generar credenciales."
+      error
+    } = await GOF.supabase
+      .from("tournament_teams")
+      .select(`
+        id,
+        tournament_id,
+        category_id,
+        team_id,
+        active,
+        teams (
+          id,
+          name,
+          league_id,
+          club_name,
+          coach_id
+        )
+      `)
+      .eq(
+        "tournament_id",
+        tournamentId
+      )
+      .eq(
+        "category_id",
+        categoryId
+      )
+      .eq(
+        "active",
+        true
+      )
+      .order(
+        "teams(name)",
+        {
+          ascending: true
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    const league =
+      getActiveLeague();
+
+    return (data || []).filter(
+      function (row) {
+        return (
+          row.teams &&
+          row.teams.league_id ===
+            league?.id
+        );
+      }
     );
+  }
+
+  function renderCredentialCategories(
+    categories
+  ) {
+    const container =
+      $("#credentials-content");
+
+    if (!container) return;
+
+    if (
+      !Array.isArray(categories) ||
+      categories.length === 0
+    ) {
+      container.innerHTML =
+        emptyState(
+          "Este torneo todavía no tiene categorías registradas."
+        );
+
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="gof-card">
+
+        <h3>
+          Credenciales
+        </h3>
+
+        <p>
+          Selecciona una categoría.
+        </p>
+
+        <select
+          id="credentials-category-select"
+          class="gof-select"
+        >
+
+          <option value="">
+            Selecciona una categoría
+          </option>
+
+          ${categories.map(
+            function (row) {
+
+              const category =
+                row.categories ||
+                {};
+
+              return `
+                <option
+                  value="${escapeHtml(
+                    category.id ||
+                    row.category_id
+                  )}"
+                >
+                  ${escapeHtml(
+                    category.name ||
+                    "Categoría"
+                  )}
+                </option>
+              `;
+            }
+          ).join("")}
+
+        </select>
+
+      </div>
+
+      <div
+        id="credentials-team-selector"
+      >
+        ${emptyState(
+          "Selecciona una categoría para ver los equipos."
+        )}
+      </div>
+
+      <div
+        id="credentials-players"
+      ></div>
+    `;
+
+    const select =
+      $("#credentials-category-select");
+
+    if (!select) return;
+
+    select.addEventListener(
+      "change",
+      async function () {
+
+        const categoryId =
+          select.value;
+
+        const state =
+          getCredentialState();
+
+        state.categoryId =
+          categoryId || null;
+
+        state.teamId = null;
+        state.roster = [];
+        state.teams = [];
+
+        const teamContainer =
+          $("#credentials-team-selector");
+
+        const playersContainer =
+          $("#credentials-players");
+
+        if (!categoryId) {
+
+          if (teamContainer) {
+            teamContainer.innerHTML =
+              emptyState(
+                "Selecciona una categoría para ver los equipos."
+              );
+          }
+
+          if (playersContainer) {
+            playersContainer.innerHTML =
+              "";
+          }
+
+          return;
+        }
+
+        try {
+
+          showLoading(
+            "Cargando equipos..."
+          );
+
+          const tournament =
+            requireTournament();
+
+          const teams =
+            await listCredentialTeams(
+              tournament.id,
+              categoryId
+            );
+
+          state.teams =
+            teams || [];
+
+          renderCredentialTeams(
+            teams,
+            categoryId
+          );
+
+          hideLoading();
+
+        } catch (error) {
+
+          hideLoading();
+          showError(error);
+
+        }
+      }
+    );
+  }
+
+  function renderCredentialTeams(
+    registrations,
+    categoryId
+  ) {
+    const container =
+      $("#credentials-team-selector");
+
+    if (!container) return;
+
+    if (
+      !Array.isArray(
+        registrations
+      ) ||
+      registrations.length === 0
+    ) {
+
+      container.innerHTML =
+        emptyState(
+          "No hay equipos registrados en esta categoría."
+        );
+
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="gof-card">
+
+        <h3>
+          Selecciona un equipo
+        </h3>
+
+        <div class="gof-module-list">
+
+          ${registrations.map(
+            function (registration) {
+
+              const team =
+                registration.teams ||
+                {};
+
+              return `
+                <button
+                  type="button"
+                  class="gof-card"
+                  data-credentials-team-id="${
+                    escapeHtml(
+                      registration.team_id
+                    )
+                  }"
+                >
+
+                  <strong>
+                    ${escapeHtml(
+                      team.name ||
+                      "Equipo"
+                    )}
+                  </strong>
+
+                  <span>
+                    Ver roster y credenciales
+                  </span>
+
+                </button>
+              `;
+            }
+          ).join("")}
+
+        </div>
+
+      </div>
+    `;
+
+    $$(
+      "[data-credentials-team-id]"
+    ).forEach(
+      function (button) {
+
+        button.addEventListener(
+          "click",
+          async function () {
+
+            try {
+
+              showLoading(
+                "Cargando jugadores..."
+              );
+
+              const tournament =
+                requireTournament();
+
+              const teamId =
+                button.dataset
+                  .credentialsTeamId;
+
+              const state =
+                getCredentialState();
+
+              const roster =
+                await GOF.roster
+                  .getTournamentTeamRoster(
+                    tournament.id,
+                    categoryId,
+                    teamId
+                  );
+
+              state.categoryId =
+                categoryId;
+
+              state.teamId =
+                teamId;
+
+              state.roster =
+                Array.isArray(
+                  roster
+                )
+                  ? roster
+                  : [];
+
+              renderCredentialPlayers(
+                state.roster,
+                categoryId,
+                teamId,
+                registrations
+              );
+
+              hideLoading();
+
+            } catch (error) {
+
+              hideLoading();
+              showError(error);
+
+            }
+          }
+        );
+      }
+    );
+  }
+
+  function renderCredentialPlayers(
+    roster,
+    categoryId,
+    teamId,
+    registrations
+  ) {
+    const container =
+      $("#credentials-players");
+
+    if (!container) return;
+
+    const registration =
+      (registrations || []).find(
+        function (row) {
+          return (
+            row.team_id ===
+            teamId
+          );
+        }
+      );
+
+    const team =
+      registration?.teams ||
+      {};
+
+    const state =
+      getCredentialState();
+
+    const categoryRow =
+      state.categories.find(
+        function (row) {
+          return (
+            (
+              row.categories?.id ||
+              row.category_id
+            ) === categoryId
+          );
+        }
+      );
+
+    const category =
+      categoryRow?.categories ||
+      {};
+
+    if (
+      !Array.isArray(roster) ||
+      roster.length === 0
+    ) {
+
+      container.innerHTML = `
+        <div class="gof-card">
+
+          <h3>
+            ${escapeHtml(
+              team.name ||
+              "Equipo"
+            )}
+          </h3>
+
+          ${emptyState(
+            "Este equipo todavía no tiene jugadores registrados."
+          )}
+
+        </div>
+      `;
+
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="gof-card">
+
+        <div class="gof-card-header">
+
+          <div>
+
+            <h3>
+              Jugadores registrados
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                team.name ||
+                "Equipo"
+              )}
+              ·
+              ${escapeHtml(
+                category.name ||
+                "Categoría"
+              )}
+            </p>
+
+          </div>
+
+          <span>
+            ${roster.length}/18
+          </span>
+
+        </div>
+
+        <div
+          class="gof-card-row"
+          style="gap:.5rem;flex-wrap:wrap;"
+        >
+
+          <button
+            type="button"
+            class="gof-button"
+            id="credentials-select-all"
+          >
+            Seleccionar todos
+          </button>
+
+          <button
+            type="button"
+            class="gof-button gof-button-primary"
+            id="credentials-print-all"
+          >
+            IMPRIMIR TODAS
+          </button>
+
+        </div>
+
+        <div class="gof-module-list">
+
+          ${roster.map(
+            function (row, index) {
+
+              const player =
+                row.player ||
+                row.players ||
+                {};
+
+              const playerId =
+                player.id ||
+                row.player_id ||
+                `row-${index}`;
+
+              return `
+                <label
+                  class="gof-card"
+                  style="
+                    display:flex;
+                    align-items:center;
+                    gap:.75rem;
+                  "
+                >
+
+                  <input
+                    type="checkbox"
+                    class="credentials-player-check"
+                    value="${escapeHtml(
+                      playerId
+                    )}"
+                    checked
+                  >
+
+                  <span
+                    style="flex:1;"
+                  >
+
+                    <strong>
+                      ${escapeHtml(
+                        player.full_name ||
+                        "Jugador sin nombre"
+                      )}
+                    </strong>
+
+                    <small
+                      style="display:block;"
+                    >
+                      Jersey
+                      ${escapeHtml(
+                        String(
+                          player.jersey_number ??
+                          "—"
+                        )
+                      )}
+
+                      ·
+
+                      ${
+                        row.approved === true
+                          ? "Aprobado"
+                          : "Pendiente"
+                      }
+
+                    </small>
+
+                  </span>
+
+                </label>
+              `;
+            }
+          ).join("")}
+
+        </div>
+
+      </div>
+    `;
+
+    const selectAll =
+      $("#credentials-select-all");
+
+    if (selectAll) {
+
+      selectAll.addEventListener(
+        "click",
+        function () {
+
+          $(
+            ".credentials-player-check"
+          );
+
+          $$(".credentials-player-check")
+            .forEach(
+              function (checkbox) {
+                checkbox.checked = true;
+              }
+            );
+        }
+      );
+    }
+
+    const printAll =
+      $("#credentials-print-all");
+
+    if (printAll) {
+
+      printAll.addEventListener(
+        "click",
+        function () {
+
+          try {
+
+            printCredentialPlayers(
+              {
+                league:
+                  getActiveLeague(),
+
+                tournament:
+                  getActiveTournament(),
+
+                category,
+
+                team,
+
+                roster
+              }
+            );
+
+          } catch (error) {
+
+            showError(error);
+
+          }
+        }
+      );
+    }
+  }
+
+  function printCredentialPlayers(
+    {
+      league,
+      tournament,
+      category,
+      team,
+      roster
+    }
+  ) {
+
+    const selectedIds =
+      new Set(
+        $(
+          ".credentials-player-check:checked"
+        ).map(
+          function (checkbox) {
+            return checkbox.value;
+          }
+        )
+      );
+
+    const players =
+      (roster || [])
+        .map(
+          function (row) {
+            return (
+              row.player ||
+              row.players ||
+              {}
+            );
+          }
+        )
+        .filter(
+          function (player) {
+
+            const id =
+              player.id;
+
+            return (
+              !id ||
+              selectedIds.has(id)
+            );
+          }
+        );
+
+    if (
+      players.length === 0
+    ) {
+
+      throw new Error(
+        "Selecciona al menos un jugador."
+      );
+    }
+
+    if (
+      !GOF.credentials ||
+      typeof GOF.credentials
+        .buildPrintDocument !==
+        "function"
+    ) {
+
+      throw new Error(
+        "El módulo de credenciales no está disponible."
+      );
+    }
+
+    const html =
+      GOF.credentials
+        .buildPrintDocument(
+          {
+            league,
+            tournament,
+            category,
+            team,
+            players
+          }
+        );
+
+    const printWindow =
+      window.open(
+        "",
+        "_blank"
+      );
+
+    if (!printWindow) {
+
+      throw new Error(
+        "El navegador bloqueó la ventana de impresión. Permite ventanas emergentes para este sitio."
+      );
+    }
+
+    printWindow.document.open();
+
+    printWindow.document.write(
+      html
+    );
+
+    printWindow.document.close();
+
+    printWindow.focus();
+
+    setTimeout(
+      function () {
+        printWindow.print();
+      },
+      300
+    );
+  }
+
+  async function loadCredentialsView() {
+
+    const tournament =
+      requireTournament();
+
+    requireLeague();
+
+    if (
+      !GOF.categories ||
+      typeof GOF.categories
+        .listTournamentCategories !==
+        "function"
+    ) {
+
+      throw new Error(
+        "El módulo de categorías no está disponible."
+      );
+    }
+
+    const categories =
+      await GOF.categories
+        .listTournamentCategories(
+          tournament.id
+        );
+
+    const state =
+      getCredentialState();
+
+    state.categories =
+      categories || [];
+
+    state.categoryId =
+      null;
+
+    state.teamId =
+      null;
+
+    state.roster =
+      [];
+
+    state.teams =
+      [];
+
+    renderCredentialCategories(
+      categories
+    );
+
+    return categories;
   }
 
   /* =====================================================

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -20,27 +22,25 @@
 
   <title>GAME ON FLAG</title>
 
-  <!-- Estilos principales -->
   <link
     rel="stylesheet"
     href="styles.css"
   >
+
 </head>
 
-<body>
 
-  <!-- =========================================================
-       APP
-  ========================================================== -->
+<body>
 
   <div
     id="app"
     class="gof-app"
   >
 
-    <!-- =======================================================
-         LOADING
-    ======================================================== -->
+
+    <!-- =====================================================
+         CARGANDO
+    ====================================================== -->
 
     <div
       id="app-loading"
@@ -50,9 +50,10 @@
       Cargando GAME ON FLAG...
     </div>
 
-    <!-- =======================================================
-         ERROR
-    ======================================================== -->
+
+    <!-- =====================================================
+         ERROR GENERAL
+    ====================================================== -->
 
     <div
       id="app-error"
@@ -61,913 +62,1108 @@
       role="alert"
     ></div>
 
-    <!-- =======================================================
-         HEADER
-    ======================================================== -->
 
-    <header class="gof-header">
+    <!-- =====================================================
+         LOGIN
+    ====================================================== -->
 
-      <div class="gof-header-brand">
-
-        <div
-          class="gof-logo"
-          aria-label="GAME ON FLAG"
-        >
-          GAME ON
-          <strong>FLAG</strong>
-        </div>
-
-        <div
-          id="active-league-name"
-          class="gof-active-league"
-        >
-          Selecciona una liga
-        </div>
-
-      </div>
-
-      <div class="gof-header-actions">
-
-        <button
-          id="btn-refresh"
-          type="button"
-          class="gof-icon-button"
-          aria-label="Actualizar"
-          title="Actualizar"
-        >
-          ↻
-        </button>
-
-        <button
-          type="button"
-          class="gof-icon-button"
-          data-gof-nav="notices"
-          aria-label="Avisos"
-          title="Avisos"
-        >
-          🔔
-        </button>
-
-        <button
-          type="button"
-          class="gof-icon-button"
-          data-gof-nav="settings"
-          aria-label="Configuración"
-          title="Configuración"
-        >
-          ⚙
-        </button>
-
-      </div>
-
-    </header>
-
-
-    <!-- =======================================================
-         NAVEGACIÓN PRINCIPAL
-    ======================================================== -->
-
-    <nav
-      class="gof-nav"
-      aria-label="Navegación principal"
+    <section
+      id="view-login"
+      data-gof-view="login"
+      class="gof-login-view"
+      hidden
     >
 
-      <button
-        type="button"
-        data-gof-nav="dashboard"
-      >
-        Inicio
-      </button>
+      <div class="gof-login-card">
 
-      <button
-        type="button"
-        data-gof-nav="leagues"
-      >
-        Ligas
-      </button>
+        <div class="gof-login-brand">
 
-      <button
-        type="button"
-        data-gof-nav="tournaments"
-      >
-        Torneos
-      </button>
-
-      <button
-        type="button"
-        data-gof-nav="calendar"
-      >
-        Calendario
-      </button>
-
-      <button
-        type="button"
-        data-gof-nav="results"
-      >
-        Resultados
-      </button>
-
-      <button
-        type="button"
-        data-gof-nav="standings"
-      >
-        Tabla
-      </button>
-
-      <button
-        type="button"
-        data-gof-nav="playoffs"
-      >
-        Playoffs
-      </button>
-
-      <button
-        type="button"
-        data-gof-nav="finance"
-      >
-        Contabilidad
-      </button>
-
-    </nav>
-
-
-    <!-- =======================================================
-         CONTENIDO
-    ======================================================== -->
-
-    <main class="gof-main">
-
-
-      <!-- =====================================================
-           DASHBOARD
-      ====================================================== -->
-
-      <section
-        id="view-dashboard"
-        data-gof-view="dashboard"
-      >
-
-        <div class="gof-page-title">
-          <h1>GAME ON FLAG</h1>
+          <div
+            class="gof-login-logo"
+            aria-label="GAME ON FLAG"
+          >
+            GAME ON
+            <strong>FLAG</strong>
+          </div>
 
           <p>
-            Administración de ligas y torneos
+            Plataforma de gestión
+            para flag football
           </p>
+
         </div>
 
 
-        <div
-          id="dashboard-content"
-          class="gof-dashboard"
+        <div class="gof-login-title">
+
+          <h1>
+            Iniciar sesión
+          </h1>
+
+          <p>
+            Ingresa para administrar
+            tus ligas y torneos.
+          </p>
+
+        </div>
+
+
+        <form
+          id="login-form"
+          novalidate
         >
 
-          <div class="gof-card">
+          <div class="gof-form-group">
 
-            <span class="gof-card-label">
-              Liga activa
-            </span>
-
-            <strong
-              id="dashboard-league-name"
+            <label
+              for="login-email"
             >
-              —
-            </strong>
+              Correo electrónico
+            </label>
+
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              placeholder="correo@ejemplo.com"
+              required
+            >
 
           </div>
 
 
-          <div class="gof-card">
+          <div class="gof-form-group">
 
-            <span class="gof-card-label">
-              Torneo activo
-            </span>
-
-            <strong
-              id="dashboard-tournament-name"
+            <label
+              for="login-password"
             >
-              —
-            </strong>
+              Contraseña
+            </label>
+
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Contraseña"
+              required
+            >
 
           </div>
 
 
-          <div class="gof-card">
+          <div
+            id="login-error"
+            class="gof-login-error"
+            hidden
+            role="alert"
+          ></div>
 
-            <span class="gof-card-label">
-              Estado
-            </span>
 
-            <strong
-              id="dashboard-status"
-            >
-              Listo
-            </strong>
+          <button
+            type="submit"
+            class="gof-primary-button gof-login-button"
+          >
+            Entrar
+          </button>
 
+        </form>
+
+
+        <div class="gof-login-footer">
+
+          <span>
+            GAME ON FLAG
+          </span>
+
+          <small>
+            Administración segura
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         APLICACIÓN
+    ====================================================== -->
+
+    <div
+      id="app-shell"
+      class="gof-app-shell"
+    >
+
+
+      <!-- ===================================================
+           HEADER
+      ==================================================== -->
+
+      <header class="gof-header">
+
+        <div class="gof-header-brand">
+
+          <div
+            class="gof-logo"
+            aria-label="GAME ON FLAG"
+          >
+            GAME ON
+            <strong>FLAG</strong>
+          </div>
+
+          <div
+            id="active-league-name"
+            class="gof-active-league"
+          >
+            Selecciona una liga
           </div>
 
         </div>
 
-      </section>
 
-
-      <!-- =====================================================
-           LIGAS
-      ====================================================== -->
-
-      <section
-        id="view-leagues"
-        data-gof-view="leagues"
-        hidden
-      >
-
-        <div class="gof-page-title">
-
-          <h2>
-            Ligas / Organizadores
-          </h2>
-
-          <p>
-            Selecciona la liga con la que deseas trabajar.
-          </p>
-
-        </div>
-
-
-        <div
-          id="league-list"
-          class="gof-list"
-        ></div>
-
-
-        <button
-          type="button"
-          class="gof-primary-button"
-          data-action="create-league"
-        >
-          + Crear liga
-        </button>
-
-      </section>
-
-
-      <!-- =====================================================
-           TORNEOS
-      ====================================================== -->
-
-      <section
-        id="view-tournaments"
-        data-gof-view="tournaments"
-        hidden
-      >
-
-        <div class="gof-page-title">
-
-          <h2>
-            Torneos
-          </h2>
-
-          <p>
-            Torneos administrados por la liga activa.
-          </p>
-
-        </div>
-
-
-        <div
-          id="tournament-list"
-          class="gof-list"
-        ></div>
-
-
-        <button
-          type="button"
-          class="gof-primary-button"
-          data-action="create-tournament"
-        >
-          + Crear torneo
-        </button>
-
-      </section>
-
-
-      <!-- =====================================================
-           TORNEO
-      ====================================================== -->
-
-      <section
-        id="view-tournament"
-        data-gof-view="tournament"
-        hidden
-      >
-
-        <div class="gof-page-title">
-
-          <h2
-            id="active-tournament-name"
-          >
-            Torneo
-          </h2>
-
-          <p
-            id="active-tournament-status"
-          >
-            —
-          </p>
-
-        </div>
-
-
-        <div class="gof-module-grid">
+        <div class="gof-header-actions">
 
           <button
+            id="btn-refresh"
             type="button"
-            class="gof-module-card"
-            data-gof-nav="categories"
+            class="gof-icon-button"
+            aria-label="Actualizar"
+            title="Actualizar"
           >
-            <strong>
-              Categorías
-            </strong>
-
-            <span>
-              Administrar categorías
-            </span>
+            ↻
           </button>
 
 
           <button
             type="button"
-            class="gof-module-card"
-            data-gof-nav="teams"
-          >
-            <strong>
-              Equipos
-            </strong>
-
-            <span>
-              Registrar equipos
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="roster"
-          >
-            <strong>
-              Roster
-            </strong>
-
-            <span>
-              Jugadores y registros
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="credentials"
-          >
-            <strong>
-              Credenciales
-            </strong>
-
-            <span>
-              Identificación de jugadores
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="matches"
-          >
-            <strong>
-              Enfrentamientos
-            </strong>
-
-            <span>
-              Equipos contra equipos
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="calendar"
-          >
-            <strong>
-              Calendario
-            </strong>
-
-            <span>
-              Fechas, horarios y campos
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="results"
-          >
-            <strong>
-              Resultados
-            </strong>
-
-            <span>
-              Marcadores e incomparecencias
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="standings"
-          >
-            <strong>
-              Tabla
-            </strong>
-
-            <span>
-              Posiciones y estadísticas
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="playoffs"
-          >
-            <strong>
-              Playoffs
-            </strong>
-
-            <span>
-              Llaves y resultados
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
-            data-gof-nav="finance"
-          >
-            <strong>
-              Contabilidad
-            </strong>
-
-            <span>
-              Cobros y gastos
-            </span>
-          </button>
-
-
-          <button
-            type="button"
-            class="gof-module-card"
+            class="gof-icon-button"
             data-gof-nav="notices"
+            aria-label="Avisos"
+            title="Avisos"
           >
-            <strong>
-              Avisos
-            </strong>
-
-            <span>
-              Comunicación
-            </span>
+            🔔
           </button>
 
 
           <button
             type="button"
-            class="gof-module-card"
+            class="gof-icon-button"
             data-gof-nav="settings"
+            aria-label="Configuración"
+            title="Configuración"
           >
-            <strong>
-              Configuración
-            </strong>
-
-            <span>
-              Ajustes de la liga
-            </span>
+            ⚙
           </button>
 
         </div>
 
-      </section>
+      </header>
 
 
-      <!-- =====================================================
-           CATEGORÍAS
-      ====================================================== -->
+      <!-- ===================================================
+           NAVEGACIÓN
+      ==================================================== -->
 
-      <section
-        data-gof-view="categories"
-        hidden
+      <nav
+        class="gof-nav"
+        aria-label="Navegación principal"
       >
 
-        <div class="gof-page-title">
-          <h2>Categorías</h2>
-        </div>
+        <button
+          type="button"
+          data-gof-nav="dashboard"
+        >
+          Inicio
+        </button>
 
-        <div
-          id="categories-content"
-          class="gof-module-content"
-        ></div>
 
-      </section>
+        <button
+          type="button"
+          data-gof-nav="leagues"
+        >
+          Ligas
+        </button>
 
 
-      <!-- =====================================================
-           EQUIPOS
-      ====================================================== -->
+        <button
+          type="button"
+          data-gof-nav="tournaments"
+        >
+          Torneos
+        </button>
 
-      <section
-        data-gof-view="teams"
-        hidden
-      >
 
-        <div class="gof-page-title">
-          <h2>Equipos</h2>
-        </div>
+        <button
+          type="button"
+          data-gof-nav="calendar"
+        >
+          Calendario
+        </button>
 
-        <div
-          id="teams-content"
-          class="gof-module-content"
-        ></div>
 
-      </section>
+        <button
+          type="button"
+          data-gof-nav="results"
+        >
+          Resultados
+        </button>
 
 
-      <!-- =====================================================
-           ROSTER
-      ====================================================== -->
+        <button
+          type="button"
+          data-gof-nav="standings"
+        >
+          Tabla
+        </button>
 
-      <section
-        data-gof-view="roster"
-        hidden
-      >
 
-        <div class="gof-page-title">
-          <h2>Roster</h2>
-        </div>
+        <button
+          type="button"
+          data-gof-nav="playoffs"
+        >
+          Playoffs
+        </button>
 
-        <div
-          id="roster-content"
-          class="gof-module-content"
-        ></div>
 
-      </section>
+        <button
+          type="button"
+          data-gof-nav="finance"
+        >
+          Contabilidad
+        </button>
 
+      </nav>
 
-      <!-- =====================================================
-           CREDENCIALES
-      ====================================================== -->
 
-      <section
-        data-gof-view="credentials"
-        hidden
-      >
+      <!-- ===================================================
+           CONTENIDO PRINCIPAL
+      ==================================================== -->
 
-        <div class="gof-page-title">
-          <h2>Credenciales</h2>
-        </div>
+      <main class="gof-main">
 
-        <div
-          id="credentials-content"
-          class="gof-module-content"
-        ></div>
 
-      </section>
+        <!-- ===============================================
+             DASHBOARD
+        ================================================ -->
 
+        <section
+          id="view-dashboard"
+          data-gof-view="dashboard"
+          hidden
+        >
 
-      <!-- =====================================================
-           SPORTWEY
-      ====================================================== -->
+          <div class="gof-page-title">
 
-      <section
-        data-gof-view="sportwey"
-        hidden
-      >
+            <h1>
+              GAME ON FLAG
+            </h1>
 
-        <div class="gof-page-title">
-          <h2>Revisión de jugador</h2>
+            <p>
+              Administración de ligas y torneos
+            </p>
 
-          <p>
-            Consulta interna de antecedentes de registro.
-          </p>
-        </div>
+          </div>
 
-        <div
-          id="sportwey-content"
-          class="gof-module-content"
-        ></div>
 
-      </section>
+          <div
+            id="dashboard-content"
+            class="gof-dashboard"
+          >
 
+            <div class="gof-card">
 
-      <!-- =====================================================
-           ENFRENTAMIENTOS
-      ====================================================== -->
+              <span class="gof-card-label">
+                Liga activa
+              </span>
 
-      <section
-        data-gof-view="matches"
-        hidden
-      >
+              <strong
+                id="dashboard-league-name"
+              >
+                —
+              </strong>
 
-        <div class="gof-page-title">
-          <h2>Enfrentamientos</h2>
+            </div>
 
-          <p>
-            Administración de los partidos del torneo.
-          </p>
-        </div>
 
-        <div
-          id="matches-content"
-          class="gof-module-content"
-        ></div>
+            <div class="gof-card">
 
-      </section>
+              <span class="gof-card-label">
+                Torneo activo
+              </span>
 
+              <strong
+                id="dashboard-tournament-name"
+              >
+                —
+              </strong>
 
-      <!-- =====================================================
-           CALENDARIO
-      ====================================================== -->
+            </div>
 
-      <section
-        data-gof-view="calendar"
-        hidden
-      >
 
-        <div class="gof-page-title">
-          <h2>Calendario</h2>
+            <div class="gof-card">
 
-          <p>
-            Fechas, horarios y campos.
-          </p>
-        </div>
+              <span class="gof-card-label">
+                Estado
+              </span>
 
-        <div
-          id="calendar-content"
-          class="gof-module-content"
-        ></div>
+              <strong
+                id="dashboard-status"
+              >
+                Listo
+              </strong>
 
-      </section>
+            </div>
 
+          </div>
 
-      <!-- =====================================================
-           PROGRAMACIÓN
-      ====================================================== -->
+        </section>
 
-      <section
-        data-gof-view="schedule"
-        hidden
-      >
 
-        <div class="gof-page-title">
-          <h2>Programación</h2>
-        </div>
+        <!-- ===============================================
+             LIGAS
+        ================================================ -->
 
-        <div
-          id="schedule-content"
-          class="gof-module-content"
-        ></div>
+        <section
+          id="view-leagues"
+          data-gof-view="leagues"
+          hidden
+        >
 
-      </section>
+          <div class="gof-page-title">
 
+            <h2>
+              Ligas / Organizadores
+            </h2>
 
-      <!-- =====================================================
-           RESULTADOS
-      ====================================================== -->
+            <p>
+              Selecciona la liga con la que deseas trabajar.
+            </p>
 
-      <section
-        data-gof-view="results"
-        hidden
-      >
+          </div>
 
-        <div class="gof-page-title">
-          <h2>Resultados</h2>
 
-          <p>
-            Marcadores e incomparecencias.
-          </p>
-        </div>
+          <div
+            id="league-list"
+            class="gof-list"
+          ></div>
 
-        <div
-          id="results-content"
-          class="gof-module-content"
-        ></div>
 
-      </section>
+          <button
+            type="button"
+            class="gof-primary-button"
+            data-action="create-league"
+          >
+            + Crear liga
+          </button>
 
+        </section>
 
-      <!-- =====================================================
-           TABLA
-      ====================================================== -->
 
-      <section
-        data-gof-view="standings"
-        hidden
-      >
+        <!-- ===============================================
+             TORNEOS
+        ================================================ -->
 
-        <div class="gof-page-title">
-          <h2>Tabla de posiciones</h2>
-        </div>
+        <section
+          id="view-tournaments"
+          data-gof-view="tournaments"
+          hidden
+        >
 
-        <div
-          id="standings-content"
-          class="gof-module-content"
-        ></div>
+          <div class="gof-page-title">
 
-      </section>
+            <h2>
+              Torneos
+            </h2>
 
+            <p>
+              Torneos administrados por la liga activa.
+            </p>
 
-      <!-- =====================================================
-           PLAYOFFS
-      ====================================================== -->
+          </div>
 
-      <section
-        data-gof-view="playoffs"
-        hidden
-      >
 
-        <div class="gof-page-title">
-          <h2>Playoffs</h2>
+          <div
+            id="tournament-list"
+            class="gof-list"
+          ></div>
 
-          <p>
-            Llaves y resultados.
-          </p>
-        </div>
 
-        <div
-          id="playoffs-content"
-          class="gof-module-content"
-        ></div>
+          <button
+            type="button"
+            class="gof-primary-button"
+            data-action="create-tournament"
+          >
+            + Crear torneo
+          </button>
 
-      </section>
+        </section>
 
 
-      <!-- =====================================================
-           CONTABILIDAD
-      ====================================================== -->
+        <!-- ===============================================
+             TORNEO
+        ================================================ -->
 
-      <section
-        data-gof-view="finance"
-        hidden
-      >
+        <section
+          id="view-tournament"
+          data-gof-view="tournament"
+          hidden
+        >
 
-        <div class="gof-page-title">
-          <h2>Contabilidad</h2>
+          <div class="gof-page-title">
 
-          <p>
-            Cobros, pagos y gastos.
-          </p>
-        </div>
+            <h2 id="active-tournament-name">
+              Torneo
+            </h2>
 
-        <div
-          id="finance-summary"
-          class="gof-finance-summary"
-        ></div>
+            <p id="active-tournament-status">
+              —
+            </p>
 
-        <div
-          id="finance-content"
-          class="gof-module-content"
-        ></div>
+          </div>
 
-      </section>
 
+          <div class="gof-module-grid">
 
-      <!-- =====================================================
-           AVISOS
-      ====================================================== -->
 
-      <section
-        data-gof-view="notices"
-        hidden
-      >
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="categories"
+            >
+              <strong>
+                Categorías
+              </strong>
 
-        <div class="gof-page-title">
-          <h2>Avisos</h2>
+              <span>
+                Administrar categorías
+              </span>
+            </button>
 
-          <p>
-            Comunicación de la liga.
-          </p>
-        </div>
 
-        <div
-          id="notices-content"
-          class="gof-module-content"
-        ></div>
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="teams"
+            >
+              <strong>
+                Equipos
+              </strong>
 
-      </section>
+              <span>
+                Registrar equipos
+              </span>
+            </button>
 
 
-      <!-- =====================================================
-           CONFIGURACIÓN
-      ====================================================== -->
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="roster"
+            >
+              <strong>
+                Roster
+              </strong>
 
-      <section
-        data-gof-view="settings"
-        hidden
-      >
+              <span>
+                Jugadores y registros
+              </span>
+            </button>
 
-        <div class="gof-page-title">
-          <h2>Configuración</h2>
 
-          <p>
-            Administración de la liga y accesos.
-          </p>
-        </div>
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="credentials"
+            >
+              <strong>
+                Credenciales
+              </strong>
 
-        <div
-          id="settings-content"
-          class="gof-module-content"
-        ></div>
+              <span>
+                Identificación de jugadores
+              </span>
+            </button>
 
-      </section>
 
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="matches"
+            >
+              <strong>
+                Enfrentamientos
+              </strong>
 
-      <!-- =====================================================
-           PUBLICACIÓN
-      ====================================================== -->
+              <span>
+                Equipos contra equipos
+              </span>
+            </button>
 
-      <section
-        data-gof-view="publish"
-        hidden
-      >
 
-        <div class="gof-page-title">
-          <h2>Publicación</h2>
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="calendar"
+            >
+              <strong>
+                Calendario
+              </strong>
 
-          <p>
-            Control de la información visible públicamente.
-          </p>
-        </div>
+              <span>
+                Fechas, horarios y campos
+              </span>
+            </button>
 
-        <div
-          id="publication-state"
-          class="gof-publication-summary"
-        ></div>
 
-        <div
-          id="publish-content"
-          class="gof-module-content"
-        ></div>
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="results"
+            >
+              <strong>
+                Resultados
+              </strong>
 
-      </section>
+              <span>
+                Marcadores e incomparecencias
+              </span>
+            </button>
 
-    </main>
 
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="standings"
+            >
+              <strong>
+                Tabla
+              </strong>
 
-    <!-- =======================================================
-         FOOTER
-    ======================================================== -->
+              <span>
+                Posiciones y estadísticas
+              </span>
+            </button>
 
-    <footer class="gof-footer">
 
-      <span>
-        GAME ON FLAG
-      </span>
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="playoffs"
+            >
+              <strong>
+                Playoffs
+              </strong>
 
-      <button
-        id="btn-logout"
-        type="button"
-        class="gof-link-button"
-      >
-        Cerrar sesión
-      </button>
+              <span>
+                Llaves y resultados
+              </span>
+            </button>
 
-    </footer>
+
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="finance"
+            >
+              <strong>
+                Contabilidad
+              </strong>
+
+              <span>
+                Cobros y gastos
+              </span>
+            </button>
+
+
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="notices"
+            >
+              <strong>
+                Avisos
+              </strong>
+
+              <span>
+                Comunicación
+              </span>
+            </button>
+
+
+            <button
+              type="button"
+              class="gof-module-card"
+              data-gof-nav="settings"
+            >
+              <strong>
+                Configuración
+              </strong>
+
+              <span>
+                Ajustes de la liga
+              </span>
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <!-- ===============================================
+             CATEGORÍAS
+        ================================================ -->
+
+        <section
+          data-gof-view="categories"
+          hidden
+        >
+
+          <div class="gof-page-title">
+            <h2>Categorías</h2>
+          </div>
+
+          <div
+            id="categories-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             EQUIPOS
+        ================================================ -->
+
+        <section
+          data-gof-view="teams"
+          hidden
+        >
+
+          <div class="gof-page-title">
+            <h2>Equipos</h2>
+          </div>
+
+          <div
+            id="teams-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             ROSTER
+        ================================================ -->
+
+        <section
+          data-gof-view="roster"
+          hidden
+        >
+
+          <div class="gof-page-title">
+            <h2>Roster</h2>
+          </div>
+
+          <div
+            id="roster-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             CREDENCIALES
+        ================================================ -->
+
+        <section
+          data-gof-view="credentials"
+          hidden
+        >
+
+          <div class="gof-page-title">
+            <h2>Credenciales</h2>
+          </div>
+
+          <div
+            id="credentials-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             SPORTWEY
+        ================================================ -->
+
+        <section
+          data-gof-view="sportwey"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Revisión de jugador
+            </h2>
+
+            <p>
+              Consulta interna de antecedentes de registro.
+            </p>
+
+          </div>
+
+          <div
+            id="sportwey-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             ENFRENTAMIENTOS
+        ================================================ -->
+
+        <section
+          data-gof-view="matches"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Enfrentamientos
+            </h2>
+
+            <p>
+              Administración de los partidos del torneo.
+            </p>
+
+          </div>
+
+          <div
+            id="matches-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             CALENDARIO
+        ================================================ -->
+
+        <section
+          data-gof-view="calendar"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Calendario
+            </h2>
+
+            <p>
+              Fechas, horarios y campos.
+            </p>
+
+          </div>
+
+          <div
+            id="calendar-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             PROGRAMACIÓN
+        ================================================ -->
+
+        <section
+          data-gof-view="schedule"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Programación
+            </h2>
+
+          </div>
+
+          <div
+            id="schedule-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             RESULTADOS
+        ================================================ -->
+
+        <section
+          data-gof-view="results"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Resultados
+            </h2>
+
+            <p>
+              Marcadores e incomparecencias.
+            </p>
+
+          </div>
+
+          <div
+            id="results-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             TABLA
+        ================================================ -->
+
+        <section
+          data-gof-view="standings"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Tabla de posiciones
+            </h2>
+
+          </div>
+
+          <div
+            id="standings-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             PLAYOFFS
+        ================================================ -->
+
+        <section
+          data-gof-view="playoffs"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Playoffs
+            </h2>
+
+            <p>
+              Llaves y resultados.
+            </p>
+
+          </div>
+
+          <div
+            id="playoffs-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             CONTABILIDAD
+        ================================================ -->
+
+        <section
+          data-gof-view="finance"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Contabilidad
+            </h2>
+
+            <p>
+              Cobros, pagos y gastos.
+            </p>
+
+          </div>
+
+          <div
+            id="finance-summary"
+            class="gof-finance-summary"
+          ></div>
+
+          <div
+            id="finance-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             AVISOS
+        ================================================ -->
+
+        <section
+          data-gof-view="notices"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Avisos
+            </h2>
+
+            <p>
+              Comunicación de la liga.
+            </p>
+
+          </div>
+
+          <div
+            id="notices-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             CONFIGURACIÓN
+        ================================================ -->
+
+        <section
+          data-gof-view="settings"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Configuración
+            </h2>
+
+            <p>
+              Administración de la liga y accesos.
+            </p>
+
+          </div>
+
+          <div
+            id="settings-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+
+        <!-- ===============================================
+             PUBLICACIÓN
+        ================================================ -->
+
+        <section
+          data-gof-view="publish"
+          hidden
+        >
+
+          <div class="gof-page-title">
+
+            <h2>
+              Publicación
+            </h2>
+
+            <p>
+              Control de la información visible públicamente.
+            </p>
+
+          </div>
+
+          <div
+            id="publication-state"
+            class="gof-publication-summary"
+          ></div>
+
+          <div
+            id="publish-content"
+            class="gof-module-content"
+          ></div>
+
+        </section>
+
+      </main>
+
+
+      <!-- ===================================================
+           FOOTER
+      ==================================================== -->
+
+      <footer class="gof-footer">
+
+        <span>
+          GAME ON FLAG
+        </span>
+
+        <button
+          id="btn-logout"
+          type="button"
+          class="gof-link-button"
+        >
+          Cerrar sesión
+        </button>
+
+      </footer>
+
+    </div>
 
   </div>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        SUPABASE
-  ========================================================== -->
+  ====================================================== -->
 
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
 
-  <!-- =========================================================
-       CONFIGURACIÓN BASE
-  ========================================================== -->
+  <!-- =====================================================
+       CONFIGURACIÓN
+  ====================================================== -->
 
   <script src="config.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        CORE
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="app.js"></script>
   <script src="auth.js"></script>
@@ -975,27 +1171,27 @@
   <script src="dashboard.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        TORNEOS
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="tournaments.js"></script>
   <script src="categories.js"></script>
   <script src="teams.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        ROSTER
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="roster.js"></script>
   <script src="credentials.js"></script>
   <script src="sportwey.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        PARTIDOS
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="matches.js"></script>
   <script src="calendar.js"></script>
@@ -1003,36 +1199,37 @@
   <script src="results.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        COMPETENCIA
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="standings.js"></script>
   <script src="playoffs.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        ADMINISTRACIÓN
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="finance.js"></script>
   <script src="notices.js"></script>
   <script src="settings.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        PORTAL
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="public.js"></script>
   <script src="publish.js"></script>
 
 
-  <!-- =========================================================
+  <!-- =====================================================
        ORQUESTADOR
-  ========================================================== -->
+  ====================================================== -->
 
   <script src="main.js"></script>
 
 </body>
-            </html>
+
+</html>

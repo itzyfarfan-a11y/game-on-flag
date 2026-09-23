@@ -2,17 +2,30 @@
 (function () {
   "use strict";
 
+  /* =====================================================
+     CONTEXTO
+  ===================================================== */
+
   function requireContext() {
     const context =
       window.GOF &&
       window.GOF.context;
 
-    if (!context || !context.activeLeague) {
-      throw new Error("No hay una liga activa.");
+    if (
+      !context ||
+      !context.activeLeague
+    ) {
+      throw new Error(
+        "No hay una liga activa."
+      );
     }
 
     return context;
   }
+
+  /* =====================================================
+     UTILIDADES
+  ===================================================== */
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -24,8 +37,16 @@
   }
 
   function normalizePlayer(player) {
+    if (!player) {
+      throw new Error(
+        "Jugador no válido."
+      );
+    }
+
     const source =
-      player.players || player;
+      player.players ||
+      player.player ||
+      player;
 
     return {
       id:
@@ -83,6 +104,10 @@
     ).format(date);
   }
 
+  /* =====================================================
+     CREDENCIAL INDIVIDUAL
+  ===================================================== */
+
   function buildCredentialCard({
     league,
     tournament,
@@ -90,6 +115,7 @@
     team,
     player
   }) {
+
     if (!league) {
       throw new Error(
         "La liga es obligatoria."
@@ -117,11 +143,20 @@
     const normalizedPlayer =
       normalizePlayer(player);
 
+    if (
+      !normalizedPlayer.full_name
+    ) {
+      throw new Error(
+        "El jugador no tiene nombre."
+      );
+    }
+
     const logoGameOnFlag =
       "assets/game-on-flag-logo.png";
 
     const leagueLogo =
-      league.logo_url || "";
+      league.logo_url ||
+      "";
 
     return `
       <article class="gof-credential">
@@ -145,7 +180,8 @@
                     leagueLogo
                   )}"
                   alt="${escapeHtml(
-                    league.name
+                    league.name ||
+                    "Liga"
                   )}"
                 >
               `
@@ -173,7 +209,9 @@
                 >
               `
               : `
-                <div class="gof-credential-no-photo">
+                <div
+                  class="gof-credential-no-photo"
+                >
                   SIN FOTO
                 </div>
               `
@@ -182,9 +220,14 @@
         </div>
 
         <div class="gof-credential-number">
-          ${escapeHtml(
-            normalizedPlayer.jersey_number
-          )}
+          ${
+            normalizedPlayer.jersey_number !==
+              ""
+              ? escapeHtml(
+                  normalizedPlayer.jersey_number
+                )
+              : "—"
+          }
         </div>
 
         <div class="gof-credential-name">
@@ -196,37 +239,53 @@
         <div class="gof-credential-data">
 
           <div>
-            <strong>LIGA</strong>
+            <strong>
+              LIGA
+            </strong>
+
             <span>
               ${escapeHtml(
-                league.name
+                league.name ||
+                ""
               )}
             </span>
           </div>
 
           <div>
-            <strong>TORNEO</strong>
+            <strong>
+              TORNEO
+            </strong>
+
             <span>
               ${escapeHtml(
-                tournament.name
+                tournament.name ||
+                ""
               )}
             </span>
           </div>
 
           <div>
-            <strong>CATEGORÍA</strong>
+            <strong>
+              CATEGORÍA
+            </strong>
+
             <span>
               ${escapeHtml(
-                category.name
+                category.name ||
+                ""
               )}
             </span>
           </div>
 
           <div>
-            <strong>EQUIPO</strong>
+            <strong>
+              EQUIPO
+            </strong>
+
             <span>
               ${escapeHtml(
-                team.name
+                team.name ||
+                ""
               )}
             </span>
           </div>
@@ -235,6 +294,7 @@
             normalizedPlayer.date_of_birth
               ? `
                 <div>
+
                   <strong>
                     FECHA DE NACIMIENTO
                   </strong>
@@ -246,6 +306,7 @@
                       )
                     )}
                   </span>
+
                 </div>
               `
               : ""
@@ -255,13 +316,17 @@
             normalizedPlayer.curp
               ? `
                 <div>
-                  <strong>CURP</strong>
+
+                  <strong>
+                    CURP
+                  </strong>
 
                   <span>
                     ${escapeHtml(
                       normalizedPlayer.curp
                     )}
                   </span>
+
                 </div>
               `
               : ""
@@ -277,6 +342,43 @@
     `;
   }
 
+  /* =====================================================
+     CREAR VARIAS CREDENCIALES
+  ===================================================== */
+
+  function buildCredentialCards({
+    league,
+    tournament,
+    category,
+    team,
+    players
+  }) {
+
+    if (!Array.isArray(players)) {
+      throw new Error(
+        "La lista de jugadores no es válida."
+      );
+    }
+
+    return players
+      .map(
+        function (player) {
+          return buildCredentialCard({
+            league,
+            tournament,
+            category,
+            team,
+            player
+          });
+        }
+      )
+      .join("");
+  }
+
+  /* =====================================================
+     DOCUMENTO DE IMPRESIÓN
+  ===================================================== */
+
   function buildPrintDocument({
     league,
     tournament,
@@ -284,11 +386,24 @@
     team,
     players
   }) {
+
     requireContext();
 
-    if (!Array.isArray(players)) {
+    if (!league) {
       throw new Error(
-        "La lista de jugadores no es válida."
+        "La liga es obligatoria."
+      );
+    }
+
+    if (!tournament) {
+      throw new Error(
+        "El torneo es obligatorio."
+      );
+    }
+
+    if (!category) {
+      throw new Error(
+        "La categoría es obligatoria."
       );
     }
 
@@ -298,19 +413,26 @@
       );
     }
 
+    if (!Array.isArray(players)) {
+      throw new Error(
+        "La lista de jugadores no es válida."
+      );
+    }
+
+    if (players.length === 0) {
+      throw new Error(
+        "El equipo no tiene jugadores registrados."
+      );
+    }
+
     const cards =
-      players
-        .map(player =>
-          buildCredentialCard({
-            league,
-            tournament,
-            category,
-            team,
-            player:
-              normalizePlayer(player)
-          })
-        )
-        .join("");
+      buildCredentialCards({
+        league,
+        tournament,
+        category,
+        team,
+        players
+      });
 
     return `
       <!doctype html>
@@ -328,7 +450,10 @@
 
         <title>
           Credenciales -
-          ${escapeHtml(team.name)}
+          ${escapeHtml(
+            team.name ||
+            "Equipo"
+          )}
         </title>
 
         <style>
@@ -510,7 +635,9 @@
         <main
           class="gof-credentials-sheet"
         >
+
           ${cards}
+
         </main>
 
         <script>
@@ -533,6 +660,10 @@
     `;
   }
 
+  /* =====================================================
+     API PÚBLICA
+  ===================================================== */
+
   window.GOF =
     window.GOF || {};
 
@@ -540,6 +671,7 @@
     normalizePlayer,
     formatDate,
     buildCredentialCard,
+    buildCredentialCards,
     buildPrintDocument
   };
 

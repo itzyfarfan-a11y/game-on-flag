@@ -1383,6 +1383,17 @@ async function openManualPlayoffBuilder(tid,cat,teams,ranked){
  const {error:ie}=await sb.from('playoff_matches').insert({tournament_id:tid,category_id:cat,stage:stage.trim()||'Etapa manual',team_a_id:teamA||null,team_b_id:teamB||null,match_order:max+1,published:false,playoff_mode:'manual',format_code:'manual',manual_label:'Llave creada por administración'});
  if(ie)return alert(ie.message);await buildPlayoffsView();toast('Partido manual agregado');
 }
+async function addManualPlayoffMatch(){
+ const tid=val('pt'),cat=val('pc');
+ if(!gofCurrentOrganizationId)return alert('Selecciona una organización primero.');
+ if(!tid||!cat)return alert('Selecciona torneo y categoría.');
+ try{
+   const base=await playoffBaseData(tid,cat);
+   await openManualPlayoffBuilder(tid,cat,base.teams,base.ranked);
+ }catch(e){
+   alert(e.message||String(e));
+ }
+}
 async function editManualPlayoffMatch(id){
  const {data:m,error}=await sb.from('playoff_matches').select('*').eq('id',id).single();if(error)return alert(error.message);
  const {data:teams,error:te}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(name)').eq('tournament_id',m.tournament_id).eq('category_id',m.category_id).eq('is_active',true);if(te)return alert(te.message);
@@ -1478,7 +1489,24 @@ async function savePlayoffSchedule(id){
  await buildPlayoffsView();
  await loadSchedule();
 }
-async function publishPlayoffs(){const tid=val('pt'),cat=val('pc');if(!tid||!cat)return;const {error}=await sb.from('playoff_matches').update({published:true}).eq('tournament_id',tid).eq('category_id',cat);if(error)alert(error.message);else{toast('Bracket publicado');buildPlayoffsView()}}
+async function publishPlayoffs(){
+ const tid=val('pt'),cat=val('pc');
+ if(!tid||!cat)return;
+ try{
+   const base=await playoffBaseData(tid,cat);
+   const {data:rows,error:re}=await sb.from('playoff_matches').select('id,team_a_id,team_b_id,stage,match_date,match_time,field_name').eq('tournament_id',tid).eq('category_id',cat).order('match_order');
+   if(re)throw new Error(re.message);
+   if(!(rows||[]).length)throw new Error('No hay un bracket para publicar.');
+   const incomplete=(rows||[]).filter(x=>!x.team_a_id||!x.team_b_id);
+   if(incomplete.length)throw new Error('No se puede publicar: hay llaves sin ambos equipos definidos. En modo manual puedes dejar una llave preparada, pero debes completar sus participantes antes de publicar.');
+   const unscheduled=(rows||[]).filter(x=>!x.match_date||!x.match_time||!x.field_name);
+   if(unscheduled.length && !confirm(`Hay ${unscheduled.length} partido(s) de playoff sin fecha, hora o campo. ¿Publicar de todos modos?`))return;
+   const {error}=await sb.from('playoff_matches').update({published:true}).eq('tournament_id',tid).eq('category_id',cat);
+   if(error)throw new Error(error.message);
+   toast(`Bracket publicado · fase inicial completa (${base.requiredGames} juegos por equipo)`);
+   buildPlayoffsView();
+ }catch(e){alert(e.message||String(e))}
+}
 async function buildPlayoffsView(){
  const tid=val('pt'),cat=val('pc');if(!tid||!cat)return;
  const {data,error}=await sb.from('playoff_matches').select('*,a:team_a_id(name),b:team_b_id(name)').eq('tournament_id',tid).eq('category_id',cat).order('match_order');

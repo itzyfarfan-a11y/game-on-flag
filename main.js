@@ -7,6 +7,10 @@
   const GOF = window.GOF;
 
   GOF.ui = GOF.ui || {};
+  GOF.context = GOF.context || {
+    activeLeague: null,
+    activeTournament: null
+  };
 
   function $(selector) {
     return document.querySelector(selector);
@@ -94,6 +98,15 @@
     element.textContent = value ?? "";
   }
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   function showView(viewName) {
     $$("[data-gof-view]").forEach(
       view => {
@@ -128,12 +141,16 @@
       $("#login-email");
 
     if (loginEmail) {
-      loginEmail.focus();
+      setTimeout(
+        () => loginEmail.focus(),
+        50
+      );
     }
   }
 
   function requireSession() {
-    const session = getSession();
+    const session =
+      getSession();
 
     if (!session) {
       showLoginView();
@@ -147,7 +164,8 @@
   }
 
   function requireLeague() {
-    const league = getActiveLeague();
+    const league =
+      getActiveLeague();
 
     if (
       !league ||
@@ -177,9 +195,11 @@
     return tournament;
   }
 
-  /*
-   * DASHBOARD
-   */
+
+  /* =====================================================
+     DASHBOARD
+  ===================================================== */
+
   async function refreshDashboard() {
     clearError();
 
@@ -195,12 +215,33 @@
         typeof GOF.dashboard.loadDashboard ===
           "function"
       ) {
-        await GOF.dashboard.loadDashboard();
+        const context =
+          await GOF.dashboard.loadDashboard();
+
+        if (
+          context &&
+          context.activeLeague
+        ) {
+          GOF.context =
+            GOF.context || {};
+
+          GOF.context.activeLeague =
+            context.activeLeague;
+        }
       } else {
         throw new Error(
           "El módulo Dashboard no está disponible."
         );
       }
+
+      const league =
+        getActiveLeague();
+
+      setText(
+        "#active-league-name",
+        league?.name ||
+          "Sin liga activa"
+      );
 
       hideLoading();
 
@@ -216,9 +257,11 @@
     }
   }
 
-  /*
-   * LIGAS
-   */
+
+  /* =====================================================
+     LIGAS
+  ===================================================== */
+
   async function loadLeagues() {
     requireSession();
 
@@ -229,18 +272,13 @@
         "Cargando ligas..."
       );
 
-      if (!GOF.leagues) {
-        throw new Error(
-          "El módulo de ligas no está cargado."
-        );
-      }
-
       if (
+        !GOF.leagues ||
         typeof GOF.leagues.listMyLeagues !==
-        "function"
+          "function"
       ) {
         throw new Error(
-          "La función de ligas no está disponible."
+          "El módulo de ligas no está disponible."
         );
       }
 
@@ -262,7 +300,9 @@
     }
   }
 
-  function renderLeagueSelector(leagues) {
+  function renderLeagueSelector(
+    leagues
+  ) {
     const container =
       $("#league-list");
 
@@ -332,18 +372,18 @@
               );
 
               if (
-                GOF.settings &&
-                typeof GOF.settings.setActiveLeague ===
+                !GOF.leagues ||
+                typeof GOF.leagues.setActiveLeague !==
                   "function"
               ) {
-                await GOF.settings.setActiveLeague(
-                  league.id
-                );
-              } else {
                 throw new Error(
                   "La función para cambiar de liga no está disponible."
                 );
               }
+
+              await GOF.leagues.setActiveLeague(
+                league.id
+              );
 
               GOF.context =
                 GOF.context || {};
@@ -354,9 +394,21 @@
               GOF.context.activeTournament =
                 null;
 
+              setText(
+                "#active-league-name",
+                league.name
+              );
+
+              setText(
+                "#active-league-slug",
+                league.slug
+              );
+
               hideLoading();
 
-              await refreshCurrentContext();
+              await loadTournaments();
+
+              await refreshDashboard();
 
               showView(
                 "dashboard"
@@ -376,38 +428,164 @@
     );
   }
 
-  /*
-   * TORNEOS
-   */
+
+  /* =====================================================
+     CREAR LIGA
+  ===================================================== */
+
+  async function createLeagueFromAction() {
+    requireSession();
+
+    if (
+      !GOF.leagues ||
+      typeof GOF.leagues.createLeague !==
+        "function"
+    ) {
+      throw new Error(
+        "La función para crear ligas no está disponible."
+      );
+    }
+
+    const name =
+      window.prompt(
+        "Nombre de la liga:"
+      );
+
+    if (name === null) {
+      return;
+    }
+
+    const cleanName =
+      name.trim();
+
+    if (!cleanName) {
+      throw new Error(
+        "El nombre de la liga es obligatorio."
+      );
+    }
+
+    const slug =
+      window.prompt(
+        "Slug de la liga:",
+        cleanName
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(
+            /[\u0300-\u036f]/g,
+            ""
+          )
+          .replace(
+            /[^a-z0-9]+/g,
+            "-"
+          )
+          .replace(
+            /^-+|-+$/g,
+            ""
+          )
+      );
+
+    if (slug === null) {
+      return;
+    }
+
+    const cleanSlug =
+      slug.trim().toLowerCase();
+
+    if (!cleanSlug) {
+      throw new Error(
+        "El slug de la liga es obligatorio."
+      );
+    }
+
+    try {
+      showLoading(
+        "Creando liga..."
+      );
+
+      const result =
+        await GOF.leagues.createLeague(
+          cleanName,
+          cleanSlug,
+          null,
+          {}
+        );
+
+      const createdLeague =
+        Array.isArray(result)
+          ? result[0]
+          : result;
+
+      if (
+        createdLeague &&
+        createdLeague.id
+      ) {
+        GOF.context =
+          GOF.context || {};
+
+        GOF.context.activeLeague =
+          createdLeague;
+
+        GOF.context.activeTournament =
+          null;
+      }
+
+      hideLoading();
+
+      await loadLeagues();
+
+      await refreshDashboard();
+
+      showView(
+        "leagues"
+      );
+
+    } catch (error) {
+      hideLoading();
+      throw error;
+    }
+  }
+
+
+  /* =====================================================
+     TORNEOS
+  ===================================================== */
+
   async function loadTournaments() {
     requireSession();
 
     const league =
       requireLeague();
 
-    if (!GOF.tournaments) {
-      throw new Error(
-        "El módulo de torneos no está cargado."
-      );
-    }
-
     if (
+      !GOF.tournaments ||
       typeof GOF.tournaments.listTournaments !==
-      "function"
+        "function"
     ) {
       throw new Error(
-        "La función de torneos no está disponible."
+        "El módulo de torneos no está disponible."
       );
     }
 
-    const data =
-      await GOF.tournaments.listTournaments();
-
-    renderTournamentSelector(
-      data
+    showLoading(
+      "Cargando torneos..."
     );
 
-    return data;
+    try {
+      const data =
+        await GOF.tournaments.listTournaments();
+
+      renderTournamentSelector(
+        data
+      );
+
+      hideLoading();
+
+      return data;
+
+    } catch (error) {
+      hideLoading();
+      throw error;
+    }
   }
 
   function renderTournamentSelector(
@@ -481,13 +659,40 @@
                 "Abriendo torneo..."
               );
 
+              const fullTournament =
+                GOF.tournaments &&
+                typeof GOF.tournaments.getTournament ===
+                  "function"
+                  ? await GOF.tournaments.getTournament(
+                      tournament.id
+                    )
+                  : tournament;
+
               GOF.context =
                 GOF.context || {};
 
               GOF.context.activeTournament =
+                fullTournament ||
                 tournament;
 
+              setText(
+                "#active-tournament-name",
+                (
+                  fullTournament ||
+                  tournament
+                ).name
+              );
+
+              setText(
+                "#active-tournament-status",
+                (
+                  fullTournament ||
+                  tournament
+                ).status
+              );
+
               await loadTournamentModules(
+                fullTournament ||
                 tournament
               );
 
@@ -511,9 +716,153 @@
     );
   }
 
-  /*
-   * MÓDULOS DEL TORNEO
-   */
+
+  /* =====================================================
+     CREAR TORNEO
+  ===================================================== */
+
+  async function createTournamentFromAction() {
+    requireSession();
+    requireLeague();
+
+    if (
+      !GOF.tournaments ||
+      typeof GOF.tournaments.createTournament !==
+        "function"
+    ) {
+      throw new Error(
+        "La función para crear torneos no está disponible."
+      );
+    }
+
+    const name =
+      window.prompt(
+        "Nombre del torneo:"
+      );
+
+    if (name === null) {
+      return;
+    }
+
+    const cleanName =
+      name.trim();
+
+    if (!cleanName) {
+      throw new Error(
+        "El nombre del torneo es obligatorio."
+      );
+    }
+
+    const season =
+      window.prompt(
+        "Temporada:",
+        new Date()
+          .getFullYear()
+          .toString()
+      );
+
+    if (season === null) {
+      return;
+    }
+
+    const startDate =
+      window.prompt(
+        "Fecha de inicio (AAAA-MM-DD):"
+      );
+
+    if (startDate === null) {
+      return;
+    }
+
+    const endDate =
+      window.prompt(
+        "Fecha de término (AAAA-MM-DD):"
+      );
+
+    if (endDate === null) {
+      return;
+    }
+
+    const rounds =
+      window.prompt(
+        "Número de jornadas regulares (3 o 7):",
+        "7"
+      );
+
+    if (rounds === null) {
+      return;
+    }
+
+    const regularRounds =
+      Number(rounds);
+
+    if (
+      ![3, 7].includes(
+        regularRounds
+      )
+    ) {
+      throw new Error(
+        "Las jornadas regulares deben ser 3 o 7."
+      );
+    }
+
+    try {
+      showLoading(
+        "Creando torneo..."
+      );
+
+      const tournament =
+        await GOF.tournaments.createTournament(
+          {
+            name: cleanName,
+            season: season.trim() || null,
+            start_date:
+              startDate.trim() || null,
+            end_date:
+              endDate.trim() || null,
+            status: "proximo",
+            regular_rounds:
+              regularRounds,
+            tournament_type:
+              "regular"
+          }
+        );
+
+      GOF.context =
+        GOF.context || {};
+
+      GOF.context.activeTournament =
+        tournament;
+
+      setText(
+        "#active-tournament-name",
+        tournament.name
+      );
+
+      setText(
+        "#active-tournament-status",
+        tournament.status
+      );
+
+      await loadTournaments();
+
+      hideLoading();
+
+      showView(
+        "tournament"
+      );
+
+    } catch (error) {
+      hideLoading();
+      throw error;
+    }
+  }
+
+
+  /* =====================================================
+     MÓDULOS DEL TORNEO
+  ===================================================== */
+
   async function loadTournamentModules(
     tournament
   ) {
@@ -550,12 +899,214 @@
       );
     }
 
-    await Promise.all(tasks);
+    await Promise.all(
+      tasks
+    );
   }
 
-  /*
-   * CONTEXTO
-   */
+
+  /* =====================================================
+     NAVEGACIÓN DE MÓDULOS
+  ===================================================== */
+
+  async function loadViewData(
+    view
+  ) {
+    const tournament =
+      getActiveTournament();
+
+    switch (view) {
+
+      case "dashboard":
+        await refreshDashboard();
+        break;
+
+      case "leagues":
+        await loadLeagues();
+        break;
+
+      case "tournaments":
+        await loadTournaments();
+        break;
+
+      case "categories":
+        requireLeague();
+
+        if (
+          GOF.categories &&
+          typeof GOF.categories.listCategories ===
+            "function"
+        ) {
+          await GOF.categories.listCategories();
+        }
+        break;
+
+      case "teams":
+        requireLeague();
+
+        if (
+          GOF.teams &&
+          typeof GOF.teams.listTeams ===
+            "function"
+        ) {
+          await GOF.teams.listTeams();
+        }
+        break;
+
+      case "roster":
+        requireTournament();
+
+        if (
+          GOF.roster &&
+          typeof GOF.roster.getTournamentTeamRoster ===
+            "function"
+        ) {
+          /*
+           * El roster requiere además
+           * categoría y equipo.
+           * No ejecutamos una consulta incompleta.
+           */
+        }
+        break;
+
+      case "credentials":
+        requireTournament();
+        break;
+
+      case "matches":
+        requireTournament();
+
+        if (
+          GOF.matches &&
+          typeof GOF.matches.listMatches ===
+            "function"
+        ) {
+          await GOF.matches.listMatches(
+            tournament.id
+          );
+        }
+        break;
+
+      case "calendar":
+        requireTournament();
+
+        if (
+          GOF.calendar &&
+          typeof GOF.calendar.loadCalendar ===
+            "function"
+        ) {
+          await GOF.calendar.loadCalendar(
+            tournament.id
+          );
+        }
+        break;
+
+      case "schedule":
+        requireTournament();
+        break;
+
+      case "results":
+        requireTournament();
+
+        if (
+          GOF.results &&
+          typeof GOF.results.listResults ===
+            "function"
+        ) {
+          await GOF.results.listResults(
+            tournament.id
+          );
+        }
+        break;
+
+      case "standings":
+        requireTournament();
+
+        if (
+          GOF.standings &&
+          typeof GOF.standings.getStandings ===
+            "function"
+        ) {
+          await GOF.standings.getStandings(
+            tournament.id
+          );
+        }
+        break;
+
+      case "playoffs":
+        requireTournament();
+
+        if (
+          GOF.playoffs &&
+          typeof GOF.playoffs.getPlayoffs ===
+            "function"
+        ) {
+          await GOF.playoffs.getPlayoffs(
+            tournament.id
+          );
+        }
+        break;
+
+      case "finance":
+        requireLeague();
+
+        if (
+          GOF.finance &&
+          typeof GOF.finance.getDashboard ===
+            "function"
+        ) {
+          await GOF.finance.getDashboard();
+        }
+        break;
+
+      case "notices":
+        requireLeague();
+
+        if (
+          GOF.notices &&
+          typeof GOF.notices.listNotices ===
+            "function"
+        ) {
+          await GOF.notices.listNotices();
+        }
+        break;
+
+      case "settings":
+        requireLeague();
+
+        if (
+          GOF.settings &&
+          typeof GOF.settings.getLeague ===
+            "function"
+        ) {
+          await GOF.settings.getLeague();
+        }
+        break;
+
+      case "publish":
+        requireTournament();
+
+        if (
+          GOF.publish &&
+          typeof GOF.publish.getPublicationSummary ===
+            "function"
+        ) {
+          await GOF.publish.getPublicationSummary(
+            tournament.id
+          );
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+
+
+  /* =====================================================
+     CONTEXTO
+  ===================================================== */
+
   async function refreshCurrentContext() {
     clearError();
 
@@ -577,6 +1128,11 @@
       league.name
     );
 
+    setText(
+      "#active-league-slug",
+      league.slug
+    );
+
     try {
       await loadTournaments();
     } catch (error) {
@@ -589,9 +1145,11 @@
     await refreshDashboard();
   }
 
-  /*
-   * LOGIN
-   */
+
+  /* =====================================================
+     LOGIN
+  ===================================================== */
+
   function bindLogin() {
     const form =
       $("#login-form");
@@ -600,19 +1158,33 @@
       return;
     }
 
+    if (
+      form.dataset.bound ===
+      "true"
+    ) {
+      return;
+    }
+
+    form.dataset.bound =
+      "true";
+
     form.addEventListener(
       "submit",
       async event => {
         event.preventDefault();
 
-        clearError();
+        clearError(
+          $("#login-error")
+        );
 
         const email =
-          $("#login-email")?.value
+          $("#login-email")
+            ?.value
             ?.trim();
 
         const password =
-          $("#login-password")?.value || "";
+          $("#login-password")
+            ?.value || "";
 
         if (!email) {
           showError(
@@ -649,12 +1221,30 @@
             );
           }
 
-          await GOF.auth.signIn(
-            email,
-            password
-          );
+          const result =
+            await GOF.auth.signIn(
+              email,
+              password
+            );
 
-          await GOF.auth.init();
+          if (
+            result &&
+            result.session
+          ) {
+            GOF.session =
+              result.session;
+
+            GOF.user =
+              result.user ||
+              result.session.user;
+          } else if (
+            GOF.auth &&
+            typeof GOF.auth.getSession ===
+              "function"
+          ) {
+            GOF.session =
+              await GOF.auth.getSession();
+          }
 
           hideLoading();
 
@@ -686,15 +1276,29 @@
     );
   }
 
-  /*
-   * NAVEGACIÓN
-   */
+
+  /* =====================================================
+     NAVEGACIÓN
+  ===================================================== */
+
   function bindNavigation() {
     $$("[data-gof-nav]").forEach(
       button => {
+
+        if (
+          button.dataset.bound ===
+          "true"
+        ) {
+          return;
+        }
+
+        button.dataset.bound =
+          "true";
+
         button.addEventListener(
           "click",
           async () => {
+
             const view =
               button.dataset.gofNav;
 
@@ -708,21 +1312,22 @@
             }
 
             try {
-              if (
-                view === "leagues"
-              ) {
-                await loadLeagues();
-              }
+              showLoading(
+                "Cargando..."
+              );
 
-              if (
-                view === "tournaments"
-              ) {
-                await loadTournaments();
-              }
+              await loadViewData(
+                view
+              );
 
-              showView(view);
+              hideLoading();
+
+              showView(
+                view
+              );
 
             } catch (error) {
+              hideLoading();
               showError(error);
             }
           }
@@ -731,14 +1336,24 @@
     );
   }
 
-  /*
-   * ACCIONES
-   */
+
+  /* =====================================================
+     ACCIONES
+  ===================================================== */
+
   function bindBasicActions() {
+
     const refresh =
       $("#btn-refresh");
 
-    if (refresh) {
+    if (
+      refresh &&
+      refresh.dataset.bound !==
+        "true"
+    ) {
+      refresh.dataset.bound =
+        "true";
+
       refresh.addEventListener(
         "click",
         refreshDashboard
@@ -748,11 +1363,19 @@
     const logout =
       $("#btn-logout");
 
-    if (logout) {
+    if (
+      logout &&
+      logout.dataset.bound !==
+        "true"
+    ) {
+      logout.dataset.bound =
+        "true";
+
       logout.addEventListener(
         "click",
         async () => {
           try {
+
             if (
               GOF.auth &&
               typeof GOF.auth.logout ===
@@ -765,6 +1388,18 @@
               );
             }
 
+            GOF.session = null;
+            GOF.user = null;
+
+            GOF.context =
+              GOF.context || {};
+
+            GOF.context.activeLeague =
+              null;
+
+            GOF.context.activeTournament =
+              null;
+
             showLoginView();
 
           } catch (error) {
@@ -773,13 +1408,66 @@
         }
       );
     }
+
+    $$("[data-action]").forEach(
+      button => {
+
+        if (
+          button.dataset.bound ===
+          "true"
+        ) {
+          return;
+        }
+
+        button.dataset.bound =
+          "true";
+
+        button.addEventListener(
+          "click",
+          async () => {
+
+            const action =
+              button.dataset.action;
+
+            try {
+
+              clearError();
+
+              switch (action) {
+
+                case "create-league":
+                  await createLeagueFromAction();
+                  break;
+
+                case "create-tournament":
+                  await createTournamentFromAction();
+                  break;
+
+                default:
+                  throw new Error(
+                    `Acción no reconocida: ${action}`
+                  );
+              }
+
+            } catch (error) {
+              hideLoading();
+              showError(error);
+            }
+          }
+        );
+      }
+    );
   }
 
-  /*
-   * ARRANQUE
-   */
+
+  /* =====================================================
+     ARRANQUE
+  ===================================================== */
+
   async function boot() {
+
     try {
+
       showLoading(
         "Iniciando GAME ON FLAG..."
       );
@@ -805,10 +1493,20 @@
 
       hideLoading();
 
-      if (!auth.session) {
+      if (
+        !auth ||
+        !auth.session
+      ) {
         showLoginView();
         return;
       }
+
+      GOF.session =
+        auth.session;
+
+      GOF.user =
+        auth.user ||
+        auth.session.user;
 
       await refreshCurrentContext();
 
@@ -825,7 +1523,9 @@
       }
 
     } catch (error) {
+
       hideLoading();
+
       showError(error);
 
       console.error(
@@ -835,59 +1535,56 @@
     }
   }
 
-  function escapeHtml(value) {
-    return String(
-      value ?? ""
-    )
-      .replace(
-        /&/g,
-        "&amp;"
-      )
-      .replace(
-        /</g,
-        "&lt;"
-      )
-      .replace(
-        />/g,
-        "&gt;"
-      )
-      .replace(
-        /"/g,
-        "&quot;"
-      )
-      .replace(
-        /'/g,
-        "&#039;"
-      );
-  }
 
-  /*
-   * API
-   */
+  /* =====================================================
+     API
+  ===================================================== */
+
   GOF.ui.$ = $;
   GOF.ui.$$ = $$;
-  GOF.ui.showView = showView;
-  GOF.ui.showLoginView = showLoginView;
-  GOF.ui.showLoading = showLoading;
-  GOF.ui.hideLoading = hideLoading;
-  GOF.ui.showError = showError;
-  GOF.ui.clearError = clearError;
+
+  GOF.ui.showView =
+    showView;
+
+  GOF.ui.showLoginView =
+    showLoginView;
+
+  GOF.ui.showLoading =
+    showLoading;
+
+  GOF.ui.hideLoading =
+    hideLoading;
+
+  GOF.ui.showError =
+    showError;
+
+  GOF.ui.clearError =
+    clearError;
+
   GOF.ui.refreshDashboard =
     refreshDashboard;
+
   GOF.ui.refreshCurrentContext =
     refreshCurrentContext;
+
   GOF.ui.requireSession =
     requireSession;
+
   GOF.ui.requireLeague =
     requireLeague;
+
   GOF.ui.requireTournament =
     requireTournament;
-  GOF.ui.boot = boot;
+
+  GOF.ui.boot =
+    boot;
+
 
   if (
     document.readyState ===
     "loading"
   ) {
+
     document.addEventListener(
       "DOMContentLoaded",
       boot,
@@ -895,8 +1592,11 @@
         once: true
       }
     );
+
   } else {
+
     boot();
+
   }
 
 })();

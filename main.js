@@ -12,7 +12,6 @@
     activeTournament: null
   };
 
-
   /* =====================================================
      UTILIDADES
   ===================================================== */
@@ -25,6 +24,25 @@
     return Array.from(
       document.querySelectorAll(selector)
     );
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function setText(selector, value) {
+    const element = $(selector);
+
+    if (!element) {
+      return;
+    }
+
+    element.textContent = value ?? "";
   }
 
   function getSession() {
@@ -45,24 +63,51 @@
     ) || null;
   }
 
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function setText(selector, value) {
-    const element = $(selector);
-
-    if (!element) {
-      return;
+  function formatDate(value) {
+    if (!value) {
+      return "—";
     }
 
-    element.textContent =
-      value ?? "";
+    try {
+      return new Intl.DateTimeFormat(
+        "es-MX",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }
+      ).format(new Date(value + "T00:00:00"));
+    } catch (error) {
+      return String(value);
+    }
+  }
+
+  function formatTime(value) {
+    if (!value) {
+      return "—";
+    }
+
+    return String(value).slice(0, 5);
+  }
+
+  function statusLabel(value) {
+    const labels = {
+      programado: "Programado",
+      jugado: "Jugado",
+      cancelado: "Cancelado",
+      incomparecencia: "Incomparecencia",
+      proximo: "Próximo",
+      activo: "Activo",
+      finalizado: "Finalizado"
+    };
+
+    return labels[value] || value || "—";
+  }
+
+  function statusClass(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "-");
   }
 
 
@@ -70,37 +115,28 @@
      LOADING / ERRORES
   ===================================================== */
 
-  function showLoading(
-    message = "Cargando..."
-  ) {
-    const element =
-      $("#app-loading");
+  function showLoading(message) {
+    const element = $("#app-loading");
 
     if (!element) {
       return;
     }
 
     element.textContent =
-      message;
+      message || "Cargando...";
 
     element.hidden = false;
   }
 
   function hideLoading() {
-    const element =
-      $("#app-loading");
+    const element = $("#app-loading");
 
-    if (!element) {
-      return;
+    if (element) {
+      element.hidden = true;
     }
-
-    element.hidden = true;
   }
 
-  function showError(
-    error,
-    container = null
-  ) {
+  function showError(error, container) {
     const message =
       error?.message ||
       String(error) ||
@@ -118,9 +154,7 @@
       return;
     }
 
-    target.textContent =
-      message;
-
+    target.textContent = message;
     target.hidden = false;
 
     console.error(
@@ -129,9 +163,7 @@
     );
   }
 
-  function clearError(
-    container = null
-  ) {
+  function clearError(container) {
     const target =
       container ||
       $("#app-error");
@@ -146,77 +178,11 @@
 
 
   /* =====================================================
-     VISTAS
-  ===================================================== */
-
-  function showView(
-    viewName
-  ) {
-    $$(
-      "[data-gof-view]"
-    ).forEach(view => {
-      view.hidden =
-        view.dataset.gofView !==
-        viewName;
-    });
-
-    $$(
-      "[data-gof-nav]"
-    ).forEach(button => {
-      button.classList.toggle(
-        "active",
-        button.dataset.gofNav ===
-          viewName
-      );
-    });
-
-    /*
-     * El login y la aplicación son
-     * contenedores independientes.
-     *
-     * Cuando se muestra login,
-     * ocultamos completamente
-     * app-shell.
-     */
-    const appShell =
-      $("#app-shell");
-
-    if (appShell) {
-      appShell.hidden =
-        viewName === "login";
-    }
-
-    GOF.ui.currentView =
-      viewName;
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  }
-
-  function showLoginView() {
-    showView("login");
-
-    const email =
-      $("#login-email");
-
-    if (email) {
-      setTimeout(
-        () => email.focus(),
-        50
-      );
-    }
-  }
-
-
-  /* =====================================================
-     VALIDACIONES DE CONTEXTO
+     CONTEXTO
   ===================================================== */
 
   function requireSession() {
-    const session =
-      getSession();
+    const session = getSession();
 
     if (!session) {
       showLoginView();
@@ -230,13 +196,9 @@
   }
 
   function requireLeague() {
-    const league =
-      getActiveLeague();
+    const league = getActiveLeague();
 
-    if (
-      !league ||
-      !league.id
-    ) {
+    if (!league || !league.id) {
       throw new Error(
         "Primero selecciona una liga."
       );
@@ -263,6 +225,107 @@
 
 
   /* =====================================================
+     VISTAS
+  ===================================================== */
+
+  function showView(viewName) {
+    $$("[data-gof-view]").forEach(
+      function (view) {
+        view.hidden =
+          view.dataset.gofView !==
+          viewName;
+      }
+    );
+
+    $$("[data-gof-nav]").forEach(
+      function (button) {
+        button.classList.toggle(
+          "active",
+          button.dataset.gofNav ===
+            viewName
+        );
+      }
+    );
+
+    const appShell =
+      $("#app-shell");
+
+    if (appShell) {
+      appShell.hidden =
+        viewName === "login";
+    }
+
+    GOF.ui.currentView =
+      viewName;
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+  function showLoginView() {
+    showView("login");
+
+    const email =
+      $("#login-email");
+
+    if (email) {
+      setTimeout(
+        function () {
+          email.focus();
+        },
+        50
+      );
+    }
+  }
+
+
+  /* =====================================================
+     RENDER GENÉRICO
+  ===================================================== */
+
+  function emptyState(message) {
+    return `
+      <div class="gof-empty-state">
+        ${escapeHtml(
+          message || "No hay información disponible."
+        )}
+      </div>
+    `;
+  }
+
+  function renderCards(
+    containerId,
+    items,
+    renderer,
+    emptyMessage
+  ) {
+    const container =
+      document.getElementById(
+        containerId
+      );
+
+    if (!container) {
+      return;
+    }
+
+    if (
+      !Array.isArray(items) ||
+      items.length === 0
+    ) {
+      container.innerHTML =
+        emptyState(emptyMessage);
+
+      return;
+    }
+
+    container.innerHTML =
+      items.map(renderer).join("");
+  }
+
+
+  /* =====================================================
      DASHBOARD
   ===================================================== */
 
@@ -275,9 +338,6 @@
       showLoading(
         "Actualizando información..."
       );
-
-      const previousTournament =
-        getActiveTournament();
 
       if (
         !GOF.dashboard ||
@@ -292,21 +352,8 @@
       const result =
         await GOF.dashboard.loadDashboard();
 
-      /*
-       * dashboard.js puede reconstruir
-       * el contexto. Conservamos el torneo
-       * activo cuando corresponde.
-       */
       GOF.context =
         GOF.context || {};
-
-      if (
-        previousTournament &&
-        previousTournament.id
-      ) {
-        GOF.context.activeTournament =
-          previousTournament;
-      }
 
       if (
         result &&
@@ -325,14 +372,40 @@
           "Selecciona una liga"
       );
 
+      setText(
+        "#dashboard-league-name",
+        league?.name ||
+          "Sin liga activa"
+      );
+
+      const tournament =
+        getActiveTournament();
+
+      setText(
+        "#dashboard-tournament-name",
+        tournament?.name ||
+          "Sin torneo seleccionado"
+      );
+
+      setText(
+        "#dashboard-status",
+        tournament
+          ? statusLabel(
+              tournament.status
+            )
+          : "Sin torneo"
+      );
+
       hideLoading();
+
+      return result;
 
     } catch (error) {
       hideLoading();
 
       if (!getSession()) {
         showLoginView();
-        return;
+        return null;
       }
 
       showError(error);
@@ -393,117 +466,114 @@
       return;
     }
 
-    container.innerHTML = "";
-
     if (
       !Array.isArray(leagues) ||
       leagues.length === 0
     ) {
-      container.innerHTML = `
-        <div class="gof-empty-state">
-          No tienes ligas disponibles.
-        </div>
-      `;
+      container.innerHTML =
+        emptyState(
+          "No tienes ligas disponibles."
+        );
 
       return;
     }
 
-    leagues.forEach(
-      league => {
-        const button =
-          document.createElement(
-            "button"
-          );
+    container.innerHTML =
+      leagues.map(
+        function (league) {
+          const current =
+            league.membership &&
+            league.membership.is_current;
 
-        button.type = "button";
+          return `
+            <button
+              type="button"
+              class="gof-league-item ${
+                current
+                  ? "active"
+                  : ""
+              }"
+              data-league-select="${
+                escapeHtml(league.id)
+              }"
+            >
+              <strong>
+                ${escapeHtml(
+                  league.name ||
+                    "Liga"
+                )}
+              </strong>
 
-        button.className =
-          "gof-league-item";
+              <small>
+                ${escapeHtml(
+                  league.slug ||
+                    ""
+                )}
+              </small>
+            </button>
+          `;
+        }
+      ).join("");
 
-        button.dataset.leagueId =
-          league.id;
+    $$("[data-league-select]")
+      .forEach(
+        function (button) {
+          button.addEventListener(
+            "click",
+            async function () {
+              const leagueId =
+                button.dataset
+                  .leagueSelect;
 
-        button.innerHTML = `
-          <strong>
-            ${escapeHtml(
-              league.name ||
-                "Liga"
-            )}
-          </strong>
-
-          ${
-            league.slug
-              ? `
-                <small>
-                  ${escapeHtml(
-                    league.slug
-                  )}
-                </small>
-              `
-              : ""
-          }
-        `;
-
-        button.addEventListener(
-          "click",
-          async () => {
-            try {
-              requireSession();
-
-              showLoading(
-                "Cambiando de liga..."
-              );
-
-              if (
-                !GOF.leagues ||
-                typeof GOF.leagues.setActiveLeague !==
-                  "function"
-              ) {
-                throw new Error(
-                  "La función para cambiar de liga no está disponible."
+              try {
+                showLoading(
+                  "Cambiando de liga..."
                 );
+
+                await GOF.leagues
+                  .setActiveLeague(
+                    leagueId
+                  );
+
+                const league =
+                  leagues.find(
+                    function (item) {
+                      return (
+                        item.id ===
+                        leagueId
+                      );
+                    }
+                  );
+
+                GOF.context.activeLeague =
+                  league || null;
+
+                GOF.context.activeTournament =
+                  null;
+
+                setText(
+                  "#active-league-name",
+                  league?.name || ""
+                );
+
+                await loadTournaments();
+
+                hideLoading();
+
+                showView(
+                  "dashboard"
+                );
+
+                await refreshDashboard();
+
+              } catch (error) {
+                hideLoading();
+                showError(error);
               }
-
-              await GOF.leagues.setActiveLeague(
-                league.id
-              );
-
-              GOF.context =
-                GOF.context || {};
-
-              GOF.context.activeLeague =
-                league;
-
-              GOF.context.activeTournament =
-                null;
-
-              setText(
-                "#active-league-name",
-                league.name
-              );
-
-              await loadTournaments();
-
-              hideLoading();
-
-              showView(
-                "dashboard"
-              );
-
-              await refreshDashboard();
-
-            } catch (error) {
-              hideLoading();
-              showError(error);
             }
-          }
-        );
-
-        container.appendChild(
-          button
-        );
-      }
-    );
+          );
+        }
+      );
   }
 
 
@@ -513,16 +583,6 @@
 
   async function createLeagueFromAction() {
     requireSession();
-
-    if (
-      !GOF.leagues ||
-      typeof GOF.leagues.createLeague !==
-        "function"
-    ) {
-      throw new Error(
-        "La función para crear ligas no está disponible."
-      );
-    }
 
     const name =
       window.prompt(
@@ -578,50 +638,34 @@
       );
     }
 
-    try {
-      showLoading(
-        "Creando liga..."
+    showLoading(
+      "Creando liga..."
+    );
+
+    const result =
+      await GOF.leagues.createLeague(
+        cleanName,
+        cleanSlug,
+        null,
+        {}
       );
 
-      const result =
-        await GOF.leagues.createLeague(
-          cleanName,
-          cleanSlug,
-          null,
-          {}
-        );
+    const created =
+      Array.isArray(result)
+        ? result[0]
+        : result;
 
-      const created =
-        Array.isArray(result)
-          ? result[0]
-          : result;
+    GOF.context.activeLeague =
+      created || null;
 
-      GOF.context =
-        GOF.context || {};
+    GOF.context.activeTournament =
+      null;
 
-      if (
-        created &&
-        created.id
-      ) {
-        GOF.context.activeLeague =
-          created;
+    await loadLeagues();
 
-        GOF.context.activeTournament =
-          null;
-      }
+    hideLoading();
 
-      await loadLeagues();
-
-      hideLoading();
-
-      showView(
-        "leagues"
-      );
-
-    } catch (error) {
-      hideLoading();
-      throw error;
-    }
+    showView("leagues");
   }
 
 
@@ -631,39 +675,23 @@
 
   async function loadTournaments() {
     requireSession();
-
     requireLeague();
 
-    if (
-      !GOF.tournaments ||
-      typeof GOF.tournaments.listTournaments !==
-        "function"
-    ) {
-      throw new Error(
-        "El módulo de torneos no está disponible."
-      );
-    }
+    showLoading(
+      "Cargando torneos..."
+    );
 
-    try {
-      showLoading(
-        "Cargando torneos..."
-      );
+    const tournaments =
+      await GOF.tournaments
+        .listTournaments();
 
-      const tournaments =
-        await GOF.tournaments.listTournaments();
+    renderTournamentSelector(
+      tournaments
+    );
 
-      renderTournamentSelector(
-        tournaments
-      );
+    hideLoading();
 
-      hideLoading();
-
-      return tournaments;
-
-    } catch (error) {
-      hideLoading();
-      throw error;
-    }
+    return tournaments;
   }
 
   function renderTournamentSelector(
@@ -676,124 +704,133 @@
       return;
     }
 
-    container.innerHTML = "";
-
     if (
       !Array.isArray(tournaments) ||
       tournaments.length === 0
     ) {
-      container.innerHTML = `
-        <div class="gof-empty-state">
-          No hay torneos registrados.
-        </div>
-      `;
+      container.innerHTML =
+        emptyState(
+          "No hay torneos registrados."
+        );
 
       return;
     }
 
-    tournaments.forEach(
-      tournament => {
-        const button =
-          document.createElement(
-            "button"
-          );
+    container.innerHTML =
+      tournaments.map(
+        function (tournament) {
+          const active =
+            getActiveTournament()?.id ===
+            tournament.id;
 
-        button.type = "button";
+          return `
+            <button
+              type="button"
+              class="gof-tournament-item ${
+                active
+                  ? "active"
+                  : ""
+              }"
+              data-tournament-select="${
+                escapeHtml(
+                  tournament.id
+                )
+              }"
+            >
+              <strong>
+                ${escapeHtml(
+                  tournament.name ||
+                    "Torneo"
+                )}
+              </strong>
 
-        button.className =
-          "gof-tournament-item";
-
-        button.dataset.tournamentId =
-          tournament.id;
-
-        button.innerHTML = `
-          <strong>
-            ${escapeHtml(
-              tournament.name ||
-                "Torneo"
-            )}
-          </strong>
-
-          ${
-            tournament.status
-              ? `
-                <small>
-                  ${escapeHtml(
+              <small>
+                ${escapeHtml(
+                  statusLabel(
                     tournament.status
-                  )}
-                </small>
-              `
-              : ""
-          }
-        `;
+                  )
+                )}
+              </small>
+            </button>
+          `;
+        }
+      ).join("");
 
-        button.addEventListener(
-          "click",
-          async () => {
-            try {
-              requireSession();
+    $$("[data-tournament-select]")
+      .forEach(
+        function (button) {
+          button.addEventListener(
+            "click",
+            async function () {
+              const id =
+                button.dataset
+                  .tournamentSelect;
 
-              showLoading(
-                "Abriendo torneo..."
-              );
+              try {
+                showLoading(
+                  "Abriendo torneo..."
+                );
 
-              let selected =
-                tournament;
-
-              if (
-                GOF.tournaments &&
-                typeof GOF.tournaments.getTournament ===
-                  "function"
-              ) {
-                const result =
-                  await GOF.tournaments.getTournament(
-                    tournament.id
+                let tournament =
+                  tournaments.find(
+                    function (item) {
+                      return (
+                        item.id === id
+                      );
+                    }
                   );
 
-                if (result) {
-                  selected =
-                    result;
+                if (
+                  GOF.tournaments &&
+                  typeof GOF.tournaments
+                    .getTournament ===
+                    "function"
+                ) {
+                  const fresh =
+                    await GOF.tournaments
+                      .getTournament(
+                        id
+                      );
+
+                  if (fresh) {
+                    tournament =
+                      fresh;
+                  }
                 }
+
+                GOF.context.activeTournament =
+                  tournament;
+
+                setText(
+                  "#active-tournament-name",
+                  tournament?.name || ""
+                );
+
+                setText(
+                  "#active-tournament-status",
+                  statusLabel(
+                    tournament?.status
+                  )
+                );
+
+                await loadTournamentModules(
+                  tournament
+                );
+
+                hideLoading();
+
+                showView(
+                  "tournament"
+                );
+
+              } catch (error) {
+                hideLoading();
+                showError(error);
               }
-
-              GOF.context =
-                GOF.context || {};
-
-              GOF.context.activeTournament =
-                selected;
-
-              setText(
-                "#active-tournament-name",
-                selected.name
-              );
-
-              setText(
-                "#active-tournament-status",
-                selected.status
-              );
-
-              await loadTournamentModules(
-                selected
-              );
-
-              hideLoading();
-
-              showView(
-                "tournament"
-              );
-
-            } catch (error) {
-              hideLoading();
-              showError(error);
             }
-          }
-        );
-
-        container.appendChild(
-          button
-        );
-      }
-    );
+          );
+        }
+      );
   }
 
 
@@ -803,18 +840,7 @@
 
   async function createTournamentFromAction() {
     requireSession();
-
     requireLeague();
-
-    if (
-      !GOF.tournaments ||
-      typeof GOF.tournaments.createTournament !==
-        "function"
-    ) {
-      throw new Error(
-        "La función para crear torneos no está disponible."
-      );
-    }
 
     const name =
       window.prompt(
@@ -856,60 +882,854 @@
       );
     }
 
-    try {
-      showLoading(
-        "Creando torneo..."
-      );
+    showLoading(
+      "Creando torneo..."
+    );
 
-      const tournament =
-        await GOF.tournaments.createTournament(
-          {
-            name:
-              cleanName,
-            status:
-              "proximo",
-            regular_rounds:
-              regularRounds,
-            tournament_type:
-              "regular"
-          }
+    const tournament =
+      await GOF.tournaments
+        .createTournament({
+          name: cleanName,
+          status: "proximo",
+          regular_rounds:
+            regularRounds,
+          tournament_type:
+            "regular"
+        });
+
+    GOF.context.activeTournament =
+      tournament;
+
+    setText(
+      "#active-tournament-name",
+      tournament?.name ||
+        cleanName
+    );
+
+    setText(
+      "#active-tournament-status",
+      statusLabel(
+        tournament?.status
+      )
+    );
+
+    await loadTournaments();
+
+    hideLoading();
+
+    showView("tournament");
+  }
+
+
+  /* =====================================================
+     EQUIPOS
+  ===================================================== */
+
+  function renderTeams(
+    teams
+  ) {
+    renderCards(
+      "teams-content",
+      teams,
+      function (team) {
+        return `
+          <article class="gof-card">
+            <div class="gof-card-header">
+              <div>
+                <h3>
+                  ${escapeHtml(
+                    team.name ||
+                      "Equipo"
+                  )}
+                </h3>
+
+                <p>
+                  ${
+                    team.club_name
+                      ? escapeHtml(
+                          team.club_name
+                        )
+                      : "Sin club/grupo asignado"
+                  }
+                </p>
+              </div>
+            </div>
+
+            <div class="gof-card-meta">
+              <span>
+                ${
+                  team.coach_id
+                    ? "Coach asignado"
+                    : "Sin coach"
+                }
+              </span>
+            </div>
+          </article>
+        `;
+      },
+      "No hay equipos registrados en esta liga."
+    );
+  }
+
+
+  /* =====================================================
+     ENFRENTAMIENTOS
+  ===================================================== */
+
+  function renderMatches(
+    matches
+  ) {
+    renderCards(
+      "matches-content",
+      matches,
+      function (match) {
+        const home =
+          match.home_team?.name ||
+          "Local";
+
+        const away =
+          match.away_team?.name ||
+          "Visitante";
+
+        const score =
+          match.home_score !== null &&
+          match.away_score !== null
+            ? `${match.home_score} - ${match.away_score}`
+            : "vs";
+
+        return `
+          <article class="gof-card">
+            <div class="gof-card-meta">
+              <span>
+                Jornada ${escapeHtml(
+                  match.round_number
+                )}
+              </span>
+
+              <span>
+                ${escapeHtml(
+                  statusLabel(
+                    match.status
+                  )
+                )}
+              </span>
+            </div>
+
+            <div class="gof-match">
+              <strong>
+                ${escapeHtml(home)}
+              </strong>
+
+              <b>
+                ${escapeHtml(score)}
+              </b>
+
+              <strong>
+                ${escapeHtml(away)}
+              </strong>
+            </div>
+
+            <div class="gof-card-meta">
+              <span>
+                ${
+                  match.match_date
+                    ? formatDate(
+                        match.match_date
+                      )
+                    : "Sin fecha"
+                }
+              </span>
+
+              <span>
+                ${
+                  match.match_time
+                    ? formatTime(
+                        match.match_time
+                      )
+                    : "Sin hora"
+                }
+              </span>
+
+              <span>
+                ${
+                  match.field_name ||
+                  "Sin campo"
+                }
+              </span>
+            </div>
+          </article>
+        `;
+      },
+      "No hay enfrentamientos registrados."
+    );
+  }
+
+
+  /* =====================================================
+     CALENDARIO
+  ===================================================== */
+
+  function renderCalendar(
+    matches
+  ) {
+    renderCards(
+      "calendar-content",
+      matches,
+      function (match) {
+        return `
+          <article class="gof-card">
+            <div class="gof-card-meta">
+              <strong>
+                ${escapeHtml(
+                  match.category_name ||
+                  match.categories?.name ||
+                  "Categoría"
+                )}
+              </strong>
+
+              <span>
+                Jornada ${escapeHtml(
+                  match.round_number
+                )}
+              </span>
+            </div>
+
+            <h3>
+              ${escapeHtml(
+                match.home_team?.name ||
+                  "Local"
+              )}
+              vs
+              ${escapeHtml(
+                match.away_team?.name ||
+                  "Visitante"
+              )}
+            </h3>
+
+            <div class="gof-card-meta">
+              <span>
+                ${formatDate(
+                  match.match_date
+                )}
+              </span>
+
+              <span>
+                ${formatTime(
+                  match.match_time
+                )}
+              </span>
+
+              <span>
+                ${escapeHtml(
+                  match.field_name ||
+                    "Campo pendiente"
+                )}
+              </span>
+            </div>
+          </article>
+        `;
+      },
+      "No hay partidos programados."
+    );
+  }
+
+
+  /* =====================================================
+     RESULTADOS
+  ===================================================== */
+
+  function renderResults(
+    results
+  ) {
+    renderCards(
+      "results-content",
+      results,
+      function (match) {
+        return `
+          <article class="gof-card">
+            <div class="gof-card-meta">
+              <span>
+                ${escapeHtml(
+                  formatDate(
+                    match.match_date
+                  )
+                )}
+              </span>
+
+              <span>
+                ${escapeHtml(
+                  statusLabel(
+                    match.status
+                  )
+                )}
+              </span>
+            </div>
+
+            <div class="gof-match">
+              <strong>
+                ${escapeHtml(
+                  match.home_team?.name ||
+                    "Local"
+                )}
+              </strong>
+
+              <b>
+                ${
+                  match.home_score ??
+                  "—"
+                }
+                -
+                ${
+                  match.away_score ??
+                  "—"
+                }
+              </b>
+
+              <strong>
+                ${escapeHtml(
+                  match.away_team?.name ||
+                    "Visitante"
+                )}
+              </strong>
+            </div>
+          </article>
+        `;
+      },
+      "No hay resultados registrados."
+    );
+  }
+
+
+  /* =====================================================
+     TABLA
+  ===================================================== */
+
+  function renderStandings(
+    standings
+  ) {
+    const container =
+      $("#standings-content");
+
+    if (!container) {
+      return;
+    }
+
+    if (
+      !Array.isArray(standings) ||
+      standings.length === 0
+    ) {
+      container.innerHTML =
+        emptyState(
+          "Todavía no hay información para la tabla."
         );
 
-      GOF.context =
-        GOF.context || {};
+      return;
+    }
 
-      GOF.context.activeTournament =
-        tournament;
+    container.innerHTML = `
+      <div class="gof-table-wrap">
+        <table class="gof-table">
+          <thead>
+            <tr>
+              <th>POS</th>
+              <th>EQUIPO</th>
+              <th>JJ</th>
+              <th>JG</th>
+              <th>JP</th>
+              <th>PA</th>
+              <th>PC</th>
+              <th>DIF</th>
+            </tr>
+          </thead>
 
-      setText(
-        "#active-tournament-name",
-        tournament?.name ||
-          cleanName
+          <tbody>
+            ${standings.map(
+              function (team, index) {
+                return `
+                  <tr>
+                    <td>
+                      ${
+                        team.position ||
+                        index + 1
+                      }
+                    </td>
+
+                    <td>
+                      <strong>
+                        ${escapeHtml(
+                          team.team_name ||
+                          team.name ||
+                          team.team?.name ||
+                          "Equipo"
+                        )}
+                      </strong>
+                    </td>
+
+                    <td>
+                      ${team.jj ?? 0}
+                    </td>
+
+                    <td>
+                      ${team.jg ?? 0}
+                    </td>
+
+                    <td>
+                      ${
+                        team.jp ??
+                        Math.max(
+                          0,
+                          (team.jj || 0) -
+                          (team.jg || 0)
+                        )
+                      }
+                    </td>
+
+                    <td>
+                      ${team.pa ?? 0}
+                    </td>
+
+                    <td>
+                      ${
+                        team.pc ??
+                        team.pe ??
+                        0
+                      }
+                    </td>
+
+                    <td>
+                      ${team.dif ?? 0}
+                    </td>
+                  </tr>
+                `;
+              }
+            ).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+
+  /* =====================================================
+     PLAYOFFS
+  ===================================================== */
+
+  function renderPlayoffs(
+    data
+  ) {
+    const container =
+      $("#playoffs-content");
+
+    if (!container) {
+      return;
+    }
+
+    const items =
+      Array.isArray(data)
+        ? data
+        : data?.matches ||
+          data?.playoffMatches ||
+          [];
+
+    if (!items.length) {
+      container.innerHTML =
+        emptyState(
+          "Los playoffs todavía no están generados."
+        );
+
+      return;
+    }
+
+    container.innerHTML =
+      items.map(
+        function (match) {
+          return `
+            <article class="gof-card">
+              <div class="gof-card-meta">
+                <span>
+                  ${escapeHtml(
+                    match.round_name ||
+                    match.round ||
+                    "Playoff"
+                  )}
+                </span>
+              </div>
+
+              <div class="gof-match">
+                <strong>
+                  ${escapeHtml(
+                    match.team_a?.name ||
+                    match.team_a_name ||
+                    "Pendiente"
+                  )}
+                </strong>
+
+                <b>
+                  ${
+                    match.score_a ??
+                    "—"
+                  }
+                  -
+                  ${
+                    match.score_b ??
+                    "—"
+                  }
+                </b>
+
+                <strong>
+                  ${escapeHtml(
+                    match.team_b?.name ||
+                    match.team_b_name ||
+                    "Pendiente"
+                  )}
+                </strong>
+              </div>
+            </article>
+          `;
+        }
+      ).join("");
+  }
+
+
+  /* =====================================================
+     VISTAS SECUNDARIAS
+  ===================================================== */
+
+  function renderSimpleData(
+    containerId,
+    data,
+    title,
+    emptyMessage
+  ) {
+    const container =
+      document.getElementById(
+        containerId
       );
 
-      setText(
-        "#active-tournament-status",
-        tournament?.status ||
-          "proximo"
-      );
+    if (!container) {
+      return;
+    }
 
-      await loadTournaments();
+    if (
+      data === null ||
+      data === undefined ||
+      (
+        Array.isArray(data) &&
+        data.length === 0
+      )
+    ) {
+      container.innerHTML =
+        emptyState(
+          emptyMessage
+        );
 
-      hideLoading();
+      return;
+    }
 
-      showView(
-        "tournament"
-      );
+    const items =
+      Array.isArray(data)
+        ? data
+        : [data];
 
-    } catch (error) {
-      hideLoading();
-      throw error;
+    container.innerHTML = `
+      <div class="gof-card-list">
+        ${items.map(
+          function (item) {
+            if (
+              item &&
+              typeof item ===
+                "object"
+            ) {
+              const name =
+                item.name ||
+                item.title ||
+                item.full_name ||
+                item.team_name ||
+                item.category_name ||
+                "Registro";
+
+              return `
+                <article class="gof-card">
+                  <h3>
+                    ${escapeHtml(
+                      name
+                    )}
+                  </h3>
+
+                  <p>
+                    ${escapeHtml(
+                      title || ""
+                    )}
+                  </p>
+                </article>
+              `;
+            }
+
+            return `
+              <article class="gof-card">
+                ${escapeHtml(item)}
+              </article>
+            `;
+          }
+        ).join("")}
+      </div>
+    `;
+  }
+
+
+  /* =====================================================
+     ROSTER
+  ===================================================== */
+
+  function renderRoster(data) {
+    renderSimpleData(
+      "roster-content",
+      data,
+      "Roster del torneo",
+      "Selecciona un equipo para consultar su roster."
+    );
+  }
+
+
+  /* =====================================================
+     CREDENCIALES
+  ===================================================== */
+
+  function renderCredentials(
+    data
+  ) {
+    renderSimpleData(
+      "credentials-content",
+      data,
+      "Credenciales",
+      "No hay jugadores disponibles para generar credenciales."
+    );
+  }
+
+
+  /* =====================================================
+     SPORTWEY
+  ===================================================== */
+
+  function renderSportwey(
+    data
+  ) {
+    renderSimpleData(
+      "sportwey-content",
+      data,
+      "Revisión interna",
+      "No hay revisiones registradas."
+    );
+  }
+
+
+  /* =====================================================
+     FINANZAS
+  ===================================================== */
+
+  function renderFinance(
+    data
+  ) {
+    const summary =
+      $("#finance-summary");
+
+    const container =
+      $("#finance-content");
+
+    if (summary) {
+      const s =
+        data?.summary ||
+        data ||
+        {};
+
+      summary.innerHTML = `
+        <div class="gof-summary-grid">
+
+          <div class="gof-summary-card">
+            <span>Cargos</span>
+            <strong>
+              ${escapeHtml(
+                String(
+                  s.totalCharges ??
+                  s.charges ??
+                  0
+                )
+              )}
+            </strong>
+          </div>
+
+          <div class="gof-summary-card">
+            <span>Pagos</span>
+            <strong>
+              ${escapeHtml(
+                String(
+                  s.totalPayments ??
+                  s.payments ??
+                  0
+                )
+              )}
+            </strong>
+          </div>
+
+          <div class="gof-summary-card">
+            <span>Gastos</span>
+            <strong>
+              ${escapeHtml(
+                String(
+                  s.totalExpenses ??
+                  s.expenses ??
+                  0
+                )
+              )}
+            </strong>
+          </div>
+        </div>
+      `;
+    }
+
+    if (container) {
+      container.innerHTML =
+        data
+          ? `
+            <article class="gof-card">
+              <h3>
+                Resumen de contabilidad
+              </h3>
+
+              <p>
+                Los movimientos financieros
+                están disponibles en el módulo
+                de Contabilidad.
+              </p>
+            </article>
+          `
+          : emptyState(
+              "No hay información financiera disponible."
+            );
     }
   }
 
 
   /* =====================================================
-     CARGA INICIAL DEL TORNEO
+     AVISOS
+  ===================================================== */
+
+  function renderNotices(
+    notices
+  ) {
+    renderCards(
+      "notices-content",
+      notices,
+      function (notice) {
+        return `
+          <article class="gof-card">
+
+            <div class="gof-card-meta">
+              <span>
+                ${notice.published
+                  ? "Publicado"
+                  : "Borrador"}
+              </span>
+            </div>
+
+            <h3>
+              ${escapeHtml(
+                notice.title ||
+                notice.name ||
+                "Aviso"
+              )}
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                notice.body ||
+                notice.content ||
+                notice.description ||
+                ""
+              )}
+            </p>
+
+          </article>
+        `;
+      },
+      "No hay avisos registrados."
+    );
+  }
+
+
+  /* =====================================================
+     CONFIGURACIÓN
+  ===================================================== */
+
+  function renderSettings(
+    data
+  ) {
+    renderSimpleData(
+      "settings-content",
+      data,
+      "Configuración de liga",
+      "No hay información de configuración."
+    );
+  }
+
+
+  /* =====================================================
+     PUBLICACIÓN
+  ===================================================== */
+
+  function renderPublish(
+    data
+  ) {
+    const state =
+      $("#publication-state");
+
+    const container =
+      $("#publish-content");
+
+    if (state) {
+      state.innerHTML = `
+        <div class="gof-card">
+          <h3>
+            Estado de publicación
+          </h3>
+
+          <p>
+            ${
+              data
+                ? "Información de publicación disponible."
+                : "Sin información."
+            }
+          </p>
+        </div>
+      `;
+    }
+
+    if (container) {
+      container.innerHTML =
+        data
+          ? `
+            <article class="gof-card">
+              <h3>
+                Publicación del torneo
+              </h3>
+
+              <p>
+                Utiliza este módulo para
+                controlar qué partidos,
+                resultados y playoffs
+                son visibles públicamente.
+              </p>
+            </article>
+          `
+          : emptyState(
+              "No hay información de publicación."
+            );
+    }
+  }
+
+
+  /* =====================================================
+     CARGA DEL TORNEO
   ===================================================== */
 
   async function loadTournamentModules(
@@ -926,31 +1746,18 @@
       );
     }
 
-    const tasks = [];
+    const categories =
+      await GOF.categories
+        .listCategories();
 
-    if (
-      GOF.categories &&
-      typeof GOF.categories.listCategories ===
-        "function"
-    ) {
-      tasks.push(
-        GOF.categories.listCategories()
-      );
-    }
+    const teams =
+      await GOF.teams
+        .listTeams();
 
-    if (
-      GOF.teams &&
-      typeof GOF.teams.listTeams ===
-        "function"
-    ) {
-      tasks.push(
-        GOF.teams.listTeams()
-      );
-    }
-
-    await Promise.all(
-      tasks
-    );
+    return {
+      categories,
+      teams
+    };
   }
 
 
@@ -964,254 +1771,277 @@
     switch (view) {
 
       case "dashboard":
-        await refreshDashboard();
-        break;
+        return refreshDashboard();
 
 
       case "leagues":
-        await loadLeagues();
-        break;
+        return loadLeagues();
 
 
       case "tournaments":
-        await loadTournaments();
-        break;
+        return loadTournaments();
 
 
-      case "categories":
+      case "categories": {
+        requireLeague();
+
+        const data =
+          await GOF.categories
+            .listCategories();
+
+        renderSimpleData(
+          "categories-content",
+          data,
+          "Categorías",
+          "No hay categorías registradas."
+        );
+
+        return data;
+      }
+
+
+      case "teams": {
+        requireLeague();
+
+        const data =
+          await GOF.teams
+            .listTeams();
+
+        renderTeams(data);
+
+        return data;
+      }
+
+
+      case "roster": {
+        const tournament =
+          requireTournament();
+
+        const teams =
+          await GOF.teams
+            .listTeams();
+
+        renderRoster(teams);
+
+        return teams;
+      }
+
+
+      case "credentials": {
+        const tournament =
+          requireTournament();
+
+        const teams =
+          await GOF.teams
+            .listTeams();
+
+        renderCredentials(
+          teams
+        );
+
+        return teams;
+      }
+
+
+      case "sportwey": {
         requireLeague();
 
         if (
-          GOF.categories &&
-          typeof GOF.categories.listCategories ===
+          !GOF.sportwey ||
+          typeof GOF.sportwey
+            .listPlayerReviews !==
             "function"
         ) {
-          await GOF.categories.listCategories();
+          return [];
         }
 
-        break;
+        const data =
+          await GOF.sportwey
+            .listPlayerReviews();
+
+        renderSportwey(data);
+
+        return data;
+      }
 
 
-      case "teams":
-        requireLeague();
+      case "matches": {
+        const tournament =
+          requireTournament();
+
+        const data =
+          await GOF.matches
+            .listMatches(
+              tournament.id
+            );
+
+        renderMatches(data);
+
+        return data;
+      }
+
+
+      case "calendar": {
+        const tournament =
+          requireTournament();
+
+        const data =
+          await GOF.calendar
+            .listCalendar(
+              tournament.id
+            );
+
+        renderCalendar(data);
+
+        return data;
+      }
+
+
+      case "schedule": {
+        const tournament =
+          requireTournament();
 
         if (
-          GOF.teams &&
-          typeof GOF.teams.listTeams ===
+          GOF.schedule &&
+          typeof GOF.schedule
+            .getScheduledMatches ===
             "function"
         ) {
-          await GOF.teams.listTeams();
+          const data =
+            await GOF.schedule
+              .getScheduledMatches(
+                tournament.id
+              );
+
+          renderCalendar(data);
+
+          return data;
         }
 
-        break;
+        return [];
+      }
 
 
-      case "roster":
-        requireTournament();
-        break;
+      case "results": {
+        const tournament =
+          requireTournament();
 
-
-      case "credentials":
-        requireTournament();
-        break;
-
-
-      case "sportwey":
-        requireLeague();
-        break;
-
-
-      case "matches":
-        {
-          const tournament =
-            requireTournament();
-
-          if (
-            GOF.matches &&
-            typeof GOF.matches.listMatches ===
-              "function"
-          ) {
-            await GOF.matches.listMatches(
+        const data =
+          await GOF.results
+            .listResults(
               tournament.id
             );
-          }
-        }
 
-        break;
+        renderResults(data);
+
+        return data;
+      }
 
 
-      case "calendar":
-        {
-          const tournament =
-            requireTournament();
+      case "standings": {
+        const tournament =
+          requireTournament();
 
-          /*
-           * calendar.js utiliza
-           * listCalendar(), no loadCalendar().
-           */
-          if (
-            GOF.calendar &&
-            typeof GOF.calendar.listCalendar ===
-              "function"
-          ) {
-            await GOF.calendar.listCalendar(
+        const data =
+          await GOF.standings
+            .getStandings(
               tournament.id
             );
-          }
-        }
 
-        break;
+        renderStandings(data);
 
-
-      case "schedule":
-        requireTournament();
-        break;
+        return data;
+      }
 
 
-      case "results":
-        {
-          const tournament =
-            requireTournament();
+      case "playoffs": {
+        const tournament =
+          requireTournament();
 
-          if (
-            GOF.results &&
-            typeof GOF.results.listResults ===
-              "function"
-          ) {
-            await GOF.results.listResults(
+        const data =
+          await GOF.playoffs
+            .getPlayoffs(
               tournament.id
             );
-          }
-        }
 
-        break;
+        renderPlayoffs(data);
 
-
-      case "standings":
-        {
-          const tournament =
-            requireTournament();
-
-          if (
-            GOF.standings &&
-            typeof GOF.standings.getStandings ===
-              "function"
-          ) {
-            await GOF.standings.getStandings(
-              tournament.id
-            );
-          }
-        }
-
-        break;
+        return data;
+      }
 
 
-      case "playoffs":
-        {
-          const tournament =
-            requireTournament();
-
-          if (
-            GOF.playoffs &&
-            typeof GOF.playoffs.getPlayoffs ===
-              "function"
-          ) {
-            await GOF.playoffs.getPlayoffs(
-              tournament.id
-            );
-          }
-        }
-
-        break;
-
-
-      case "finance":
+      case "finance": {
         requireLeague();
 
-        if (
-          GOF.finance &&
-          typeof GOF.finance.getDashboard ===
-            "function"
-        ) {
-          await GOF.finance.getDashboard();
-        }
+        const data =
+          await GOF.finance
+            .getDashboard();
 
-        break;
+        renderFinance(data);
+
+        return data;
+      }
 
 
-      case "notices":
+      case "notices": {
         requireLeague();
 
-        if (
-          GOF.notices &&
-          typeof GOF.notices.listNotices ===
-            "function"
-        ) {
-          await GOF.notices.listNotices();
-        }
+        const data =
+          await GOF.notices
+            .listNotices();
 
-        break;
+        renderNotices(data);
+
+        return data;
+      }
 
 
-      case "settings":
+      case "settings": {
         requireLeague();
 
-        if (
-          GOF.settings &&
-          typeof GOF.settings.getLeague ===
-            "function"
-        ) {
-          await GOF.settings.getLeague();
-        }
+        const data =
+          await GOF.settings
+            .getLeague();
 
-        break;
+        renderSettings(data);
+
+        return data;
+      }
 
 
-      case "publish":
-        {
-          const tournament =
-            requireTournament();
+      case "publish": {
+        const tournament =
+          requireTournament();
 
-          if (
-            GOF.publish &&
-            typeof GOF.publish.getPublicationSummary ===
-              "function"
-          ) {
-            await GOF.publish.getPublicationSummary(
+        const data =
+          await GOF.publish
+            .getPublicationSummary(
               tournament.id
             );
-          }
-        }
 
-        break;
+        renderPublish(data);
+
+        return data;
+      }
 
 
       default:
-        break;
+        return null;
     }
   }
 
 
   /* =====================================================
-     CONTEXTO ACTUAL
+     CONTEXTO
   ===================================================== */
 
   async function refreshCurrentContext() {
     requireSession();
 
-    clearError();
-
     let league =
       getActiveLeague();
 
-    /*
-     * Si no tenemos liga activa,
-     * consultamos las ligas disponibles.
-     */
-    if (
-      !league ||
-      !league.id
-    ) {
+    if (!league || !league.id) {
       const leagues =
         await loadLeagues();
 
@@ -1222,26 +2052,18 @@
         league =
           leagues[0];
 
-        GOF.context =
-          GOF.context || {};
-
         GOF.context.activeLeague =
           league;
 
-        if (
-          GOF.leagues &&
-          typeof GOF.leagues.setActiveLeague ===
-            "function"
-        ) {
-          await GOF.leagues.setActiveLeague(
+        await GOF.leagues
+          .setActiveLeague(
             league.id
           );
-        }
       }
     }
 
     if (!league) {
-      return;
+      return null;
     }
 
     setText(
@@ -1252,6 +2074,8 @@
     await loadTournaments();
 
     await refreshDashboard();
+
+    return league;
   }
 
 
@@ -1263,14 +2087,8 @@
     const form =
       $("#login-form");
 
-    if (!form) {
-      return;
-    }
-
-    if (
-      form.dataset.bound ===
-      "true"
-    ) {
+    if (!form ||
+        form.dataset.bound === "true") {
       return;
     }
 
@@ -1279,15 +2097,13 @@
 
     form.addEventListener(
       "submit",
-      async event => {
+      async function (event) {
         event.preventDefault();
 
         const errorBox =
           $("#login-error");
 
-        clearError(
-          errorBox
-        );
+        clearError(errorBox);
 
         const email =
           $("#login-email")
@@ -1324,44 +2140,19 @@
             "Iniciando sesión..."
           );
 
-          if (
-            !GOF.auth ||
-            typeof GOF.auth.signIn !==
-              "function"
-          ) {
-            throw new Error(
-              "El módulo de autenticación no está disponible."
-            );
-          }
-
           const result =
             await GOF.auth.signIn(
               email,
               password
             );
 
-          if (
-            result &&
-            result.session
-          ) {
-            GOF.session =
-              result.session;
+          GOF.session =
+            result.session;
 
-            GOF.user =
-              result.user ||
-              result.session.user;
-          } else if (
-            GOF.auth &&
-            typeof GOF.auth.getSession ===
-              "function"
-          ) {
-            GOF.session =
-              await GOF.auth.getSession();
-
-            GOF.user =
-              GOF.session?.user ||
-              null;
-          }
+          GOF.user =
+            result.user ||
+            result.session?.user ||
+            null;
 
           if (!GOF.session) {
             throw new Error(
@@ -1371,21 +2162,15 @@
 
           form.reset();
 
-          hideLoading();
-
           await refreshCurrentContext();
 
-          if (
+          hideLoading();
+
+          showView(
             getActiveLeague()
-          ) {
-            showView(
-              "dashboard"
-            );
-          } else {
-            showView(
-              "leagues"
-            );
-          }
+              ? "dashboard"
+              : "leagues"
+          );
 
         } catch (error) {
           hideLoading();
@@ -1405,63 +2190,64 @@
   ===================================================== */
 
   function bindNavigation() {
-    $$(
-      "[data-gof-nav]"
-    ).forEach(button => {
+    $$("[data-gof-nav]")
+      .forEach(
+        function (button) {
 
-      if (
-        button.dataset.bound ===
-        "true"
-      ) {
-        return;
-      }
-
-      button.dataset.bound =
-        "true";
-
-      button.addEventListener(
-        "click",
-        async () => {
-
-          const view =
-            button.dataset.gofNav;
-
-          if (!view) {
+          if (
+            button.dataset.bound ===
+            "true"
+          ) {
             return;
           }
 
-          if (!getSession()) {
-            showLoginView();
-            return;
-          }
+          button.dataset.bound =
+            "true";
 
-          try {
-            showLoading(
-              "Cargando..."
-            );
+          button.addEventListener(
+            "click",
+            async function () {
 
-            await loadViewData(
-              view
-            );
+              const view =
+                button.dataset.gofNav;
 
-            hideLoading();
+              if (!view) {
+                return;
+              }
 
-            showView(
-              view
-            );
+              if (!getSession()) {
+                showLoginView();
+                return;
+              }
 
-          } catch (error) {
-            hideLoading();
-            showError(error);
-          }
+              try {
+                showLoading(
+                  "Cargando..."
+                );
+
+                await loadViewData(
+                  view
+                );
+
+                hideLoading();
+
+                showView(
+                  view
+                );
+
+              } catch (error) {
+                hideLoading();
+                showError(error);
+              }
+            }
+          );
         }
       );
-    });
   }
 
 
   /* =====================================================
-     ACCIONES GENERALES
+     ACCIONES
   ===================================================== */
 
   function bindBasicActions() {
@@ -1479,7 +2265,7 @@
 
       refresh.addEventListener(
         "click",
-        async () => {
+        async function () {
           try {
             await refreshDashboard();
           } catch (error) {
@@ -1503,30 +2289,12 @@
 
       logout.addEventListener(
         "click",
-        async () => {
-
+        async function () {
           try {
-
-            if (
-              !GOF.auth ||
-              typeof GOF.auth.logout !==
-                "function"
-            ) {
-              throw new Error(
-                "La función de cierre de sesión no está disponible."
-              );
-            }
-
             await GOF.auth.logout();
 
-            GOF.session =
-              null;
-
-            GOF.user =
-              null;
-
-            GOF.context =
-              GOF.context || {};
+            GOF.session = null;
+            GOF.user = null;
 
             GOF.context.activeLeague =
               null;
@@ -1544,56 +2312,54 @@
     }
 
 
-    $$(
-      "[data-action]"
-    ).forEach(button => {
+    $$("[data-action]")
+      .forEach(
+        function (button) {
 
-      if (
-        button.dataset.bound ===
-        "true"
-      ) {
-        return;
-      }
-
-      button.dataset.bound =
-        "true";
-
-      button.addEventListener(
-        "click",
-        async () => {
-
-          const action =
-            button.dataset.action;
-
-          try {
-
-            clearError();
-
-            switch (action) {
-
-              case "create-league":
-                await createLeagueFromAction();
-                break;
-
-              case "create-tournament":
-                await createTournamentFromAction();
-                break;
-
-              default:
-                console.warn(
-                  "GAME ON FLAG: acción no implementada:",
-                  action
-                );
-                break;
-            }
-
-          } catch (error) {
-            hideLoading();
-            showError(error);
+          if (
+            button.dataset.bound ===
+            "true"
+          ) {
+            return;
           }
+
+          button.dataset.bound =
+            "true";
+
+          button.addEventListener(
+            "click",
+            async function () {
+
+              try {
+                clearError();
+
+                switch (
+                  button.dataset.action
+                ) {
+
+                  case "create-league":
+                    await createLeagueFromAction();
+                    break;
+
+                  case "create-tournament":
+                    await createTournamentFromAction();
+                    break;
+
+                  default:
+                    console.warn(
+                      "GAME ON FLAG: acción no implementada:",
+                      button.dataset.action
+                    );
+                }
+
+              } catch (error) {
+                hideLoading();
+                showError(error);
+              }
+            }
+          );
         }
       );
-    });
   }
 
 
@@ -1602,9 +2368,7 @@
   ===================================================== */
 
   async function boot() {
-
     try {
-
       showLoading(
         "Iniciando GAME ON FLAG..."
       );
@@ -1633,9 +2397,7 @@
         !auth.session
       ) {
         hideLoading();
-
         showLoginView();
-
         return;
       }
 
@@ -1646,26 +2408,18 @@
         auth.user ||
         auth.session.user;
 
-      hideLoading();
-
       await refreshCurrentContext();
 
-      if (
-        getActiveLeague()
-      ) {
-        showView(
-          "dashboard"
-        );
-      } else {
-        showView(
-          "leagues"
-        );
-      }
-
-    } catch (error) {
-
       hideLoading();
 
+      showView(
+        getActiveLeague()
+          ? "dashboard"
+          : "leagues"
+      );
+
+    } catch (error) {
+      hideLoading();
       showError(error);
 
       console.error(
@@ -1677,57 +2431,38 @@
 
 
   /* =====================================================
-     API PÚBLICA DEL CONTROLADOR
+     API PÚBLICA
   ===================================================== */
 
-  GOF.ui.$ =
-    $;
-
-  GOF.ui.$$ =
-    $$;
-
-  GOF.ui.showView =
-    showView;
-
+  GOF.ui.$ = $;
+  GOF.ui.$$ = $$;
+  GOF.ui.showView = showView;
   GOF.ui.showLoginView =
     showLoginView;
-
   GOF.ui.showLoading =
     showLoading;
-
   GOF.ui.hideLoading =
     hideLoading;
-
   GOF.ui.showError =
     showError;
-
   GOF.ui.clearError =
     clearError;
-
   GOF.ui.refreshDashboard =
     refreshDashboard;
-
   GOF.ui.refreshCurrentContext =
     refreshCurrentContext;
-
   GOF.ui.requireSession =
     requireSession;
-
   GOF.ui.requireLeague =
     requireLeague;
-
   GOF.ui.requireTournament =
     requireTournament;
-
   GOF.ui.loadLeagues =
     loadLeagues;
-
   GOF.ui.loadTournaments =
     loadTournaments;
-
   GOF.ui.loadViewData =
     loadViewData;
-
   GOF.ui.boot =
     boot;
 
@@ -1740,7 +2475,6 @@
     document.readyState ===
     "loading"
   ) {
-
     document.addEventListener(
       "DOMContentLoaded",
       boot,
@@ -1748,11 +2482,8 @@
         once: true
       }
     );
-
   } else {
-
     boot();
-
   }
 
 })();

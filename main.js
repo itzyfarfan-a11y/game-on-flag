@@ -324,6 +324,79 @@
       items.map(renderer).join("");
   }
 
+  function renderSimpleData(
+    containerId,
+    data,
+    title,
+    emptyMessage
+  ) {
+    const container =
+      document.getElementById(
+        containerId
+      );
+
+    if (!container) {
+      return;
+    }
+
+    if (
+      data === null ||
+      data === undefined ||
+      (
+        Array.isArray(data) &&
+        data.length === 0
+      )
+    ) {
+      container.innerHTML =
+        emptyState(
+          emptyMessage ||
+          "No hay información disponible."
+        );
+
+      return;
+    }
+
+    let content = "";
+
+    if (Array.isArray(data)) {
+      content = data.map(
+        function (item) {
+          return `
+            <article class="gof-card">
+              <pre>${escapeHtml(
+                JSON.stringify(
+                  item,
+                  null,
+                  2
+                )
+              )}</pre>
+            </article>
+          `;
+        }
+      ).join("");
+    } else {
+      content = `
+        <article class="gof-card">
+          <h3>
+            ${escapeHtml(
+              title || "Información"
+            )}
+          </h3>
+
+          <pre>${escapeHtml(
+            JSON.stringify(
+              data,
+              null,
+              2
+            )
+          )}</pre>
+        </article>
+      `;
+    }
+
+    container.innerHTML = content;
+  }
+
 
   /* =====================================================
      DASHBOARD
@@ -1220,7 +1293,7 @@
     ) {
       container.innerHTML =
         emptyState(
-          "Todavía no hay información para la tabla."
+          "No hay tabla disponible."
         );
 
       return;
@@ -1244,60 +1317,70 @@
 
           <tbody>
             ${standings.map(
-              function (team, index) {
+              function (row, index) {
                 return `
                   <tr>
                     <td>
-                      ${
-                        team.position ||
+                      ${escapeHtml(
+                        row.position ??
                         index + 1
-                      }
+                      )}
                     </td>
 
                     <td>
-                      <strong>
-                        ${escapeHtml(
-                          team.team_name ||
-                          team.name ||
-                          team.team?.name ||
-                          "Equipo"
-                        )}
-                      </strong>
+                      ${escapeHtml(
+                        row.name ||
+                        row.team_name ||
+                        "Equipo"
+                      )}
                     </td>
 
                     <td>
-                      ${team.jj ?? 0}
-                    </td>
-
-                    <td>
-                      ${team.jg ?? 0}
-                    </td>
-
-                    <td>
-                      ${
-                        team.jp ??
-                        Math.max(
-                          0,
-                          (team.jj || 0) -
-                          (team.jg || 0)
-                        )
-                      }
-                    </td>
-
-                    <td>
-                      ${team.pa ?? 0}
-                    </td>
-
-                    <td>
-                      ${
-                        team.pc ??
-                        team.pe ??
+                      ${escapeHtml(
+                        row.jj ??
+                        row.JJ ??
                         0
-                      }
+                      )}
                     </td>
 
                     <td>
-                      ${team.dif ?? 0}
+                      ${escapeHtml(
+                        row.jg ??
+                        row.JG ??
+                        0
+                      )}
+                    </td>
+
+                    <td>
+                      ${escapeHtml(
+                        row.jp ??
+                        row.JP ??
+                        0
+                      )}
+                    </td>
+
+                    <td>
+                      ${escapeHtml(
+                        row.pa ??
+                        row.PA ??
+                        0
+                      )}
+                    </td>
+
+                    <td>
+                      ${escapeHtml(
+                        row.pc ??
+                        row.PC ??
+                        0
+                      )}
+                    </td>
+
+                    <td>
+                      ${escapeHtml(
+                        row.dif ??
+                        row.DIF ??
+                        0
+                      )}
                     </td>
                   </tr>
                 `;
@@ -1317,163 +1400,12 @@
   function renderPlayoffs(
     data
   ) {
-    const container =
-      $("#playoffs-content");
-
-    if (!container) {
-      return;
-    }
-
-    const items =
-      Array.isArray(data)
-        ? data
-        : data?.matches ||
-          data?.playoffMatches ||
-          [];
-
-    if (!items.length) {
-      container.innerHTML =
-        emptyState(
-          "Los playoffs todavía no están generados."
-        );
-
-      return;
-    }
-
-    container.innerHTML =
-      items.map(
-        function (match) {
-          return `
-            <article class="gof-card">
-              <div class="gof-card-meta">
-                <span>
-                  ${escapeHtml(
-                    match.round_name ||
-                    match.round ||
-                    "Playoff"
-                  )}
-                </span>
-              </div>
-
-              <div class="gof-match">
-                <strong>
-                  ${escapeHtml(
-                    match.team_a?.name ||
-                    match.team_a_name ||
-                    "Pendiente"
-                  )}
-                </strong>
-
-                <b>
-                  ${
-                    match.score_a ??
-                    "—"
-                  }
-                  -
-                  ${
-                    match.score_b ??
-                    "—"
-                  }
-                </b>
-
-                <strong>
-                  ${escapeHtml(
-                    match.team_b?.name ||
-                    match.team_b_name ||
-                    "Pendiente"
-                  )}
-                </strong>
-              </div>
-            </article>
-          `;
-        }
-      ).join("");
-  }
-
-
-  /* =====================================================
-     VISTAS SECUNDARIAS
-  ===================================================== */
-
-  function renderSimpleData(
-    containerId,
-    data,
-    title,
-    emptyMessage
-  ) {
-    const container =
-      document.getElementById(
-        containerId
-      );
-
-    if (!container) {
-      return;
-    }
-
-    if (
-      data === null ||
-      data === undefined ||
-      (
-        Array.isArray(data) &&
-        data.length === 0
-      )
-    ) {
-      container.innerHTML =
-        emptyState(
-          emptyMessage
-        );
-
-      return;
-    }
-
-    const items =
-      Array.isArray(data)
-        ? data
-        : [data];
-
-    container.innerHTML = `
-      <div class="gof-card-list">
-        ${items.map(
-          function (item) {
-            if (
-              item &&
-              typeof item ===
-                "object"
-            ) {
-              const name =
-                item.name ||
-                item.title ||
-                item.full_name ||
-                item.team_name ||
-                item.category_name ||
-                "Registro";
-
-              return `
-                <article class="gof-card">
-                  <h3>
-                    ${escapeHtml(
-                      name
-                    )}
-                  </h3>
-
-                  <p>
-                    ${escapeHtml(
-                      title || ""
-                    )}
-                  </p>
-                </article>
-              `;
-            }
-
-            return `
-              <article class="gof-card">
-                ${escapeHtml(item)}
-              </article>
-            `;
-          }
-        ).join("")}
-      </div>
-    `;
+    renderSimpleData(
+      "playoffs-content",
+      data,
+      "Playoffs",
+      "No hay playoffs registrados para esta categoría."
+    );
   }
 
 
@@ -1481,7 +1413,9 @@
      ROSTER
   ===================================================== */
 
-  function renderRoster(data) {
+  function renderRoster(
+    data
+  ) {
     renderSimpleData(
       "roster-content",
       data,
@@ -1518,7 +1452,7 @@
       "sportwey-content",
       data,
       "Revisión interna",
-      "No hay revisiones registradas."
+      "Selecciona un jugador para consultar su historial Sportwey."
     );
   }
 
@@ -1583,6 +1517,7 @@
               )}
             </strong>
           </div>
+
         </div>
       `;
     }
@@ -1687,19 +1622,54 @@
       $("#publish-content");
 
     if (state) {
+      const published =
+        Number(
+          data?.published ??
+          0
+        );
+
+      const pending =
+        Number(
+          data?.pending ??
+          0
+        );
+
+      const playoffs =
+        Number(
+          data?.playoffs ??
+          0
+        );
+
       state.innerHTML = `
         <div class="gof-card">
           <h3>
             Estado de publicación
           </h3>
 
-          <p>
-            ${
-              data
-                ? "Información de publicación disponible."
-                : "Sin información."
-            }
-          </p>
+          <div class="gof-summary-grid">
+
+            <div class="gof-summary-card">
+              <span>Publicados</span>
+              <strong>
+                ${published}
+              </strong>
+            </div>
+
+            <div class="gof-summary-card">
+              <span>Pendientes</span>
+              <strong>
+                ${pending}
+              </strong>
+            </div>
+
+            <div class="gof-summary-card">
+              <span>Playoffs</span>
+              <strong>
+                ${playoffs}
+              </strong>
+            </div>
+
+          </div>
         </div>
       `;
     }
@@ -1714,10 +1684,16 @@
               </h3>
 
               <p>
-                Utiliza este módulo para
-                controlar qué partidos,
-                resultados y playoffs
-                son visibles públicamente.
+                Estado de publicación cargado
+                correctamente.
+              </p>
+
+              <p>
+                ${
+                  data.ready
+                    ? "El torneo está listo para publicación."
+                    : "Existen elementos pendientes de publicación."
+                }
               </p>
             </article>
           `
@@ -1725,6 +1701,49 @@
               "No hay información de publicación."
             );
     }
+  }
+
+
+  /* =====================================================
+     CATEGORÍA SELECCIONADA
+  ===================================================== */
+
+  function getSelectedCategoryId() {
+    const candidates = [
+      "#category-select",
+      "#active-category-id",
+      "[data-active-category-id]"
+    ];
+
+    for (
+      const selector of candidates
+    ) {
+      const element =
+        $(selector);
+
+      if (!element) {
+        continue;
+      }
+
+      const value =
+        element.value ||
+        element.dataset
+          .activeCategoryId ||
+        element.textContent;
+
+      if (
+        value &&
+        /^[0-9a-f-]{36}$/i.test(
+          String(value).trim()
+        )
+      ) {
+        return String(
+          value
+        ).trim();
+      }
+    }
+
+    return null;
   }
 
 
@@ -1814,22 +1833,22 @@
 
 
       case "roster": {
-        const tournament =
-          requireTournament();
+        requireTournament();
 
         const teams =
           await GOF.teams
             .listTeams();
 
-        renderRoster(teams);
+        renderRoster(
+          teams
+        );
 
         return teams;
       }
 
 
       case "credentials": {
-        const tournament =
-          requireTournament();
+        requireTournament();
 
         const teams =
           await GOF.teams
@@ -1846,20 +1865,16 @@
       case "sportwey": {
         requireLeague();
 
-        if (
-          !GOF.sportwey ||
-          typeof GOF.sportwey
-            .listPlayerReviews !==
-            "function"
-        ) {
-          return [];
-        }
+        /*
+         * Sportwey requiere playerId.
+         * No ejecutamos una consulta sin jugador
+         * seleccionado porque el módulo la rechaza.
+         */
+        const data = [];
 
-        const data =
-          await GOF.sportwey
-            .listPlayerReviews();
-
-        renderSportwey(data);
+        renderSportwey(
+          data
+        );
 
         return data;
       }
@@ -1958,10 +1973,20 @@
         const tournament =
           requireTournament();
 
+        const categoryId =
+          getSelectedCategoryId();
+
+        if (!categoryId) {
+          renderPlayoffs([]);
+
+          return [];
+        }
+
         const data =
           await GOF.playoffs
             .getPlayoffs(
-              tournament.id
+              tournament.id,
+              categoryId
             );
 
         renderPlayoffs(data);
@@ -1973,9 +1998,23 @@
       case "finance": {
         requireLeague();
 
+        const tournament =
+          getActiveTournament();
+
+        if (
+          !tournament ||
+          !tournament.id
+        ) {
+          renderFinance(null);
+
+          return null;
+        }
+
         const data =
           await GOF.finance
-            .getDashboard();
+            .getDashboard(
+              tournament.id
+            );
 
         renderFinance(data);
 
@@ -2013,10 +2052,16 @@
         const tournament =
           requireTournament();
 
-        const data =
+        const state =
           await GOF.publish
-            .getPublicationSummary(
+            .getPublicationState(
               tournament.id
+            );
+
+        const data =
+          GOF.publish
+            .getPublicationSummary(
+              state
             );
 
         renderPublish(data);
@@ -2041,7 +2086,10 @@
     let league =
       getActiveLeague();
 
-    if (!league || !league.id) {
+    if (
+      !league ||
+      !league.id
+    ) {
       const leagues =
         await loadLeagues();
 
@@ -2087,8 +2135,11 @@
     const form =
       $("#login-form");
 
-    if (!form ||
-        form.dataset.bound === "true") {
+    if (
+      !form ||
+      form.dataset.bound ===
+        "true"
+    ) {
       return;
     }
 
@@ -2122,6 +2173,7 @@
             ),
             errorBox
           );
+
           return;
         }
 
@@ -2132,6 +2184,7 @@
             ),
             errorBox
           );
+
           return;
         }
 
@@ -2217,6 +2270,7 @@
 
               if (!getSession()) {
                 showLoginView();
+
                 return;
               }
 
@@ -2237,6 +2291,7 @@
 
               } catch (error) {
                 hideLoading();
+
                 showError(error);
               }
             }
@@ -2293,8 +2348,11 @@
           try {
             await GOF.auth.logout();
 
-            GOF.session = null;
-            GOF.user = null;
+            GOF.session =
+              null;
+
+            GOF.user =
+              null;
 
             GOF.context.activeLeague =
               null;
@@ -2354,6 +2412,7 @@
 
               } catch (error) {
                 hideLoading();
+
                 showError(error);
               }
             }
@@ -2397,7 +2456,9 @@
         !auth.session
       ) {
         hideLoading();
+
         showLoginView();
+
         return;
       }
 
@@ -2420,6 +2481,7 @@
 
     } catch (error) {
       hideLoading();
+
       showError(error);
 
       console.error(
@@ -2436,33 +2498,49 @@
 
   GOF.ui.$ = $;
   GOF.ui.$$ = $$;
-  GOF.ui.showView = showView;
+
+  GOF.ui.showView =
+    showView;
+
   GOF.ui.showLoginView =
     showLoginView;
+
   GOF.ui.showLoading =
     showLoading;
+
   GOF.ui.hideLoading =
     hideLoading;
+
   GOF.ui.showError =
     showError;
+
   GOF.ui.clearError =
     clearError;
+
   GOF.ui.refreshDashboard =
     refreshDashboard;
+
   GOF.ui.refreshCurrentContext =
     refreshCurrentContext;
+
   GOF.ui.requireSession =
     requireSession;
+
   GOF.ui.requireLeague =
     requireLeague;
+
   GOF.ui.requireTournament =
     requireTournament;
+
   GOF.ui.loadLeagues =
     loadLeagues;
+
   GOF.ui.loadTournaments =
     loadTournaments;
+
   GOF.ui.loadViewData =
     loadViewData;
+
   GOF.ui.boot =
     boot;
 

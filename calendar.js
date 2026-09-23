@@ -231,3 +231,198 @@
   }
 
   async function updateMatchSchedule({
+    matchId,
+    matchDate,
+    matchTime,
+    fieldName,
+    force = false,
+    overrideNote = null
+  }) {
+    if (!matchId) {
+      throw new Error("Partido no válido.");
+    }
+
+    const date = normalizeDate(matchDate);
+    const time = validateTime(matchTime);
+    const field = validateField(fieldName);
+
+    if (force && !String(overrideNote || "").trim()) {
+      throw new Error(
+        "El cambio forzado requiere una nota de justificación."
+      );
+    }
+
+    const { data, error } = await sb().rpc(
+      "admin_update_match_schedule",
+      {
+        p_match_id: matchId,
+        p_match_date: date,
+        p_match_time: time,
+        p_field_name: field,
+        p_force: Boolean(force),
+        p_override_note:
+          String(overrideNote || "").trim() || null
+      }
+    );
+
+    if (error) throw error;
+
+    return data;
+  }
+
+  async function saveWeekDate(
+    tournamentId,
+    roundNumber,
+    matchDate,
+    reason = "Cambio de fecha de jornada"
+  ) {
+    if (!tournamentId) {
+      throw new Error("Torneo no válido.");
+    }
+
+    const round = Number(roundNumber);
+
+    if (!Number.isInteger(round) || round < 1) {
+      throw new Error("Jornada no válida.");
+    }
+
+    const date = normalizeDate(matchDate);
+
+    const league = requireLeague();
+
+    /*
+      Primero recuperamos los partidos de esa jornada.
+      Cada cambio pasa por el RPC seguro de programación.
+    */
+    const { data: matches, error } = await sb()
+      .from("matches")
+      .select("id,match_date,match_time,field_name")
+      .eq("tournament_id", tournamentId)
+      .eq("round_number", round)
+      .eq("status", "programado");
+
+    if (error) throw error;
+
+    const results = [];
+
+    for (const match of matches || []) {
+      if (!match.match_time || !match.field_name) {
+        /*
+          Un partido sin hora/campo todavía no está
+          completamente programado. No inventamos datos.
+        */
+        continue;
+      }
+
+      const result =
+        await updateMatchSchedule({
+          matchId: match.id,
+          matchDate: date,
+          matchTime: match.match_time,
+          fieldName: match.field_name,
+          force: true,
+          overrideNote: reason
+        });
+
+      results.push(result);
+    }
+
+    return {
+      leagueId: league.id,
+      tournamentId,
+      roundNumber: round,
+      updated: results.length
+    };
+  }
+
+  async function publishCalendar(tournamentId) {
+    if (!tournamentId) {
+      throw new Error("Torneo no válido.");
+    }
+
+    const league = requireLeague();
+
+    /*
+      La validación completa del calendario debe realizarse
+      antes de publicar. Si el proyecto ya dispone del RPC
+      de validación, lo utilizamos; si no, no publicamos
+      silenciosamente.
+    */
+    const { data: validation, error: validationError } =
+      await sb().rpc(
+        "validate_nffl_schedule",
+        {
+          p_tournament_id: tournamentId
+        }
+      );
+
+    if (validationError) {
+      throw validationError;
+    }
+
+    if (
+      validation &&
+      typeof validation === "object" &&
+      validation.ok === false
+    ) {
+      throw new Error(
+        validation.message ||
+        "El calendario no está listo para publicación."
+      );
+    }
+
+    const { data, error } = await sb()
+      .from("matches")
+      .update({
+        published: true
+      })
+      .eq("tournament_id", tournamentId)
+      .eq("status", "programado")
+      .select("id");
+
+    if (error) throw error;
+
+    return {
+      leagueId: league.id,
+      tournamentId,
+      published: data || []
+    };
+  }
+
+  async function unpublishCalendar(tournamentId) {
+    if (!tournamentId) {
+      throw new Error("Torneo no válido.");
+    }
+
+    const { data, error } = await sb()
+      .from("matches")
+      .update({
+        published: false
+      })
+      .eq("tournament_id", tournamentId)
+      .select("id");
+
+    if (error) throw error;
+
+    return {
+      tournamentId,
+      unpublished: data || []
+    };
+  }
+
+  /*
+    API pública del módulo.
+    main.js utiliza GOF.calendar para acceder
+    a las funciones del calendario.
+  */
+  window.GOF =
+    window.GOF || {};
+
+  window.GOF.calendar = {
+    listCalendar,
+    updateMatchSchedule,
+    saveWeekDate,
+    publishCalendar,
+    unpublishCalendar
+  };
+})();

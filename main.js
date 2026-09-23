@@ -1,4 +1,4 @@
-/* GAME ON FLAG — Integración principal */
+J7/* GAME ON FLAG — Integración principal */
 (function () {
   "use strict";
 
@@ -3114,19 +3114,8 @@
       case "roster":
         return loadRosterView();
 
-      case "credentials": {
-        requireTournament();
-
-        const teams =
-          await GOF.teams
-            .listTeams();
-
-        renderCredentials(
-          teams
-        );
-
-        return teams;
-      }
+      case "credentials":
+  return loadCredentialsView();
 
       case "sportwey": {
 

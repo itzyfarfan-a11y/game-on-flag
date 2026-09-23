@@ -30,7 +30,7 @@
      * de tu proyecto Supabase.
      */
     supabaseAnonKey:
-  "sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl",,
+  "sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl",
 
       
 

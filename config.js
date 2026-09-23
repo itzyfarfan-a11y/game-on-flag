@@ -30,7 +30,9 @@
      * de tu proyecto Supabase.
      */
     supabaseAnonKey:
-      "PEGA_AQUI_TU_CLAVE_PUBLICA",
+  "AQUÍ_VA_TU_CLAVE_DE_SUPABASE",
+
+      
 
     environment:
       "production"

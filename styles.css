@@ -1,1 +1,700 @@
-:root{--bg:#090b0c;--panel:#121619;--panel2:#181d20;--text:#f5f7f8;--muted:#9aa5aa;--line:#293136;--accent:#b7ff24;--danger:#ff5b63;--warning:#ffd166}*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{min-height:100dvh;max-width:560px;margin:auto;padding-bottom:78px}.top{position:sticky;top:0;z-index:10;background:rgba(9,11,12,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px 14px}.brand{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:900;letter-spacing:.8px}.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#10130b;display:grid;place-items:center;font-weight:1000}.top-row{display:flex;align-items:center;justify-content:space-between}.icon-btn{border:0;background:transparent;color:var(--text);font-size:21px;padding:8px}.content{padding:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:12px}.card h2,.card h3{margin:0 0 8px}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action{width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:13px;border-radius:13px;font-weight:750}.action.primary{background:var(--accent);color:#10130b;border-color:var(--accent)}.action.danger{border-color:#5c292d;color:#ff9ca1}.field{display:grid;gap:6px;margin:10px 0}.field label{font-size:12px;color:var(--muted);font-weight:700}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#0d1113;color:var(--text);border-radius:12px;padding:12px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,100%);z-index:20;background:rgba(12,15,16,.98);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:7px 6px env(safe-area-inset-bottom)}.nav{border:0;background:transparent;color:var(--muted);padding:7px 2px;font-size:11px}.nav.active{color:var(--accent);font-weight:800}.list{display:grid;gap:8px}.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);border-radius:13px;background:#101416}.badge{font-size:11px;padding:4px 8px;border-radius:999px;background:#222a2e;color:#cbd4d8}.badge.active{background:#26380e;color:var(--accent)}.error{background:#35191c;border:1px solid #713239;color:#ffb5ba;padding:12px;border-radius:12px}.success{background:#18270c;border:1px solid #38580e;color:#d7ff9b;padding:12px;border-radius:12px}.empty{text-align:center;padding:25px;color:var(--muted)}.spinner{padding:30px;text-align:center;color:var(--muted)}
+:root {
+  --gof-bg: #090b0c;
+  --gof-panel: #121619;
+  --gof-panel-2: #181d20;
+  --gof-text: #f5f7f8;
+  --gof-muted: #9aa5aa;
+  --gof-line: #293136;
+  --gof-accent: #b7ff24;
+  --gof-danger: #ff5b63;
+  --gof-warning: #ffd166;
+  --gof-success: #73d13d;
+  --gof-radius: 16px;
+  --gof-max: 560px;
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  background: var(--gof-bg);
+  color: var(--gof-text);
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  background: var(--gof-bg);
+  color: var(--gof-text);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.gof-app {
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--gof-bg);
+}
+
+.gof-app-shell {
+  width: 100%;
+  max-width: var(--gof-max);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-bottom: 76px;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.gof-loading {
+  position: fixed;
+  left: 50%;
+  top: 16px;
+  z-index: 1000;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 520px;
+  padding: 12px 16px;
+  border: 1px solid var(--gof-line);
+  border-radius: 13px;
+  background: #161b1e;
+  color: var(--gof-text);
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   ERROR GENERAL
+========================================================= */
+
+.gof-error {
+  position: fixed;
+  left: 50%;
+  top: 72px;
+  z-index: 999;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 520px;
+  padding: 12px 14px;
+  border: 1px solid #713239;
+  border-radius: 13px;
+  background: #35191c;
+  color: #ffb5ba;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+.gof-login-view {
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 16px;
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(183, 255, 36, 0.08),
+      transparent 38%
+    ),
+    var(--gof-bg);
+}
+
+.gof-login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 26px 20px 20px;
+  border: 1px solid var(--gof-line);
+  border-radius: 22px;
+  background: var(--gof-panel);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.gof-login-brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.gof-login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--gof-text);
+  font-size: 26px;
+  font-weight: 950;
+  letter-spacing: 1px;
+}
+
+.gof-login-logo strong {
+  color: var(--gof-accent);
+}
+
+.gof-login-brand p {
+  margin: 9px 0 0;
+  color: var(--gof-muted);
+  font-size: 13px;
+}
+
+.gof-login-title {
+  margin-bottom: 20px;
+}
+
+.gof-login-title h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.gof-login-title p {
+  margin: 0;
+  color: var(--gof-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   FORMULARIOS
+========================================================= */
+
+.gof-form-group {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 15px;
+}
+
+.gof-form-group label {
+  color: var(--gof-muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.gof-form-group input,
+.gof-form-group select,
+.gof-form-group textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 13px;
+  border: 1px solid var(--gof-line);
+  border-radius: 12px;
+  outline: none;
+  background: #0d1113;
+  color: var(--gof-text);
+}
+
+.gof-form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.gof-form-group input::placeholder,
+.gof-form-group textarea::placeholder {
+  color: #687278;
+}
+
+.gof-form-group input:focus,
+.gof-form-group select:focus,
+.gof-form-group textarea:focus {
+  border-color: var(--gof-accent);
+  box-shadow:
+    0 0 0 2px rgba(183, 255, 36, 0.08);
+}
+
+.gof-login-button {
+  margin-top: 4px;
+}
+
+
+/* =========================================================
+   LOGIN ERROR
+========================================================= */
+
+.gof-login-error {
+  margin: 10px 0 14px;
+  padding: 11px 12px;
+  border: 1px solid #713239;
+  border-radius: 12px;
+  background: #35191c;
+  color: #ffb5ba;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   LOGIN FOOTER
+========================================================= */
+
+.gof-login-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gof-line);
+  text-align: center;
+}
+
+.gof-login-footer span {
+  color: var(--gof-text);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.7px;
+}
+
+.gof-login-footer small {
+  color: var(--gof-muted);
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.gof-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 62px;
+  padding: 9px 13px;
+  border-bottom: 1px solid var(--gof-line);
+  background: rgba(9, 11, 12, 0.97);
+  backdrop-filter: blur(12px);
+}
+
+.gof-header-brand {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gof-logo {
+  color: var(--gof-text);
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: 0.7px;
+  white-space: nowrap;
+}
+
+.gof-logo strong {
+  color: var(--gof-accent);
+}
+
+.gof-active-league {
+  max-width: 230px;
+  overflow: hidden;
+  color: var(--gof-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gof-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.gof-icon-button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gof-text);
+  font-size: 19px;
+}
+
+.gof-icon-button:hover,
+.gof-icon-button:focus-visible {
+  background: var(--gof-panel-2);
+  outline: none;
+}
+
+
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
+
+.gof-nav {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--gof-line);
+  background: var(--gof-bg);
+  scrollbar-width: none;
+}
+
+.gof-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.gof-nav button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gof-muted);
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.gof-nav button:hover {
+  background: var(--gof-panel);
+  color: var(--gof-text);
+}
+
+.gof-nav button.active {
+  border-color: rgba(183, 255, 36, 0.25);
+  background: rgba(183, 255, 36, 0.08);
+  color: var(--gof-accent);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.gof-main {
+  width: 100%;
+  padding: 16px;
+}
+
+.gof-page-title {
+  margin-bottom: 17px;
+}
+
+.gof-page-title h1,
+.gof-page-title h2 {
+  margin: 0 0 6px;
+  color: var(--gof-text);
+  line-height: 1.2;
+}
+
+.gof-page-title h1 {
+  font-size: 25px;
+}
+
+.gof-page-title h2 {
+  font-size: 21px;
+}
+
+.gof-page-title p {
+  margin: 0;
+  color: var(--gof-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.gof-primary-button {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 14px;
+  border: 1px solid var(--gof-accent);
+  border-radius: 12px;
+  background: var(--gof-accent);
+  color: #10130b;
+  font-weight: 850;
+}
+
+.gof-primary-button:hover {
+  filter: brightness(1.05);
+}
+
+.gof-primary-button:active {
+  transform: translateY(1px);
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.gof-dashboard {
+  display: grid;
+  gap: 10px;
+}
+
+.gof-card {
+  padding: 15px;
+  border: 1px solid var(--gof-line);
+  border-radius: var(--gof-radius);
+  background: var(--gof-panel);
+}
+
+.gof-card-label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--gof-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gof-card strong {
+  display: block;
+  font-size: 17px;
+}
+
+
+/* =========================================================
+   LISTAS
+========================================================= */
+
+.gof-list {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.gof-league-item,
+.gof-tournament-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--gof-line);
+  border-radius: 14px;
+  background: var(--gof-panel);
+  color: var(--gof-text);
+  text-align: left;
+}
+
+.gof-league-item:hover,
+.gof-tournament-item:hover {
+  border-color: rgba(183, 255, 36, 0.35);
+  background: var(--gof-panel-2);
+}
+
+.gof-league-item strong,
+.gof-tournament-item strong {
+  font-size: 15px;
+}
+
+.gof-league-item small,
+.gof-tournament-item small {
+  color: var(--gof-muted);
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   ESTADO VACÍO
+========================================================= */
+
+.gof-empty-state {
+  padding: 28px 15px;
+  border: 1px dashed var(--gof-line);
+  border-radius: 14px;
+  color: var(--gof-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   MÓDULOS
+========================================================= */
+
+.gof-module-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.gof-module-card {
+  min-height: 105px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--gof-line);
+  border-radius: 15px;
+  background: var(--gof-panel);
+  color: var(--gof-text);
+  text-align: left;
+}
+
+.gof-module-card:hover {
+  border-color: rgba(183, 255, 36, 0.35);
+  background: var(--gof-panel-2);
+}
+
+.gof-module-card strong {
+  font-size: 14px;
+}
+
+.gof-module-card span {
+  color: var(--gof-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.gof-module-content {
+  width: 100%;
+}
+
+
+/* =========================================================
+   CONTABILIDAD
+========================================================= */
+
+.gof-finance-summary,
+.gof-publication-summary {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.gof-footer {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 80;
+  width: min(var(--gof-max), 100%);
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px env(safe-area-inset-bottom);
+  transform: translateX(-50%);
+  border-top: 1px solid var(--gof-line);
+  background: rgba(12, 15, 16, 0.98);
+}
+
+.gof-footer span {
+  color: var(--gof-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.gof-link-button {
+  padding: 7px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--gof-muted);
+  font-size: 12px;
+}
+
+.gof-link-button:hover {
+  color: var(--gof-danger);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 380px) {
+
+  .gof-main {
+    padding: 13px;
+  }
+
+  .gof-module-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gof-header {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .gof-login-card {
+    padding: 22px 16px 18px;
+  }
+
+}
+
+
+@media (min-width: 700px) {
+
+  .gof-app-shell {
+    border-left: 1px solid var(--gof-line);
+    border-right: 1px solid var(--gof-line);
+  }
+
+  }

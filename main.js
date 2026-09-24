@@ -1,4 +1,4 @@
-J7/* GAME ON FLAG — Integración principal */
+/* GAME ON FLAG — Integración principal */
 (function () {
   "use strict";
 

@@ -3038,32 +3038,51 @@
   ===================================================== */
 
   async function loadTournamentModules(
-    tournament
+  tournament
+) {
+  requireSession();
+
+  if (
+    !tournament ||
+    !tournament.id
   ) {
-    requireSession();
-
-    if (
-      !tournament ||
-      !tournament.id
-    ) {
-      throw new Error(
-        "Torneo no válido."
-      );
-    }
-
-    const categories =
-      await GOF.categories
-        .listCategories();
-
-    const teams =
-      await GOF.teams
-        .listTeams();
-
-    return {
-      categories,
-      teams
-    };
+    throw new Error(
+      "Torneo no válido."
+    );
   }
+
+  /*
+   * GAME ON FLAG
+   * El torneo queda como contexto activo.
+   *
+   * Los módulos especializados no se consultan
+   * todos al abrir el torneo. Cada módulo carga
+   * sus propios datos cuando el usuario lo abre.
+   */
+
+  GOF.context =
+    GOF.context || {};
+
+  GOF.context.activeTournament =
+    tournament;
+
+  setText(
+    "#active-tournament-name",
+    tournament.name || ""
+  );
+
+  setText(
+    "#active-tournament-status",
+    statusLabel(
+      tournament.status
+    )
+  );
+
+  return {
+    tournament,
+    league: getActiveLeague()
+  };
+}
 
   /* =====================================================
      CARGA DE VISTAS
@@ -3089,7 +3108,7 @@
           await GOF.categories
             .listCategories();
 
-        renderSimpleData(
+        renderSimpleData
           "categories-content",
           data,
           "Categorías",

@@ -3108,7 +3108,7 @@
           await GOF.categories
             .listCategories();
 
-        renderSimpleData
+                renderSimpleData(
           "categories-content",
           data,
           "Categorías",

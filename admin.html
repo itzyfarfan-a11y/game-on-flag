@@ -1736,23 +1736,16 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
     if(msg)msg.textContent=''; if(!code){if(msg)msg.textContent='Escribe tu código personal.';return;}
     try{
       await ensureAnon();
-      const st=await sb.rpc('platform_access_code_configured');
-      if(st.error)throw st.error;
-      let r;
-      if(!st.data?.configured){
-        r=await sb.rpc('set_platform_access_code',{p_code:code});
-        if(r.error)throw r.error;
-        gofPlatformUnlocked=true; await showPlatformDashboard(); return;
-      }
-      r=await sb.rpc('verify_platform_access_code',{p_code:code});
+      const r=await sb.rpc('verify_platform_personal_code',{p_code:code});
       if(r.error)throw r.error;
       if(!r.data?.ok)throw new Error(r.data?.message||'Código personal incorrecto.');
-      gofPlatformUnlocked=true; await showPlatformDashboard();
+      gofPlatformUnlocked=true;
+      await showPlatformDashboard();
     }catch(e){console.error(e);if(msg)msg.textContent=e?.message||'No se pudo validar el código.';}
   }
   async function showPlatformDashboard(){
     const box=document.getElementById('login'); if(!box)return;
-    box.innerHTML=`<div class="gof-platform-dashboard"><div class="gof-platform-head"><div><div class="gof-platform-brand">GAME ON FLAG</div><h1>Administración de plataforma</h1><p class="mut">Ligas activas y acceso de cada administrador.</p></div><button class="secondary" id="gofPlatformLock">🔒 Cerrar acceso</button></div><div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">🏟️ Ligas activas</h2><button class="secondary" id="gofRefreshLeagues">↻ Actualizar</button></div><div id="gofActiveLeagues" class="gof-active-leagues"><div class="empty">Cargando...</div></div></div><div class="card"><h2>➕ Crear nueva liga</h2><p class="mut">La liga se crea con su propio código GOF. Ese código se entrega al administrador de esa liga.</p><div class="form"><input id="gofNewLeagueName" placeholder="Nombre de la liga"><input id="gofNewLeagueSlug" placeholder="Identificador opcional"><input id="gofNewLeagueColor" value="#6d28d9" placeholder="Color principal"><button class="primary" id="gofCreateLeague">CREAR LIGA</button></div></div></div>`;
+    box.innerHTML=`<div class="gof-platform-dashboard"><div class="gof-platform-head"><div><div class="gof-platform-brand">GAME ON FLAG</div><h1>Administración de plataforma</h1><p class="mut">Ligas activas y acceso de cada administrador. Acceso de plataforma validado.</p></div><button class="secondary" id="gofPlatformLock">🔒 Cerrar acceso</button></div><div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">🏟️ Ligas activas</h2><button class="secondary" id="gofRefreshLeagues">↻ Actualizar</button></div><div id="gofActiveLeagues" class="gof-active-leagues"><div class="empty">Cargando...</div></div></div><div class="card"><h2>➕ Crear nueva liga</h2><p class="mut">La liga se crea con su propio código GOF. Ese código se entrega al administrador de esa liga.</p><div class="form"><input id="gofNewLeagueName" placeholder="Nombre de la liga"><input id="gofNewLeagueSlug" placeholder="Identificador opcional"><input id="gofNewLeagueColor" value="#6d28d9" placeholder="Color principal"><button class="primary" id="gofCreateLeague">CREAR LIGA</button></div></div></div>`;
     document.getElementById('gofPlatformLock').onclick=()=>location.reload();
     document.getElementById('gofRefreshLeagues').onclick=loadPlatformLeagues;
     document.getElementById('gofCreateLeague').onclick=createPlatformLeague;

@@ -1720,4 +1720,126 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
 <script id="gof-platform-role-logout">
 (function(){const old=window.logout;if(old){window.logout=function(){window.GOF_PLATFORM_MASTER=false;return old.apply(this,arguments)}}})();
 </script>
+
+<style id="gof-entry-v2">
+#entryV2{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% -10%,#35105f,#07070b 52%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+#entryV2.hidden{display:none!important}
+.gof-entry-box{width:min(460px,100%);background:linear-gradient(145deg,#21172d,#100d15);border:1px solid #5a3d70;border-radius:22px;padding:24px;box-shadow:0 20px 80px #000b}
+.gof-entry-logo{width:74px;height:74px;object-fit:contain;display:block;margin:0 auto 12px;border-radius:18px;background:#0b0910;padding:7px;border:1px solid #8d2cff}
+.gof-entry-box h1{text-align:center;margin:0;font-size:27px}.gof-entry-box>p{text-align:center;color:#aaa4b7;margin:7px 0 20px}
+.gof-entry-options{display:grid;gap:10px}.gof-entry-btn{width:100%;min-height:64px!important;text-align:left!important;padding:12px 15px!important;border:1px solid #40324f!important;background:#15111c!important;border-radius:14px!important;display:flex!important;align-items:center!important;gap:13px!important}
+.gof-entry-btn .ei{font-size:27px;width:38px;text-align:center}.gof-entry-btn b{display:block;font-size:16px}.gof-entry-btn small{display:block;color:#aaa4b7;margin-top:3px;font-size:11px}
+.gof-entry-btn.master{border-color:#8d2cff!important}.gof-entry-note{text-align:center;color:#746b7e;font-size:10px;margin-top:15px}
+#gofEntryModal{position:fixed;inset:0;z-index:10000;background:#000b;display:none;align-items:center;justify-content:center;padding:18px}
+#gofEntryModal.show{display:flex}.gof-entry-modal{width:min(430px,100%);background:#1a1422;border:1px solid #5a3d70;border-radius:18px;padding:20px}
+.gof-entry-modal h3{margin:0 0 5px}.gof-entry-modal p{color:#aaa4b7;font-size:12px;margin:0 0 14px}.gof-entry-modal input{margin-top:5px}
+.gof-entry-actions{display:flex;gap:8px;margin-top:12px}.gof-entry-actions button{flex:1}
+#gofMasterV2{display:none}
+#gofMasterV2.show{display:block}
+.gof-master-list{display:grid;gap:8px;margin-top:12px}.gof-master-item{padding:12px;border:1px solid #40324f;border-radius:12px;background:#100d15}.gof-master-code{font-size:18px;font-weight:900;color:#f2c94c;letter-spacing:1px}
+@media(max-width:600px){.gof-entry-box{padding:19px}.gof-entry-box h1{font-size:23px}.gof-entry-btn{min-height:59px!important}}
+</style>
+<div id="entryV2">
+  <div class="gof-entry-box">
+    <img class="gof-entry-logo" src="https://picivrqgmckrwutarhyw.supabase.co/storage/v1/object/public/game-on-flag/game-on-flag.png" alt="Game On Flag" onerror="this.style.display='none'">
+    <h1>GAME ON FLAG</h1>
+    <p>Selecciona cómo quieres ingresar</p>
+    <div class="gof-entry-options">
+      <button class="gof-entry-btn" type="button" onclick="gofOpenCreateV2()"><span class="ei">🏟️</span><span><b>Crear nueva liga</b><small>Solo administradora principal</small></span></button>
+      <button class="gof-entry-btn" type="button" onclick="gofOpenLeagueV2()"><span class="ei">🔑</span><span><b>Ingresar a una liga existente</b><small>Usa el código de acceso de tu liga</small></span></button>
+      <button class="gof-entry-btn master" type="button" onclick="gofOpenMasterV2()"><span class="ei">👑</span><span><b>Administrador</b><small>Acceso de la administradora de GAME ON FLAG</small></span></button>
+    </div>
+    <div class="gof-entry-note">GAME ON FLAG · Administración de ligas</div>
+    <div id="gofMasterV2">
+      <div class="card" style="margin:16px 0 0">
+        <div class="row"><b>Panel maestro</b><button type="button" onclick="gofCloseMasterV2()">Cerrar</button></div>
+        <p class="mut small">Desde aquí puedes crear ligas y administrar sus códigos de acceso.</p>
+        <div class="form">
+          <input id="gofNewLeagueNameV2" placeholder="Nombre de la liga">
+          <input id="gofNewLeagueSlugV2" placeholder="Slug (opcional)">
+          <input id="gofNewLeagueColorV2" placeholder="Color principal" value="#6d28d9">
+        </div>
+        <button class="primary full" type="button" onclick="gofCreateLeagueV2()" style="margin-top:9px">CREAR LIGA</button>
+        <div id="gofMasterListV2" class="gof-master-list"><div class="empty">Cargando ligas...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="gofEntryModal">
+  <div class="gof-entry-modal">
+    <h3 id="gofEntryModalTitle">Acceso</h3>
+    <p id="gofEntryModalText"></p>
+    <input id="gofEntryInput" type="password" placeholder="Contraseña" autocomplete="current-password">
+    <div class="gof-entry-actions"><button type="button" onclick="gofCloseModalV2()">Cancelar</button><button class="primary" type="button" onclick="gofSubmitModalV2()">ENTRAR</button></div>
+    <p class="red" id="gofEntryMsgV2"></p>
+  </div>
+</div>
+<script id="gof-entry-v2-script">
+(function(){
+const GOF_ACCESS_URL='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/gof-access';
+let gofEntryModeV2='';
+
+function showEntryV2(){document.getElementById('entryV2')?.classList.remove('hidden');document.getElementById('gofEntryModal')?.classList.remove('show');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('nav')?.classList.add('hidden')}
+function hideEntryV2(){document.getElementById('entryV2')?.classList.add('hidden')}
+window.gofOpenCreateV2=function(){gofEntryModeV2='master';document.getElementById('gofEntryModalTitle').textContent='Crear nueva liga';document.getElementById('gofEntryModalText').textContent='Confirma la contraseña de la administradora principal.';document.getElementById('gofEntryInput').type='password';document.getElementById('gofEntryInput').placeholder='Contraseña maestra';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
+window.gofOpenMasterV2=window.gofOpenCreateV2;
+window.gofOpenLeagueV2=function(){gofEntryModeV2='league';document.getElementById('gofEntryModalTitle').textContent='Ingresar a una liga existente';document.getElementById('gofEntryModalText').textContent='Introduce únicamente el código de acceso que te entregó la administradora de GAME ON FLAG.';document.getElementById('gofEntryInput').type='text';document.getElementById('gofEntryInput').placeholder='GOF-XXXXXXXX';document.getElementById('gofEntryInput').value='';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
+window.gofCloseModalV2=function(){document.getElementById('gofEntryModal').classList.remove('show')}
+window.gofCloseMasterV2=function(){document.getElementById('gofMasterV2').classList.remove('show')}
+async function accessV2(action,value){
+ const r=await fetch(GOF_ACCESS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(action==='master'?{action:'master',password:value}:{action:'league',code:value.toUpperCase().trim()})});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok||j.error)throw new Error(j.error||j.message||'No se pudo validar el acceso.');
+ if(!j.access_token||!j.refresh_token)throw new Error('El servidor no devolvió una sesión válida.');
+ return j;
+}
+window.gofSubmitModalV2=async function(){
+ const v=document.getElementById('gofEntryInput').value.trim(),m=document.getElementById('gofEntryMsgV2');m.textContent='';
+ if(!v)return m.textContent=gofEntryModeV2==='master'?'Escribe la contraseña.':'Escribe el código.';
+ try{
+  const j=await accessV2(gofEntryModeV2,v);
+  const r=await sb.auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});
+  if(r.error)throw r.error;
+  gofCloseModalV2();hideEntryV2();
+  window.GOF_PLATFORM_MASTER=gofEntryModeV2==='master';
+  document.getElementById('nav').classList.remove('hidden');
+  document.querySelectorAll('#nav button[data-v="organizaciones"]').forEach(b=>b.style.display=window.GOF_PLATFORM_MASTER?'':'none');
+  document.getElementById('sessionName').textContent=window.GOF_PLATFORM_MASTER?'Administradora GAME ON FLAG':(j.league?.name||'Administrador de liga');
+  if(window.GOF_PLATFORM_MASTER){setView('organizaciones');await refreshAllSelectors();await loadMisLigas();}
+  else {await loadLeagueContextFinal();setView('inicio');await refreshAllSelectors();}
+ }catch(e){m.textContent=e.message||'No se pudo validar el acceso.'}
+}
+window.gofCreateLeagueV2=async function(){
+ if(!window.GOF_PLATFORM_MASTER)return gofOpenMasterV2();
+ const name=document.getElementById('gofNewLeagueNameV2').value.trim(),slug=document.getElementById('gofNewLeagueSlugV2').value.trim(),color=document.getElementById('gofNewLeagueColorV2').value.trim()||'#6d28d9';
+ if(!name)return alert('Escribe el nombre de la liga.');
+ const {data,error}=await sb.rpc('create_league',{p_name:name,p_slug:slug||null,p_logo_url:null,p_primary_color:color});
+ if(error)return alert(error.message);
+ document.getElementById('gofNewLeagueNameV2').value='';document.getElementById('gofNewLeagueSlugV2').value='';
+ await refreshAllSelectors();await loadMisLigas();await gofLoadMasterV2();alert('Liga creada correctamente.');
+}
+window.gofLoadMasterV2=async function(){
+ const box=document.getElementById('gofMasterListV2');if(!box||!sb)return;
+ const {data,error}=await sb.from('leagues').select('id,name,status,created_at').order('created_at',{ascending:false});
+ if(error){box.innerHTML='<div class="empty">'+esc(error.message)+'</div>';return}
+ const rows=data||[];
+ box.innerHTML=rows.map(x=>'<div class="gof-master-item"><div class="row"><b>'+esc(x.name)+'</b><span class="tag">'+esc(x.status||'active')+'</span></div><div class="toolbar" style="margin-top:8px"><button class="primary" type="button" onclick="gofEnterMasterLeagueV2(\''+x.id+'\')">ENTRAR</button><button type="button" onclick="gofGenerateCodeV2(\''+x.id+'\')">GENERAR CÓDIGO</button></div></div>').join('')||'<div class="empty">No hay ligas creadas.</div>';
+}
+window.gofEnterMasterLeagueV2=async function(id){const {error}=await sb.rpc('set_active_league',{p_league_id:id});if(error)return alert(error.message);await loadLeagueContextFinal();gofCloseMasterV2();hideEntryV2();setView('inicio');await refreshAllSelectors()}
+window.gofGenerateCodeV2=async function(id){const {data,error}=await sb.rpc('generate_league_access_code',{p_league_id:id});if(error)return alert(error.message);alert('Código de acceso: '+(data?.code||''));await gofLoadMasterV2()}
+window.gofEntryResetV2=async function(){
+ try{await sb.auth.signOut()}catch(_){}
+ window.GOF_PLATFORM_MASTER=false;showEntryV2();
+}
+document.getElementById('gofEntryInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')gofSubmitModalV2()});
+window.addEventListener('load',async function(){
+ try{sb=sb||makeClient()}catch(_){}
+ // La nueva entrada siempre es el punto inicial del portal.
+ try{await sb.auth.signOut()}catch(_){}
+ window.GOF_PLATFORM_MASTER=false;
+ showEntryV2();
+});
+})();
+</script>
+
 </body></html>

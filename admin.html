@@ -1803,7 +1803,7 @@ window.gofSubmitModalV2=async function(){
   const j=await accessV2(gofEntryModeV2,v);
   const r=await sb.auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});
   if(r.error)throw r.error;
-  gofCloseModalV2();hideEntryV2();
+  gofCloseModalV2();window.gofV2Authenticated=true;hideEntryV2();
   window.GOF_PLATFORM_MASTER=gofEntryModeV2==='master';
   document.getElementById('nav').classList.remove('hidden');
   document.querySelectorAll('#nav button[data-v="organizaciones"]').forEach(b=>b.style.display=window.GOF_PLATFORM_MASTER?'':'none');
@@ -1843,6 +1843,52 @@ window.addEventListener('load',async function(){
  setTimeout(showEntryV2,500);
  setTimeout(showEntryV2,1500);
 });
+})();
+</script>
+
+<!-- GOF HARD ENTRY GATE V3 -->
+<style id="gofHardGateV3">
+html.gof-hard-entry-v3 body > header,
+html.gof-hard-entry-v3 body > nav,
+html.gof-hard-entry-v3 body > main,
+html.gof-hard-entry-v3 #nav,
+html.gof-hard-entry-v3 .view{display:none!important}
+html.gof-hard-entry-v3 #entryV2{display:flex!important;visibility:visible!important;opacity:1!important;z-index:2147483647!important}
+html.gof-hard-entry-v3 body{overflow:hidden!important}
+</style>
+<script>
+(function(){
+  const H='gof-hard-entry-v3';
+  function lock(){
+    document.documentElement.classList.add(H);
+    document.body?.classList.add('gof-entry-lock');
+    const e=document.getElementById('entryV2');
+    if(e){e.classList.remove('hidden');e.style.display='flex';e.style.visibility='visible';e.style.opacity='1';}
+    const n=document.getElementById('nav'); if(n)n.classList.add('hidden');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  }
+  function unlock(){
+    document.documentElement.classList.remove(H);
+    document.body?.classList.remove('gof-entry-lock');
+    const e=document.getElementById('entryV2'); if(e){e.classList.add('hidden');e.style.display='';e.style.visibility='';e.style.opacity='';}
+  }
+  window.gofHardLockV3=lock;
+  window.gofHardUnlockV3=unlock;
+  // Replace the earlier gate functions so the hard lock is authoritative.
+  window.showEntryV2=lock;
+  window.hideEntryV2=unlock;
+  // Lock immediately; do not wait for load/auth/session/bootstrap code.
+  lock();
+  document.addEventListener('DOMContentLoaded',lock,{once:false});
+  window.addEventListener('load',function(){
+    if(!window.GOF_PLATFORM_MASTER && !window.gofV2Authenticated){lock();}
+  });
+  // Any normal logout returns to the same locked entry screen.
+  const oldLogout=window.logout;
+  window.logout=async function(){
+    try{if(typeof oldLogout==='function') await oldLogout();}catch(_){ }
+    window.GOF_PLATFORM_MASTER=false;window.gofV2Authenticated=false;lock();
+  };
 })();
 </script>
 

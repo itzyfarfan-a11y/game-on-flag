@@ -432,7 +432,28 @@ body.home-screen{overflow:hidden!important}
 .calendar-mode-bar{margin:4px 0 7px!important}.calendar-mode-bar button{padding:8px 12px!important;border-radius:10px!important}
 
 .view{padding-top:0!important}.view>h2{margin:4px 0 12px!important;line-height:1.05!important}.back-menu{margin-top:0!important;margin-bottom:8px!important}.view>.card:first-of-type{margin-top:8px!important}main{padding-top:8px!important}.gof-final-header .gof-actions{gap:6px!important}.gof-final-header .gof-icon{width:38px!important;height:38px!important}.gof-final-header .gof-badge{display:none!important}.admin-player-row{padding:10px!important;margin-bottom:8px!important}.admin-player-row .form{gap:7px!important}.admin-player-row .ap-preview{width:64px!important;height:64px!important}#elist{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}#elist>.card{margin:0!important;padding:10px!important}#elist>.card .row{gap:7px!important}#elist>.card .tag{font-size:10px!important;padding:4px 6px!important}#elist>.card .toolbar button{padding:7px 8px!important;font-size:11px!important}@media(max-width:650px){main{padding:7px 10px 24px!important}.view>h2{font-size:28px!important;margin:3px 0 9px!important}.back-menu{font-size:14px!important;padding:7px 11px!important}.view>.notice{margin:8px 0!important}.view>.card{padding:12px!important;margin:9px 0!important}.gof-final-header .gof-icon{width:34px!important;height:34px!important;font-size:16px!important}.gof-final-header .gof-actions{gap:4px!important}.admin-player-row .form{grid-template-columns:1fr 90px!important}.admin-player-row .ap-photo,.admin-player-row .ap-curp{grid-column:1/-1!important}}
-</style></head><body><div class="app"><header class="top gof-top gof-final-header">
+</style>
+<style id="gof-platform-mobile-final-fix">
+/* GAME ON FLAG — acceso de plataforma móvil */
+body:has(#login.active){overflow-x:hidden!important;overflow-y:auto!important}
+body:has(#login.active) .gof-final-header,
+body:has(#login.active) .gof-top,
+body:has(#login.active) > header{display:none!important}
+body:has(#login.active) main{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;height:100dvh!important;min-height:100dvh!important;overflow:auto!important;box-sizing:border-box!important}
+body:has(#login.active) #login{width:100%!important;min-height:100dvh!important;margin:0!important;padding:0!important;box-sizing:border-box!important;display:block!important}
+body:has(#login.active) .gof-platform-wrap{width:100%!important;min-height:100dvh!important;box-sizing:border-box!important;display:flex!important;align-items:flex-start!important;justify-content:center!important;padding:28px 14px 40px!important}
+body:has(#login.active) .gof-platform-card{width:100%!important;max-width:430px!important;box-sizing:border-box!important;padding:22px!important;margin:0!important}
+body:has(#login.active) .gof-platform-card h1{font-size:24px!important;line-height:1.1!important;white-space:normal!important}
+body:has(#login.active) .gof-platform-card input,
+body:has(#login.active) .gof-platform-card button{width:100%!important;max-width:100%!important;box-sizing:border-box!important}
+body:has(#login.active) .gof-platform-card .form{width:100%!important}
+body:has(#login.active) .gof-platform-dashboard{width:100%!important;max-width:760px!important;box-sizing:border-box!important;padding:18px 14px 40px!important;margin:0 auto!important}
+body:has(#login.active) .gof-platform-head{width:100%!important;box-sizing:border-box!important}
+body:has(#login.active) .gof-active-league{grid-template-columns:1fr!important}
+body:has(#login.active) .gof-active-league>.primary{width:100%!important}
+@media(min-width:651px){body:has(#login.active) .gof-platform-wrap{align-items:center;padding:30px 20px!important}}
+</style>
+</head><body><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
 <div class="gof-center-brand"><div class="gof-title">GAME ON FLAG <b>APPLICATION</b></div><div class="gof-subtitle">CENTRO DE ADMINISTRACIÓN</div></div>
 <div class="gof-actions"><button class="gof-icon" onclick="openPublicPortal()" title="Portal Público" type="button">🌐</button><button class="gof-icon gof-header-gear" onclick="setView('configuracion')" title="Configuración" type="button">⚙️</button><button class="gof-icon" onclick="openAdminProfile()" title="Perfil de administradora" type="button">👤</button></div>
@@ -1743,8 +1764,9 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
     const r=await sb.rpc('get_platform_active_leagues');
     if(r.error){box.innerHTML='<div class="empty">'+escP(r.error.message)+'</div>';return;}
     const rows=r.data||[];
-    box.innerHTML=rows.length?rows.map(x=>`<div class="gof-active-league"><div class="gof-active-main"><b>${escP(x.league_name)}</b><span class="mut">${escP(x.slug||'')}</span></div><div class="gof-code"><code>${escP(x.access_code||'Sin código')}</code><button type="button" class="secondary" onclick="navigator.clipboard?.writeText('${String(x.access_code||'').replace(/'/g,"\\'")}');this.textContent='✓ Copiado';setTimeout(()=>this.textContent='Copiar',1200)">Copiar</button></div><button type="button" class="primary" onclick="window.gofEnterPlatformLeague('${x.league_id}')">ENTRAR</button></div>`).join(''):'<div class="empty">No hay ligas activas todavía.</div>';
+    box.innerHTML=rows.length?rows.map(x=>`<div class="gof-active-league"><div class="gof-active-main"><b>${escP(x.league_name)}</b><span class="mut">${escP(x.slug||'')}</span></div><div class="gof-code"><code>${escP(x.access_code||'Sin código')}</code><button type="button" class="secondary" onclick="navigator.clipboard?.writeText('${String(x.access_code||'').replace(/'/g,"\\'")}');this.textContent='✓ Copiado';setTimeout(()=>this.textContent='Copiar',1200)">Copiar</button></div><button type="button" class="primary" onclick="window.gofEnterPlatformLeague('${x.league_id}')">ENTRAR</button><button type="button" class="danger" onclick="window.gofDeletePlatformLeague('${x.league_id}', '${String(x.league_name||'').replace(/'/g,\"\\'\")}')">🗑️ BORRAR LIGA</button></div>`).join(''):'<div class="empty">No hay ligas activas todavía.</div>';
   }
+  window.gofDeletePlatformLeague=async function(id,name){if(!gofPlatformUnlocked)return alert('Primero valida tu código personal.');if(!confirm('ATENCIÓN\n\nVas a borrar definitivamente la liga: '+name+'\n\nSe eliminarán sus torneos y datos relacionados. Esta acción no se puede deshacer.\n\n¿Continuar?'))return;try{const r=await sb.rpc('delete_league_as_platform_owner',{p_league_id:id});if(r.error)throw r.error;alert('Liga eliminada correctamente.');await loadPlatformLeagues();}catch(e){alert(e?.message||'No se pudo borrar la liga.');console.error(e);}};
   window.gofEnterPlatformLeague=async function(id){
     if(!gofPlatformUnlocked)return;
     const r=await sb.rpc('set_active_league',{p_league_id:id});
@@ -1777,5 +1799,80 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
   document.addEventListener('DOMContentLoaded',()=>setTimeout(platformLoginUI,50));
 })();
 
+</script>
+
+<style id="gof-mobile-platform-gate-fix">
+html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+body.gof-platform-gate{overflow-x:hidden!important;overflow-y:auto!important;min-height:100dvh!important}
+body.gof-platform-gate .gof-final-header,
+body.gof-platform-gate .gof-admin-final-header,
+body.gof-platform-gate .gof-top,
+body.gof-platform-gate>header{display:none!important}
+body.gof-platform-gate .nav,body.gof-platform-gate #nav{display:none!important}
+body.gof-platform-gate #login{display:block!important;position:relative!important;width:100%!important;min-width:0!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;overflow:visible!important;box-sizing:border-box!important}
+body.gof-platform-gate #login .gof-platform-wrap{width:100%!important;min-width:0!important;max-width:none!important;min-height:100dvh!important;margin:0!important;padding:20px 16px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important}
+body.gof-platform-gate #login .gof-platform-card{width:100%!important;max-width:430px!important;min-width:0!important;margin:0 auto!important;padding:24px 20px!important;box-sizing:border-box!important;border-radius:20px!important;overflow:hidden!important;background:linear-gradient(145deg,#1d1727 0%,#100c17 100%)!important;border:1px solid #54356d!important;box-shadow:0 15px 45px rgba(0,0,0,.55)!important}
+body.gof-platform-gate #login .gof-platform-brand{display:block!important;width:100%!important;text-align:center!important;font-size:16px!important;line-height:1.1!important;font-weight:900!important;letter-spacing:3px!important;color:#fff!important;margin-bottom:10px!important}
+body.gof-platform-gate #login .gof-platform-card h1{width:100%!important;margin:5px 0 8px!important;padding:0!important;text-align:center!important;font-size:27px!important;line-height:1.08!important;font-weight:900!important;color:#fff!important;white-space:normal!important;overflow:visible!important;word-break:normal!important}
+body.gof-platform-gate #login .gof-platform-card>p.mut{width:100%!important;margin:0 auto 20px!important;text-align:center!important;font-size:14px!important;line-height:1.4!important;color:#aaa1b4!important;white-space:normal!important}
+body.gof-platform-gate #login .gof-label{display:block!important;width:100%!important;margin:0 0 7px!important;font-size:13px!important;font-weight:800!important;color:#eee!important}
+body.gof-platform-gate #login input{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;height:50px!important;min-height:50px!important;margin:0 0 12px!important;padding:0 14px!important;box-sizing:border-box!important;border-radius:12px!important;border:1px solid #4a3857!important;background:#09070d!important;color:#fff!important;font-size:16px!important;outline:none!important}
+body.gof-platform-gate #login input:focus{border-color:#9b59ff!important;box-shadow:0 0 0 2px rgba(155,89,255,.18)!important}
+body.gof-platform-gate #login button{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:50px!important;height:50px!important;margin:10px 0 0!important;padding:0 14px!important;box-sizing:border-box!important;border-radius:12px!important;font-size:14px!important;font-weight:900!important;white-space:normal!important;text-align:center!important;cursor:pointer!important;touch-action:manipulation!important}
+body.gof-platform-gate #login button.primary{background:linear-gradient(135deg,#7b2cff,#9b59ff)!important;color:#fff!important;border:1px solid #a66aff!important;box-shadow:0 7px 20px rgba(123,44,255,.25)!important}
+body.gof-platform-gate #login button.secondary{background:#17121f!important;color:#eee!important;border:1px solid #49345a!important}
+body.gof-platform-gate #login .red{width:100%!important;margin:9px 0!important;text-align:center!important;font-size:13px!important;line-height:1.3!important;white-space:normal!important;word-break:break-word!important}
+body.gof-platform-gate #login .gof-platform-dashboard{width:100%!important;max-width:900px!important;min-width:0!important;margin:0 auto!important;padding:20px 16px 40px!important;box-sizing:border-box!important}
+body.gof-platform-gate #login .gof-platform-head{width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin-bottom:16px!important}
+body.gof-platform-gate #login .gof-platform-head h1{font-size:25px!important;text-align:left!important}
+body.gof-platform-gate #login .gof-platform-dashboard .card{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow:hidden!important;border-radius:18px!important}
+body.gof-platform-gate #login .gof-active-league{width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;box-sizing:border-box!important}
+body.gof-platform-gate #login .gof-active-main{min-width:0!important}
+body.gof-platform-gate #login .gof-active-main b{display:block!important;max-width:100%!important;font-size:15px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+body.gof-platform-gate #login .gof-code{min-width:0!important;max-width:100%!important}
+body.gof-platform-gate #login .gof-code code{min-width:0!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important}
+@media(max-width:650px){
+ body.gof-platform-gate #login .gof-platform-wrap{min-height:100dvh!important;padding:18px 14px!important;align-items:center!important}
+ body.gof-platform-gate #login .gof-platform-card{max-width:100%!important;padding:22px 17px!important;border-radius:18px!important}
+ body.gof-platform-gate #login .gof-platform-card h1{font-size:24px!important}
+ body.gof-platform-gate #login .gof-platform-brand{font-size:15px!important;letter-spacing:2.5px!important}
+ body.gof-platform-gate #login .gof-platform-card>p.mut{font-size:13px!important;margin-bottom:18px!important}
+ body.gof-platform-gate #login input{height:52px!important;min-height:52px!important;font-size:16px!important}
+ body.gof-platform-gate #login button{height:52px!important;min-height:52px!important;font-size:13px!important}
+ body.gof-platform-gate #login .gof-platform-dashboard{padding:16px 12px 35px!important}
+ body.gof-platform-gate #login .gof-platform-head{align-items:stretch!important;flex-direction:column!important}
+ body.gof-platform-gate #login .gof-platform-head h1{font-size:22px!important;text-align:left!important}
+ body.gof-platform-gate #login .gof-active-league{grid-template-columns:1fr!important;gap:9px!important;padding:13px 0!important}
+ body.gof-platform-gate #login .gof-code{width:100%!important}
+ body.gof-platform-gate #login .gof-code code{flex:1!important}
+ body.gof-platform-gate #login .gof-active-league>.primary{width:100%!important}
+}
+@media(max-width:390px){
+ body.gof-platform-gate #login .gof-platform-wrap{padding:12px 10px!important}
+ body.gof-platform-gate #login .gof-platform-card{padding:20px 14px!important}
+ body.gof-platform-gate #login .gof-platform-card h1{font-size:22px!important}
+ body.gof-platform-gate #login .gof-platform-brand{font-size:14px!important}
+}
+</style>
+<script id="gof-mobile-platform-gate-controller">
+(function(){
+ function updatePlatformGate(){
+  const login=document.getElementById('login');
+  if(!login)return;
+  const gate=!!login.querySelector('.gof-platform-wrap');
+  document.body.classList.toggle('gof-platform-gate',gate);
+ }
+ function startGateObserver(){
+  updatePlatformGate();
+  const login=document.getElementById('login');
+  if(!login)return;
+  const observer=new MutationObserver(updatePlatformGate);
+  observer.observe(login,{childList:true,subtree:true});
+  setTimeout(updatePlatformGate,100);
+  setTimeout(updatePlatformGate,500);
+  setTimeout(updatePlatformGate,1000);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startGateObserver);else startGateObserver();
+})();
 </script>
 </body></html>

@@ -1,4 +1,4 @@
-/* GAME ON FLAG — Tabla / Standings */
+/* GAME ON FLAG — Tabla de posiciones */
 (function () {
   "use strict";
 
@@ -23,209 +23,180 @@
     return league;
   }
 
-  function requireTournament(tournamentId) {
-    if (!tournamentId) {
-      throw new Error("Torneo no válido.");
-    }
-
-    return tournamentId;
+  function normalizeName(value) {
+    return String(value || "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toUpperCase();
   }
 
-  function normalizeName(team) {
-    return (
-      String(team?.name || "")
-        .trim()
-        .toLocaleUpperCase("es-MX")
-    );
-  }
-
-  function createTeamRow(team) {
+  function emptyTeam(team) {
     return {
-      id: team.id,
-      name: team.name || "SIN NOMBRE",
-      logo_url: team.logo_url || null,
-
+      team_id: team.id,
+      team_name:
+        team.name ||
+        "SIN NOMBRE",
       jj: 0,
       jg: 0,
       jp: 0,
-
       pa: 0,
       pc: 0,
       dif: 0
     };
   }
 
-  function applyMatch(row, scored, conceded, won) {
-    row.jj += 1;
-    row.pa += Number(scored || 0);
-    row.pc += Number(conceded || 0);
+  function isMatchCounted(match) {
+    const status =
+      String(match.status || "")
+        .trim()
+        .toLowerCase();
 
-    if (won) {
-      row.jg += 1;
-    } else {
-      row.jp += 1;
-    }
-
-    row.dif = row.pa - row.pc;
+    return [
+      "jugado",
+      "incomparecencia"
+    ].includes(status);
   }
 
-  function calculateStandings(teams, matches) {
+  function isForfeit(match) {
+    return (
+      String(match.status || "")
+        .trim()
+        .toLowerCase() ===
+      "incomparecencia"
+    );
+  }
+
+  function calculateStandings(
+    teams,
+    matches
+  ) {
     const table = new Map();
 
+    /*
+     * Registramos todos los equipos aunque
+     * todavía no tengan partidos jugados.
+     */
     (teams || []).forEach(team => {
-      if (!team || !team.id) return;
-
       table.set(
         team.id,
-        createTeamRow(team)
+        emptyTeam(team)
       );
     });
 
+    /*
+     * Procesamos únicamente partidos que
+     * forman parte de los resultados oficiales.
+     */
     (matches || []).forEach(match => {
-      if (!match) return;
-
-      if (
-        !["jugado", "incomparecencia"].includes(
-          match.status
-        )
-      ) {
+      if (!isMatchCounted(match)) {
         return;
       }
 
-      if (
-        match.home_score === null ||
-        match.home_score === undefined ||
-        match.away_score === null ||
-        match.away_score === undefined
-      ) {
+      const homeId =
+        match.home_team_id;
+
+      const awayId =
+        match.away_team_id;
+
+      if (!homeId || !awayId) {
         return;
       }
 
-      const home = table.get(
-        match.home_team_id
-      );
+      /*
+       * Si alguno de los equipos no está
+       * en la lista de equipos de la categoría,
+       * no lo agregamos automáticamente.
+       */
+      const home =
+        table.get(homeId);
 
-      const away = table.get(
-        match.away_team_id
-      );
+      const away =
+        table.get(awayId);
 
       if (!home || !away) {
         return;
       }
 
       /*
-       * Los partidos de preparación/reposición pueden excluir
-       * estadísticamente a uno de los equipos.
+       * En caso de incomparecencia:
+       *
+       * El resultado oficial puede venir
+       * directamente desde matches.
+       *
+       * Si existen marcadores, se utilizan.
        */
-      const excluded =
-        match.is_makeup &&
-        match.stats_exclude_team_id
-          ? match.stats_exclude_team_id
-          : null;
+      const homeScore =
+        Number(
+          match.score_home ??
+          match.home_score ??
+          0
+        );
 
-      if (
-        excluded !== match.home_team_id
-      ) {
-        if (
-          match.home_score >
-          match.away_score
-        ) {
-          applyMatch(
-            home,
-            match.home_score,
-            match.away_score,
-            true
-          );
-        } else if (
-          match.home_score <
-          match.away_score
-        ) {
-          applyMatch(
-            home,
-            match.home_score,
-            match.away_score,
-            false
-          );
-        } else {
-          /*
-           * El sistema actualmente no usa empates
-           * como resultado competitivo.
-           */
-          applyMatch(
-            home,
-            match.home_score,
-            match.away_score,
-            false
-          );
-        }
-      }
+      const awayScore =
+        Number(
+          match.score_away ??
+          match.away_score ??
+          0
+        );
 
-      if (
-        excluded !== match.away_team_id
+      home.jj++;
+      away.jj++;
+
+      home.pa += homeScore;
+      home.pc += awayScore;
+
+      away.pa += awayScore;
+      away.pc += homeScore;
+
+      if (homeScore > awayScore) {
+        home.jg++;
+        away.jp++;
+      } else if (
+        awayScore > homeScore
       ) {
-        if (
-          match.away_score >
-          match.home_score
-        ) {
-          applyMatch(
-            away,
-            match.away_score,
-            match.home_score,
-            true
-          );
-        } else if (
-          match.away_score <
-          match.home_score
-        ) {
-          applyMatch(
-            away,
-            match.away_score,
-            match.home_score,
-            false
-          );
-        } else {
-          applyMatch(
-            away,
-            match.away_score,
-            match.home_score,
-            false
-          );
-        }
+        away.jg++;
+        home.jp++;
+      } else {
+        /*
+         * Si el sistema permite empate,
+         * no se suma victoria ni derrota.
+         */
       }
     });
 
-    const rows = Array.from(
+    /*
+     * DIF = puntos a favor - puntos contra.
+     */
+    table.forEach(row => {
+      row.dif =
+        row.pa -
+        row.pc;
+    });
+
+    /*
+     * CRITERIO OFICIAL GAME ON FLAG
+     *
+     * 1. JG — más juegos ganados
+     * 2. PA — más puntos a favor
+     * 3. DIF — mayor diferencia
+     * 4. PC — menos puntos contra
+     * 5. Nombre — orden alfabético
+     *
+     * No se utiliza sistema de 3 puntos.
+     */
+    return Array.from(
       table.values()
-    );
-
-    rows.sort((a, b) => {
-      /*
-       * Desempate oficial de Game On Flag:
-       *
-       * 1. DIF
-       * 2. PA
-       * 3. PC menor
-       * 4. Nombre del equipo
-       *
-       * No se utiliza sistema de 3 puntos
-       * por victoria.
-       */
-      return (
-        b.dif - a.dif ||
+    ).sort(
+      (a, b) =>
+        b.jg - a.jg ||
         b.pa - a.pa ||
+        b.dif - a.dif ||
         a.pc - b.pc ||
-        normalizeName(a).localeCompare(
-          normalizeName(b),
-          "es-MX"
-        )
-      );
-    });
-
-    return rows.map(
-      (row, index) => ({
-        ...row,
-        pos: index + 1
-      })
+        normalizeName(a.team_name)
+          .localeCompare(
+            normalizeName(b.team_name),
+            "es-MX"
+          )
     );
   }
 
@@ -233,9 +204,24 @@
     tournamentId,
     categoryId
   ) {
-    const league = requireLeague();
+    requireLeague();
 
-    let query = sb()
+    if (!tournamentId) {
+      throw new Error(
+        "Torneo no válido."
+      );
+    }
+
+    if (!categoryId) {
+      throw new Error(
+        "Categoría no válida."
+      );
+    }
+
+    const {
+      data,
+      error
+    } = await sb()
       .from("tournament_teams")
       .select(`
         id,
@@ -245,7 +231,6 @@
         teams (
           id,
           name,
-          logo_url,
           league_id
         ),
         categories (
@@ -258,45 +243,31 @@
         "tournament_id",
         tournamentId
       )
-      .eq("active", true);
-
-    if (categoryId) {
-      query = query.eq(
+      .eq(
         "category_id",
         categoryId
+      )
+      .eq(
+        "active",
+        true
       );
+
+    if (error) {
+      throw error;
     }
 
-    const {
-      data,
-      error
-    } = await query;
-
-    if (error) throw error;
-
     return (data || [])
-      .filter(row => {
-        const teamLeague =
-          row.teams &&
-          row.teams.league_id;
-
-        const categoryLeague =
-          row.categories &&
-          row.categories.league_id;
-
-        return (
-          teamLeague === league.id &&
-          categoryLeague === league.id
-        );
-      })
+      .filter(row =>
+        row.teams &&
+        row.categories
+      )
       .map(row => ({
-        id: row.team_id,
+        id:
+          row.team_id,
         name:
-          row.teams?.name ||
-          "SIN NOMBRE",
-        logo_url:
-          row.teams?.logo_url ||
-          null,
+          row.teams.name,
+        league_id:
+          row.teams.league_id,
         category_id:
           row.category_id
       }));
@@ -306,9 +277,24 @@
     tournamentId,
     categoryId
   ) {
-    const league = requireLeague();
+    requireLeague();
 
-    let query = sb()
+    if (!tournamentId) {
+      throw new Error(
+        "Torneo no válido."
+      );
+    }
+
+    if (!categoryId) {
+      throw new Error(
+        "Categoría no válida."
+      );
+    }
+
+    const {
+      data,
+      error
+    } = await sb()
       .from("matches")
       .select(`
         id,
@@ -317,84 +303,55 @@
         round_number,
         home_team_id,
         away_team_id,
-        home_score,
-        away_score,
+        score_home,
+        score_away,
         status,
+        match_date,
+        match_time,
+        field_name,
         is_makeup,
-        stats_exclude_team_id,
-        home_team:teams!matches_home_team_id_fkey (
-          id,
-          name,
-          logo_url,
-          league_id
-        ),
-        away_team:teams!matches_away_team_id_fkey (
-          id,
-          name,
-          logo_url,
-          league_id
-        ),
-        categories (
-          id,
-          name,
-          league_id
-        )
+        stats_exclude_team_id
       `)
       .eq(
         "tournament_id",
         tournamentId
       )
-      .in("status", [
-        "jugado",
-        "incomparecencia"
-      ]);
-
-    if (categoryId) {
-      query = query.eq(
+      .eq(
         "category_id",
         categoryId
+      )
+      .order(
+        "round_number",
+        {
+          ascending: true
+        }
+      )
+      .order(
+        "match_date",
+        {
+          ascending: true,
+          nullsFirst: true
+        }
+      )
+      .order(
+        "match_time",
+        {
+          ascending: true,
+          nullsFirst: true
+        }
       );
+
+    if (error) {
+      throw error;
     }
 
-    const {
-      data,
-      error
-    } = await query;
-
-    if (error) throw error;
-
-    return (data || []).filter(match => {
-      const categoryOk =
-        !match.categories ||
-        match.categories.league_id ===
-          league.id;
-
-      const homeOk =
-        !match.home_team ||
-        match.home_team.league_id ===
-          league.id;
-
-      const awayOk =
-        !match.away_team ||
-        match.away_team.league_id ===
-          league.id;
-
-      return (
-        categoryOk &&
-        homeOk &&
-        awayOk
-      );
-    });
+    return data || [];
   }
 
-  async function getStandings(
+  async function loadStandings({
     tournamentId,
-    categoryId = null
-  ) {
-    requireTournament(
-      tournamentId
-    );
-
+    categoryId
+  }) {
     const [
       teams,
       matches
@@ -415,205 +372,131 @@
     );
   }
 
-  async function getTeamPosition(
-    tournamentId,
-    categoryId,
-    teamId
-  ) {
-    if (!teamId) {
-      throw new Error(
-        "Equipo no válido."
-      );
-    }
-
-    const standings =
-      await getStandings(
-        tournamentId,
-        categoryId
-      );
-
-    return (
-      standings.find(
-        row => row.id === teamId
-      ) || null
-    );
-  }
-
   function renderStandings(
     container,
     standings
   ) {
     if (!container) {
-      throw new Error(
-        "No se encontró el contenedor de la tabla."
-      );
+      return;
     }
 
-    container.innerHTML = "";
+    const rows =
+      standings || [];
 
-    const table =
-      document.createElement("div");
+    if (!rows.length) {
+      container.innerHTML = `
+        <div class="gof-empty-state">
+          No hay equipos registrados.
+        </div>
+      `;
 
-    table.className =
-      "gof-standings";
+      return;
+    }
 
-    const header =
-      document.createElement("div");
+    container.innerHTML = `
+      <div class="gof-standings-wrap">
+        <table class="gof-standings-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Equipo</th>
+              <th>JJ</th>
+              <th>JG</th>
+              <th>JP</th>
+              <th>PA</th>
+              <th>PC</th>
+              <th>DIF</th>
+            </tr>
+          </thead>
 
-    header.className =
-      "gof-standings-row gof-standings-header";
+          <tbody>
+            ${rows
+              .map(
+                (row, index) => `
+                  <tr>
+                    <td>
+                      ${index + 1}
+                    </td>
 
-    header.innerHTML = `
-      <div>POS</div>
-      <div>EQUIPO</div>
-      <div>JJ</div>
-      <div>JG</div>
-      <div>JP</div>
-      <div>PA</div>
-      <div>PC</div>
-      <div>DIF</div>
+                    <td>
+                      <strong>
+                        ${escapeHtml(
+                          row.team_name
+                        )}
+                      </strong>
+                    </td>
+
+                    <td>
+                      ${row.jj}
+                    </td>
+
+                    <td>
+                      ${row.jg}
+                    </td>
+
+                    <td>
+                      ${row.jp}
+                    </td>
+
+                    <td>
+                      ${row.pa}
+                    </td>
+
+                    <td>
+                      ${row.pc}
+                    </td>
+
+                    <td class="${
+                      row.dif > 0
+                        ? "positive"
+                        : row.dif < 0
+                          ? "negative"
+                          : ""
+                    }">
+                      ${row.dif}
+                    </td>
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
     `;
-
-    table.appendChild(header);
-
-    if (
-      !standings ||
-      standings.length === 0
-    ) {
-      const empty =
-        document.createElement("div");
-
-      empty.className =
-        "gof-empty-state";
-
-      empty.textContent =
-        "Aún no hay resultados para generar la tabla.";
-
-      table.appendChild(empty);
-      container.appendChild(table);
-
-      return table;
-    }
-
-    standings.forEach(row => {
-      const item =
-        document.createElement("div");
-
-      item.className =
-        "gof-standings-row";
-
-      item.dataset.teamId =
-        row.id;
-
-      const team =
-        document.createElement("div");
-
-      team.className =
-        "gof-standing-team";
-
-      if (row.logo_url) {
-        const logo =
-          document.createElement("img");
-
-        logo.src =
-          row.logo_url;
-
-        logo.alt =
-          row.name;
-
-        logo.loading =
-          "lazy";
-
-        team.appendChild(
-          logo
-        );
-      }
-
-      const name =
-        document.createElement("span");
-
-      name.textContent =
-        row.name;
-
-      team.appendChild(
-        name
-      );
-
-      item.innerHTML = `
-        <div>${row.pos}</div>
-      `;
-
-      item.appendChild(
-        team
-      );
-
-      item.innerHTML += `
-        <div>${row.jj}</div>
-        <div>${row.jg}</div>
-        <div>${row.jp}</div>
-        <div>${row.pa}</div>
-        <div>${row.pc}</div>
-        <div>${row.dif}</div>
-      `;
-
-      table.appendChild(
-        item
-      );
-    });
-
-    container.appendChild(
-      table
-    );
-
-    return table;
   }
 
-  function getSummary(
-    standings
-  ) {
-    const rows =
-      Array.isArray(standings)
-        ? standings
-        : [];
-
-    return {
-      teams: rows.length,
-
-      played: rows.reduce(
-        (sum, row) =>
-          sum + row.jj,
-        0
-      ),
-
-      wins: rows.reduce(
-        (sum, row) =>
-          sum + row.jg,
-        0
-      ),
-
-      pointsFor: rows.reduce(
-        (sum, row) =>
-          sum + row.pa,
-        0
-      ),
-
-      pointsAgainst:
-        rows.reduce(
-          (sum, row) =>
-            sum + row.pc,
-          0
-        )
-    };
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+      .replace(
+        /</g,
+        "&lt;"
+      )
+      .replace(
+        />/g,
+        "&gt;"
+      )
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+      .replace(
+        /'/g,
+        "&#039;"
+      );
   }
 
   window.GOF =
     window.GOF || {};
 
   window.GOF.standings = {
-    getStandings,
-    getTeamPosition,
     calculateStandings,
-    renderStandings,
-    getSummary
+    getTeams,
+    getMatches,
+    loadStandings,
+    renderStandings
   };
 })();

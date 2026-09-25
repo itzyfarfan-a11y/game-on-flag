@@ -1796,7 +1796,16 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
   };
   window.login=window.login||function(){};
   // Al cargar: la entrada principal pasa a ser el código personal de plataforma.
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(platformLoginUI,50));
+  function bootPlatformGate(){
+    try{ platformLoginUI(); }catch(e){ console.error('GAME ON FLAG platform gate:',e); }
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bootPlatformGate,{once:true});
+  }else{
+    bootPlatformGate();
+  }
+  setTimeout(bootPlatformGate,250);
+  setTimeout(bootPlatformGate,1000);
 })();
 
 </script>

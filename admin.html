@@ -1724,6 +1724,9 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
 <style id="gof-entry-v2">
 #entryV2{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% -10%,#35105f,#07070b 52%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
 #entryV2.hidden{display:none!important}
+body.gof-entry-lock .view{display:none!important}
+body.gof-entry-lock #nav{display:none!important}
+body.gof-entry-lock header{display:none!important}
 .gof-entry-box{width:min(460px,100%);background:linear-gradient(145deg,#21172d,#100d15);border:1px solid #5a3d70;border-radius:22px;padding:24px;box-shadow:0 20px 80px #000b}
 .gof-entry-logo{width:74px;height:74px;object-fit:contain;display:block;margin:0 auto 12px;border-radius:18px;background:#0b0910;padding:7px;border:1px solid #8d2cff}
 .gof-entry-box h1{text-align:center;margin:0;font-size:27px}.gof-entry-box>p{text-align:center;color:#aaa4b7;margin:7px 0 20px}
@@ -1779,8 +1782,8 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
 const GOF_ACCESS_URL='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/gof-access';
 let gofEntryModeV2='';
 
-function showEntryV2(){document.getElementById('entryV2')?.classList.remove('hidden');document.getElementById('gofEntryModal')?.classList.remove('show');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('nav')?.classList.add('hidden')}
-function hideEntryV2(){document.getElementById('entryV2')?.classList.add('hidden')}
+function showEntryV2(){document.body.classList.add('gof-entry-lock');document.getElementById('entryV2')?.classList.remove('hidden');document.getElementById('gofEntryModal')?.classList.remove('show');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('nav')?.classList.add('hidden')}
+function hideEntryV2(){document.body.classList.remove('gof-entry-lock');document.getElementById('entryV2')?.classList.add('hidden')}
 window.gofOpenCreateV2=function(){gofEntryModeV2='master';document.getElementById('gofEntryModalTitle').textContent='Crear nueva liga';document.getElementById('gofEntryModalText').textContent='Confirma la contraseña de la administradora principal.';document.getElementById('gofEntryInput').type='password';document.getElementById('gofEntryInput').placeholder='Contraseña maestra';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
 window.gofOpenMasterV2=window.gofOpenCreateV2;
 window.gofOpenLeagueV2=function(){gofEntryModeV2='league';document.getElementById('gofEntryModalTitle').textContent='Ingresar a una liga existente';document.getElementById('gofEntryModalText').textContent='Introduce únicamente el código de acceso que te entregó la administradora de GAME ON FLAG.';document.getElementById('gofEntryInput').type='text';document.getElementById('gofEntryInput').placeholder='GOF-XXXXXXXX';document.getElementById('gofEntryInput').value='';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
@@ -1834,10 +1837,11 @@ window.gofEntryResetV2=async function(){
 document.getElementById('gofEntryInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')gofSubmitModalV2()});
 window.addEventListener('load',async function(){
  try{sb=sb||makeClient()}catch(_){}
- // La nueva entrada siempre es el punto inicial del portal.
  try{await sb.auth.signOut()}catch(_){}
  window.GOF_PLATFORM_MASTER=false;
  showEntryV2();
+ setTimeout(showEntryV2,500);
+ setTimeout(showEntryV2,1500);
 });
 })();
 </script>

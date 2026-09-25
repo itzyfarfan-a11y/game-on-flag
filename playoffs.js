@@ -31,18 +31,42 @@
     return id;
   }
 
+  function stageLabel(stage) {
+    const labels = {
+      cuartos: "Cuartos de final",
+      semifinal: "Semifinal",
+      final: "Final"
+    };
+
+    return labels[stage] || stage || "Playoff";
+  }
+
+  function stageOrder(stage) {
+    const order = {
+      cuartos: 1,
+      semifinal: 2,
+      final: 3
+    };
+
+    return order[stage] || 99;
+  }
+
+  function formatLabel(formatCode) {
+    const labels = {
+      "8qf": "Cuartos → Semifinal → Final",
+      "4sf": "Semifinal → Final",
+      "2f": "Final directa"
+    };
+
+    return labels[formatCode] || "";
+  }
+
   async function getTournament(tournamentId) {
-    validateId(
-      tournamentId,
-      "Torneo no válido."
-    );
+    validateId(tournamentId, "Torneo no válido.");
 
     const league = requireLeague();
 
-    const {
-      data,
-      error
-    } = await sb()
+    const { data, error } = await sb()
       .from("tournaments")
       .select(`
         id,
@@ -60,20 +84,17 @@
     return data;
   }
 
-  async function getTeams(
-    tournamentId,
-    categoryId
-  ) {
+  async function getTeams(tournamentId, categoryId) {
     const league = requireLeague();
 
-    let query = sb()
+    const { data, error } = await sb()
       .from("tournament_teams")
       .select(`
         id,
         tournament_id,
         team_id,
         category_id,
-        active,
+        is_active,
         teams (
           id,
           name,
@@ -86,53 +107,36 @@
           league_id
         )
       `)
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq("active", true)
-      .eq(
-        "category_id",
-        categoryId
-      );
-
-    const {
-      data,
-      error
-    } = await query;
+      .eq("tournament_id", tournamentId)
+      .eq("category_id", categoryId);
 
     if (error) throw error;
 
     return (data || [])
       .filter(row => {
+        const active =
+          row.is_active === undefined
+            ? true
+            : row.is_active === true;
+
         return (
+          active &&
           row.teams?.league_id === league.id &&
           row.categories?.league_id === league.id
         );
       })
       .map(row => ({
         id: row.team_id,
-        name:
-          row.teams?.name ||
-          "SIN NOMBRE",
-        logo_url:
-          row.teams?.logo_url ||
-          null,
-        tournament_team_id:
-          row.id
+        name: row.teams?.name || "SIN NOMBRE",
+        logo_url: row.teams?.logo_url || null,
+        tournament_team_id: row.id
       }));
   }
 
-  async function getRegularMatches(
-    tournamentId,
-    categoryId
-  ) {
+  async function getRegularMatches(tournamentId, categoryId) {
     const league = requireLeague();
 
-    const {
-      data,
-      error
-    } = await sb()
+    const { data, error } = await sb()
       .from("matches")
       .select(`
         id,
@@ -164,14 +168,8 @@
           league_id
         )
       `)
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq(
-        "category_id",
-        categoryId
-      )
+      .eq("tournament_id", tournamentId)
+      .eq("category_id", categoryId)
       .in("status", [
         "jugado",
         "incomparecencia"
@@ -182,22 +180,27 @@
     return (data || []).filter(match => {
       return (
         (!match.categories ||
-          match.categories.league_id ===
-            league.id) &&
+          match.categories.league_id === league.id) &&
         (!match.home_team ||
-          match.home_team.league_id ===
-            league.id) &&
+          match.home_team.league_id === league.id) &&
         (!match.away_team ||
-          match.away_team.league_id ===
-            league.id)
+          match.away_team.league_id === league.id)
       );
     });
   }
 
-  function calculateRanking(
-    teams,
-    matches
-  ) {
+  /*
+   * TABLA OFICIAL GAME ON FLAG
+   *
+   * 1. JG
+   * 2. PA
+   * 3. DIF
+   * 4. PC menor
+   * 5. Nombre
+   *
+   * No se utiliza sistema de 3 puntos.
+   */
+  function calculateRanking(teams, matches) {
     const table = new Map();
 
     (teams || []).forEach(team => {
@@ -231,15 +234,8 @@
         return;
       }
 
-      const home =
-        table.get(
-          match.home_team_id
-        );
-
-      const away =
-        table.get(
-          match.away_team_id
-        );
+      const home = table.get(match.home_team_id);
+      const away = table.get(match.away_team_id);
 
       if (!home || !away) {
         return;
@@ -251,59 +247,43 @@
           ? match.stats_exclude_team_id
           : null;
 
-      if (
-        excluded !==
-        match.home_team_id
-      ) {
-        home.jj++;
-        home.pa +=
-          Number(match.home_score);
-        home.pc +=
-          Number(match.away_score);
+      const homeScore = Number(match.home_score);
+      const awayScore = Number(match.away_score);
 
-        if (
-          Number(match.home_score) >
-          Number(match.away_score)
-        ) {
+      if (excluded !== match.home_team_id) {
+        home.jj++;
+        home.pa += homeScore;
+        home.pc += awayScore;
+
+        if (homeScore > awayScore) {
           home.jg++;
         } else {
           home.jp++;
         }
 
-        home.dif =
-          home.pa - home.pc;
+        home.dif = home.pa - home.pc;
       }
 
-      if (
-        excluded !==
-        match.away_team_id
-      ) {
+      if (excluded !== match.away_team_id) {
         away.jj++;
-        away.pa +=
-          Number(match.away_score);
-        away.pc +=
-          Number(match.home_score);
+        away.pa += awayScore;
+        away.pc += homeScore;
 
-        if (
-          Number(match.away_score) >
-          Number(match.home_score)
-        ) {
+        if (awayScore > homeScore) {
           away.jg++;
         } else {
           away.jp++;
         }
 
-        away.dif =
-          away.pa - away.pc;
+        away.dif = away.pa - away.pc;
       }
     });
 
-    return Array.from(
-      table.values()
-    ).sort(
+    return Array.from(table.values()).sort(
       (a, b) =>
-        b.dif - a.dif ||
+        b.jg - a.jg ||
         b.pa - a.pa ||
+        b.dif - a.dif ||
         a.pc - b.pc ||
         String(a.name).localeCompare(
           String(b.name),
@@ -312,101 +292,44 @@
     );
   }
 
-  function getQualifierCount(
-    teamCount
-  ) {
-    if (teamCount >= 11) {
-      return 8;
+  /*
+   * Formatos:
+   *
+   * 2 equipos = Final directa
+   * 4 equipos = Semifinal → Final
+   * 8 equipos = Cuartos → Semifinal → Final
+   */
+  function normalizeFormat(formatCode, teamCount) {
+    if (
+      formatCode === "2f" ||
+      formatCode === "4sf" ||
+      formatCode === "8qf"
+    ) {
+      return formatCode;
     }
 
     if (teamCount >= 8) {
-      return 4;
+      return "8qf";
     }
 
-    if (teamCount >= 2) {
-      return 2;
+    if (teamCount >= 4) {
+      return "4sf";
     }
 
+    return "2f";
+  }
+
+  function getQualifierCount(formatCode) {
+    if (formatCode === "8qf") return 8;
+    if (formatCode === "4sf") return 4;
+    if (formatCode === "2f") return 2;
     return 0;
   }
 
-  async function getExistingPlayoffs(
-    tournamentId,
-    categoryId
-  ) {
-    const {
-      data,
-      error
-    } = await sb()
-      .from("playoff_matches")
-      .select(`
-        id,
-        tournament_id,
-        category_id,
-        round_number,
-        playoff_stage,
-        seed_a,
-        seed_b,
-        team_a_id,
-        team_b_id,
-        score_a,
-        score_b,
-        winner_team_id,
-        playoff_mode,
-        match_date,
-        match_time,
-        field_name,
-        published
-      `)
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq(
-        "category_id",
-        categoryId
-      )
-      .order(
-        "round_number",
-        {
-          ascending: true
-        }
-      )
-      .order(
-        "seed_a",
-        {
-          ascending: true,
-          nullsFirst: true
-        }
-      );
-
-    if (error) throw error;
-
-    return data || [];
-  }
-
-  function hasPlayoffResults(
-    playoffMatches
-  ) {
-    return (
-      playoffMatches || []
-    ).some(match =>
-      match.winner_team_id ||
-      match.score_a !== null ||
-      match.score_b !== null ||
-      match.published
-    );
-  }
-
-  function buildBracket(
-    qualifiers
-  ) {
-    const count =
-      qualifiers.length;
-
+  function buildBracket(qualifiers, formatCode) {
     const bracket = [];
 
-    if (count === 8) {
+    if (formatCode === "8qf") {
       const pairings = [
         [1, 8],
         [4, 5],
@@ -414,110 +337,110 @@
         [3, 6]
       ];
 
-      pairings.forEach(
-        (pair, index) => {
-          bracket.push({
-            playoff_stage:
-              "cuartos",
-            round_number: 1,
-            seed_a: pair[0],
-            seed_b: pair[1],
-            team_a_id:
-              qualifiers[
-                pair[0] - 1
-              ].id,
-            team_b_id:
-              qualifiers[
-                pair[1] - 1
-              ].id,
-            playoff_mode:
-              "automatic"
-          });
-        }
-      );
+      pairings.forEach((pair, index) => {
+        bracket.push({
+          stage: "cuartos",
+          match_order: index + 1,
+          seed_a: pair[0],
+          seed_b: pair[1],
+          team_a_id: qualifiers[pair[0] - 1]?.id || null,
+          team_b_id: qualifiers[pair[1] - 1]?.id || null,
+          playoff_mode: "automatic",
+          format_code: "8qf",
+          manual_label: `Cuartos ${index + 1}`
+        });
+      });
 
       bracket.push(
         {
-          playoff_stage: "semifinal",
-          round_number: 2,
+          stage: "semifinal",
+          match_order: 5,
           seed_a: 1,
           seed_b: 2,
           team_a_id: null,
           team_b_id: null,
-          playoff_mode: "automatic"
+          playoff_mode: "automatic",
+          format_code: "8qf",
+          manual_label: "Semifinal 1"
         },
         {
-          playoff_stage: "semifinal",
-          round_number: 2,
+          stage: "semifinal",
+          match_order: 6,
           seed_a: 3,
           seed_b: 4,
           team_a_id: null,
           team_b_id: null,
-          playoff_mode: "automatic"
+          playoff_mode: "automatic",
+          format_code: "8qf",
+          manual_label: "Semifinal 2"
         },
         {
-          playoff_stage: "final",
-          round_number: 3,
+          stage: "final",
+          match_order: 7,
           seed_a: 1,
           seed_b: 2,
           team_a_id: null,
           team_b_id: null,
-          playoff_mode: "automatic"
+          playoff_mode: "automatic",
+          format_code: "8qf",
+          manual_label: "Final"
         }
       );
 
       return bracket;
     }
 
-    if (count === 4) {
+    if (formatCode === "4sf") {
       bracket.push(
         {
-          playoff_stage: "semifinal",
-          round_number: 1,
+          stage: "semifinal",
+          match_order: 1,
           seed_a: 1,
           seed_b: 4,
-          team_a_id:
-            qualifiers[0].id,
-          team_b_id:
-            qualifiers[3].id,
-          playoff_mode: "automatic"
+          team_a_id: qualifiers[0]?.id || null,
+          team_b_id: qualifiers[3]?.id || null,
+          playoff_mode: "automatic",
+          format_code: "4sf",
+          manual_label: "Semifinal 1"
         },
         {
-          playoff_stage: "semifinal",
-          round_number: 1,
+          stage: "semifinal",
+          match_order: 2,
           seed_a: 2,
           seed_b: 3,
-          team_a_id:
-            qualifiers[1].id,
-          team_b_id:
-            qualifiers[2].id,
-          playoff_mode: "automatic"
+          team_a_id: qualifiers[1]?.id || null,
+          team_b_id: qualifiers[2]?.id || null,
+          playoff_mode: "automatic",
+          format_code: "4sf",
+          manual_label: "Semifinal 2"
         },
         {
-          playoff_stage: "final",
-          round_number: 2,
+          stage: "final",
+          match_order: 3,
           seed_a: 1,
           seed_b: 2,
           team_a_id: null,
           team_b_id: null,
-          playoff_mode: "automatic"
+          playoff_mode: "automatic",
+          format_code: "4sf",
+          manual_label: "Final"
         }
       );
 
       return bracket;
     }
 
-    if (count === 2) {
+    if (formatCode === "2f") {
       bracket.push({
-        playoff_stage: "final",
-        round_number: 1,
+        stage: "final",
+        match_order: 1,
         seed_a: 1,
         seed_b: 2,
-        team_a_id:
-          qualifiers[0].id,
-        team_b_id:
-          qualifiers[1].id,
-        playoff_mode: "automatic"
+        team_a_id: qualifiers[0]?.id || null,
+        team_b_id: qualifiers[1]?.id || null,
+        playoff_mode: "automatic",
+        format_code: "2f",
+        manual_label: "Final"
       });
 
       return bracket;
@@ -526,50 +449,86 @@
     return bracket;
   }
 
+  async function getExistingPlayoffs(
+    tournamentId,
+    categoryId
+  ) {
+    const { data, error } = await sb()
+      .from("playoff_matches")
+      .select(`
+        id,
+        tournament_id,
+        category_id,
+        stage,
+        seed_a,
+        seed_b,
+        team_a_id,
+        team_b_id,
+        score_a,
+        score_b,
+        winner_team_id,
+        match_order,
+        published,
+        match_date,
+        match_time,
+        field_name,
+        playoff_mode,
+        format_code,
+        manual_label
+      `)
+      .eq("tournament_id", tournamentId)
+      .eq("category_id", categoryId)
+      .order("match_order", {
+        ascending: true
+      });
+
+    if (error) throw error;
+
+    return data || [];
+  }
+
+  function hasPlayoffResults(matches) {
+    return (matches || []).some(match =>
+      match.winner_team_id ||
+      match.score_a !== null ||
+      match.score_b !== null ||
+      match.published
+    );
+  }
+
   async function createPlayoffMatches(
     tournamentId,
     categoryId,
     bracket
   ) {
-    if (
-      !bracket ||
-      bracket.length === 0
-    ) {
+    if (!bracket || !bracket.length) {
       throw new Error(
         "No se pudo generar la llave de playoffs."
       );
     }
 
-    const payload =
-      bracket.map(item => ({
-        tournament_id:
-          tournamentId,
-        category_id:
-          categoryId,
-        round_number:
-          item.round_number,
-        playoff_stage:
-          item.playoff_stage,
-        seed_a:
-          item.seed_a,
-        seed_b:
-          item.seed_b,
-        team_a_id:
-          item.team_a_id,
-        team_b_id:
-          item.team_b_id,
-        score_a: null,
-        score_b: null,
-        winner_team_id: null,
-        playoff_mode:
-          item.playoff_mode,
-        published: false
-      }));
+    const payload = bracket.map(item => ({
+      tournament_id: tournamentId,
+      category_id: categoryId,
+      stage: item.stage,
+      seed_a: item.seed_a,
+      seed_b: item.seed_b,
+      team_a_id: item.team_a_id,
+      team_b_id: item.team_b_id,
+      score_a: null,
+      score_b: null,
+      winner_team_id: null,
+      match_order: item.match_order,
+      published: false,
+      playoff_mode: item.playoff_mode,
+      format_code: item.format_code,
+      manual_label: item.manual_label,
+      match_date: null,
+      match_time: null,
+      field_name: null
+    }));
 
-    const {
-      data,
-      error
-    } = await sb()
+    const { data, error } = await sb()
       .from("playoff_matches")
       .insert(payload)
       .select();
@@ -581,7 +540,8 @@
 
   async function generatePlayoffs({
     tournamentId,
-    categoryId
+    categoryId,
+    formatCode = null
   }) {
     validateId(
       tournamentId,
@@ -594,14 +554,9 @@
     );
 
     const tournament =
-      await getTournament(
-        tournamentId
-      );
+      await getTournament(tournamentId);
 
-    if (
-      tournament.status !==
-      "activo"
-    ) {
+    if (tournament.status !== "activo") {
       throw new Error(
         "Los playoffs solo pueden generarse cuando el torneo está activo."
       );
@@ -612,10 +567,7 @@
       matches,
       existing
     ] = await Promise.all([
-      getTeams(
-        tournamentId,
-        categoryId
-      ),
+      getTeams(tournamentId, categoryId),
       getRegularMatches(
         tournamentId,
         categoryId
@@ -626,14 +578,8 @@
       )
     ]);
 
-    if (
-      existing.length > 0
-    ) {
-      if (
-        hasPlayoffResults(
-          existing
-        )
-      ) {
+    if (existing.length) {
+      if (hasPlayoffResults(existing)) {
         throw new Error(
           "La llave de playoffs ya tiene resultados o publicaciones y no puede regenerarse."
         );
@@ -644,35 +590,32 @@
       );
     }
 
-    if (
-      teams.length < 2
-    ) {
+    if (teams.length < 2) {
       throw new Error(
         "Se necesitan al menos 2 equipos."
       );
     }
 
-    /*
-     * La base de datos también valida que la fase regular
-     * esté completamente terminada antes de aceptar
-     * la inserción de playoffs.
-     */
     const ranking =
       calculateRanking(
         teams,
         matches
       );
 
-    const qualifierCount =
-      getQualifierCount(
+    const selectedFormat =
+      normalizeFormat(
+        formatCode,
         ranking.length
       );
 
-    if (
-      qualifierCount === 0
-    ) {
+    const qualifierCount =
+      getQualifierCount(
+        selectedFormat
+      );
+
+    if (ranking.length < qualifierCount) {
       throw new Error(
-        "No hay suficientes equipos para generar playoffs."
+        `El formato ${formatLabel(selectedFormat)} requiere al menos ${qualifierCount} equipos.`
       );
     }
 
@@ -684,7 +627,8 @@
 
     const bracket =
       buildBracket(
-        qualifiers
+        qualifiers,
+        selectedFormat
       );
 
     return createPlayoffMatches(
@@ -726,33 +670,25 @@
       "Partido de playoffs no válido."
     );
 
-    const {
-      data: match,
-      error: loadError
-    } = await sb()
-      .from("playoff_matches")
-      .select(`
-        id,
-        tournament_id,
-        category_id,
-        round_number,
-        playoff_stage,
-        team_a_id,
-        team_b_id,
-        score_a,
-        score_b,
-        winner_team_id,
-        published
-      `)
-      .eq(
-        "id",
-        playoffMatchId
-      )
-      .single();
+    const { data: match, error } =
+      await sb()
+        .from("playoff_matches")
+        .select(`
+          id,
+          tournament_id,
+          category_id,
+          stage,
+          team_a_id,
+          team_b_id,
+          score_a,
+          score_b,
+          winner_team_id,
+          published
+        `)
+        .eq("id", playoffMatchId)
+        .single();
 
-    if (loadError) {
-      throw loadError;
-    }
+    if (error) throw error;
 
     if (!match) {
       throw new Error(
@@ -775,11 +711,8 @@
       );
     }
 
-    const a =
-      Number(scoreA);
-
-    const b =
-      Number(scoreB);
+    const a = Number(scoreA);
+    const b = Number(scoreB);
 
     if (
       !Number.isInteger(a) ||
@@ -803,25 +736,19 @@
         ? match.team_a_id
         : match.team_b_id;
 
-    const {
-      data,
-      error
-    } = await sb()
-      .from("playoff_matches")
-      .update({
-        score_a: a,
-        score_b: b,
-        winner_team_id:
-          winner
-      })
-      .eq(
-        "id",
-        playoffMatchId
-      )
-      .select()
-      .single();
+    const { data, error: updateError } =
+      await sb()
+        .from("playoff_matches")
+        .update({
+          score_a: a,
+          score_b: b,
+          winner_team_id: winner
+        })
+        .eq("id", playoffMatchId)
+        .select()
+        .single();
 
-    if (error) throw error;
+    if (updateError) throw updateError;
 
     await propagateWinners(
       match.tournament_id,
@@ -836,72 +763,50 @@
     teamA,
     teamB
   ) {
-    const {
-      data: current,
-      error: loadError
-    } = await sb()
-      .from("playoff_matches")
-      .select(`
-        id,
-        team_a_id,
-        team_b_id,
-        score_a,
-        score_b,
-        winner_team_id,
-        published
-      `)
-      .eq(
-        "id",
-        matchId
-      )
-      .single();
+    const { data: current, error } =
+      await sb()
+        .from("playoff_matches")
+        .select(`
+          id,
+          team_a_id,
+          team_b_id,
+          score_a,
+          score_b,
+          winner_team_id,
+          published
+        `)
+        .eq("id", matchId)
+        .single();
 
-    if (loadError) {
-      throw loadError;
-    }
+    if (error) throw error;
 
-    if (!current) {
-      return null;
-    }
-
-    if (
-      current.published
-    ) {
-      return current;
+    if (!current || current.published) {
+      return current || null;
     }
 
     const changed =
-      current.team_a_id !==
-        teamA ||
-      current.team_b_id !==
-        teamB;
+      current.team_a_id !== (teamA || null) ||
+      current.team_b_id !== (teamB || null);
 
     if (!changed) {
       return current;
     }
 
-    const {
-      data,
-      error
-    } = await sb()
-      .from("playoff_matches")
-      .update({
-        team_a_id:
-          teamA || null,
-        team_b_id:
-          teamB || null,
-        score_a: null,
-        score_b: null,
-        winner_team_id: null
-      })
-      .eq(
-        "id",
-        matchId
-      )
-      .select()
-      .single();
+    const { data, error: updateError } =
+      await sb()
+        .from("playoff_matches")
+        .update({
+          team_a_id: teamA || null,
+          team_b_id: teamB || null,
+          score_a: null,
+          score_b: null,
+          winner_team_id: null
+        })
+        .eq("id", matchId)
+        .select()
+        .single();
 
-    if (error) throw error;
+    if (updateError) throw updateError;
 
     return data;
   }
@@ -916,172 +821,74 @@
         categoryId
       );
 
-    if (
-      !matches ||
-      matches.length === 0
-    ) {
+    if (!matches.length) {
       return matches;
     }
 
     const quarters =
-      matches.filter(
-        m =>
-          m.playoff_stage ===
-          "cuartos"
-      );
+      matches
+        .filter(m => m.stage === "cuartos")
+        .sort(
+          (a, b) =>
+            a.match_order - b.match_order
+        );
 
     const semis =
-      matches.filter(
-        m =>
-          m.playoff_stage ===
-          "semifinal"
-      );
+      matches
+        .filter(m => m.stage === "semifinal")
+        .sort(
+          (a, b) =>
+            a.match_order - b.match_order
+        );
 
     const finals =
-      matches.filter(
-        m =>
-          m.playoff_stage ===
-          "final"
-      );
+      matches
+        .filter(m => m.stage === "final")
+        .sort(
+          (a, b) =>
+            a.match_order - b.match_order
+        );
 
     /*
-     * Llave de 8:
-     *
-     * QF1 -> SF1
-     * QF2 -> SF1
-     * QF3 -> SF2
-     * QF4 -> SF2
+     * 8 equipos:
+     * QF1 + QF2 -> SF1
+     * QF3 + QF4 -> SF2
      */
     if (
       quarters.length === 4 &&
       semis.length >= 2
     ) {
-      const qf1 =
-        quarters.find(
-          m =>
-            m.seed_a === 1 &&
-            m.seed_b === 8
-        );
+      await setParticipants(
+        semis[0].id,
+        quarters[0]?.winner_team_id || null,
+        quarters[1]?.winner_team_id || null
+      );
 
-      const qf2 =
-        quarters.find(
-          m =>
-            m.seed_a === 4 &&
-            m.seed_b === 5
-        );
-
-      const qf3 =
-        quarters.find(
-          m =>
-            m.seed_a === 2 &&
-            m.seed_b === 7
-        );
-
-      const qf4 =
-        quarters.find(
-          m =>
-            m.seed_a === 3 &&
-            m.seed_b === 6
-        );
-
-      const sf1 =
-        semis.find(
-          m =>
-            m.seed_a === 1 &&
-            m.seed_b === 2
-        );
-
-      const sf2 =
-        semis.find(
-          m =>
-            m.seed_a === 3 &&
-            m.seed_b === 4
-        );
-
-      if (sf1) {
-        await setParticipants(
-          sf1.id,
-          qf1?.winner_team_id ||
-            null,
-          qf2?.winner_team_id ||
-            null
-        );
-      }
-
-      if (sf2) {
-        await setParticipants(
-          sf2.id,
-          qf3?.winner_team_id ||
-            null,
-          qf4?.winner_team_id ||
-            null
-        );
-      }
+      await setParticipants(
+        semis[1].id,
+        quarters[2]?.winner_team_id || null,
+        quarters[3]?.winner_team_id || null
+      );
     }
 
     /*
-     * Llave de 4:
-     * las dos semifinales alimentan la final.
+     * 4 u 8 equipos:
+     * semifinal 1 + semifinal 2 -> final
      */
     if (
       semis.length >= 2 &&
-      finals.length >= 1
+      finals.length
     ) {
-      const sf1 =
-        semis.find(
-          m =>
-            m.seed_a === 1 &&
-            m.seed_b === 4
-        ) ||
-        semis.find(
-          m =>
-            m.seed_a === 1 &&
-            m.seed_b === 2
-        );
-
-      const sf2 =
-        semis.find(
-          m =>
-            m.seed_a === 2 &&
-            m.seed_b === 3
-        ) ||
-        semis.find(
-          m =>
-            m.seed_a === 3 &&
-            m.seed_b === 4
-        );
-
-      const final =
-        finals[0];
-
       await setParticipants(
-        final.id,
-        sf1?.winner_team_id ||
-          null,
-        sf2?.winner_team_id ||
-          null
+        finals[0].id,
+        semis[0]?.winner_team_id || null,
+        semis[1]?.winner_team_id || null
       );
     }
 
     return getPlayoffs(
       tournamentId,
       categoryId
-    );
-  }
-
-  function stageLabel(
-    stage
-  ) {
-    const labels = {
-      cuartos: "Cuartos de final",
-      semifinal: "Semifinal",
-      final: "Final"
-    };
-
-    return (
-      labels[stage] ||
-      stage ||
-      "Playoff"
     );
   }
 
@@ -1098,10 +905,7 @@
 
     container.innerHTML = "";
 
-    if (
-      !matches ||
-      matches.length === 0
-    ) {
+    if (!matches || !matches.length) {
       container.textContent =
         "No hay playoffs generados.";
       return container;
@@ -1111,138 +915,129 @@
 
     matches.forEach(match => {
       const stage =
-        match.playoff_stage ||
-        "playoff";
+        match.stage || "playoff";
 
       if (!groups[stage]) {
         groups[stage] = [];
       }
 
-      groups[stage].push(
-        match
-      );
+      groups[stage].push(match);
     });
 
     Object.keys(groups)
-      .sort((a, b) => {
-        const order = {
-          cuartos: 1,
-          semifinal: 2,
-          final: 3
-        };
-
-        return (
-          (order[a] || 99) -
-          (order[b] || 99)
-        );
-      })
+      .sort(
+        (a, b) =>
+          stageOrder(a) - stageOrder(b)
+      )
       .forEach(stage => {
         const section =
-          document.createElement(
-            "section"
-          );
+          document.createElement("section");
 
         section.className =
           "gof-playoff-stage";
 
         const title =
-          document.createElement(
-            "h3"
-          );
+          document.createElement("h3");
 
         title.textContent =
           stageLabel(stage);
 
-        section.appendChild(
-          title
-        );
+        section.appendChild(title);
 
-        groups[stage].forEach(
-          match => {
+        groups[stage]
+          .sort(
+            (a, b) =>
+              a.match_order - b.match_order
+          )
+          .forEach(match => {
             const card =
-              document.createElement(
-                "div"
-              );
+              document.createElement("div");
 
             card.className =
               "gof-playoff-card";
 
             const teamA =
-              teamMap[
-                match.team_a_id
-              ] ||
+              teamMap[match.team_a_id] ||
               "Por definir";
 
             const teamB =
-              teamMap[
-                match.team_b_id
-              ] ||
+              teamMap[match.team_b_id] ||
               "Por definir";
 
             const scoreA =
-              match.score_a ??
-              "—";
+              match.score_a ?? "—";
 
             const scoreB =
-              match.score_b ??
-              "—";
+              match.score_b ?? "—";
 
             card.innerHTML = `
               <div class="gof-playoff-meta">
-                <span>Sembrado ${match.seed_a ?? "—"}</span>
-                <span>vs</span>
-                <span>Sembrado ${match.seed_b ?? "—"}</span>
+                <span>${escapeHtml(
+                  match.manual_label ||
+                  stageLabel(stage)
+                )}</span>
+                ${
+                  match.format_code
+                    ? `<span>${escapeHtml(
+                        formatLabel(
+                          match.format_code
+                        )
+                      )}</span>`
+                    : ""
+                }
               </div>
 
               <div class="gof-playoff-teams">
-                <strong>${escapeHtml(teamA)}</strong>
-                <strong>${escapeHtml(teamB)}</strong>
+                <strong>${escapeHtml(
+                  teamA
+                )}</strong>
+                <strong>${escapeHtml(
+                  teamB
+                )}</strong>
               </div>
 
               <div class="gof-playoff-score">
                 <span>${scoreA}</span>
                 <span>${scoreB}</span>
               </div>
+
+              ${
+                match.field_name ||
+                match.match_date ||
+                match.match_time
+                  ? `
+                    <div class="gof-playoff-meta">
+                      <span>${
+                        match.match_date || ""
+                      }</span>
+                      <span>${
+                        match.match_time || ""
+                      }</span>
+                      <span>${
+                        match.field_name || ""
+                      }</span>
+                    </div>
+                  `
+                  : ""
+              }
             `;
 
-            section.appendChild(
-              card
-            );
-          }
-        );
+            section.appendChild(card);
+          });
 
-        container.appendChild(
-          section
-        );
+        container.appendChild(section);
       });
 
     return container;
   }
 
   function escapeHtml(value) {
-    return String(
-      value ?? ""
-    )
-      .replace(
-        /&/g,
-        "&amp;"
-      )
-      .replace(
-        /</g,
-        "&lt;"
-      )
-      .replace(
-        />/g,
-        "&gt;"
-      )
-      .replace(
-        /"/g,
-        "&quot;"
-      )
-      .replace(
-        /'/g,
-        "&#039;"
-      );
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
   window.GOF =
@@ -1255,6 +1050,8 @@
     propagateWinners,
     calculateRanking,
     getQualifierCount,
-    renderPlayoffs
+    renderPlayoffs,
+    buildBracket,
+    formatLabel
   };
-})(); 
+})();

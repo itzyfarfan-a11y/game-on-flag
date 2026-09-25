@@ -57,15 +57,6 @@
     ].includes(status);
   }
 
-  function isForfeit(match) {
-    return (
-      String(match.status || "")
-        .trim()
-        .toLowerCase() ===
-      "incomparecencia"
-    );
-  }
-
   function calculateStandings(
     teams,
     matches
@@ -73,8 +64,8 @@
     const table = new Map();
 
     /*
-     * Registramos todos los equipos aunque
-     * todavía no tengan partidos jugados.
+     * Todos los equipos aparecen,
+     * aunque todavía no tengan partidos.
      */
     (teams || []).forEach(team => {
       table.set(
@@ -84,8 +75,11 @@
     });
 
     /*
-     * Procesamos únicamente partidos que
-     * forman parte de los resultados oficiales.
+     * Solo cuentan partidos oficiales
+     * con resultado:
+     *
+     * jugado
+     * incomparecencia
      */
     (matches || []).forEach(match => {
       if (!isMatchCounted(match)) {
@@ -102,41 +96,34 @@
         return;
       }
 
-      /*
-       * Si alguno de los equipos no está
-       * en la lista de equipos de la categoría,
-       * no lo agregamos automáticamente.
-       */
       const home =
         table.get(homeId);
 
       const away =
         table.get(awayId);
 
+      /*
+       * No agregamos equipos que no pertenezcan
+       * a la categoría actual.
+       */
       if (!home || !away) {
         return;
       }
 
       /*
-       * En caso de incomparecencia:
+       * NOMBRES REALES DE SUPABASE:
        *
-       * El resultado oficial puede venir
-       * directamente desde matches.
-       *
-       * Si existen marcadores, se utilizan.
+       * home_score
+       * away_score
        */
       const homeScore =
         Number(
-          match.score_home ??
-          match.home_score ??
-          0
+          match.home_score || 0
         );
 
       const awayScore =
         Number(
-          match.score_away ??
-          match.away_score ??
-          0
+          match.away_score || 0
         );
 
       home.jj++;
@@ -156,16 +143,12 @@
       ) {
         away.jg++;
         home.jp++;
-      } else {
-        /*
-         * Si el sistema permite empate,
-         * no se suma victoria ni derrota.
-         */
       }
     });
 
     /*
-     * DIF = puntos a favor - puntos contra.
+     * DIF =
+     * Puntos a favor - Puntos contra
      */
     table.forEach(row => {
       row.dif =
@@ -174,15 +157,15 @@
     });
 
     /*
-     * CRITERIO OFICIAL GAME ON FLAG
+     * CRITERIO OFICIAL GAME ON FLAG:
      *
      * 1. JG — más juegos ganados
      * 2. PA — más puntos a favor
      * 3. DIF — mayor diferencia
      * 4. PC — menos puntos contra
-     * 5. Nombre — orden alfabético
+     * 5. Nombre — alfabético
      *
-     * No se utiliza sistema de 3 puntos.
+     * NO se utiliza sistema de 3 puntos.
      */
     return Array.from(
       table.values()
@@ -264,10 +247,13 @@
       .map(row => ({
         id:
           row.team_id,
+
         name:
           row.teams.name,
+
         league_id:
           row.teams.league_id,
+
         category_id:
           row.category_id
       }));
@@ -303,8 +289,8 @@
         round_number,
         home_team_id,
         away_team_id,
-        score_home,
-        score_away,
+        home_score,
+        away_score,
         status,
         match_date,
         match_time,
@@ -360,6 +346,7 @@
         tournamentId,
         categoryId
       ),
+
       getMatches(
         tournamentId,
         categoryId
@@ -395,7 +382,9 @@
 
     container.innerHTML = `
       <div class="gof-standings-wrap">
+
         <table class="gof-standings-table">
+
           <thead>
             <tr>
               <th>#</th>
@@ -410,10 +399,12 @@
           </thead>
 
           <tbody>
+
             ${rows
               .map(
                 (row, index) => `
                   <tr>
+
                     <td>
                       ${index + 1}
                     </td>
@@ -455,12 +446,16 @@
                     }">
                       ${row.dif}
                     </td>
+
                   </tr>
                 `
               )
               .join("")}
+
           </tbody>
+
         </table>
+
       </div>
     `;
   }

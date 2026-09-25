@@ -328,6 +328,17 @@
     return data || [];
   }
 
+  /*
+   * CONFIGURACIÓN OPERATIVA
+   *
+   * Columnas reales de Supabase:
+   *
+   * referee_rate
+   * referees_per_field
+   * field_rent_rate
+   * photographer_rate
+   * paramedic_rate
+   */
   async function getOperationSettings(
     tournamentId
   ) {
@@ -350,7 +361,8 @@
         scope,
         playoff_stage,
         referee_rate,
-        field_rate,
+        referees_per_field,
+        field_rent_rate,
         photographer_rate,
         paramedic_rate,
         notes,
@@ -610,13 +622,27 @@
     return data;
   }
 
+  /*
+   * Guarda la configuración de operación.
+   *
+   * Se aceptan ambos nombres:
+   *
+   * fieldRentRate  -> nombre nuevo
+   * fieldRate      -> compatibilidad con código anterior
+   *
+   * Pero a Supabase SIEMPRE se envía:
+   *
+   * field_rent_rate
+   */
   async function saveOperationSettings({
     tournamentId,
     roundNumber = null,
     scope,
     playoffStage = null,
     refereeRate = 0,
-    fieldRate = 0,
+    refereesPerField = 2,
+    fieldRentRate = null,
+    fieldRate = null,
     photographerRate = 0,
     paramedicRate = 0,
     notes = null
@@ -634,22 +660,55 @@
       );
     }
 
+    const finalFieldRentRate =
+      fieldRentRate !== null &&
+      fieldRentRate !== undefined
+        ? fieldRentRate
+        : fieldRate !== null &&
+          fieldRate !== undefined
+          ? fieldRate
+          : 0;
+
     const payload = {
       tournament_id:
         tournamentId,
+
       round_number:
         roundNumber,
+
       scope,
+
       playoff_stage:
         playoffStage,
+
       referee_rate:
         number(refereeRate),
-      field_rate:
-        number(fieldRate),
+
+      referees_per_field:
+        Math.max(
+          1,
+          Math.floor(
+            Number(
+              refereesPerField || 2
+            )
+          )
+        ),
+
+      field_rent_rate:
+        number(
+          finalFieldRentRate
+        ),
+
       photographer_rate:
-        number(photographerRate),
+        number(
+          photographerRate
+        ),
+
       paramedic_rate:
-        number(paramedicRate),
+        number(
+          paramedicRate
+        ),
+
       notes:
         notes || null
     };
@@ -873,12 +932,14 @@
       totalDue,
       totalPaid,
       totalExpenses,
+
       outstanding:
         Math.max(
           0,
           totalDue -
             totalPaid
         ),
+
       net:
         totalPaid -
         totalExpenses
@@ -955,14 +1016,17 @@
 
     container.innerHTML = `
       <span class="gof-payment-dot"></span>
+
       <span class="gof-payment-status">
-        ${status === "pagado"
-          ? "Pagado"
-          : status === "parcial"
-            ? "Parcial"
-            : status === "pendiente"
-              ? "Pendiente"
-              : "Sin cargo"}
+        ${
+          status === "pagado"
+            ? "Pagado"
+            : status === "parcial"
+              ? "Parcial"
+              : status === "pendiente"
+                ? "Pendiente"
+                : "Sin cargo"
+        }
       </span>
     `;
   }
@@ -981,6 +1045,7 @@
     container.innerHTML = `
       <div class="gof-finance-card">
         <small>Por cobrar</small>
+
         <strong>
           ${money(
             data.totalDue || 0
@@ -990,6 +1055,7 @@
 
       <div class="gof-finance-card">
         <small>Cobrado</small>
+
         <strong>
           ${money(
             data.totalPaid || 0
@@ -999,6 +1065,7 @@
 
       <div class="gof-finance-card">
         <small>Gastos</small>
+
         <strong>
           ${money(
             data.totalExpenses || 0
@@ -1008,6 +1075,7 @@
 
       <div class="gof-finance-card">
         <small>Saldo pendiente</small>
+
         <strong>
           ${money(
             data.outstanding || 0
@@ -1017,6 +1085,7 @@
 
       <div class="gof-finance-card">
         <small>Neto</small>
+
         <strong>
           ${money(
             data.net || 0

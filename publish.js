@@ -6,7 +6,6 @@
     if (!window.GOF || !window.GOF.supabase) {
       throw new Error("Supabase no está inicializado.");
     }
-
     return window.GOF.supabase;
   }
 
@@ -27,7 +26,6 @@
     if (!id) {
       throw new Error(message);
     }
-
     return id;
   }
 
@@ -55,9 +53,7 @@
     return true;
   }
 
-  async function getTournament(
-    tournamentId
-  ) {
+  async function getTournament(tournamentId) {
     const league = requireLeague();
 
     requireId(
@@ -78,14 +74,8 @@
         start_date,
         end_date
       `)
-      .eq(
-        "id",
-        tournamentId
-      )
-      .eq(
-        "league_id",
-        league.id
-      )
+      .eq("id", tournamentId)
+      .eq("league_id", league.id)
       .single();
 
     if (error) throw error;
@@ -93,9 +83,7 @@
     return data;
   }
 
-  async function getPublishedMatches(
-    tournamentId
-  ) {
+  async function getPublishedMatches(tournamentId) {
     requireId(
       tournamentId,
       "Torneo no válido."
@@ -141,34 +129,19 @@
           league_id
         )
       `)
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq(
-        "published",
-        true
-      )
-      .order(
-        "round_number",
-        {
-          ascending: true
-        }
-      )
-      .order(
-        "match_date",
-        {
-          ascending: true,
-          nullsFirst: true
-        }
-      )
-      .order(
-        "match_time",
-        {
-          ascending: true,
-          nullsFirst: true
-        }
-      );
+      .eq("tournament_id", tournamentId)
+      .eq("published", true)
+      .order("round_number", {
+        ascending: true
+      })
+      .order("match_date", {
+        ascending: true,
+        nullsFirst: true
+      })
+      .order("match_time", {
+        ascending: true,
+        nullsFirst: true
+      });
 
     if (error) throw error;
 
@@ -176,25 +149,20 @@
       match =>
         (
           !match.categories ||
-          match.categories.league_id ===
-            league.id
+          match.categories.league_id === league.id
         ) &&
         (
           !match.home_team ||
-          match.home_team.league_id ===
-            league.id
+          match.home_team.league_id === league.id
         ) &&
         (
           !match.away_team ||
-          match.away_team.league_id ===
-            league.id
+          match.away_team.league_id === league.id
         )
     );
   }
 
-  async function getUnpublishedMatches(
-    tournamentId
-  ) {
+  async function getUnpublishedMatches(tournamentId) {
     requireId(
       tournamentId,
       "Torneo no válido."
@@ -237,20 +205,11 @@
           league_id
         )
       `)
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq(
-        "published",
-        false
-      )
-      .order(
-        "round_number",
-        {
-          ascending: true
-        }
-      );
+      .eq("tournament_id", tournamentId)
+      .eq("published", false)
+      .order("round_number", {
+        ascending: true
+      });
 
     if (error) throw error;
 
@@ -258,25 +217,20 @@
       match =>
         (
           !match.categories ||
-          match.categories.league_id ===
-            league.id
+          match.categories.league_id === league.id
         ) &&
         (
           !match.home_team ||
-          match.home_team.league_id ===
-            league.id
+          match.home_team.league_id === league.id
         ) &&
         (
           !match.away_team ||
-          match.away_team.league_id ===
-            league.id
+          match.away_team.league_id === league.id
         )
     );
   }
 
-  async function getPublishedPlayoffs(
-    tournamentId
-  ) {
+  async function getPublishedPlayoffs(tournamentId) {
     requireId(
       tournamentId,
       "Torneo no válido."
@@ -293,8 +247,10 @@
         id,
         tournament_id,
         category_id,
-        round_number,
-        playoff_stage,
+        stage,
+        match_order,
+        format_code,
+        manual_label,
         seed_a,
         seed_b,
         team_a_id,
@@ -319,20 +275,11 @@
           league_id
         )
       `)
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq(
-        "published",
-        true
-      )
-      .order(
-        "round_number",
-        {
-          ascending: true
-        }
-      );
+      .eq("tournament_id", tournamentId)
+      .eq("published", true)
+      .order("match_order", {
+        ascending: true
+      });
 
     if (error) throw error;
 
@@ -340,29 +287,22 @@
       match =>
         (
           !match.team_a ||
-          match.team_a.league_id ===
-            league.id
+          match.team_a.league_id === league.id
         ) &&
         (
           !match.team_b ||
-          match.team_b.league_id ===
-            league.id
+          match.team_b.league_id === league.id
         )
     );
   }
 
-  async function publishMatch(
-    matchId
-  ) {
+  async function publishMatch(matchId) {
     await requireAdmin();
 
     requireId(
       matchId,
       "Partido no válido."
     );
-
-    const league =
-      requireLeague();
 
     const {
       data,
@@ -372,10 +312,7 @@
       .update({
         published: true
       })
-      .eq(
-        "id",
-        matchId
-      )
+      .eq("id", matchId)
       .select(`
         id,
         tournament_id,
@@ -385,11 +322,6 @@
 
     if (error) throw error;
 
-    /*
-     * La consulta anterior está protegida por RLS.
-     * La comprobación adicional evita considerar como
-     * publicado un registro que no pertenece a la liga activa.
-     */
     if (!data) {
       throw new Error(
         "No se pudo publicar el partido."
@@ -399,9 +331,7 @@
     return data;
   }
 
-  async function unpublishMatch(
-    matchId
-  ) {
+  async function unpublishMatch(matchId) {
     await requireAdmin();
 
     requireId(
@@ -417,10 +347,7 @@
       .update({
         published: false
       })
-      .eq(
-        "id",
-        matchId
-      )
+      .eq("id", matchId)
       .select(`
         id,
         tournament_id,
@@ -433,9 +360,7 @@
     return data;
   }
 
-  async function publishPlayoff(
-    playoffMatchId
-  ) {
+  async function publishPlayoff(playoffMatchId) {
     await requireAdmin();
 
     requireId(
@@ -451,10 +376,7 @@
       .update({
         published: true
       })
-      .eq(
-        "id",
-        playoffMatchId
-      )
+      .eq("id", playoffMatchId)
       .select(`
         id,
         tournament_id,
@@ -467,9 +389,7 @@
     return data;
   }
 
-  async function unpublishPlayoff(
-    playoffMatchId
-  ) {
+  async function unpublishPlayoff(playoffMatchId) {
     await requireAdmin();
 
     requireId(
@@ -485,10 +405,7 @@
       .update({
         published: false
       })
-      .eq(
-        "id",
-        playoffMatchId
-      )
+      .eq("id", playoffMatchId)
       .select(`
         id,
         tournament_id,
@@ -501,9 +418,7 @@
     return data;
   }
 
-  async function getPublicationState(
-    tournamentId
-  ) {
+  async function getPublicationState(tournamentId) {
     await requireAdmin();
 
     const [
@@ -512,18 +427,10 @@
       unpublishedMatches,
       publishedPlayoffs
     ] = await Promise.all([
-      getTournament(
-        tournamentId
-      ),
-      getPublishedMatches(
-        tournamentId
-      ),
-      getUnpublishedMatches(
-        tournamentId
-      ),
-      getPublishedPlayoffs(
-        tournamentId
-      )
+      getTournament(tournamentId),
+      getPublishedMatches(tournamentId),
+      getUnpublishedMatches(tournamentId),
+      getPublishedPlayoffs(tournamentId)
     ]);
 
     return {
@@ -540,9 +447,7 @@
     };
   }
 
-  async function publishCompletedResults(
-    tournamentId
-  ) {
+  async function publishCompletedResults(tournamentId) {
     await requireAdmin();
 
     requireId(
@@ -550,8 +455,7 @@
       "Torneo no válido."
     );
 
-    const league =
-      requireLeague();
+    const league = requireLeague();
 
     const {
       data,
@@ -561,21 +465,12 @@
       .update({
         published: true
       })
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq(
-        "published",
-        false
-      )
-      .in(
-        "status",
-        [
-          "jugado",
-          "incomparecencia"
-        ]
-      )
+      .eq("tournament_id", tournamentId)
+      .eq("published", false)
+      .in("status", [
+        "jugado",
+        "incomparecencia"
+      ])
       .select(`
         id,
         tournament_id,
@@ -590,14 +485,11 @@
     return (data || []).filter(
       match =>
         !match.categories ||
-        match.categories.league_id ===
-          league.id
+        match.categories.league_id === league.id
     );
   }
 
-  async function unpublishAllMatches(
-    tournamentId
-  ) {
+  async function unpublishAllMatches(tournamentId) {
     await requireAdmin();
 
     requireId(
@@ -613,14 +505,8 @@
       .update({
         published: false
       })
-      .eq(
-        "tournament_id",
-        tournamentId
-      )
-      .eq(
-        "published",
-        true
-      )
+      .eq("tournament_id", tournamentId)
+      .eq("published", true)
       .select(`
         id,
         tournament_id,
@@ -632,28 +518,22 @@
     return data || [];
   }
 
-  function getPublicationSummary(
-    state
-  ) {
-    const data =
-      state || {};
+  function getPublicationSummary(state) {
+    const data = state || {};
 
     const published =
       Number(
-        data.publishedMatchCount ||
-          0
+        data.publishedMatchCount || 0
       );
 
     const pending =
       Number(
-        data.unpublishedMatchCount ||
-          0
+        data.unpublishedMatchCount || 0
       );
 
     const playoffs =
       Number(
-        data.publishedPlayoffCount ||
-          0
+        data.publishedPlayoffCount || 0
       );
 
     return {
@@ -678,9 +558,7 @@
     }
 
     const summary =
-      getPublicationSummary(
-        state
-      );
+      getPublicationSummary(state);
 
     container.innerHTML = `
       <div class="gof-publication-card">
@@ -744,4 +622,4 @@
     getPublicationSummary,
     renderPublicationState
   };
-})();
+})(); 

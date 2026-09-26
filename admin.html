@@ -1818,8 +1818,9 @@ async function accessV2(action,value){
  const r=await fetch(GOF_ACCESS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(action==='master'?{action:'master',password:value}:{action:'league',code:value.toUpperCase().trim()})});
  const j=await r.json().catch(()=>({}));
  if(!r.ok||j.error)throw new Error(j.error||j.message||'No se pudo validar el acceso.');
- if(!j.access_token||!j.refresh_token)throw new Error('El servidor no devolvió una sesión válida.');
- return j;
+ const session=j.session||null;
+ if(!session?.access_token||!session?.refresh_token)throw new Error('El servidor no devolvió una sesión válida.');
+ return {access_token:session.access_token,refresh_token:session.refresh_token,league:j.league||null};
 }
 window.gofSubmitModalV2=async function(){
  const v=document.getElementById('gofEntryInput').value.trim(),m=document.getElementById('gofEntryMsgV2');m.textContent='';

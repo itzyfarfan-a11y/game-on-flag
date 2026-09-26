@@ -1829,8 +1829,11 @@ window.gofSubmitModalV2=async function(){
   const j=await accessV2(gofEntryModeV2,v);
   const r=await sb.auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});
   if(r.error)throw r.error;
-  gofCloseModalV2();window.gofV2Authenticated=true;hideEntryV2();
+  window.gofV2Authenticated=true;
   window.GOF_PLATFORM_MASTER=gofEntryModeV2==='master';
+  if(typeof window.gofHardUnlockV3==='function') window.gofHardUnlockV3();
+  hideEntryV2();
+  gofCloseModalV2();
   document.getElementById('nav').classList.remove('hidden');
   document.querySelectorAll('#nav button[data-v="organizaciones"]').forEach(b=>b.style.display=window.GOF_PLATFORM_MASTER?'':'none');
   document.getElementById('sessionName').textContent=window.GOF_PLATFORM_MASTER?'Administradora GAME ON FLAG':(j.league?.name||'Administrador de liga');
@@ -1871,12 +1874,9 @@ window.addEventListener('load',async function(){
   showRecovery();
   return;
  }
- try{await sb.auth.signOut()}catch(_){}
+ if(window.gofV2Authenticated)return;
  window.GOF_PLATFORM_MASTER=false;
- window.gofV2Authenticated=false;
  showEntryV2();
- setTimeout(function(){if(!window.gofV2Authenticated)showEntryV2()},500);
- setTimeout(function(){if(!window.gofV2Authenticated)showEntryV2()},1500);
 });
 })();
 </script>

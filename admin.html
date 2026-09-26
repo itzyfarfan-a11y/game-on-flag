@@ -1899,12 +1899,20 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
   // Replace the earlier gate functions so the hard lock is authoritative.
   window.showEntryV2=lock;
   window.hideEntryV2=unlock;
-  // Lock immediately; do not wait for load/auth/session/bootstrap code.
-  lock();
-  document.addEventListener('DOMContentLoaded',lock,{once:false});
-  window.addEventListener('load',function(){
-    if(!window.GOF_PLATFORM_MASTER && !window.gofV2Authenticated){lock();}
-  });
+  // Password-recovery links must be allowed to reach the recovery screen.
+  const gofIsRecoveryRoute=()=>{
+    const q=new URLSearchParams(location.search);
+    const h=location.hash||'';
+    return q.has('code') || /type=recovery(?:&|$)/.test(h);
+  };
+  if(!gofIsRecoveryRoute()){
+    // Lock immediately; do not wait for load/auth/session/bootstrap code.
+    lock();
+    document.addEventListener('DOMContentLoaded',lock,{once:false});
+    window.addEventListener('load',function(){
+      if(!gofIsRecoveryRoute() && !window.GOF_PLATFORM_MASTER && !window.gofV2Authenticated){lock();}
+    });
+  }
   // Any normal logout returns to the same locked entry screen.
   const oldLogout=window.logout;
   window.logout=async function(){

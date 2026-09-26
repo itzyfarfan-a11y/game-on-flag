@@ -635,7 +635,11 @@ async function saveNewPassword(){
   }catch(e){m.className='red';m.textContent=e.message}
 }
 function showRecovery(){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('recovery').classList.add('active');document.getElementById('nav').classList.add('hidden');}
-if(sb) sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY')showRecovery();});
+function gofBindRecoveryListener(){
+  if(!sb||window.__gofRecoveryListenerBound)return;
+  window.__gofRecoveryListenerBound=true;
+  sb.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY')showRecovery();});
+}
 async function bootstrapPortalSession(){
   try{
     const raw=localStorage.getItem('gof_admin_session');
@@ -659,10 +663,20 @@ function clearLoginHash(){
     history.replaceState(null,document.title,location.pathname+location.search);
   }
 }
+function gofIsRecoveryRoute(){
+  const q=new URLSearchParams(location.search);
+  const h=location.hash||'';
+  return q.has('code') || /(?:^|[&#])type=recovery(?:&|$)/.test(h);
+}
 async function initAdminSession(){
   const msg=document.getElementById('msg');
+  if(gofIsRecoveryRoute()){
+    showRecovery();
+    return;
+  }
   try{
     sb=makeClient();
+    gofBindRecoveryListener();
 
     // Entrada desde Portal Público: recibe la sesión por almacenamiento local.
     let session=await bootstrapPortalSession();
@@ -723,10 +737,7 @@ if(location.pathname.endsWith('/admin.html')){
 // Solo una recuperación real debe abrir "Nueva contraseña".
 // Un login normal también puede contener refresh_token, por lo que NO se considera recuperación.
 (function(){
-  const hasRecoveryCode=new URLSearchParams(location.search).has('code');
-  const hash=location.hash||'';
-  const isRecovery=/type=recovery(?:&|$)/.test(hash);
-  if(hasRecoveryCode||isRecovery)setTimeout(()=>showRecovery(),300);
+  if(gofIsRecoveryRoute())setTimeout(()=>showRecovery(),50);
 })();
 async function logout(){localStorage.removeItem('gof_admin_session');if(sb)await sb.auth.signOut();location.replace(new URL('./admin.html',window.location.href).href)}
 async function loadHomeTournamentSelector(){

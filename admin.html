@@ -1734,7 +1734,7 @@ body.gof-entry-lock header{display:none!important}
 .gof-entry-btn .ei{font-size:27px;width:38px;text-align:center}.gof-entry-btn b{display:block;font-size:16px}.gof-entry-btn small{display:block;color:#aaa4b7;margin-top:3px;font-size:11px}
 .gof-entry-btn.master{border-color:#8d2cff!important}.gof-entry-note{text-align:center;color:#746b7e;font-size:10px;margin-top:15px}
 #gofEntryModal{position:fixed;inset:0;z-index:2147483648;background:#000b;display:none;align-items:center;justify-content:center;padding:18px}
-#gofEntryModal.show{display:flex}.gof-entry-modal{width:min(430px,100%);background:#1a1422;border:1px solid #5a3d70;border-radius:18px;padding:20px}
+#gofEntryModal.show{display:flex}.gof-entry-modal{width:min(430px,100%);background:#1a1422;border:1px solid #5a3d70;border-radius:18px;padding:20px}.gof-forgot-password{display:block;width:100%;margin:9px 0 4px;background:none;border:0;color:#c9a7ff;text-decoration:underline;font-size:14px;cursor:pointer}
 .gof-entry-modal h3{margin:0 0 5px}.gof-entry-modal p{color:#aaa4b7;font-size:12px;margin:0 0 14px}.gof-entry-modal input{margin-top:5px}
 .gof-entry-actions{display:flex;gap:8px;margin-top:12px}.gof-entry-actions button{flex:1}
 #gofMasterV2{display:none}
@@ -1773,6 +1773,7 @@ body.gof-entry-lock header{display:none!important}
     <h3 id="gofEntryModalTitle">Acceso</h3>
     <p id="gofEntryModalText"></p>
     <input id="gofEntryInput" type="password" placeholder="Contraseña" autocomplete="current-password">
+    <button id="gofForgotPasswordV2" type="button" class="gof-forgot-password" onclick="gofForgotPasswordV2()">¿OLVIDASTE TU CONTRASEÑA?</button>
     <div class="gof-entry-actions"><button type="button" onclick="gofCloseModalV2()">Cancelar</button><button class="primary" type="button" onclick="gofSubmitModalV2()">ENTRAR</button></div>
     <p class="red" id="gofEntryMsgV2"></p>
   </div>
@@ -1784,9 +1785,22 @@ let gofEntryModeV2='';
 
 function showEntryV2(){document.body.classList.add('gof-entry-lock');document.getElementById('entryV2')?.classList.remove('hidden');document.getElementById('gofEntryModal')?.classList.remove('show');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('nav')?.classList.add('hidden')}
 function hideEntryV2(){document.body.classList.remove('gof-entry-lock');document.getElementById('entryV2')?.classList.add('hidden')}
-window.gofOpenCreateV2=function(){gofEntryModeV2='master';document.getElementById('gofEntryModalTitle').textContent='Crear nueva liga';document.getElementById('gofEntryModalText').textContent='Confirma la contraseña de la administradora principal.';document.getElementById('gofEntryInput').type='password';document.getElementById('gofEntryInput').placeholder='Contraseña maestra';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
+window.gofOpenCreateV2=function(){gofEntryModeV2='master';document.getElementById('gofEntryModalTitle').textContent='Crear nueva liga';document.getElementById('gofEntryModalText').textContent='Confirma la contraseña de la administradora principal.';document.getElementById('gofEntryInput').type='password';document.getElementById('gofEntryInput').placeholder='Contraseña maestra';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofForgotPasswordV2').style.display='block';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
 window.gofOpenMasterV2=window.gofOpenCreateV2;
-window.gofOpenLeagueV2=function(){gofEntryModeV2='league';document.getElementById('gofEntryModalTitle').textContent='Ingresar a una liga existente';document.getElementById('gofEntryModalText').textContent='Introduce únicamente el código de acceso que te entregó la administradora de GAME ON FLAG.';document.getElementById('gofEntryInput').type='text';document.getElementById('gofEntryInput').placeholder='GOF-XXXXXXXX';document.getElementById('gofEntryInput').value='';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
+window.gofOpenLeagueV2=function(){gofEntryModeV2='league';document.getElementById('gofEntryModalTitle').textContent='Ingresar a una liga existente';document.getElementById('gofEntryModalText').textContent='Introduce únicamente el código de acceso que te entregó la administradora de GAME ON FLAG.';document.getElementById('gofEntryInput').type='text';document.getElementById('gofEntryInput').placeholder='GOF-XXXXXXXX';document.getElementById('gofEntryInput').value='';document.getElementById('gofEntryMsgV2').textContent='';document.getElementById('gofForgotPasswordV2').style.display='none';document.getElementById('gofEntryModal').classList.add('show');document.getElementById('gofEntryInput').focus()}
+window.gofForgotPasswordV2=async function(){
+ if(gofEntryModeV2!=='master')return;
+ const email=window.prompt('Escribe el correo de la administradora principal para recibir el enlace de recuperación:');
+ if(!email)return;
+ const m=document.getElementById('gofEntryMsgV2');m.textContent='Enviando enlace de recuperación...';
+ try{
+  const client=sb||makeClient();
+  const redirectTo=new URL('./admin.html',window.location.href).href;
+  const {error}=await client.auth.resetPasswordForEmail(email.trim(),{redirectTo});
+  if(error)throw error;
+  m.textContent='Listo. Revisa tu correo y abre el enlace para crear la nueva contraseña.';
+ }catch(e){m.textContent=e?.message||'No se pudo enviar el enlace de recuperación.'}
+}
 window.gofCloseModalV2=function(){document.getElementById('gofEntryModal').classList.remove('show')}
 window.gofCloseMasterV2=function(){document.getElementById('gofMasterV2').classList.remove('show')}
 async function accessV2(action,value){
@@ -1837,6 +1851,14 @@ window.gofEntryResetV2=async function(){
 document.getElementById('gofEntryInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')gofSubmitModalV2()});
 window.addEventListener('load',async function(){
  try{sb=sb||makeClient()}catch(_){}
+ const recoveryHash=location.hash||'';
+ const recoveryQuery=new URLSearchParams(location.search);
+ if(recoveryQuery.has('code')||/type=recovery(?:&|$)/.test(recoveryHash)){
+  document.body.classList.remove('gof-entry-lock');
+  document.getElementById('entryV2')?.classList.add('hidden');
+  showRecovery();
+  return;
+ }
  try{await sb.auth.signOut()}catch(_){}
  window.GOF_PLATFORM_MASTER=false;
  showEntryV2();

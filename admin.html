@@ -1873,9 +1873,10 @@ window.addEventListener('load',async function(){
  }
  try{await sb.auth.signOut()}catch(_){}
  window.GOF_PLATFORM_MASTER=false;
+ window.gofV2Authenticated=false;
  showEntryV2();
- setTimeout(showEntryV2,500);
- setTimeout(showEntryV2,1500);
+ setTimeout(function(){if(!window.gofV2Authenticated)showEntryV2()},500);
+ setTimeout(function(){if(!window.gofV2Authenticated)showEntryV2()},1500);
 });
 })();
 </script>

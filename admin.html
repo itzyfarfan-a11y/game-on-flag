@@ -1613,26 +1613,30 @@ async function loadMisLigas(){
  const {data:userData,error:userError}=await sb.auth.getUser();
  const user=userData?.user;
  if(userError||!user){box.innerHTML='<div class="empty">No hay una sesión administrativa activa.</div>';return;}
- await loadLeagueContextFinal();
- // Primero obtenemos las ligas desde league_members. Esto evita que el listado
- // dependa exclusivamente de una consulta por owner_id y permite mostrar
- // correctamente las ligas que el administrador principal acaba de crear.
- const {data:members,error:memberError}=await sb.from('league_members').select('league_id,role,is_current,active').eq('user_id',user.id).eq('active',true).order('created_at',{ascending:false});
- const ids=[...new Set((members||[]).map(m=>m.league_id).filter(Boolean))];
- const all=[];
- for(const id of ids){
-   const {data:l,error}=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('id',id).maybeSingle();
-   if(!error&&l)all.push(l);
+ const all=[]; let lastError=null;
+ // Para la administradora principal, consultar por propietario primero. La liga
+ // recién creada siempre queda con owner_id = auth.uid().
+ const ownedQ=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('owner_id',user.id).order('created_at',{ascending:false});
+ if(ownedQ.error) lastError=ownedQ.error;
+ (ownedQ.data||[]).forEach(l=>{if(!all.some(x=>x.id===l.id))all.push(l)});
+ // También incluir organizaciones a las que el usuario tenga membresía activa.
+ const membersQ=await sb.from('league_members').select('league_id,role,is_current,active,created_at').eq('user_id',user.id).eq('active',true).order('created_at',{ascending:false});
+ if(membersQ.error && !lastError) lastError=membersQ.error;
+ for(const m of (membersQ.data||[])){
+   if(!m.league_id)continue;
+   if(all.some(x=>x.id===m.league_id))continue;
+   const q=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('id',m.league_id).maybeSingle();
+   if(q.error){if(!lastError)lastError=q.error;continue;}
+   if(q.data)all.push(q.data);
  }
- // Respaldo para sesiones/organizaciones antiguas donde aún no exista
- // el registro de membresía visible en el listado.
- if(!all.length){
-   const {data:owned}=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('owner_id',user.id).order('created_at',{ascending:false});
-   (owned||[]).forEach(l=>{if(!all.some(x=>x.id===l.id))all.push(l)});
+ // Si existe una organización activa, refrescar el contexto después del listado.
+ if(gofCurrentOrganizationId && !all.some(x=>x.id===gofCurrentOrganizationId)){
+   const q=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('id',gofCurrentOrganizationId).maybeSingle();
+   if(q.data)all.push(q.data);
  }
  const sel=document.getElementById('leagueCodeLeague');
  if(sel)sel.innerHTML='<option value="">Selecciona una liga</option>'+all.map(x=>`<option value="${esc(x.id)}" ${x.id===gofCurrentOrganizationId?'selected':''}>${esc(x.name)}</option>`).join('');
- box.innerHTML=all.map(x=>`<div class="card"><div class="row"><b>${esc(x.name)}</b><span class="tag">${x.id===gofCurrentOrganizationId?'ACTIVA':x.status==='active'?'Activa':'Revocada'}</span></div><div class="toolbar" style="margin-top:8px"><button class="primary" type="button" onclick="selectLeagueFinal('${x.id}')">Usar esta organización</button></div></div>`).join('')||`<div class="empty">${memberError?esc(memberError.message):'No hay ligas disponibles.'}</div>`;
+ box.innerHTML=all.map(x=>`<div class="card"><div class="row"><b>${esc(x.name)}</b><span class="tag">${x.id===gofCurrentOrganizationId?'ACTIVA':x.status==='active'?'Activa':'Revocada'}</span></div><div class="toolbar" style="margin-top:8px"><button class="primary" type="button" onclick="selectLeagueFinal('${x.id}')">Usar esta organización</button></div></div>`).join('')||`<div class="empty">${lastError?esc(lastError.message):'No hay ligas disponibles.'}</div>`;
  const codes=await sb.from('league_access_codes').select('id,league_id,code,active,created_at,last_access_at').order('created_at',{ascending:false});
  const lc=document.getElementById('leagueCodesList');
  if(lc)lc.innerHTML=(codes.data||[]).map(c=>`<div class="card"><b>${esc(c.code)}</b> · ${c.active?'Activo':'Revocado'}<div class="mut small">Organización: ${esc(all.find(x=>x.id===c.league_id)?.name||c.league_id)}</div><div class="toolbar"><button class="secondary" type="button" onclick="${c.active?`revokeLeagueCodeFinal('${c.id}')`:`reactivateLeagueCodeFinal('${c.id}')`}">${c.active?'Revocar':'Reactivar'}</button></div></div>`).join('')||'<div class="empty">Aún no hay códigos.</div>';

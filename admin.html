@@ -1644,52 +1644,16 @@ async function loadMisLigas(){
 async function createTournament(){const name=val('tn').trim(),start=val('ts');if(!name||!start)return alert('Completa nombre y fecha.');await loadLeagueContextFinal();if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');const type=val('ttype')==='relampago'?'relampago':'regular',rounds=type==='relampago'?3:7,u=(await sb.auth.getUser()).data.user;const {error}=await sb.from('tournaments').insert({name,season:val('tseason').trim()||null,start_date:start,tournament_type:type,regular_rounds:rounds,status:'proximo',created_by:u.id,league_id:gofCurrentOrganizationId});if(error)return alert(error.message);toast('Torneo creado');document.getElementById('tn').value='';document.getElementById('tseason').value='';document.getElementById('ttype').value='regular';await loadT();refreshDashboard()}
 async function createTeam(){await loadLeagueContextFinal();const name=val('en').trim(),club=val('eclub').trim()||null;if(!name)return alert('Escribe el nombre del equipo.');if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');const {error}=await sb.from('teams').insert({name,club_name:club,league_id:gofCurrentOrganizationId});if(error)alert(error.message);else{toast('Equipo creado');document.getElementById('en').value='';document.getElementById('eclub').value='';await loadE();await refreshAllSelectors()}}
 async function login(){
- const msg=document.getElementById('msg'); msg.textContent='';
- try{
-  if(!sb)sb=makeClient();
-  const code=val('leagueAccessCode').trim().toUpperCase();
-  if(!code)throw new Error('Escribe tu código de acceso.');
-  let session=(await sb.auth.getSession()).data?.session;
-  if(!session){
-   const anon=await sb.auth.signInAnonymously();
-   if(anon.error)throw new Error('No se pudo preparar el acceso por código. Activa el acceso anónimo en Supabase.');
-   session=anon.data?.session;
-  }
-
-  // UNA SOLA PANTALLA DE ACCESO:
-  // PACHECO63 = administradora principal de GAME ON FLAG.
-  // Cualquier otro GOF-... = administrador de esa liga únicamente.
-  if(code==='PACHECO63'){
-    const gate=await sb.rpc('verify_platform_personal_code',{p_code:code});
-    if(gate.error)throw gate.error;
-    if(!gate.data?.ok)throw new Error(gate.data?.message||'Código de administrador incorrecto.');
-    window.GOF_PLATFORM_MASTER=true;
-    document.getElementById('login').classList.remove('active');
-    document.getElementById('nav').classList.remove('hidden');
-    document.querySelectorAll('#nav button[data-v="organizaciones"]').forEach(b=>b.style.display='');
-    document.getElementById('sessionName').textContent='Administradora GAME ON FLAG';
-    setView('organizaciones');
-    await refreshAllSelectors();
-    await loadMisLigas();
-    msg.textContent='';
+  // Acceso antiguo redirigido al mismo flujo seguro V2.
+  // La contraseña maestra nunca se valida ni se expone en el cliente.
+  if(typeof window.gofOpenLeagueV2==='function'){
+    window.gofOpenLeagueV2();
     return;
   }
-
-  const r=await sb.rpc('redeem_league_access_code',{p_code:code});
-  if(r.error)throw r.error;
-  window.GOF_PLATFORM_MASTER=false;
-  await loadLeagueContextFinal();
-  if(!gofCurrentOrganizationId)throw new Error('El código no tiene una organización activa.');
-  const prof=(await sb.from('profiles').select('full_name').eq('id',session.user.id).maybeSingle()).data;
-  document.getElementById('login').classList.remove('active');
-  document.getElementById('nav').classList.remove('hidden');
-  document.querySelectorAll('#nav button[data-v="organizaciones"]').forEach(b=>b.style.display='none');
-  document.getElementById('sessionName').textContent=prof?.full_name||r.data?.role||'Administrador';
-  setView('inicio');
-  await refreshAllSelectors();
-  msg.textContent='';
- }catch(e){console.error('GAME ON FLAG access:',e);msg.textContent=e?.message||'Código no válido o acceso no disponible.'}
+  const msg=document.getElementById('msg');
+  if(msg)msg.textContent='El acceso no está disponible todavía. Recarga la página.';
 }
+
 async function saveCategoryExceptionFinal(status){const tid=val('ceTournament'),cid=val('ceCategory'),team=val('ceTeam')||null,player=val('cePlayer')||null,reason=val('ceReason').trim()||null;if(!tid||!cid)return alert('Selecciona torneo y categoría.');await loadLeagueContextFinal();const {error}=await sb.from('category_exception_authorizations').insert({league_id:gofCurrentOrganizationId,tournament_id:tid,category_id:cid,team_id:team,player_id:player,reason,status,authorized_by:(await sb.auth.getUser()).data.user?.id,authorized_at:new Date().toISOString()});if(error)return alert(error.message);toast(status==='autorizado'?'Excepción autorizada':'Excepción rechazada');loadCategoryExceptionsFinal()}
 async function loadCategoryExceptionsFinal(){const box=document.getElementById('ceList');if(!box)return;const {data}=await sb.from('category_exception_authorizations').select('*,categories(name),teams(name),players(full_name)').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false}).limit(30);box.innerHTML=(data||[]).map(x=>`<div>• ${esc(x.players?.full_name||x.teams?.name||'Elemento')} — <b>${esc(x.status)}</b>${x.reason?' · '+esc(x.reason):''}</div>`).join('')||'Sin excepciones registradas.'}
 async function categoryWarningFinal(){const box=document.getElementById('ceWarning');const tid=val('ceTournament'),cid=val('ceCategory'),pid=val('cePlayer');if(!box||!tid||!cid||!pid){if(box){box.style.display='none';box.textContent=' ';}return false;}const [{data:selected},{data:regs}]=await Promise.all([sb.from('categories').select('id,name').eq('id',cid).eq('league_id',gofCurrentOrganizationId).maybeSingle(),sb.from('roster_registrations').select('category_id,categories(name)').eq('tournament_id',tid).eq('player_id',pid).eq('status','aprobado')]);const selectedName=String(selected?.name||'').toLowerCase();const superior=(regs||[]).some(r=>{const n=String(r.categories?.name||'').toLowerCase();return (selectedName.includes('bronce')&&(n.includes('silver')||n.includes('golden')))||(selectedName.includes('silver')&&n.includes('golden'));});box.style.display=superior?'block':'none';box.textContent=superior?'⚠️ JUGADOR FUERA DE CATEGORÍA — Este jugador pertenece a una categoría superior. Su participación requiere autorización de la administración.':' ';return superior;}

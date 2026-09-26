@@ -1609,14 +1609,33 @@ async function redeemLeagueCodeFinal(){const code=val('redeemLeagueCode').trim()
 async function revokeLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;if(!confirm('¿Revocar este código? La información de la organización NO se eliminará.'))return;const {error}=await sb.rpc('revoke_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 async function reactivateLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;const {error}=await sb.rpc('reactivate_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 async function loadMisLigas(){
- const box=document.getElementById('ownLeagues'); if(!box||!sb)return; await loadLeagueContextFinal();
- const {data:owned}=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('owner_id',(await sb.auth.getUser()).data.user.id).order('created_at',{ascending:false});
- const {data:members}=await sb.from('league_members').select('league_id,role,is_current,active').eq('user_id',(await sb.auth.getUser()).data.user.id).eq('active',true);
- const all=[...(owned||[])]; (members||[]).forEach(m=>{if(!all.some(x=>x.id===m.league_id))all.push({id:m.league_id,name:'Organización compartida',status:'active',owner_id:null})});
- const sel=document.getElementById('leagueCodeLeague');if(sel)sel.innerHTML=all.map(x=>`<option value="${esc(x.id)}" ${x.id===gofCurrentOrganizationId?'selected':''}>${esc(x.name)}</option>`).join('');
- box.innerHTML=all.map(x=>`<div class="card"><div class="row"><b>${esc(x.name)}</b><span class="tag">${x.id===gofCurrentOrganizationId?'ACTIVA':x.status==='active'?'Activa':'Revocada'}</span></div><div class="toolbar" style="margin-top:8px"><button class="primary" type="button" onclick="selectLeagueFinal('${x.id}')">Usar esta organización</button></div></div>`).join('')||'<div class="empty">No hay ligas disponibles.</div>';
+ const box=document.getElementById('ownLeagues'); if(!box||!sb)return;
+ const {data:userData,error:userError}=await sb.auth.getUser();
+ const user=userData?.user;
+ if(userError||!user){box.innerHTML='<div class="empty">No hay una sesión administrativa activa.</div>';return;}
+ await loadLeagueContextFinal();
+ // Primero obtenemos las ligas desde league_members. Esto evita que el listado
+ // dependa exclusivamente de una consulta por owner_id y permite mostrar
+ // correctamente las ligas que el administrador principal acaba de crear.
+ const {data:members,error:memberError}=await sb.from('league_members').select('league_id,role,is_current,active').eq('user_id',user.id).eq('active',true).order('created_at',{ascending:false});
+ const ids=[...new Set((members||[]).map(m=>m.league_id).filter(Boolean))];
+ const all=[];
+ for(const id of ids){
+   const {data:l,error}=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('id',id).maybeSingle();
+   if(!error&&l)all.push(l);
+ }
+ // Respaldo para sesiones/organizaciones antiguas donde aún no exista
+ // el registro de membresía visible en el listado.
+ if(!all.length){
+   const {data:owned}=await sb.from('leagues').select('id,name,slug,primary_color,status,owner_id,created_at').eq('owner_id',user.id).order('created_at',{ascending:false});
+   (owned||[]).forEach(l=>{if(!all.some(x=>x.id===l.id))all.push(l)});
+ }
+ const sel=document.getElementById('leagueCodeLeague');
+ if(sel)sel.innerHTML='<option value="">Selecciona una liga</option>'+all.map(x=>`<option value="${esc(x.id)}" ${x.id===gofCurrentOrganizationId?'selected':''}>${esc(x.name)}</option>`).join('');
+ box.innerHTML=all.map(x=>`<div class="card"><div class="row"><b>${esc(x.name)}</b><span class="tag">${x.id===gofCurrentOrganizationId?'ACTIVA':x.status==='active'?'Activa':'Revocada'}</span></div><div class="toolbar" style="margin-top:8px"><button class="primary" type="button" onclick="selectLeagueFinal('${x.id}')">Usar esta organización</button></div></div>`).join('')||`<div class="empty">${memberError?esc(memberError.message):'No hay ligas disponibles.'}</div>`;
  const codes=await sb.from('league_access_codes').select('id,league_id,code,active,created_at,last_access_at').order('created_at',{ascending:false});
- const lc=document.getElementById('leagueCodesList'); if(lc)lc.innerHTML=(codes.data||[]).map(c=>`<div class="card"><b>${esc(c.code)}</b> · ${c.active?'Activo':'Revocado'}<div class="mut small">Organización: ${esc(all.find(x=>x.id===c.league_id)?.name||c.league_id)}</div><div class="toolbar"><button class="secondary" type="button" onclick="${c.active?`revokeLeagueCodeFinal('${c.id}')`:`reactivateLeagueCodeFinal('${c.id}')`}">${c.active?'Revocar':'Reactivar'}</button></div></div>`).join('')||'<div class="empty">Aún no hay códigos.</div>';
+ const lc=document.getElementById('leagueCodesList');
+ if(lc)lc.innerHTML=(codes.data||[]).map(c=>`<div class="card"><b>${esc(c.code)}</b> · ${c.active?'Activo':'Revocado'}<div class="mut small">Organización: ${esc(all.find(x=>x.id===c.league_id)?.name||c.league_id)}</div><div class="toolbar"><button class="secondary" type="button" onclick="${c.active?`revokeLeagueCodeFinal('${c.id}')`:`reactivateLeagueCodeFinal('${c.id}')`}">${c.active?'Revocar':'Reactivar'}</button></div></div>`).join('')||'<div class="empty">Aún no hay códigos.</div>';
 }
 async function createTournament(){const name=val('tn').trim(),start=val('ts');if(!name||!start)return alert('Completa nombre y fecha.');await loadLeagueContextFinal();if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');const type=val('ttype')==='relampago'?'relampago':'regular',rounds=type==='relampago'?3:7,u=(await sb.auth.getUser()).data.user;const {error}=await sb.from('tournaments').insert({name,season:val('tseason').trim()||null,start_date:start,tournament_type:type,regular_rounds:rounds,status:'proximo',created_by:u.id,league_id:gofCurrentOrganizationId});if(error)return alert(error.message);toast('Torneo creado');document.getElementById('tn').value='';document.getElementById('tseason').value='';document.getElementById('ttype').value='regular';await loadT();refreshDashboard()}
 async function createTeam(){await loadLeagueContextFinal();const name=val('en').trim(),club=val('eclub').trim()||null;if(!name)return alert('Escribe el nombre del equipo.');if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');const {error}=await sb.from('teams').insert({name,club_name:club,league_id:gofCurrentOrganizationId});if(error)alert(error.message);else{toast('Equipo creado');document.getElementById('en').value='';document.getElementById('eclub').value='';await loadE();await refreshAllSelectors()}}

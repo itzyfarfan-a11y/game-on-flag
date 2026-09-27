@@ -1586,6 +1586,8 @@ input,select,textarea{min-height:44px;width:100%;box-sizing:border-box}
   .gof-icon{min-width:44px!important}.back-menu{width:100%!important}
   .gof-organization-manager .form,.gof-exception-panel .form{grid-template-columns:1fr!important}
 }
+.gof-owner-league-actions{width:100%;box-sizing:border-box}.gof-enter-league-btn,.gof-delete-league-btn{position:relative;z-index:5;pointer-events:auto}.gof-league-code{position:relative;z-index:4}.gof-delete-league-btn{cursor:pointer}
+@media(max-width:700px){.gof-owner-league-actions{display:grid!important;grid-template-columns:minmax(0,1fr) 58px;gap:8px!important}.gof-enter-league-btn{grid-column:1 / -1!important;width:100%!important;min-width:0!important}.gof-league-code{grid-column:1!important;min-width:0!important;width:100%!important}.gof-delete-league-btn{grid-column:2!important;grid-row:2!important;width:58px!important;height:58px!important;align-self:stretch!important}.gof-league-code button{flex:0 0 auto!important}}
 </style>
 <script>
 /* GAME ON FLAG FINAL FUNCTIONAL PATCH */
@@ -1614,14 +1616,14 @@ async function ensurePlatformMaster(){
  if(!window.GOF_PLATFORM_MASTER){ alert('Esta sección es exclusiva de la administradora principal de GAME ON FLAG.'); return false; }
  return true;
 }
-async function gofGenerateOwnerCode(id){
+window.gofGenerateOwnerCode=async function(id){
   if(!(await ensurePlatformMaster()))return;
   const {data,error}=await sb.rpc('generate_league_access_code',{p_league_id:id});
   if(error)return alert(error.message);
   await loadMisLigas();
   alert('Código de acceso para el administrador:\n\n'+(data?.code||'No disponible'));
 }
-async function gofDeleteOwnerLeague(id,name){
+window.gofDeleteOwnerLeague=async function(id,name){
   if(!(await ensurePlatformMaster()))return;
   const ok=confirm('¿Seguro que quieres eliminar definitivamente la liga "'+name+'"?\n\nSe eliminarán sus torneos, equipos, rosters, partidos, resultados, contabilidad y código de acceso. Esta acción no se puede deshacer.');
   if(!ok)return;
@@ -1723,7 +1725,7 @@ async function loadMisLigas(){
        try{ const r=await sb.rpc('get_active_league_access_code',{p_league_id:l.id}); code=r?.data?.code||''; }catch(e){}
        const safeCode=esc(code||'Sin código');
        const copyBtn=code?`<button type="button" title="Copiar código" onclick="navigator.clipboard?.writeText('${esc(code)}');toast('Código copiado')">📋</button>`:`<button type="button" class="gold" onclick="gofGenerateOwnerCode('${l.id}')">Generar</button>`;
-       return `<div class="card" style="margin-bottom:10px;padding:14px"><div class="row" style="align-items:flex-start;gap:10px"><div style="flex:1"><b style="font-size:18px">${esc(l.name)}</b><div class="mut small" style="margin-top:5px">Liga activa</div></div><span class="tag">Activa</span></div><div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,1.3fr) auto;gap:8px;align-items:center;margin-top:12px"><button class="primary" type="button" onclick="window.gofOwnerEnterLeague('${l.id}')">Entrar a esta liga</button><div style="display:flex;align-items:center;gap:7px;padding:9px 10px;border:1px solid #6d28d9;border-radius:10px;min-width:0"><span>🔑</span><b>Código:</b><code id="gofCode_${l.id}" style="font-size:15px;overflow-wrap:anywhere">${safeCode}</code>${copyBtn}</div><button type="button" class="danger" title="Eliminar liga definitivamente" onclick="gofDeleteOwnerLeague('${l.id}',${JSON.stringify(l.name)})">🗑️</button></div></div>`;
+       return `<div class="card gof-owner-league-card" style="margin-bottom:10px;padding:14px"><div class="row" style="align-items:flex-start;gap:10px"><div style="flex:1;min-width:0"><b style="font-size:18px">${esc(l.name)}</b><div class="mut small" style="margin-top:5px">Liga activa</div></div><span class="tag">Activa</span></div><div class="gof-owner-league-actions" style="display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-top:12px"><button class="primary gof-enter-league-btn" style="flex:1 1 190px;min-width:170px" type="button" onclick="window.gofOwnerEnterLeague('${l.id}')">Entrar a esta liga</button><div class="gof-league-code" style="flex:1 1 220px;min-width:190px;display:flex;align-items:center;gap:7px;padding:9px 10px;border:1px solid #6d28d9;border-radius:10px;box-sizing:border-box"><span>🔑</span><b>Código:</b><code id="gofCode_${l.id}" style="font-size:15px;overflow-wrap:anywhere;word-break:break-word;flex:1">${safeCode}</code>${copyBtn}</div><button type="button" class="danger gof-delete-league-btn" style="flex:0 0 58px;min-width:58px" title="Eliminar liga definitivamente" aria-label="Eliminar liga definitivamente" onclick="window.gofDeleteOwnerLeague('${l.id}',${JSON.stringify(l.name)})">🗑️</button></div></div>`;
      }));
      target.innerHTML=rows.join('')||'<div class="empty">No hay ligas activas visibles.</div>';
    }

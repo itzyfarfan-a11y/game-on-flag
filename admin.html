@@ -1624,14 +1624,21 @@ window.gofGenerateOwnerCode=async function(id){
   alert('Código de acceso para el administrador:\n\n'+(data?.code||'No disponible'));
 }
 window.gofDeleteOwnerLeague=async function(id,name){
-  if(!(await ensurePlatformMaster()))return;
-  const ok=confirm('¿Seguro que quieres eliminar definitivamente la liga "'+name+'"?\n\nSe eliminarán sus torneos, equipos, rosters, partidos, resultados, contabilidad y código de acceso. Esta acción no se puede deshacer.');
-  if(!ok)return;
-  const {data,error}=await sb.rpc('delete_league_as_platform_owner',{p_league_id:id});
-  if(error)return alert(error.message);
-  if(window.GOF_ACTIVE_LEAGUE_ID===id)window.GOF_ACTIVE_LEAGUE_ID=null;
-  toast('Liga eliminada');
-  await loadMisLigas();
+  try{
+    if(!(await ensurePlatformMaster()))return;
+    if(!id)return;
+    const ok=confirm('¿Seguro que quieres eliminar definitivamente la liga "'+String(name||'')+'"?\n\nSe eliminarán sus torneos, equipos, rosters, partidos, resultados, contabilidad y código de acceso. Esta acción no se puede deshacer.');
+    if(!ok)return;
+    if(!sb)sb=makeClient();
+    const {data,error}=await sb.rpc('delete_league_as_platform_owner',{p_league_id:id});
+    if(error)throw error;
+    if(!data?.ok)throw new Error('El servidor no confirmó la eliminación.');
+    if(window.GOF_ACTIVE_LEAGUE_ID===id)window.GOF_ACTIVE_LEAGUE_ID=null;
+    toast('Liga eliminada correctamente');
+    await loadMisLigas();
+  }catch(e){
+    alert('No fue posible eliminar la liga: '+(e?.message||e));
+  }
 }
 async function createLeagueFinal(){
   if(!(await ensurePlatformMaster()))return;
@@ -1706,7 +1713,9 @@ window.gofOwnerEnterLeague=async function(id){
 }
 function gofUpdateMasterCreateCard(){
   const card=document.getElementById('gofMasterCreateCard');
-  if(card)card.style.display=window.GOF_PLATFORM_MASTER?'block':'none';
+  // La creación de ligas pertenece exclusivamente a la pantalla de Ligas activas.
+  // Nunca se muestra dentro del panel de una liga ya abierta.
+  if(card)card.style.display='none';
 }
 async function loadMisLigas(){
  if(window.GOF_PLATFORM_MASTER){
@@ -1725,7 +1734,7 @@ async function loadMisLigas(){
        try{ const r=await sb.rpc('get_active_league_access_code',{p_league_id:l.id}); code=r?.data?.code||''; }catch(e){}
        const safeCode=esc(code||'Sin código');
        const copyBtn=code?`<button type="button" title="Copiar código" onclick="navigator.clipboard?.writeText('${esc(code)}');toast('Código copiado')">📋</button>`:`<button type="button" class="gold" onclick="gofGenerateOwnerCode('${l.id}')">Generar</button>`;
-       return `<div class="card gof-owner-league-card" style="margin-bottom:10px;padding:14px"><div class="row" style="align-items:flex-start;gap:10px"><div style="flex:1;min-width:0"><b style="font-size:18px">${esc(l.name)}</b><div class="mut small" style="margin-top:5px">Liga activa</div></div><span class="tag">Activa</span></div><div class="gof-owner-league-actions" style="display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin-top:12px"><button class="primary gof-enter-league-btn" style="flex:1 1 190px;min-width:170px" type="button" onclick="window.gofOwnerEnterLeague('${l.id}')">Entrar a esta liga</button><div class="gof-league-code" style="flex:1 1 220px;min-width:190px;display:flex;align-items:center;gap:7px;padding:9px 10px;border:1px solid #6d28d9;border-radius:10px;box-sizing:border-box"><span>🔑</span><b>Código:</b><code id="gofCode_${l.id}" style="font-size:15px;overflow-wrap:anywhere;word-break:break-word;flex:1">${safeCode}</code>${copyBtn}</div><button type="button" class="danger gof-delete-league-btn" style="flex:0 0 58px;min-width:58px" title="Eliminar liga definitivamente" aria-label="Eliminar liga definitivamente" onclick="window.gofDeleteOwnerLeague('${l.id}',${JSON.stringify(l.name)})">🗑️</button></div></div>`;
+       return `<div class="card gof-owner-league-card" style="margin-bottom:10px;padding:14px"><div class="row" style="align-items:flex-start;gap:10px"><div style="flex:1;min-width:0"><b style="font-size:18px">${esc(l.name)}</b><div class="mut small" style="margin-top:5px">Liga activa</div></div><span class="tag">Activa</span></div><div class="gof-owner-league-actions" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch;margin-top:12px;position:relative;z-index:5"><button class="primary gof-enter-league-btn" style="width:100%;min-height:54px;position:relative;z-index:6;pointer-events:auto" type="button" onclick="event.stopPropagation();window.gofOwnerEnterLeague('${l.id}')">Entrar a esta liga</button><button type="button" class="danger gof-delete-league-btn" style="width:58px;min-width:58px;min-height:54px;position:relative;z-index:7;pointer-events:auto" title="Eliminar liga definitivamente" aria-label="Eliminar liga definitivamente" onclick="event.stopPropagation();window.gofDeleteOwnerLeague('${l.id}',${JSON.stringify(l.name)})">🗑️</button></div><div class="gof-league-code" style="display:flex;align-items:center;gap:7px;width:100%;margin-top:8px;padding:10px;border:1px solid #6d28d9;border-radius:10px;box-sizing:border-box"><span>🔑</span><b>Código:</b><code id="gofCode_${l.id}" style="font-size:15px;overflow-wrap:anywhere;word-break:break-word;flex:1">${safeCode}</code>${copyBtn}</div></div>`;
      }));
      target.innerHTML=rows.join('')||'<div class="empty">No hay ligas activas visibles.</div>';
    }

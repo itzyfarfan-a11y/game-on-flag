@@ -494,6 +494,106 @@ body.home-screen{overflow:hidden!important}
 .gof-secondary-grid .admin-home-btn{min-height:62px!important}
 @media(max-width:390px){.gof-workflow-list{gap:7px!important}.gof-workflow-step{grid-template-columns:24px 22px minmax(0,1fr) 10px!important;min-height:82px!important;padding:7px 5px!important}.gof-workflow-step .step-no{width:24px!important;height:24px!important;font-size:11px!important}.gof-workflow-step .step-icon{font-size:18px!important}.gof-workflow-step .step-copy b{font-size:12px!important}.gof-workflow-step .step-copy small{font-size:8.5px!important}.gof-workflow-step .step-arrow{font-size:18px!important}}
 </style>
+
+<style id="gof-mobile-context-v3">
+/* V3: selector de torneo/categoría limpio y ergonómico para celular */
+.gof-tournament-picker.gof-home-context{
+  display:block!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  padding:6px!important;
+  margin:4px 0 7px!important;
+  height:auto!important;
+  min-height:0!important;
+}
+.gof-tournament-picker .gof-selector-title{display:none!important}
+.gof-tournament-picker .gof-home-quick-selects{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:7px!important;
+  width:100%!important;
+  align-items:stretch!important;
+}
+.gof-tournament-picker .gof-home-select-card{
+  min-width:0!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:6px 8px!important;
+}
+.gof-tournament-picker .gof-home-select-card span{
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.gof-tournament-picker .gof-home-select-card select{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:380px){
+  .gof-tournament-picker .gof-home-quick-selects{gap:5px!important}
+  .gof-tournament-picker .gof-home-select-card{padding:5px 6px!important}
+  .gof-tournament-picker .gof-home-select-card span{font-size:8px!important}
+  .gof-tournament-picker .gof-home-select-card select{font-size:10px!important;padding-left:6px!important;padding-right:5px!important}
+}
+</style>
+
+
+<style id="gof-mobile-context-v4-final">
+/* V4 FINAL: en móvil solo quedan Torneo en curso y Categorías, lado a lado. */
+body.home-screen .gof-tournament-picker.gof-home-context{
+  display:block!important;
+  grid-column:1/-1!important;
+  width:100%!important;
+  min-width:0!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:6px 0 8px!important;
+  padding:6px!important;
+  box-sizing:border-box!important;
+}
+body.home-screen .gof-tournament-picker.gof-home-context .gof-selector-title{display:none!important}
+body.home-screen .gof-tournament-picker.gof-home-context .gof-home-quick-selects{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:7px!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+}
+body.home-screen .gof-tournament-picker.gof-home-context .gof-home-select-card{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:6px 7px!important;
+  box-sizing:border-box!important;
+}
+body.home-screen .gof-tournament-picker.gof-home-context .gof-home-select-card span{
+  display:block!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  font-size:9px!important;
+  margin-bottom:3px!important;
+}
+body.home-screen .gof-tournament-picker.gof-home-context .gof-home-select-card select{
+  width:100%!important;
+  min-width:0!important;
+  height:34px!important;
+  min-height:34px!important;
+  box-sizing:border-box!important;
+  font-size:10px!important;
+}
+@media(max-width:390px){
+  body.home-screen .gof-tournament-picker.gof-home-context{padding:5px!important;margin:5px 0 7px!important}
+  body.home-screen .gof-tournament-picker.gof-home-context .gof-home-quick-selects{gap:5px!important}
+  body.home-screen .gof-tournament-picker.gof-home-context .gof-home-select-card{padding:5px 6px!important}
+  body.home-screen .gof-tournament-picker.gof-home-context .gof-home-select-card span{font-size:8px!important}
+  body.home-screen .gof-tournament-picker.gof-home-context .gof-home-select-card select{height:32px!important;min-height:32px!important;font-size:9px!important}
+}
+</style>
 </head><body><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
 <div class="gof-center-brand"><div class="gof-title">GAME ON FLAG</div><div class="gof-subtitle">CENTRO DE ADMINISTRACIÓN</div></div>
@@ -507,7 +607,7 @@ body.home-screen{overflow:hidden!important}
 </div>
 <div class="admin-home-stats"><div class="admin-home-stat"><div class="mut">🏆 Torneos</div><div class="stat" id="cT">0</div></div><div class="admin-home-stat"><div class="mut">👥 Equipos</div><div class="stat" id="cE">0</div></div><div class="admin-home-stat"><div class="mut">🧑‍🤝‍🧑 Jugadores</div><div class="stat" id="cP">0</div></div><div class="admin-home-stat"><div class="mut">🏈 Partidos</div><div class="stat" id="cM">0</div></div></div>
 
-<div class="gof-tournament-selector gof-tournament-picker gof-home-context"><div class="gof-selector-title">📌 CONTEXTO ACTUAL</div><div class="gof-home-quick-selects">
+<div class="gof-tournament-selector gof-tournament-picker gof-home-context"><div class="gof-home-quick-selects">
 <label class="gof-home-select-card"><span>🏟️ TORNEO EN CURSO</span><select id="homeTournamentCourseSelect" onchange="selectHomeTournament(this.value)"><option value="">Cargando torneos…</option></select></label>
 <label class="gof-home-select-card"><span>🏷️ CATEGORÍAS</span><select id="homeCategorySelect"><option value="">Todas las categorías</option></select></label>
 </div><div id="homeTournamentOptions" class="gof-tournament-options"></div><select id="homeTournamentSelect" aria-hidden="true" tabindex="-1"></select></div>

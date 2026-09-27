@@ -1589,10 +1589,20 @@ input,select,textarea{min-height:44px;width:100%;box-sizing:border-box}
 <script>
 /* GAME ON FLAG FINAL FUNCTIONAL PATCH */
 let gofCurrentOrganizationId=null,gofCurrentOrganization=null;
-async function loadLeagueContextFinal(){
+async function loadLeagueContextFinal(preferredLeagueId=null){
  if(!sb)return null; const u=(await sb.auth.getUser()).data.user; if(!u)return null;
- // GAME ON FLAG inicia sin organización activa. Nunca seleccionamos automáticamente
- // la organización más reciente: la administradora debe elegirla explícitamente.
+ // La administradora principal no necesita ser miembro de cada liga.
+ // Si acaba de seleccionar una liga desde "Ligas activas", cargamos esa liga directamente.
+ const selectedId=preferredLeagueId || (window.GOF_PLATFORM_MASTER ? window.GOF_ACTIVE_LEAGUE_ID : null);
+ if(selectedId){
+   const {data:l,error}=await sb.from('leagues').select('id,name,slug,logo_url,primary_color,owner_id,status').eq('id',selectedId).eq('status','active').maybeSingle();
+   if(error||!l){gofCurrentOrganizationId=null;gofCurrentOrganization=null;document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent='Selecciona una organización');return null;}
+   gofCurrentOrganizationId=l.id;gofCurrentOrganization=l;
+   document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent=l.name||'Organización activa');
+   restoreHomeLeagueLogo();
+   return l;
+ }
+ // Administradores de liga sí usan league_members para conservar su liga actual.
  const {data:m}=await sb.from('league_members').select('league_id,role,is_current,active').eq('user_id',u.id).eq('active',true).eq('is_current',true).maybeSingle();
  if(!m){gofCurrentOrganizationId=null;gofCurrentOrganization=null;document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent='Selecciona una organización');return null;}
  const {data:l}=await sb.from('leagues').select('id,name,slug,logo_url,primary_color,owner_id,status').eq('id',m.league_id).maybeSingle();
@@ -1610,9 +1620,15 @@ async function revokeLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))retu
 async function reactivateLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;const {error}=await sb.rpc('reactivate_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 async function gofOwnerEnterLeague(id){
  if(!window.GOF_PLATFORM_MASTER)return;
+ if(!id)return;
  const {error}=await sb.rpc('set_active_league',{p_league_id:id});
  if(error){alert('No fue posible abrir esta liga: '+error.message);return;}
- await loadLeagueContextFinal();await refreshAllSelectors();setView('inicio');
+ window.GOF_ACTIVE_LEAGUE_ID=id;
+ const league=await loadLeagueContextFinal(id);
+ if(!league){alert('La liga no está disponible.');return;}
+ await refreshAllSelectors();
+ setView('inicio');
+ toast('Liga activa: '+league.name);
 }
 async function loadMisLigas(){
  if(window.GOF_PLATFORM_MASTER){
@@ -1899,7 +1915,7 @@ window.gofLoadMasterV2=async function(){
  const rows=data||[];
  box.innerHTML=rows.map(x=>'<div class="gof-master-item"><div class="row"><b>'+esc(x.name)+'</b><span class="tag">'+esc(x.status||'active')+'</span></div><div class="toolbar" style="margin-top:8px"><button class="primary" type="button" onclick="gofEnterMasterLeagueV2(\''+x.id+'\')">ENTRAR</button><button type="button" onclick="gofGenerateCodeV2(\''+x.id+'\')">GENERAR CÓDIGO</button></div></div>').join('')||'<div class="empty">No hay ligas creadas.</div>';
 }
-window.gofEnterMasterLeagueV2=async function(id){const {error}=await sb.rpc('set_active_league',{p_league_id:id});if(error)return alert(error.message);await loadLeagueContextFinal();gofCloseMasterV2();hideEntryV2();setView('inicio');await refreshAllSelectors()}
+window.gofEnterMasterLeagueV2=async function(id){const {error}=await sb.rpc('set_active_league',{p_league_id:id});if(error)return alert(error.message);window.GOF_ACTIVE_LEAGUE_ID=id;await loadLeagueContextFinal(id);gofCloseMasterV2();hideEntryV2();setView('inicio');await refreshAllSelectors()}
 window.gofGenerateCodeV2=async function(id){const {data,error}=await sb.rpc('generate_league_access_code',{p_league_id:id});if(error)return alert(error.message);alert('Código de acceso: '+(data?.code||''));await gofLoadMasterV2()}
 window.gofEntryResetV2=async function(){
  try{await sb.auth.signOut()}catch(_){}

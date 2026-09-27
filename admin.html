@@ -1638,8 +1638,17 @@ window.gofOwnerEnterLeague=async function(id){
   hideEntryV2();
   gofCloseMasterV2();
   document.getElementById('nav')?.classList.remove('hidden');
-  setView('inicio');
+  // Entrada segura: primero mostramos Inicio sin ejecutar cargadores que puedan
+  // depender de elementos de otras vistas. Después intentamos cargar el panel.
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  const home=document.getElementById('inicio');
+  if(home) home.classList.add('active');
+  document.body.classList.add('home-screen');
+  document.querySelectorAll('.nav button[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v==='inicio'));
+  const sn=document.getElementById('sessionName');
+  if(sn) sn.textContent=league.name||'Administradora';
   toast('Liga activa: '+league.name);
+  try{ await refreshDashboard(); }catch(err){ console.warn('Dashboard posterior omitido:',err); }
  }catch(e){alert('No fue posible abrir esta liga: '+(e?.message||e));}
 }
 async function loadMisLigas(){

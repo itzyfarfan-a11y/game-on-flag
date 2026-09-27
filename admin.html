@@ -458,6 +458,25 @@ body.home-screen{overflow:hidden!important}
 .gof-step-nav .step-current{font-size:12px;color:#bfb4c8;text-align:center;flex:0 1 150px}
 @media(max-width:560px){.gof-workflow-wrap{padding:12px}.gof-workflow-head{display:block}.workflow-badge{display:inline-block;margin-top:9px}.gof-workflow-head h2{font-size:21px}.gof-workflow-step{grid-template-columns:30px 31px 1fr 18px;padding:10px 8px}.gof-workflow-step .step-no{width:27px;height:27px;font-size:13px}.gof-workflow-step .step-icon{font-size:22px}.gof-workflow-step .step-copy b{font-size:15px}.gof-workflow-step .step-copy small{font-size:11px}.gof-secondary-grid{grid-template-columns:1fr}.gof-step-nav{display:grid;grid-template-columns:1fr}.gof-step-nav .step-current{order:-1;max-width:none}}
 </style>
+<style id="gof-mobile-home-flow">
+.gof-workflow-wrap{margin-top:12px!important;padding:10px!important;border-radius:18px!important}
+.gof-workflow-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.gof-workflow-step{display:grid!important;grid-template-columns:29px 30px 1fr 13px!important;gap:5px!important;min-height:76px!important;padding:9px 7px!important;border-radius:14px!important;text-align:left!important;box-sizing:border-box!important}
+.gof-workflow-step .step-no{width:27px!important;height:27px!important;font-size:12px!important}
+.gof-workflow-step .step-icon{font-size:21px!important}
+.gof-workflow-step .step-copy{gap:2px!important}
+.gof-workflow-step .step-copy b{font-size:14px!important;line-height:1.05!important}
+.gof-workflow-step .step-copy small{font-size:10px!important;line-height:1.18!important;color:#bdb4c8!important}
+.gof-workflow-step .step-arrow{font-size:22px!important}
+.gof-secondary-tools{margin-top:12px!important}
+.gof-secondary-title{font-size:10px!important;margin-bottom:5px!important}
+.gof-secondary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.gof-secondary-grid .admin-home-btn{min-height:62px!important;padding:8px!important}
+.gof-secondary-grid .admin-home-btn .ico{font-size:20px!important}
+.gof-secondary-grid .admin-home-btn b{font-size:13px!important}
+.gof-secondary-grid .admin-home-btn small{font-size:9px!important}
+@media(max-width:390px){.gof-workflow-step{grid-template-columns:25px 25px 1fr 10px!important;min-height:72px!important;padding:7px 5px!important}.gof-workflow-step .step-no{width:24px!important;height:24px!important;font-size:11px!important}.gof-workflow-step .step-icon{font-size:18px!important}.gof-workflow-step .step-copy b{font-size:12px!important}.gof-workflow-step .step-copy small{font-size:9px!important}.gof-workflow-step .step-arrow{font-size:19px!important}}
+</style>
 </head><body><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
 <div class="gof-center-brand"><div class="gof-title">GAME ON FLAG</div><div class="gof-subtitle">CENTRO DE ADMINISTRACIÓN</div></div>
@@ -476,15 +495,15 @@ body.home-screen{overflow:hidden!important}
 <label class="gof-home-select-card"><span>🏷️ CATEGORÍAS</span><select id="homeCategorySelect"><option value="">Todas las categorías</option></select></label>
 </div><div id="homeTournamentOptions" class="gof-tournament-options"></div><select id="homeTournamentSelect" aria-hidden="true" tabindex="-1"></select></div>
 
-<div class="gof-workflow-wrap"><div class="gof-workflow-head"><div><span class="workflow-kicker">RUTA DE TRABAJO</span><h2>Configura tu liga en este orden</h2><p>Primero registra los equipos. Después crea el torneo, asigna categorías y equipos, captura rosters y continúa hasta playoffs.</p></div><span class="workflow-badge">7 PASOS</span></div>
+<div class="gof-workflow-wrap">
 <div class="gof-workflow-list">
-<button class="gof-workflow-step" onclick="setView('equipos')"><span class="step-no">1</span><span class="step-icon">👥</span><span class="step-copy"><b>Equipos</b><small>Registra todos los equipos que podrán participar en tus torneos.</small></span><span class="step-arrow">›</span></button>
-<button class="gof-workflow-step" onclick="setView('torneos')"><span class="step-no">2</span><span class="step-icon">🏆</span><span class="step-copy"><b>Torneo</b><small>Crea el torneo y dentro de este asigna categorías y equipos participantes.</small></span><span class="step-arrow">›</span></button>
-<button class="gof-workflow-step" onclick="setView('rosters')"><span class="step-no">3</span><span class="step-icon">📋</span><span class="step-copy"><b>Rosters</b><small>Registra y valida los jugadores de cada equipo en su categoría.</small></span><span class="step-arrow">›</span></button>
-<button class="gof-workflow-step" onclick="setView('calendario')"><span class="step-no">4</span><span class="step-icon">📅</span><span class="step-copy"><b>Calendario</b><small>Genera enfrentamientos, asigna fechas, horas y campos, valida y publica.</small></span><span class="step-arrow">›</span></button>
-<button class="gof-workflow-step" onclick="setView('resultados')"><span class="step-no">5</span><span class="step-icon">🏈</span><span class="step-copy"><b>Resultados</b><small>Captura los marcadores y las incomparecencias de cada partido.</small></span><span class="step-arrow">›</span></button>
-<button class="gof-workflow-step" onclick="setView('tabla')"><span class="step-no">6</span><span class="step-icon">📊</span><span class="step-copy"><b>Tabla</b><small>Consulta la clasificación generada automáticamente por los resultados.</small></span><span class="step-arrow">›</span></button>
-<button class="gof-workflow-step" onclick="setView('playoffs')"><span class="step-no">7</span><span class="step-icon">🏆</span><span class="step-copy"><b>Playoffs</b><small>Configura la fase final, semifinales, cuartos y final.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('equipos')"><span class="step-no">1</span><span class="step-icon">👥</span><span class="step-copy"><b>Equipos</b><small>Registra los equipos que participarán.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('torneos')"><span class="step-no">2</span><span class="step-icon">🏆</span><span class="step-copy"><b>Torneo</b><small>Crea torneo, categorías y asigna equipos.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('rosters')"><span class="step-no">3</span><span class="step-icon">📋</span><span class="step-copy"><b>Rosters</b><small>Registra y valida jugadores.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('calendario')"><span class="step-no">4</span><span class="step-icon">📅</span><span class="step-copy"><b>Calendario</b><small>Enfrentamientos, horarios y campos.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('resultados')"><span class="step-no">5</span><span class="step-icon">🏈</span><span class="step-copy"><b>Resultados</b><small>Captura los marcadores.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('tabla')"><span class="step-no">6</span><span class="step-icon">📊</span><span class="step-copy"><b>Tabla</b><small>Clasificación automática.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('playoffs')"><span class="step-no">7</span><span class="step-icon">🏆</span><span class="step-copy"><b>Playoffs</b><small>Fase final y campeonato.</small></span><span class="step-arrow">›</span></button>
 </div></div>
 
 <div class="gof-secondary-tools"><div class="gof-secondary-title">HERRAMIENTAS ADMINISTRATIVAS</div><div class="gof-secondary-grid"><button class="admin-home-btn" onclick="setView('credenciales')"><span class="ico">🪪</span><span><b>Credenciales</b><small>Generar e imprimir acreditaciones</small></span></button><button class="admin-home-btn" onclick="setView('avisos')"><span class="ico">📢</span><span><b>Avisos</b><small>Comunicados y sanciones</small></span></button><button class="admin-home-btn goldline" onclick="setView('contabilidad')"><span class="ico">💰</span><span><b>Contabilidad</b><small>Pagos y gastos</small></span></button><button class="admin-home-btn" onclick="setView('configuracion')"><span class="ico">⚙️</span><span><b>Configuración</b><small>Ajustes de la organización</small></span></button></div></div>

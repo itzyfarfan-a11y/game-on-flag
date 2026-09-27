@@ -1631,7 +1631,13 @@ window.gofOwnerEnterLeague=async function(id){
   window.GOF_ACTIVE_LEAGUE_ID=id;
   const league=await loadLeagueContextFinal(id);
   if(!league)throw new Error('La liga no está disponible o no está activa.');
-  await refreshAllSelectors();
+  // La administradora principal entra directamente a la liga seleccionada.
+  // No ejecutamos aquí refreshAllSelectors(): algunos módulos tienen selectores
+  // que solo existen cuando su vista está abierta y pueden intentar escribir
+  // innerHTML sobre un elemento inexistente.
+  hideEntryV2();
+  gofCloseMasterV2();
+  document.getElementById('nav')?.classList.remove('hidden');
   setView('inicio');
   toast('Liga activa: '+league.name);
  }catch(e){alert('No fue posible abrir esta liga: '+(e?.message||e));}

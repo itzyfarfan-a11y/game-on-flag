@@ -1618,17 +1618,23 @@ async function generateLeagueCodeFinal(){if(!(await ensurePlatformMaster()))retu
 async function redeemLeagueCodeFinal(){const code=val('redeemLeagueCode').trim();if(!code)return alert('Escribe el código de acceso.');const {data,error}=await sb.rpc('redeem_league_access_code',{p_code:code});if(error)return alert(error.message);await loadLeagueContextFinal();toast('Acceso concedido a '+(data?.league_name||'la organización'));document.getElementById('redeemLeagueCode').value='';await refreshAllSelectors();await loadMisLigas();}
 async function revokeLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;if(!confirm('¿Revocar este código? La información de la organización NO se eliminará.'))return;const {error}=await sb.rpc('revoke_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 async function reactivateLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;const {error}=await sb.rpc('reactivate_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
-async function gofOwnerEnterLeague(id){
- if(!window.GOF_PLATFORM_MASTER)return;
- if(!id)return;
- const {error}=await sb.rpc('set_active_league',{p_league_id:id});
- if(error){alert('No fue posible abrir esta liga: '+error.message);return;}
- window.GOF_ACTIVE_LEAGUE_ID=id;
- const league=await loadLeagueContextFinal(id);
- if(!league){alert('La liga no está disponible.');return;}
- await refreshAllSelectors();
- setView('inicio');
- toast('Liga activa: '+league.name);
+window.gofOwnerEnterLeague=async function(id){
+ try{
+  if(!window.GOF_PLATFORM_MASTER){alert('Esta opción es exclusiva de la administradora principal.');return;}
+  if(!id)return;
+  if(!sb)sb=makeClient();
+  const session=(await sb.auth.getSession()).data?.session;
+  if(!session){
+    const anon=await sb.auth.signInAnonymously();
+    if(anon.error)throw anon.error;
+  }
+  window.GOF_ACTIVE_LEAGUE_ID=id;
+  const league=await loadLeagueContextFinal(id);
+  if(!league)throw new Error('La liga no está disponible o no está activa.');
+  await refreshAllSelectors();
+  setView('inicio');
+  toast('Liga activa: '+league.name);
+ }catch(e){alert('No fue posible abrir esta liga: '+(e?.message||e));}
 }
 async function loadMisLigas(){
  if(window.GOF_PLATFORM_MASTER){
@@ -1640,7 +1646,7 @@ async function loadMisLigas(){
    if(target){
      const {data,error}=await sb.from('leagues').select('id,name,status').eq('status','active').order('name');
      if(error){target.textContent='No se pudo consultar la lista completa de ligas: '+error.message;return;}
-     target.innerHTML=(data||[]).map(l=>`<div class="card"><div class="row"><b>${esc(l.name)}</b><span class="tag">Activa</span></div><button class="primary" type="button" onclick="gofOwnerEnterLeague('${l.id}')">Entrar a esta liga</button></div>`).join('')||'<div class="empty">No hay ligas activas visibles.</div>';
+     target.innerHTML=(data||[]).map(l=>`<div class="card"><div class="row"><b>${esc(l.name)}</b><span class="tag">Activa</span></div><button class="primary" type="button" onclick="window.gofOwnerEnterLeague('${l.id}')">Entrar a esta liga</button></div>`).join('')||'<div class="empty">No hay ligas activas visibles.</div>';
    }
    return;
  }

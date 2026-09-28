@@ -1234,47 +1234,68 @@ async function enrollTeam(){
   await loadLeagueContextFinal();
   if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');
 
-  // Reutiliza el equipo si ya existe en esta liga; si no, lo crea aquí mismo.
-  const {data:found,error:findError}=await sb.from('teams').select('id,name,club_name').eq('league_id',gofCurrentOrganizationId).ilike('name',name).limit(1);
-  if(findError)return alert('No se pudo buscar el equipo: '+findError.message);
-  let team=found?.[0];
-  if(team){
-    if(team.club_name && team.club_name.trim().toLowerCase()!==coach.toLowerCase()){
-      const change=confirm(`El equipo "${team.name}" ya existe con Coach "${team.club_name}".\n\n¿Quieres actualizarlo a "${coach}"?`);
-      if(!change)return;
-    }
-    const {error:updateError}=await sb.from('teams').update({name,club_name:coach}).eq('id',team.id);
-    if(updateError)return alert('No se pudo actualizar el equipo: '+updateError.message);
-    team={...team,name,club_name:coach};
-  }else{
-    const {data:created,error:createError}=await sb.from('teams').insert({name,club_name:coach,league_id:gofCurrentOrganizationId}).select('id,name,club_name').single();
-    if(createError)return alert('No se pudo crear el equipo: '+createError.message);
-    team=created;
-  }
+  // El nombre NO es único: puede haber varios equipos con el mismo nombre,
+  // incluso con el mismo Coach o con Coaches/instituciones diferentes.
+  const {data:team,error:createError}=await sb.from('teams')
+    .insert({name,club_name:coach,league_id:gofCurrentOrganizationId})
+    .select('id,name,club_name')
+    .single();
 
-  const {data:already,error:alreadyError}=await sb.from('tournament_teams').select('id,is_active').eq('tournament_id',tournament_id).eq('category_id',category_id).eq('team_id',team.id).limit(1);
-  if(alreadyError)return alert('No se pudo comprobar la inscripción: '+alreadyError.message);
-  if(already?.some(x=>x.is_active!==false))return alert(`El equipo "${team.name}" ya está inscrito en esta categoría.`);
+  if(createError)return alert('No se pudo crear el equipo: '+createError.message);
 
-  // Aviso de posible empalme: mismo Coach con otro equipo en el mismo torneo.
-  const {data:coachTeams}=await sb.from('teams').select('id,name').eq('league_id',gofCurrentOrganizationId).ilike('club_name',coach);
+  // Solo advertimos si el mismo Coach ya dirige otro equipo en este torneo.
+  // La advertencia nunca bloquea por el nombre del equipo.
+  const {data:coachTeams}=await sb.from('teams')
+    .select('id,name')
+    .eq('league_id',gofCurrentOrganizationId)
+    .ilike('club_name',coach);
+
   const coachIds=(coachTeams||[]).map(x=>x.id).filter(id=>id!==team.id);
+
   if(coachIds.length){
-    const {data:coachIns}=await sb.from('tournament_teams').select('team_id,category_id').eq('tournament_id',tournament_id).in('team_id',coachIds);
+    const {data:coachIns}=await sb.from('tournament_teams')
+      .select('team_id,category_id')
+      .eq('tournament_id',tournament_id)
+      .in('team_id',coachIds);
+
     if((coachIns||[]).length){
-      const names=(coachTeams||[]).filter(x=>coachIds.includes(x.id)).map(x=>x.name).join(', ');
-      if(!confirm(`⚠️ Este Coach ya tiene otro equipo en este torneo: ${names}.\n\nEsto puede provocar empalmes de horario.\n\n¿Quieres inscribirlo de todos modos?`))return;
+      const names=(coachTeams||[])
+        .filter(x=>coachIds.includes(x.id))
+        .map(x=>x.name)
+        .join(', ');
+
+      if(!confirm(`⚠️ Este Coach ya tiene otro equipo en este torneo: ${names}.
+
+Esto puede provocar empalmes de horario.
+
+¿Quieres inscribirlo de todos modos?`)){
+        await sb.from('teams').delete().eq('id',team.id);
+        return;
+      }
     }
   }
 
-  const {error:ce}=await sb.from('tournament_categories').upsert({tournament_id,category_id},{onConflict:'tournament_id,category_id'});
-  if(ce)return alert('No se pudo asociar la categoría al torneo: '+ce.message);
-  const {error}=await sb.from('tournament_teams').insert({tournament_id,category_id,team_id:team.id,is_active:true});
-  if(error)return alert('No se pudo inscribir el equipo: '+error.message);
+  const {error:ce}=await sb.from('tournament_categories')
+    .upsert({tournament_id,category_id},{onConflict:'tournament_id,category_id'});
+
+  if(ce){
+    await sb.from('teams').delete().eq('id',team.id);
+    return alert('No se pudo asociar la categoría al torneo: '+ce.message);
+  }
+
+  const {error}=await sb.from('tournament_teams')
+    .insert({tournament_id,category_id,team_id:team.id,is_active:true});
+
+  if(error){
+    await sb.from('teams').delete().eq('id',team.id);
+    return alert('No se pudo inscribir el equipo: '+error.message);
+  }
+
   toast(`Equipo ${team.name} inscrito`);
   clearTeamEntry();
   await loadEnrolled();
 }
+
 async function loadEnrolled(){
   const tid=val('at'),cat=val('ac'),out=document.getElementById('enrolled');
   if(!out)return;

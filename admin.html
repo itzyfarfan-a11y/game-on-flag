@@ -1321,7 +1321,7 @@ async function removeEnrollmentTeam(teamId,currentName){
   const tid=val('at'),cat=val('ac');
   if(!tid||!cat)return alert('Selecciona torneo y categoría.');
   if(!confirm(`¿Quitar a "${currentName}" de esta categoría?\n\nEl equipo se conservará en GAME ON FLAG para no perder su historial.`))return;
-  const {error}=await sb.from('tournament_teams').update({is_active:false}).eq('tournament_id',tid).eq('category_id',cat).eq('team_id',teamId);
+  const {error}=await sb.rpc('gof_remove_team_from_category',{p_tournament_id:tid,p_category_id:cat,p_team_id:teamId});
   if(error)return alert('No se pudo quitar el equipo: '+error.message);
   toast('Equipo retirado de la categoría');
   await loadEnrolled();

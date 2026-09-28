@@ -50,7 +50,7 @@ Agrega a los jugadores <b>uno por uno</b>. Al guardar un jugador, el formulario 
 const SUPABASE_URL='https://picivrqgmckrwutarhyw.supabase.co',SUPABASE_ANON_KEY='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const token=new URLSearchParams(location.search).get('token');
-let info=null,players=[],editingIndex=null,currentPhoto='';
+let info=null,players=[],editingIndex=null,currentPhoto='',realtimeChannel=null,realtimeTimer=null;
 
 function msg(t,c='mut'){const e=document.getElementById('msg');e.className=c;e.textContent=t}
 function esc(x){return String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -121,6 +121,15 @@ async function persistRoster(){
  return data;
 }
 
+async function deletePlayerFromServer(playerId){
+ const {data,error}=await sb.rpc('delete_roster_player_with_access_link',{
+   p_token:token,
+   p_player_id:playerId
+ });
+ if(error)throw error;
+ return data;
+}
+
 async function reloadRosterFromServer(){
  const {data,error}=await sb.rpc('get_roster_with_access_link',{p_token:token});
  if(error)throw error;
@@ -145,7 +154,7 @@ async function savePlayer(){
  const duplicate=players.findIndex((p,i)=>i!==editingIndex&&String(p.jersey_number)===String(num));
  if(duplicate>=0)return alert('Ese número de jersey ya está registrado en el roster.');
 
- const item={full_name:name,jersey_number:num,date_of_birth:dob,curp,photo_url:photo};
+ const item={...(wasEditing&&players[editingIndex]?.player_id?{player_id:players[editingIndex].player_id}:{}),full_name:name,jersey_number:num,date_of_birth:dob,curp,photo_url:photo};
  const wasEditing=editingIndex!==null;
  const previous=wasEditing?players[editingIndex]:null;
  if(wasEditing)players[editingIndex]=item;else players.push(item);
@@ -165,22 +174,18 @@ async function savePlayer(){
 }
 
 async function deletePlayer(i){
- if(!players[i])return;
- if(!confirm('¿Eliminar a '+players[i].full_name+' del roster?'))return;
- const removed=players.splice(i,1)[0];
- const oldEditing=editingIndex;
- if(editingIndex===i)editingIndex=null;
- else if(editingIndex!==null&&editingIndex>i)editingIndex--;
+ const player=players[i];
+ if(!player)return;
+ if(!player.player_id)return alert('No se pudo identificar al jugador. Recarga el roster e inténtalo de nuevo.');
+ if(!confirm('¿Eliminar a '+player.full_name+' del roster?'))return;
+
  msg('Eliminando jugador...');
  try{
-   await persistRoster();
+   await deletePlayerFromServer(player.player_id);
    await reloadRosterFromServer();
    clearForm();
-   msg('🗑️ Jugador eliminado.','ok');
+   msg('🗑️ Jugador eliminado correctamente.','ok');
  }catch(error){
-   players.splice(i,0,removed);
-   editingIndex=oldEditing;
-   render();
    msg(error.message||'No se pudo eliminar el jugador.','error');
  }
 }
@@ -206,7 +211,34 @@ function photoSelected(input){
 
 async function refreshLiveRoster(){
  const stamp=document.getElementById('liveStamp');
- if(stamp)stamp.textContent='Roster guardado en el servidor';
+ if(stamp)stamp.textContent='🔴 Roster sincronizado en tiempo real';
+
+ if(realtimeChannel) {
+   try{ await sb.removeChannel(realtimeChannel); }catch(e){}
+   realtimeChannel=null;
+ }
+
+ if(info?.tournament_id && info?.category_id && info?.team_id){
+   realtimeChannel=sb.channel('gof-roster-'+info.team_id+'-'+info.category_id)
+     .on('postgres_changes',{
+       event:'*',
+       schema:'public',
+       table:'roster_registrations',
+       filter:'team_id=eq.'+info.team_id
+     },async()=>{
+       if(editingIndex!==null)return;
+       try{
+         await reloadRosterFromServer();
+       }catch(e){}
+     })
+     .subscribe();
+ }
+
+ if(realtimeTimer)clearInterval(realtimeTimer);
+ realtimeTimer=setInterval(async()=>{
+   if(editingIndex!==null)return;
+   try{await reloadRosterFromServer();}catch(e){}
+ },5000);
 }
 
 async function load(){

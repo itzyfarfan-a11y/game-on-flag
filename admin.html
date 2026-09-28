@@ -753,6 +753,17 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 .category-edit-wrap select{flex:1;min-width:0}
 #btnRenameOtros{border:1px solid #b15cff;background:#24172f;color:#fff;border-radius:12px;padding:0 13px;font-weight:900;white-space:nowrap}
 </style>
+
+<style id="gof-roster-mobile-final">
+.gof-roster-menu{display:grid;gap:10px;margin-top:12px}
+.gof-roster-menu-btn{width:100%;display:grid;grid-template-columns:42px 1fr 26px;align-items:center;text-align:left;gap:10px;padding:15px 14px;border:1px solid #382e48;border-radius:16px;background:#15121d;color:#fff;min-height:72px}
+.gof-roster-menu-btn>span:first-child{font-size:25px;text-align:center}.gof-roster-menu-btn b{display:block;font-size:16px}.gof-roster-menu-btn small{display:block;color:#aaa4b7;font-size:11px;margin-top:4px}.gof-roster-chevron{font-size:30px;color:#b86cff;text-align:center}
+.gof-roster-panel{display:none;background:#17131f;border:1px solid #382e48;border-top:0;border-radius:0 0 16px 16px;padding:12px;margin-top:-10px}
+.gof-roster-panel.open{display:block}
+.gof-access-code{display:grid;gap:8px;padding:12px;border:1px solid #5a3d70;border-radius:13px;background:#0f0c14;margin-top:9px}
+.gof-access-code code{display:block;word-break:break-all;font-size:12px;line-height:1.45;color:#f2c94c;padding:8px;background:#07070b;border-radius:8px}
+@media(max-width:650px){.gof-roster-menu-btn{min-height:68px}.gof-roster-menu-btn b{font-size:15px}}
+</style>
 </head><body><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
 <div class="gof-center-brand"><div class="gof-title">GAME ON FLAG</div><div class="gof-subtitle">CENTRO DE ADMINISTRACIÓN</div></div>
@@ -798,7 +809,83 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 </div>
 </section>
 <section class="view" id="equipos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>👥 Equipos</h2><div class="workflow-kicker" style="margin-top:6px">PASO 1 DE 7 · EQUIPOS</div><div class="card"><div class="form"><input id="en" placeholder="Nombre del equipo"/><input id="eclub" placeholder="Club / Coach / Grupo (opcional)"/><button class="primary" onclick="createTeam()">+ Crear equipo</button></div><p class="mut small">La categoría se asigna al inscribir el equipo en un torneo. El Club/Coach ayuda al generador a evitar empalmes entre equipos del mismo grupo.</p></div><div id="elist"></div><div class="gof-step-nav gof-step-1"><button type="button" onclick="setView('inicio')">← Menú principal</button><div class="step-current">Paso 1 de 7</div><button class="primary" type="button" onclick="setView('torneos')">Siguiente: Torneo →</button></div></section>
-<section class="view" id="rosters"><section class="card sportwey-review-panel"><h3>🔎 Revisión de antecedente de categoría</h3><p class="mut small">SOLO BUSCAR. Esta revisión no bloquea automáticamente al jugador ni sustituye la decisión de Administración.</p><div class="form"><select id="swPlayer"><option value="">Selecciona jugador</option></select><input id="swSource" placeholder="Fuente / URL de revisión (opcional)"><select id="swStatus"><option value="sin_antecedente">Sin antecedente</option><option value="posible_antecedente">Posible antecedente</option><option value="antecedente_confirmado">Antecedente confirmado</option><option value="revisado">Revisado</option></select><input id="swNotes" placeholder="Notas de revisión"><button class="primary" type="button" onclick="saveSportweyReviewFinal()">💾 Registrar revisión</button></div><div id="swList" class="mut small" style="margin-top:9px"></div></section><div class="card gof-exception-panel"><h3>⚠️ Excepciones de categoría</h3><p class="mut small">Golden → Silver y Silver → Bronce generan una advertencia. La administración decide si autoriza la participación; no se bloquea automáticamente.</p><div class="form"><select id="ceTournament"><option value="">Selecciona torneo</option></select><select id="ceCategory"><option value="">Selecciona categoría</option></select><select id="ceTeam"><option value="">Equipo</option></select><select id="cePlayer"><option value="">Jugador</option></select><input id="ceReason" placeholder="Motivo / autorización (opcional)"/><button class="primary" type="button" onclick="saveCategoryExceptionFinal('autorizado')">✅ Autorizar excepción</button><button class="danger" type="button" onclick="saveCategoryExceptionFinal('rechazado')">❌ Rechazar</button></div><div id="ceWarning" class="notice" style="display:none"></div><div id="ceList" class="mut small"></div></div><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📋 Rosters</h2><div class="workflow-kicker" style="margin-top:6px">PASO 3 DE 7 · ROSTERS</div><div class="notice"><b>🔐 ADMINISTRACIÓN — EDICIÓN DE ROSTER</b><br/>Administración es la versión maestra. Puedes guardar jugadores uno por uno, editar cualquier jugador y consultar los rosters completos sin mostrar 18 formularios al mismo tiempo.</div><div class="card"><h3>🔗 Enlaces de Roster para Coaches</h3><div class="form"><select id="rt"></select><select id="rc"></select><select id="re"></select><button class="gold" onclick="generateLink()">GENERAR ENLACE</button></div><p class="mut" id="linkStatus"></p><div id="linkOut"></div></div><div class="card"><h3>➕ Agregar / editar jugador</h3><div class="form"><select id="qrt"></select><select id="qrc"></select><select id="qre"></select></div><div id="quickRosterList" class="grid" style="margin-top:10px"></div><div class="card quick-player-form" style="margin-top:10px"><div class="row"><div><b id="quickRosterFormTitle">Jugador nuevo</b><div class="mut small">Guarda un jugador y el formulario se limpia para capturar al siguiente.</div></div><button type="button" onclick="clearQuickPlayerForm()">Limpiar</button></div><div class="form" style="margin-top:9px"><label class="field-label">Nombre completo<input id="qrName" placeholder="Nombre completo"></label><label class="field-label">Número de jersey<input id="qrNumber" type="number" min="0" max="99" placeholder="Número de jersey"></label><label class="field-label">Fecha de nacimiento<input id="qrDob" type="date"></label><label class="field-label">CURP <span class="mut">(solo Mom’s / +35)</span><input id="qrCurp" placeholder="CURP"></label><label class="field-label">Foto / URL<input id="qrPhoto" placeholder="URL de fotografía"></label><label class="field-label">📷 Seleccionar foto<input id="qrPhotoFile" type="file" accept="image/*" onchange="readQuickPhoto(this)"></label></div><img id="qrPhotoPreview" alt="Vista previa" style="display:none;width:76px;height:76px;object-fit:cover;border-radius:12px;margin-top:8px;border:1px solid var(--line)"><div class="toolbar" style="margin-top:10px"><button class="gold" onclick="saveQuickPlayer()">💾 GUARDAR JUGADOR</button></div></div></div><div class="card"><h3>👀 Ver Rosters</h3><div class="form"><select id="vrt"></select><select id="vrFilter"><option value="todos">Todos</option><option value="femenil">Femenil</option><option value="varonil">Varonil</option><option value="mixto">Mixto</option></select></div><div id="viewRosterList" style="margin-top:10px"></div></div><div id="adminRosterList" style="display:none"></div><div class="gof-step-nav gof-step-3"><button type="button" onclick="setView('torneos')">← Torneo</button><div class="step-current">Paso 2 de 6</div><button class="primary" type="button" onclick="setView('calendario')">Siguiente: Calendario →</button></div></section>
+<section class="view" id="rosters">
+<button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
+<h2>📋 Rosters</h2>
+<div class="workflow-kicker" style="margin-top:6px">PASO 3 DE 7 · ROSTERS</div>
+<div class="notice"><b>🔐 ADMINISTRACIÓN — EDICIÓN DE ROSTER</b><br/>Aquí tienes todas las funciones de roster en botones independientes. Abre solamente la función que necesites.</div>
+
+<div class="gof-roster-menu">
+  <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('links')"><span>🔗</span><span><b>Enlaces de Roster para Coaches</b><small>Genera el enlace y código del Coach</small></span><span class="gof-roster-chevron">›</span></button>
+  <div id="gofRosterPanel-links" class="gof-roster-panel">
+    <div class="form">
+      <select id="rt"></select><select id="rc"></select><select id="re"></select>
+      <button class="gold" type="button" onclick="generateLink()">🔗 GENERAR ENLACE Y CÓDIGO</button>
+    </div>
+    <p class="mut" id="linkStatus"></p><div id="linkOut"></div>
+  </div>
+
+  <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('edit')"><span>✏️</span><span><b>Agregar / editar jugador</b><small>Consulta jugadores y edita uno existente</small></span><span class="gof-roster-chevron">›</span></button>
+  <div id="gofRosterPanel-edit" class="gof-roster-panel">
+    <div class="form"><select id="qrt"></select><select id="qrc"></select><select id="qre"></select></div>
+    <div id="quickRosterList" class="grid" style="margin-top:10px"></div>
+  </div>
+
+  <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('new')"><span>➕</span><span><b>Jugador nuevo</b><small>Captura un jugador desde cero</small></span><span class="gof-roster-chevron">›</span></button>
+  <div id="gofRosterPanel-new" class="gof-roster-panel">
+    <div class="card quick-player-form">
+      <div class="row"><div><b id="quickRosterFormTitle">Jugador nuevo</b><div class="mut small">Guarda un jugador y el formulario se limpia para capturar al siguiente.</div></div><button type="button" onclick="clearQuickPlayerForm()">Limpiar</button></div>
+      <div class="form" style="margin-top:9px">
+        <label class="field-label">Nombre completo<input id="qrName" placeholder="Nombre completo"></label>
+        <label class="field-label">Número de jersey<input id="qrNumber" type="number" min="0" max="99" placeholder="Número de jersey"></label>
+        <label class="field-label">Fecha de nacimiento<input id="qrDob" type="date"></label>
+        <label class="field-label">CURP <span class="mut">(solo Mom’s / +35)</span><input id="qrCurp" placeholder="CURP"></label>
+        <label class="field-label">Foto / URL<input id="qrPhoto" placeholder="URL de fotografía"></label>
+        <label class="field-label">📷 Seleccionar foto<input id="qrPhotoFile" type="file" accept="image/*" onchange="readQuickPhoto(this)"></label>
+      </div>
+      <img id="qrPhotoPreview" alt="Vista previa" style="display:none;width:76px;height:76px;object-fit:cover;border-radius:12px;margin-top:8px;border:1px solid var(--line)">
+      <div class="toolbar" style="margin-top:10px"><button class="gold" type="button" onclick="saveQuickPlayer()">💾 GUARDAR JUGADOR</button></div>
+    </div>
+  </div>
+
+  <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('view')"><span>👀</span><span><b>Ver Rosters</b><small>Consulta los rosters completos por torneo</small></span><span class="gof-roster-chevron">›</span></button>
+  <div id="gofRosterPanel-view" class="gof-roster-panel">
+    <div class="form"><select id="vrt"></select><select id="vrFilter"><option value="todos">Todos</option><option value="femenil">Femenil</option><option value="varonil">Varonil</option><option value="mixto">Mixto</option></select></div>
+    <div id="viewRosterList" style="margin-top:10px"></div>
+  </div>
+
+  <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('review')"><span>🔎</span><span><b>Revisión de antecedentes de categoría</b><small>Consulta y registra una revisión</small></span><span class="gof-roster-chevron">›</span></button>
+  <div id="gofRosterPanel-review" class="gof-roster-panel">
+    <p class="mut small">SOLO BUSCAR. Esta revisión no bloquea automáticamente al jugador ni sustituye la decisión de Administración.</p>
+    <div class="form">
+      <select id="swPlayer"><option value="">Selecciona jugador</option></select>
+      <input id="swSource" placeholder="Fuente / URL de revisión (opcional)">
+      <select id="swStatus"><option value="sin_antecedente">Sin antecedente</option><option value="posible_antecedente">Posible antecedente</option><option value="antecedente_confirmado">Antecedente confirmado</option><option value="revisado">Revisado</option></select>
+      <input id="swNotes" placeholder="Notas de revisión">
+      <button class="primary" type="button" onclick="saveSportweyReviewFinal()">💾 Registrar revisión</button>
+    </div>
+    <div id="swList" class="mut small" style="margin-top:9px"></div>
+  </div>
+
+  <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('exceptions')"><span>⚠️</span><span><b>Excepciones de categoría</b><small>Autoriza o rechaza participaciones fuera de categoría</small></span><span class="gof-roster-chevron">›</span></button>
+  <div id="gofRosterPanel-exceptions" class="gof-roster-panel">
+    <p class="mut small">Golden → Silver y Silver → Bronce generan una advertencia. La administración decide si autoriza la participación; no se bloquea automáticamente.</p>
+    <div class="form">
+      <select id="ceTournament"><option value="">Selecciona torneo</option></select>
+      <select id="ceCategory"><option value="">Selecciona categoría</option></select>
+      <select id="ceTeam"><option value="">Equipo</option></select>
+      <select id="cePlayer"><option value="">Jugador</option></select>
+      <input id="ceReason" placeholder="Motivo / autorización (opcional)">
+      <button class="primary" type="button" onclick="saveCategoryExceptionFinal('autorizado')">✅ Autorizar excepción</button>
+      <button class="danger" type="button" onclick="saveCategoryExceptionFinal('rechazado')">❌ Rechazar</button>
+    </div>
+    <div id="ceWarning" class="notice" style="display:none"></div><div id="ceList" class="mut small"></div>
+  </div>
+</div>
+
+<div id="adminRosterList" style="display:none"></div>
+<div class="gof-step-nav gof-step-3"><button type="button" onclick="setView('torneos')">← Torneo</button><div class="step-current">Paso 3 de 7</div><button class="primary" type="button" onclick="setView('calendario')">Siguiente: Calendario →</button></div>
+</section>
 <section class="view" id="calendario"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📅 Calendario</h2><div class="workflow-kicker" style="margin-top:6px">PASO 4 DE 7 · CALENDARIO</div><div class="toolbar calendar-mode-bar"><button id="calModeGeneral" class="primary" type="button" onclick="setScheduleMode('general')">📊 General</button><button id="calModeCategory" type="button" onclick="setScheduleMode('category')">🏷️ Por categoría</button></div><div class="card"><div class="form"><label class="field-label">Liga<select id="ct"></select></label><label class="field-label">Categoría<select id="cc"></select></label><label class="field-label">Fecha<input id="cd" type="date"/></label><label class="field-label">Campo<input id="cf" placeholder="Campo 1–5"/></label><label class="field-label">Hora<input id="ch" type="time"/></label></div><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="generateSchedule()">🎲 Generar / regenerar categoría</button><button class="gold" onclick="generateFullTournamentSchedule()">🚀 GENERAR TODO EL TORNEO</button><button onclick="validateSchedule()">✅ Validar calendario completo</button><button class="primary" onclick="approvePublishFullCalendar()">✅📢 APROBAR Y PUBLICAR TODO</button><button onclick="manualMatch()">✏️ Crear juego manual</button></div><div class="notice">El flujo de programación es: <b>generar → revisar calendario completo → editar/mover lo necesario → validar → aprobar y publicar todo al final.</b><br/>Los partidos no se aprueban uno por uno. <b>Campo 5:</b> uso exclusivo de la administración.</div><div class="notice"><b>🔐 Solo Administración:</b> el estado de publicación y los cambios pendientes se muestran aquí. El portal público nunca muestra semáforos ni estados internos.</div></div><div class="card"><h3>🔁 Reponer semana de equipo sustituto</h3><div class="notice">Usa esto cuando un equipo entra después de que otro se dio de baja. El partido de reposición cuenta para el equipo que necesita completar sus semanas; el rival queda excluido de sus estadísticas.</div><div class="form"><select id="mt"></select><select id="mc"></select><select id="mmake"></select><select id="mopp"></select><input id="mround" min="1" placeholder="Semana de reposición" type="number"/><input id="mdate" type="date"/><input id="mtime" type="time"/><input id="mfield" placeholder="Cancha"/><input id="mnote" placeholder="Motivo / observación"/></div><div class="toolbar" style="margin-top:9px"><button class="gold" onclick="createMakeupMatch()">➕ Crear partido de reposición</button></div><div class="mut small" id="makeupStatus" style="margin-top:8px"></div></div><div id="scheduleList"></div><div class="gof-step-nav gof-step-4"><button type="button" onclick="setView('rosters')">← Rosters</button><div class="step-current">Paso 3 de 6</div><button class="primary" type="button" onclick="setView('resultados')">Siguiente: Resultados →</button></div></section>
 <section class="view" id="resultados"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏈 Resultados</h2><div class="workflow-kicker" style="margin-top:6px">PASO 5 DE 7 · RESULTADOS</div><div class="notice">INCOMPARECENCIA = <b>18–0</b>. El equipo ausente conserva el adeudo del arbitraje.</div><div id="resultsList"></div><div class="gof-step-nav gof-step-5"><button type="button" onclick="setView('calendario')">← Calendario</button><div class="step-current">Paso 4 de 6</div><button class="primary" type="button" onclick="setView('tabla')">Siguiente: Tabla →</button></div></section>
 <section class="view" id="tabla"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📊 Tabla de posiciones</h2><div class="workflow-kicker" style="margin-top:6px">PASO 6 DE 7 · TABLA</div><div class="card"><div class="form"><select id="st"></select><select id="sc"></select></div></div><div id="standings"></div><div class="gof-step-nav gof-step-6"><button type="button" onclick="setView('resultados')">← Resultados</button><div class="step-current">Paso 5 de 6</div><button class="primary" type="button" onclick="setView('playoffs')">Siguiente: Playoffs →</button></div></section>
@@ -1421,7 +1508,28 @@ function readQuickPhoto(input){const file=input.files?.[0];if(!file)return;const
 async function saveQuickPlayer(){const tid=val('qrt'),cat=val('qrc'),team=val('qre');if(!tid||!cat||!team)return alert('Selecciona torneo, categoría y equipo.');const name=val('qrName').trim(),num=val('qrNumber').trim(),dob=val('qrDob'),photo=val('qrPhoto').trim(),curp=val('qrCurp').trim();if(!name||!num||!dob||!photo)return alert('Nombre, número, fecha de nacimiento y foto son obligatorios.');const rows=await fetchQuickRoster();const idx=quickRosterContext.editing?rows.findIndex(x=>x.player_id===quickRosterContext.editing):-1;const item={player_id:quickRosterContext.editing||null,full_name:name,photo_url:photo,jersey_number:num,curp,date_of_birth:dob};if(idx>=0)rows[idx]=item;else rows.push(item);if(rows.length>18)return alert('El roster no puede tener más de 18 jugadores.');if(rows.some((x,i)=>rows.findIndex(y=>String(y.jersey_number)===String(x.jersey_number))!==i))return alert('No puede haber números de jersey duplicados.');const {data,error}=await sb.rpc('admin_save_roster',{p_tournament_id:tid,p_category_id:cat,p_team_id:team,p_players:rows});if(error)return alert(error.message);toast(quickRosterContext.editing?'Jugador actualizado correctamente':'Jugador guardado correctamente');clearQuickPlayerForm();await loadQuickRoster()}
 async function loadViewRosterSelectors(){const sel=document.getElementById('vrt');if(!sel)return;const {data:t}=await sb.from('tournaments').select('id,name,status').order('created_at',{ascending:false});fill('vrt',t||[],'id','name');await loadViewRosters()}
 async function loadViewRosters(){const tid=val('vrt'),filter=val('vrFilter')||'todos',out=document.getElementById('viewRosterList');if(!out||!tid){if(out)out.innerHTML='<div class="empty">Selecciona un torneo.</div>';return}const {data:ins,error}=await sb.from('tournament_teams').select('team_id,category_id,categories(id,name),teams(id,name)').eq('tournament_id',tid).eq('is_active',true);if(error)return alert(error.message);const rows=(ins||[]).filter(x=>{const n=String(x.categories?.name||'').toLowerCase();return filter==='todos'||n.includes(filter)});if(!rows.length){out.innerHTML='<div class="empty">No hay equipos para ese filtro.</div>';return}const cards=[];for(const r of rows){const {data:players}=await sb.rpc('public_get_roster',{p_tournament_id:tid,p_category_id:r.category_id,p_team_id:r.team_id});const ps=players||[];cards.push(`<details class="card roster-view-card"><summary><b>${esc(r.teams?.name||'Equipo')}</b><span class="tag">${esc(r.categories?.name||'Categoría')} · ${ps.length}/18</span></summary><div style="margin-top:9px">${ps.length?`<div class="roster-mini-grid">${ps.map(p=>`<div class="roster-mini-player"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')}${p.date_of_birth?' · '+esc(p.date_of_birth):''}</div></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div></details>`)}out.innerHTML=cards.join('')}
-async function generateLink(){const tournament_id=val('rt'),category_id=val('rc'),team_id=val('re');if(!tournament_id||!category_id||!team_id)return alert('Selecciona torneo, categoría y equipo.');const {data:token,error}=await sb.rpc('create_roster_access_link',{p_tournament_id:tournament_id,p_category_id:category_id,p_team_id:team_id,p_expires_at:null});if(error)return alert(error.message);const base=new URL('roster-1.html',window.location.href).href;const link=base+'?token='+encodeURIComponent(token);document.getElementById('linkStatus').textContent='Enlace activo mientras el torneo esté en Próximo.';document.getElementById('linkOut').innerHTML=`<input id="linkField" value="${esc(link)}" readonly style="margin-top:8px" onclick="this.select()"><div class="toolbar" style="margin-top:8px"><button class="gold" onclick="copyLink()">📋 COPIAR ENLACE</button><button onclick="openRosterLink()">🔗 ABRIR ENLACE</button></div>`}
+async function generateLink(){
+  const tournament_id=val('rt'),category_id=val('rc'),team_id=val('re');
+  if(!tournament_id||!category_id||!team_id)return alert('Selecciona torneo, categoría y equipo.');
+  const {data:token,error}=await sb.rpc('create_roster_access_link',{p_tournament_id:tournament_id,p_category_id:category_id,p_team_id:team_id,p_expires_at:null});
+  if(error)return alert(error.message);
+  const base=new URL('roster-1.html',window.location.href);
+  base.search='';
+  base.hash='';
+  const link=base.href+'?token='+encodeURIComponent(token);
+  document.getElementById('linkStatus').textContent='Enlace activo mientras el torneo esté en Próximo. El código es único para este equipo y categoría.';
+  document.getElementById('linkOut').innerHTML=
+    `<div class="gof-access-code"><b>🔐 CÓDIGO DE ACCESO DEL COACH</b><code>${esc(token)}</code><button type="button" class="gold" onclick="copyCoachCode()">📋 COPIAR CÓDIGO</button></div>
+     <input id="linkField" value="${esc(link)}" readonly style="margin-top:8px" onclick="this.select()">
+     <div class="toolbar" style="margin-top:8px"><button type="button" class="gold" onclick="copyLink()">📋 COPIAR ENLACE</button><button type="button" onclick="openRosterLink()">🔗 ABRIR ROSTER DEL COACH</button></div>`;
+}
+async function copyCoachCode(){
+  const el=document.querySelector('#linkOut .gof-access-code code');if(!el)return;
+  const code=el.textContent.trim();
+  try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(code);toast('Código copiado.');return}}catch(e){}
+  try{const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Código copiado.');return}catch(e){}
+  prompt('Copia este código:',code);
+}
 async function copyLink(){const f=document.getElementById('linkField');if(!f)return;const link=f.value;f.focus();f.select();try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(link);toast('Enlace copiado.');return}}catch(e){}try{document.execCommand('copy');toast('Enlace copiado.');return}catch(e){}prompt('Copia este enlace:',link)}
 function openRosterLink(){const f=document.getElementById('linkField');if(f&&f.value)window.open(f.value,'_blank')}
 async function loadMakeupSelectors(){const tid=val('mt'),cat=val('mc');if(!tid){return}const {data:tc}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);fill('mc',(tc||[]).map(x=>({id:x.category_id,name:x.categories.name})),'id','name');await loadMakeupTeams()}
@@ -2284,6 +2392,25 @@ async function renderCredentialFinal(){const tid=val('crTournament'),cid=val('cr
 async function saveSportweyReviewFinal(){const pid=val('swPlayer'),status=val('swStatus'),source=val('swSource').trim()||null,notes=val('swNotes').trim()||null;if(!pid)return alert('Selecciona un jugador.');await loadLeagueContextFinal();const u=(await sb.auth.getUser()).data.user;if(!gofCurrentOrganizationId||!u?.id)return alert('No hay organización activa.');const {error}=await sb.from('sportwey_review_log').insert({league_id:gofCurrentOrganizationId,player_id:pid,status,source_url:source,notes,reviewed_by:u.id,reviewed_at:new Date().toISOString()});if(error)return alert(error.message);toast('Revisión registrada');document.getElementById('swNotes').value='';await loadSportweyReviewsFinal()}
 async function loadSportweyReviewsFinal(){const box=document.getElementById('swList');if(!box||!sb)return;const {data,error}=await sb.from('sportwey_review_log').select('status,source_url,notes,reviewed_at,players(full_name)').eq('league_id',gofCurrentOrganizationId).order('reviewed_at',{ascending:false}).limit(20);if(error){box.textContent='No se pudo consultar el historial de revisión.';return}box.innerHTML=(data||[]).map(x=>`<div>• <b>${esc(x.players?.full_name||'Jugador')}</b> — ${esc(x.status)}${x.source_url?' · '+esc(x.source_url):''}${x.notes?' · '+esc(x.notes):''}</div>`).join('')||'Sin revisiones registradas.'}
 (function(){const bind=()=>{for(const id of ['crTournament','crCategory','crTeam']){const e=document.getElementById(id);if(e&&!e.dataset.gofBound){e.dataset.gofBound='1';e.onchange=id==='crTournament'||id==='crCategory'?loadCredentialTeamsFinal:loadCredentialPlayersFinal}}};const oldSet=window.setView;window.setView=async function(v){const r=oldSet.apply(this,arguments);if(v==='credenciales'||v==='rosters'){try{await loadCredentialSelectorsFinal()}catch(e){console.warn('GAME ON FLAG module load',e)}}bind();return r};})();
+</script>
+
+<script id="gof-roster-accordion-final">
+function gofRosterPanel(name){
+  const ids=['links','edit','new','view','review','exceptions'];
+  ids.forEach(id=>{
+    const p=document.getElementById('gofRosterPanel-'+id);
+    if(p)p.classList.toggle('open',id===name && !p.classList.contains('open'));
+  });
+  const p=document.getElementById('gofRosterPanel-'+name);
+  if(!p||!p.classList.contains('open'))return;
+  try{
+    if(name==='links') loadRosterSelects();
+    if(name==='edit') loadQuickRosterSelectors();
+    if(name==='view') loadViewRosterSelectors();
+    if(name==='review'){loadLeagueContextFinal().then(()=>{loadCredentialSelectorsFinal();loadSportweyReviewsFinal();}).catch(console.warn);}
+    if(name==='exceptions'){loadLeagueContextFinal().then(()=>{if(window.loadRosterSelects)window.loadRosterSelects();loadCategoryExceptionsFinal();}).catch(console.warn);}
+  }catch(e){console.error('GAME ON FLAG roster:',e)}
+}
 </script>
 <script id="gof-clean-state-guard">
 /* GAME ON FLAG — CLEAN VERSION GUARD

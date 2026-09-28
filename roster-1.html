@@ -18,7 +18,9 @@
 
 <section class="card">
 <div class="notice"><b>📋 Registro rápido del roster</b><br>
-Agrega a los jugadores <b>uno por uno</b>. Al guardar un jugador, el formulario se limpia automáticamente para capturar al siguiente. La <b>CURP se muestra en todos los formularios</b>; solo es obligatoria en <b>Mom's, 30+ y 35+</b>.
+Agrega a los jugadores <b>uno por uno</b>. Al guardar un jugador, el formulario se limpia automáticamente para capturar al siguiente.<br><br>
+⚠️ <b>IMPORTANTE:</b> solo puedes registrar jugadores de la categoría de este equipo. <b>Está prohibido registrar jugadores de otra categoría.</b> Por ejemplo: un jugador <b>Golden</b> no puede jugar en <b>Silver</b>, y un jugador <b>Silver</b> no puede jugar en <b>Bronce</b>.<br><br>
+La <b>CURP se muestra en todos los formularios</b>; solo es obligatoria en <b>Mom's, 30+ y 35+</b>.
 </div>
 </section>
 
@@ -36,7 +38,7 @@ Agrega a los jugadores <b>uno por uno</b>. Al guardar un jugador, el formulario 
 <div class="field"><label>Número de jersey <span class="required">*</span></label><input id="jersey" type="number" min="0" max="99" inputmode="numeric" placeholder="Número de jersey"></div>
 <div class="field"><label>Fecha de nacimiento <span class="optional">(opcional)</span></label><input id="dob" type="date"></div>
 <div class="field"><label>CURP <span id="curpHint" class="optional">(opcional, según categoría)</span></label><input id="curp" maxlength="18" placeholder="CURP" autocomplete="off"></div>
-<div class="field"><label>📷 Fotografía <span class="required">*</span></label><div class="photo-preview"><img id="photoPreview" alt="Vista previa" style="display:none"><input id="photoFile" type="file" accept="image/*" onchange="photoSelected(this)"></div><div class="mut">La fotografía es opcional.</div></div>
+<div class="field"><label>📷 Fotografía <span class="required">*</span></label><div class="photo-preview"><img id="photoPreview" alt="Vista previa" style="display:none"><input id="photoFile" type="file" accept="image/*" onchange="photoSelected(this)"></div><div class="mut">La fotografía es obligatoria.</div></div>
 </div>
 <div class="savebar"><button id="saveBtn" class="gold" style="width:100%" onclick="savePlayer()">💾 GUARDAR JUGADOR</button></div>
 <div id="msg" class="mut" style="margin-top:10px"></div>
@@ -125,10 +127,10 @@ async function persistRoster(){
  return data;
 }
 
-async function deletePlayerFromServer(playerId){
- const {data,error}=await sb.rpc('delete_roster_player_with_access_link',{
+async function deletePlayerFromServer(rosterRegistrationId){
+ const {data,error}=await sb.rpc('delete_roster_registration_with_access_link',{
    p_token:token,
-   p_player_id:playerId
+   p_roster_registration_id:rosterRegistrationId
  });
  if(error)throw error;
  return data;
@@ -183,17 +185,17 @@ async function deletePlayer(i){
  if(info?.coach_can_edit===false)return alert('El torneo ya inició. Solo Administración puede modificar el roster.');
  const player=players[i];
  if(!player)return;
- if(!player.player_id)return alert('No se pudo identificar al jugador. Recarga el roster e inténtalo de nuevo.');
+ if(!player.roster_registration_id)return alert('No se pudo identificar el registro del jugador. Recarga el roster e inténtalo de nuevo.');
  if(!confirm('¿Eliminar a '+player.full_name+' del roster?'))return;
  const row=document.querySelectorAll('.player-row')[i];
  const buttons=row?.querySelectorAll('button');
  if(buttons)buttons.forEach(b=>b.disabled=true);
  msg('🗑️ Eliminando jugador...');
  try{
-   const result=await deletePlayerFromServer(player.player_id);
+   const result=await deletePlayerFromServer(player.roster_registration_id);
    await reloadRosterFromServer();
-   if(players.some(p=>p.player_id===player.player_id)){
-     throw new Error('Supabase confirmó la operación, pero el jugador sigue apareciendo en el roster.');
+   if(players.some(p=>p.roster_registration_id===player.roster_registration_id)){
+     throw new Error('El jugador sigue apareciendo en el roster después de eliminarlo.');
    }
    if(editingIndex!==null)clearForm(); else render();
    msg('🗑️ '+player.full_name+' fue eliminado correctamente.','ok');

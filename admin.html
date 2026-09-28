@@ -748,6 +748,11 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 .enrolled-item{display:grid!important;grid-template-columns:28px minmax(0,1fr) 38px 38px!important;align-items:center!important;gap:7px!important}
 .enrolled-team-copy{min-width:0;display:flex;flex-direction:column;gap:2px}.enrolled-team-copy b{overflow-wrap:anywhere}.enrolled-team-copy small{color:var(--mut);font-size:11px}.enrolled-edit,.enrolled-delete{width:36px!important;height:36px!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:10px!important}
 </style>
+<style>
+.category-edit-wrap{display:flex;align-items:stretch;gap:8px}
+.category-edit-wrap select{flex:1;min-width:0}
+#btnRenameOtros{border:1px solid #b15cff;background:#24172f;color:#fff;border-radius:12px;padding:0 13px;font-weight:900;white-space:nowrap}
+</style>
 </head><body><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
 <div class="gof-center-brand"><div class="gof-title">GAME ON FLAG</div><div class="gof-subtitle">CENTRO DE ADMINISTRACIÓN</div></div>
@@ -1194,12 +1199,20 @@ function clearTeamEntry(){const n=document.getElementById('aeName'),c=document.g
 function renderEnrollmentEmpty(){const out=document.getElementById('enrolled');if(out)out.innerHTML='<div class="mut">📋 Selecciona un torneo y una categoría para ver los equipos inscritos.</div>';}
 async function loadEnrollmentCategories(tournamentId){
   const catEl=document.getElementById('ac');
-  const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tournamentId);
-  if(error){console.error('GAME ON FLAG categorías del torneo:',error);catEl.innerHTML='<option value="">No se pudieron cargar las categorías</option>';return;}
-  const cats=(data||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'})).filter(x=>x.id);
-  if(!cats.length){catEl.innerHTML='<option value="">Este torneo no tiene categorías</option>';renderEnrollmentEmpty();return;}
+  if(!catEl||!sb)return;
+  const {data,error}=await sb.from('categories').select('id,name').eq('league_id',gofCurrentOrganizationId).order('name');
+  if(error){
+    console.error('GAME ON FLAG categorías de la liga:',error);
+    catEl.innerHTML='<option value="">No se pudieron cargar las categorías</option>';
+    renderEnrollmentEmpty(); syncOtrosRenameButton(); return;
+  }
+  const cats=(data||[]).map(x=>({id:x.id,name:x.name})).filter(x=>x.id&&x.name);
+  if(!cats.length){
+    catEl.innerHTML='<option value="">No hay categorías creadas</option>';
+    renderEnrollmentEmpty(); syncOtrosRenameButton(); return;
+  }
   catEl.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
-  catEl.value='';clearTeamEntry();renderEnrollmentEmpty();syncOtrosRenameButton();
+  catEl.value=''; clearTeamEntry(); renderEnrollmentEmpty(); syncOtrosRenameButton();
 }
 function syncOtrosRenameButton(){const sel=document.getElementById('ac'),btn=document.getElementById('btnRenameOtros');if(!sel||!btn)return;const opt=sel.options[sel.selectedIndex];const isOtros=String(opt?.textContent||'').trim().toUpperCase()==='OTROS';btn.style.display=isOtros?'inline-block':'none';btn.textContent=isOtros?'✏️ Renombrar OTROS':'✏️';}
 async function renameOtrosCategory(){const sel=document.getElementById('ac');if(!sel?.value)return;const opt=sel.options[sel.selectedIndex];const current=String(opt?.textContent||'').trim();if(current.toUpperCase()!=='OTROS')return alert('El lápiz solo está disponible para la categoría OTROS.');const next=prompt('Nuevo nombre para la categoría OTROS:', '');if(next===null)return;const name=next.trim();if(!name)return alert('El nombre no puede quedar vacío.');if(name.toUpperCase()==='OTROS')return alert('Escribe un nombre diferente de OTROS.');const {error}=await sb.from('categories').update({name}).eq('id',sel.value).eq('league_id',gofCurrentOrganizationId);if(error)return alert(error.message);toast('Categoría renombrada correctamente');await loadEnrollmentSelectors();await refreshAllSelectors();}

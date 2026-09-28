@@ -855,7 +855,7 @@ function makeClient(){
 }
 try{sb=makeClient()}catch(e){console.error(e)}
 function toast(x){const t=document.getElementById('toast');t.textContent=x;t.style.display='block';setTimeout(()=>t.style.display='none',2600)}
-function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}function val(id){return document.getElementById(id)?.value||''}function fill(id,data,key,label){const el=document.getElementById(id);if(!el)return;const old=el.value;el.innerHTML=(data||[]).map(x=>`<option value="${esc(x[key])}">${esc(x[label])}</option>`).join('');if(old&&[...el.options].some(o=>o.value===old))el.value=old}
+function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}function val(id){return document.getElementById(id)?.value||''}function fill(id,data,key,label,placeholder){const el=document.getElementById(id);if(!el)return;const old=el.value;el.innerHTML=(placeholder?`<option value="">${esc(placeholder)}</option>`:'')+(data||[]).map(x=>`<option value="${esc(x[key])}">${esc(x[label])}</option>`).join('');if(old&&[...el.options].some(o=>o.value===old))el.value=old}
 async function loadFinance(){
   const sel=document.getElementById('finT'); if(!sel||!sb)return;
   const {data:tournaments,error:te}=await sb.from('tournaments').select('id,name,season,tournament_type').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});
@@ -1155,7 +1155,26 @@ async function deleteTournament(id,name){
   const typed=window.prompt('Escribe ACEPTAR para confirmar la eliminación definitiva:'); if(typed!=='ACEPTAR')return alert('Eliminación cancelada.');
   const {error}=await sb.rpc('delete_tournament',{p_tournament_id:id});if(error)return alert(error.message);toast('Torneo eliminado definitivamente');await loadT();refreshDashboard();await loadMisLigas();
 }
-async function loadEnrollmentSelectors(){const {data:t}=await sb.from('tournaments').select('id,name').eq('league_id',gofCurrentOrganizationId).eq('status','proximo').order('created_at',{ascending:false});fill('at',t,'id','name');const {data:c}=await sb.from('categories').select('id,name').eq('league_id',gofCurrentOrganizationId).order('name');fill('ac',c,'id','name');const {data:e}=await sb.from('teams').select('id,name').eq('league_id',gofCurrentOrganizationId).order('name');fill('ae',e,'id','name');await loadEnrolled()}
+async function loadEnrollmentSelectors(){
+  if(!sb||!gofCurrentOrganizationId)return;
+  const tourEl=document.getElementById('at'),catEl=document.getElementById('ac'),teamEl=document.getElementById('ae');
+  if(tourEl)tourEl.innerHTML='<option value="">Selecciona torneo</option>';
+  if(catEl)catEl.innerHTML='<option value="">Selecciona categoría</option>';
+  if(teamEl)teamEl.innerHTML='<option value="">Selecciona equipo</option>';
+  const {data:t,error:te}=await sb.from('tournaments').select('id,name').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
+  if(te){console.error('GAME ON FLAG torneos:',te);if(tourEl)tourEl.innerHTML='<option value="">Error al cargar torneos</option>';}
+  else fill('at',t,'id','name','Selecciona torneo');
+  const {data:c,error:ce}=await sb.from('categories').select('id,name').eq('league_id',gofCurrentOrganizationId).order('name');
+  if(ce){console.error('GAME ON FLAG categorías:',ce);if(catEl)catEl.innerHTML='<option value="">Error al cargar categorías</option>';}
+  else if(!(c||[]).length){if(catEl)catEl.innerHTML='<option value="">No hay categorías creadas</option>';} 
+  else fill('ac',c,'id','name','Selecciona categoría');
+  const {data:e,error:ee}=await sb.from('teams').select('id,name').eq('league_id',gofCurrentOrganizationId).order('name');
+  if(ee){console.error('GAME ON FLAG equipos:',ee);if(teamEl)teamEl.innerHTML='<option value="">Error al cargar equipos</option>';}
+  else fill('ae',e,'id','name','Selecciona equipo');
+  if(catEl)catEl.onchange=syncOtrosRenameButton;
+  syncOtrosRenameButton();
+  await loadEnrolled();
+}
 function syncOtrosRenameButton(){const sel=document.getElementById('ac'),btn=document.getElementById('btnRenameOtros');if(!sel||!btn)return;const opt=sel.options[sel.selectedIndex];const isOtros=String(opt?.textContent||'').trim().toUpperCase()==='OTROS';btn.style.display=isOtros?'inline-block':'none';btn.textContent=isOtros?'✏️ Renombrar OTROS':'✏️';}
 async function renameOtrosCategory(){const sel=document.getElementById('ac');if(!sel?.value)return;const opt=sel.options[sel.selectedIndex];const current=String(opt?.textContent||'').trim();if(current.toUpperCase()!=='OTROS')return alert('El lápiz solo está disponible para la categoría OTROS.');const next=prompt('Nuevo nombre para la categoría OTROS:', '');if(next===null)return;const name=next.trim();if(!name)return alert('El nombre no puede quedar vacío.');if(name.toUpperCase()==='OTROS')return alert('Escribe un nombre diferente de OTROS.');const {error}=await sb.from('categories').update({name}).eq('id',sel.value).eq('league_id',gofCurrentOrganizationId);if(error)return alert(error.message);toast('Categoría renombrada correctamente');await loadEnrollmentSelectors();await refreshAllSelectors();}
 

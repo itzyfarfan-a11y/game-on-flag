@@ -154,8 +154,8 @@ async function savePlayer(){
  const duplicate=players.findIndex((p,i)=>i!==editingIndex&&String(p.jersey_number)===String(num));
  if(duplicate>=0)return alert('Ese número de jersey ya está registrado en el roster.');
 
- const item={...(wasEditing&&players[editingIndex]?.player_id?{player_id:players[editingIndex].player_id}:{}),full_name:name,jersey_number:num,date_of_birth:dob,curp,photo_url:photo};
  const wasEditing=editingIndex!==null;
+ const item={...(wasEditing&&players[editingIndex]?.player_id?{player_id:players[editingIndex].player_id}:{}),full_name:name,jersey_number:num,date_of_birth:dob,curp,photo_url:photo};
  const previous=wasEditing?players[editingIndex]:null;
  if(wasEditing)players[editingIndex]=item;else players.push(item);
  if(players.length>18){if(!wasEditing)players.pop();return alert('El roster no puede tener más de 18 jugadores.');}
@@ -178,15 +178,22 @@ async function deletePlayer(i){
  if(!player)return;
  if(!player.player_id)return alert('No se pudo identificar al jugador. Recarga el roster e inténtalo de nuevo.');
  if(!confirm('¿Eliminar a '+player.full_name+' del roster?'))return;
-
- msg('Eliminando jugador...');
+ const row=document.querySelectorAll('.player-row')[i];
+ const buttons=row?.querySelectorAll('button');
+ if(buttons)buttons.forEach(b=>b.disabled=true);
+ msg('🗑️ Eliminando jugador...');
  try{
-   await deletePlayerFromServer(player.player_id);
+   const result=await deletePlayerFromServer(player.player_id);
    await reloadRosterFromServer();
-   clearForm();
-   msg('🗑️ Jugador eliminado correctamente.','ok');
+   if(players.some(p=>p.player_id===player.player_id)){
+     throw new Error('Supabase confirmó la operación, pero el jugador sigue apareciendo en el roster.');
+   }
+   if(editingIndex!==null)clearForm(); else render();
+   msg('🗑️ '+player.full_name+' fue eliminado correctamente.','ok');
  }catch(error){
+   render();
    msg(error.message||'No se pudo eliminar el jugador.','error');
+   alert(error.message||'No se pudo eliminar el jugador.');
  }
 }
 

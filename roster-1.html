@@ -11,7 +11,7 @@
 </head>
 <body>
 <main class="app">
-<div class="brand">GAME ON FLAG</div><div class="sub">ROSTER DEL COACH · V3</div>
+<div class="brand">GAME ON FLAG</div><div class="sub">ROSTER DEL COACH · V4</div>
 <section id="loading" class="card hero">Cargando enlace...</section>
 <section id="app" style="display:none">
 <section class="card hero"><h1 id="team">Equipo</h1><div id="meta" class="mut"></div><p class="mut">Código de acceso válido para este equipo y categoría.</p></section>
@@ -45,7 +45,7 @@ La <b>CURP se muestra en todos los formularios</b>; solo es obligatoria en <b>Mo
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const ROSTER_BUILD='2026-09-28-V3-DELETE-ID-FALLBACK';
+const ROSTER_BUILD='2026-09-28-V4-DELETE-ROW';
 const SUPABASE_URL='https://picivrqgmckrwutarhyw.supabase.co',SUPABASE_ANON_KEY='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const token=new URLSearchParams(location.search).get('token');
@@ -75,7 +75,7 @@ function fillForm(p){
 }
 function editPlayer(i){if(info?.coach_can_edit===false)return alert('El torneo ya inició. Solo Administración puede modificar el roster.');if(!players[i])return;editingIndex=i;fillForm(players[i]);msg('Corrige los datos y pulsa Guardar cambios.')}
 async function persistRoster(){const payload=players.map(p=>({...p,curp:p.curp?.trim()||null}));const {data,error}=await sb.rpc('submit_roster_with_access_link',{p_token:token,p_players:payload});if(error)throw error;return data}
-async function deletePlayerFromServer(rosterRegistrationId,playerId){const {data,error}=await sb.rpc('delete_roster_registration_v3_with_access_link',{p_token:token,p_roster_registration_id:rosterRegistrationId,p_player_id:playerId||null});if(error)throw error;if(!data?.ok||Number(data?.deleted_rows)!==1)throw new Error('No se confirmó la eliminación del registro.');return data}
+async function deletePlayerFromServer(rosterRegistrationId,playerId,jerseyNumber,fullName){const {data,error}=await sb.rpc('delete_roster_registration_v4_with_access_link',{p_token:token,p_roster_registration_id:rosterRegistrationId,p_player_id:playerId||null,p_jersey_number:Number.isFinite(Number(jerseyNumber))?Number(jerseyNumber):null,p_full_name:fullName||''});if(error)throw error;if(!data?.ok||Number(data?.deleted_rows)!==1)throw new Error('No se confirmó la eliminación de la fila seleccionada.');return data}
 async function reloadRosterFromServer(){const {data,error}=await sb.rpc('get_roster_with_access_link',{p_token:token});if(error)throw error;players=(data.players||[]).map(p=>({...blankPlayer(),...p}));info=data;render()}
 async function savePlayer(){
  const name=document.getElementById('fullName').value.trim(),num=document.getElementById('jersey').value.trim(),dob=document.getElementById('dob').value,curp=document.getElementById('curp').value.trim().toUpperCase(),photo=currentPhoto,req=curpRequired();
@@ -92,7 +92,7 @@ async function deletePlayer(i){
  if(info?.coach_can_edit===false)return alert('El torneo ya inició. Solo Administración puede modificar el roster.');
  const player=players[i];if(!player)return;if(!player.roster_registration_id)return alert('No se pudo identificar el registro del jugador. Recarga el roster e inténtalo de nuevo.');if(!confirm('¿Eliminar a '+player.full_name+' del roster?'))return;
  const row=document.querySelectorAll('.player-row')[i],buttons=row?.querySelectorAll('button');if(buttons)buttons.forEach(b=>b.disabled=true);msg('🗑️ Eliminando jugador...');
- try{await deletePlayerFromServer(player.roster_registration_id,player.player_id);await reloadRosterFromServer();if(players.some(p=>p.roster_registration_id===player.roster_registration_id))throw new Error('El jugador sigue apareciendo en el roster después de eliminarlo.');if(editingIndex!==null)clearForm();else render();msg('🗑️ '+player.full_name+' fue eliminado correctamente. Registro eliminado.','ok')}catch(error){render();msg(error.message||'No se pudo eliminar el jugador.','error');alert(error.message||'No se pudo eliminar el jugador.')}
+ try{await deletePlayerFromServer(player.roster_registration_id,player.player_id,player.jersey_number,player.full_name);await reloadRosterFromServer();if(players.some(p=>p.roster_registration_id===player.roster_registration_id))throw new Error('El jugador sigue apareciendo en el roster después de eliminarlo.');if(editingIndex!==null)clearForm();else render();msg('🗑️ '+player.full_name+' fue eliminado correctamente. Registro eliminado.','ok')}catch(error){render();msg(error.message||'No se pudo eliminar el jugador.','error');alert(error.message||'No se pudo eliminar el jugador.')}
 }
 function photoSelected(input){
  const file=input.files?.[0];if(!file)return;if(file.size>4*1024*1024)return alert('La foto debe pesar máximo 4 MB.');const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=900,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext('2d').drawImage(img,0,0,c.width,c.height);currentPhoto=c.toDataURL('image/jpeg',.78);const preview=document.getElementById('photoPreview');preview.src=currentPhoto;preview.style.display='block'};img.src=reader.result};reader.readAsDataURL(file)

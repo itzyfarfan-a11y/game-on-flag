@@ -34,9 +34,9 @@ Agrega a los jugadores <b>uno por uno</b>. Al guardar un jugador, el formulario 
 <div class="form">
 <div class="field"><label>Nombre completo <span class="required">*</span></label><input id="fullName" placeholder="Nombre completo" autocomplete="name"></div>
 <div class="field"><label>Número de jersey <span class="required">*</span></label><input id="jersey" type="number" min="0" max="99" inputmode="numeric" placeholder="Número de jersey"></div>
-<div class="field"><label>Fecha de nacimiento <span class="required">*</span></label><input id="dob" type="date"></div>
+<div class="field"><label>Fecha de nacimiento <span class="optional">(opcional)</span></label><input id="dob" type="date"></div>
 <div class="field"><label>CURP <span id="curpHint" class="optional">(opcional, según categoría)</span></label><input id="curp" maxlength="18" placeholder="CURP" autocomplete="off"></div>
-<div class="field"><label>📷 Fotografía <span class="required">*</span></label><div class="photo-preview"><img id="photoPreview" alt="Vista previa" style="display:none"><input id="photoFile" type="file" accept="image/*" onchange="photoSelected(this)"></div><div class="mut">La fotografía es obligatoria.</div></div>
+<div class="field"><label>📷 Fotografía <span class="required">*</span></label><div class="photo-preview"><img id="photoPreview" alt="Vista previa" style="display:none"><input id="photoFile" type="file" accept="image/*" onchange="photoSelected(this)"></div><div class="mut">La fotografía es opcional.</div></div>
 </div>
 <div class="savebar"><button id="saveBtn" class="gold" style="width:100%" onclick="savePlayer()">💾 GUARDAR JUGADOR</button></div>
 <div id="msg" class="mut" style="margin-top:10px"></div>
@@ -79,6 +79,9 @@ function render(){
  document.getElementById('formTitle').textContent=editingIndex===null?'➕ Jugador '+(players.length+1):'✏️ Editar jugador '+(editingIndex+1);
  document.getElementById('saveBtn').textContent=editingIndex===null?'💾 GUARDAR JUGADOR':'💾 GUARDAR CAMBIOS';
  document.getElementById('curpHint').textContent=curpRequired()?'(obligatoria en esta categoría)':'(opcional en esta categoría)';
+ const locked=info?.coach_can_edit===false;
+ document.getElementById('captureCard').style.display=locked?'none':'block';
+ document.getElementById('meta').textContent=(info?.category||'Categoría')+(locked?' · 🔒 Torneo iniciado — roster bloqueado para coach':'');
 }
 
 function clearForm(){
@@ -108,6 +111,7 @@ function fillForm(p){
 }
 
 function editPlayer(i){
+ if(info?.coach_can_edit===false)return alert('El torneo ya inició. Solo Administración puede modificar el roster.');
  if(!players[i])return;
  editingIndex=i;
  fillForm(players[i]);
@@ -147,15 +151,17 @@ async function savePlayer(){
  const photo=currentPhoto;
  const req=curpRequired();
 
- if(!name||!/^[0-9]+$/.test(num)||Number(num)<0||Number(num)>99||!dob||!photo){
-   return alert('Completa nombre, número de jersey, fecha de nacimiento y fotografía.');
+ if(!name||!/^[0-9]+$/.test(num)||Number(num)<0||Number(num)>99||!photo){
+   return alert('Completa nombre completo, número de jersey y fotografía.');
  }
+ if(info?.coach_can_edit===false)return alert('El torneo ya inició. Solo Administración puede modificar el roster.');
  if(req&&!curp)return alert('La CURP es obligatoria para esta categoría.');
  const duplicate=players.findIndex((p,i)=>i!==editingIndex&&String(p.jersey_number)===String(num));
  if(duplicate>=0)return alert('Ese número de jersey ya está registrado en el roster.');
 
  const wasEditing=editingIndex!==null;
- const item={...(wasEditing&&players[editingIndex]?.player_id?{player_id:players[editingIndex].player_id}:{}),full_name:name,jersey_number:num,date_of_birth:dob,curp,photo_url:photo};
+ const old=wasEditing?players[editingIndex]:null;
+ const item={...(wasEditing&&old?.player_id?{player_id:old.player_id}:{}),full_name:name,jersey_number:num,date_of_birth:dob||null,curp,photo_url:photo||old?.photo_url||''};
  const previous=wasEditing?players[editingIndex]:null;
  if(wasEditing)players[editingIndex]=item;else players.push(item);
  if(players.length>18){if(!wasEditing)players.pop();return alert('El roster no puede tener más de 18 jugadores.');}
@@ -174,6 +180,7 @@ async function savePlayer(){
 }
 
 async function deletePlayer(i){
+ if(info?.coach_can_edit===false)return alert('El torneo ya inició. Solo Administración puede modificar el roster.');
  const player=players[i];
  if(!player)return;
  if(!player.player_id)return alert('No se pudo identificar al jugador. Recarga el roster e inténtalo de nuevo.');

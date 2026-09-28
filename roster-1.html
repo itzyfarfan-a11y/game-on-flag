@@ -6,7 +6,7 @@
 <title>GAME ON FLAG — Roster del Coach</title>
 <style>
 :root{--bg:#07070b;--card:#15121d;--card2:#1c1725;--line:#382e48;--purple:#7d22ff;--gold:#e6c04d;--txt:#fff;--mut:#aaa4b7;--red:#ff6378;--green:#7ff0b1}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#35105f,#07070b 48%);color:var(--txt);font-family:Arial,sans-serif}.app{max-width:720px;margin:auto;padding:16px}.brand{text-align:center;font-weight:900;font-size:25px;margin:12px 0 2px}.sub{text-align:center;letter-spacing:3px;color:var(--mut);font-size:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}.hero{border:2px solid var(--purple)}h1{font-size:25px;margin:0 0 5px}h2{font-size:20px;margin:0 0 12px}.mut{color:var(--mut)}.form{display:grid;gap:10px}.field{display:grid;gap:6px}.field label{font-weight:800;font-size:14px}.required{color:#ffd85c}.optional{color:var(--mut);font-weight:400}input,button{font:inherit;border-radius:11px;padding:13px;border:1px solid var(--line)}input{width:100%;background:#0b0a0f;color:#fff}input[type=file]{padding:10px}.gold{background:var(--gold);color:#17120a;font-weight:900;border:0}.primary{background:var(--purple);color:#fff;font-weight:900;border:0}.player-list{display:grid;gap:8px}.player-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 10px}.player-num{font-weight:900;color:var(--gold);text-align:center}.player-info{min-width:0}.player-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player-meta{font-size:12px;color:var(--mut);margin-top:3px}.row-actions{display:flex;gap:5px}.icon-btn{padding:8px 9px;border:1px solid var(--line);background:#0e0b13;color:#fff}.icon-edit{border-color:var(--purple)}.icon-delete{border-color:#6f1e35}.photo-preview{display:flex;align-items:center;gap:12px}.photo-preview img{width:76px;height:76px;object-fit:cover;border-radius:12px;background:#0b0a0f;border:1px solid var(--line)}.error{color:#ff9aaa}.ok{color:var(--green)}.count{display:inline-block;background:#292333;padding:5px 9px;border-radius:99px;color:#f2c94c}.notice{background:#201b29;border-left:4px solid var(--gold);padding:12px;border-radius:12px;line-height:1.35}.savebar{position:sticky;bottom:8px;margin-top:14px;background:rgba(10,8,14,.92);padding:8px;border-radius:15px;backdrop-filter:blur(8px)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#35105f,#07070b 48%);color:var(--txt);font-family:Arial,sans-serif}.app{max-width:720px;margin:auto;padding:16px}.brand{text-align:center;font-weight:900;font-size:25px;margin:12px 0 2px}.sub{text-align:center;letter-spacing:3px;color:var(--mut);font-size:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}.hero{border:2px solid var(--purple)}h1{font-size:25px;margin:0 0 5px}h2{font-size:20px;margin:0 0 12px}.mut{color:var(--mut)}.form{display:grid;gap:10px}.field{display:grid;gap:6px}.field label{font-weight:800;font-size:14px}.required{color:#ffd85c}.optional{color:var(--mut);font-weight:400}input,button{font:inherit;border-radius:11px;padding:13px;border:1px solid var(--line)}input{width:100%;background:#0b0a0f;color:#fff}input[type=file]{padding:10px}.gold{background:var(--gold);color:#17120a;font-weight:900;border:0}.primary{background:var(--purple);color:#fff;font-weight:900;border:0}.player-list{display:grid;gap:8px}.player-row{display:grid;grid-template-columns:34px 48px minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 10px}.player-num{font-weight:900;color:var(--gold);text-align:center}.player-thumb{width:48px;height:48px;border-radius:50%;overflow:hidden;background:#272132;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px}.player-thumb img{width:100%;height:100%;object-fit:cover;display:block}.player-info{min-width:0}.player-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player-meta{font-size:12px;color:var(--mut);margin-top:3px}.row-actions{display:flex;gap:5px}.icon-btn{padding:8px 9px;border:1px solid var(--line);background:#0e0b13;color:#fff}.icon-edit{border-color:var(--purple)}.icon-delete{border-color:#6f1e35}.photo-preview{display:flex;align-items:center;gap:12px}.photo-preview img{width:76px;height:76px;object-fit:cover;border-radius:12px;background:#0b0a0f;border:1px solid var(--line)}.error{color:#ff9aaa}.ok{color:var(--green)}.count{display:inline-block;background:#292333;padding:5px 9px;border-radius:99px;color:#f2c94c}.notice{background:#201b29;border-left:4px solid var(--gold);padding:12px;border-radius:12px;line-height:1.35}.savebar{position:sticky;bottom:8px;margin-top:14px;background:rgba(10,8,14,.92);padding:8px;border-radius:15px;backdrop-filter:blur(8px)}
 </style>
 </head>
 <body>
@@ -66,6 +66,7 @@ function render(){
  list.innerHTML=players.map((p,i)=>`
  <div class="player-row">
    <div class="player-num">${i+1}</div>
+   <div class="player-thumb">${p.photo_url?`<img src="${esc(p.photo_url)}" alt="">`:'👤'}</div>
    <div class="player-info">
      <div class="player-name">${esc(p.full_name||'Jugador sin nombre')}</div>
      <div class="player-meta">Jersey #${esc(p.jersey_number??'')}${p.date_of_birth?' · '+esc(p.date_of_birth):''}</div>
@@ -120,6 +121,15 @@ async function persistRoster(){
  return data;
 }
 
+async function reloadRosterFromServer(){
+ const {data,error}=await sb.rpc('get_roster_with_access_link',{p_token:token});
+ if(error)throw error;
+ const serverPlayers=(data.players||[]).map(p=>({...blankPlayer(),...p}));
+ players=serverPlayers;
+ info=data;
+ render();
+}
+
 async function savePlayer(){
  const name=document.getElementById('fullName').value.trim();
  const num=document.getElementById('jersey').value.trim();
@@ -144,6 +154,7 @@ async function savePlayer(){
  msg(wasEditing?'Guardando cambios...':'Guardando jugador...');
  try{
    await persistRoster();
+   await reloadRosterFromServer();
    msg(wasEditing?'✅ Jugador actualizado.':'✅ Jugador guardado. Captura el siguiente jugador.','ok');
    clearForm();
  }catch(error){
@@ -163,6 +174,7 @@ async function deletePlayer(i){
  msg('Eliminando jugador...');
  try{
    await persistRoster();
+   await reloadRosterFromServer();
    clearForm();
    msg('🗑️ Jugador eliminado.','ok');
  }catch(error){
@@ -193,16 +205,8 @@ function photoSelected(input){
 }
 
 async function refreshLiveRoster(){
- if(!info)return;
- const {data,error}=await sb.rpc('public_get_roster_live',{p_tournament_id:info.tournament_id,p_category_id:info.category_id,p_team_id:info.team_id,p_league_slug:null});
- if(error)return;
- const incoming=data||[];
- const normalized=incoming.map(p=>({...blankPlayer(),...p,jersey_number:p.jersey_number??'',date_of_birth:p.date_of_birth||'',curp:p.curp||''}));
- if(editingIndex===null && !document.querySelector('#fullName:focus') && normalized.length!==players.length){
-   players=normalized;render();
- }
  const stamp=document.getElementById('liveStamp');
- if(stamp)stamp.textContent='Actualizado: '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ if(stamp)stamp.textContent='Roster guardado en el servidor';
 }
 
 async function load(){
@@ -217,7 +221,6 @@ async function load(){
  render();
  clearForm();
  await refreshLiveRoster();
- setInterval(refreshLiveRoster,3000);
 }
 load();
 </script>

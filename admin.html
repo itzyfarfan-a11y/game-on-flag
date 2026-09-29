@@ -1883,9 +1883,9 @@ async function loadSchedule(){
   const tsCatClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'cat-mixto';if(x.includes('silver femenil'))return 'cat-silverf';if(x.includes('silver varonil'))return 'cat-silverv';if(x.includes('bronce')||x.includes('bronze'))return 'cat-bronce';if(x.includes('35'))return 'cat-35';if(x.includes('moms'))return 'cat-moms';if(x.includes('golden'))return 'cat-golden';return 'cat-other'};
   const tsDot=n=>{const c=tsCatClass(n);return c==='cat-mixto'?'#8bd23e':c==='cat-silverf'?'#e28b9e':c==='cat-silverv'?'#6eb7ce':c==='cat-bronce'?'#d28a3f':c==='cat-35'?'#e04b52':c==='cat-moms'?'#a56be0':c==='cat-golden'?'#d9b54a':'#8f7aaa'};
   const teamCategories=[...new Set(teamRows.map(t=>t.category))].sort((a,b)=>a.localeCompare(b,'es'));
-  html+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3><div class="team-schedule-actions"><button type="button" class="primary" onclick="downloadTeamScheduleImage()">🖼️ Descargar imagen</button></div></div><div class="notice">Consulta una categoría completa o todas. Selecciona la categoría y verás únicamente sus equipos y sus enfrentamientos J1–J7. En <b>Todas</b> aparecen todas las categorías diferenciadas por color.</div><div class="team-schedule-filter"><label class="field-label" style="margin:0">🏷️ Ver categoría<select id="teamCatFilter" onchange="filterTeamSchedule()"><option value="">Todas las categorías</option>${teamCategories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label></div><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
+  html+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3><div class="team-schedule-actions"><button type="button" class="primary" onclick="downloadTeamScheduleImage()">🖼️ Descargar imagen</button></div></div><div class="notice">Consulta una categoría completa o todas. Selecciona la categoría y verás únicamente sus equipos y sus enfrentamientos J1–J7. En <b>Todas</b> aparecen todas las categorías diferenciadas por color.</div><div class="team-schedule-filter"><div class="team-filter-grid"><label class="field-label" style="margin:0">🏷️ Ver categoría<select id="teamCatFilter" onchange="filterTeamSchedule()"><option value="">Todas las categorías</option>${teamCategories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label><label class="field-label" style="margin:0">🖼️ Descargar categoría<select id="teamImageCat"><option value="">Todas las categorías</option>${teamCategories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label></div></div><div class="team-schedule-scroll-tools"><button type="button" onclick="scrollTeamSchedule(-1)" aria-label="Desplazar enfrentamientos a la izquierda">◀</button><span>J1–J7 · desliza o usa las flechas</span><button type="button" onclick="scrollTeamSchedule(1)" aria-label="Desplazar enfrentamientos a la derecha">▶</button></div><div class="team-schedule-scroll-wrap"><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
   teamRows.forEach(t=>{const cc=tsCatClass(t.category);html+=`<tr class="cat-row" data-team-category="${esc(t.category)}"><td class="ts-cat ${cc}"><span class="ts-cat-badge"><span class="ts-cat-dot" style="background:${tsDot(t.category)}"></span>${esc(t.category)}</span></td><td class="ts-team">${esc(t.name)}</td>${[1,2,3,4,5,6,7].map(r=>`<td class="ts-j ${cc}">${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`;});
-  html+=`</tbody></table></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo. J1–J7 muestran su rival de cada jornada. En teléfono puedes deslizar derecha/izquierda; <b>CATEGORÍA</b> y <b>EQUIPO</b> permanecen visibles.</div></div>`;
+  html+=`</tbody></table></div></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo. J1–J7 muestran su rival de cada jornada. En teléfono puedes deslizar derecha/izquierda; <b>CATEGORÍA</b> y <b>EQUIPO</b> permanecen visibles.</div></div>`;
   box.innerHTML=html;
 }
 function filterTeamSchedule(){
@@ -1895,12 +1895,17 @@ function filterTeamSchedule(){
    row.style.display=!wanted || row.dataset.teamCategory===wanted ? '' : 'none';
  });
 }
+function scrollTeamSchedule(direction){
+ const wrap=document.querySelector('.team-schedule-card .cg-scroll');
+ if(!wrap)return;
+ wrap.scrollBy({left:direction*260,behavior:'smooth'});
+}
 
 async function downloadTeamScheduleImage(){
  const tid=val('ct'); if(!tid)return alert('Selecciona un torneo.');
  const {data,error}=await sb.from('matches').select('round_number,category_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name),categories(name)').eq('tournament_id',tid).gte('round_number',1).lte('round_number',7).eq('is_makeup',false).neq('status','cancelado');
  if(error)return alert(error.message);
- const selectedCat=String(document.getElementById('teamCatFilter')?.value||'');
+ const selectedCat=String(document.getElementById('teamImageCat')?.value||'');
  const games=(data||[]).filter(g=>!selectedCat || String(g.categories?.name||'')===selectedCat); if(!games.length)return alert(selectedCat?`No hay enfrentamientos para ${selectedCat}.`:'No hay enfrentamientos de fase regular para descargar.');
  const {data:tour}=await sb.from('tournaments').select('name').eq('id',tid).single();
  const title=String(tour?.name||'GAME ON FLAG');
@@ -3058,4 +3063,20 @@ window.addEventListener('load',async function(){
   .team-schedule-grid .ts-team{font-size:11px!important;}
   .team-schedule-grid .ts-cat{font-size:9px!important;}
 }
+</style>
+
+<style>
+/* GAME ON FLAG · Enfrentamientos móvil: tabla realmente desplazable + filtros de imagen */
+.team-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.team-schedule-scroll-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;color:var(--mut);font-size:11px;}
+.team-schedule-scroll-tools button{min-width:42px;height:34px;padding:0 10px;font-size:16px;font-weight:900;}
+.team-schedule-scroll-wrap{width:100%;max-width:100%;overflow:hidden;border-radius:12px;}
+.team-schedule-card .cg-scroll{display:block!important;width:100%!important;max-width:100%!important;overflow-x:scroll!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;scrollbar-width:thin!important;}
+.team-schedule-grid{width:700px!important;min-width:700px!important;table-layout:fixed!important;}
+.team-schedule-grid th:first-child,.team-schedule-grid td:first-child{width:82px!important;min-width:82px!important;max-width:82px!important;}
+.team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){left:82px!important;width:112px!important;min-width:112px!important;max-width:112px!important;}
+.team-schedule-grid th:not(:first-child):not(:nth-child(2)),.team-schedule-grid td:not(:first-child):not(:nth-child(2)){width:72px!important;min-width:72px!important;max-width:72px!important;}
+.team-schedule-grid th{font-size:10px!important;padding:6px 3px!important;}
+.team-schedule-grid td{font-size:10px!important;line-height:1.1!important;padding:6px 3px!important;}
+@media(max-width:700px){.team-filter-grid{grid-template-columns:1fr;} .team-schedule-grid{width:700px!important;min-width:700px!important;} .team-schedule-grid th:first-child,.team-schedule-grid td:first-child{width:78px!important;min-width:78px!important;max-width:78px!important;} .team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){left:78px!important;width:108px!important;min-width:108px!important;max-width:108px!important;} .team-schedule-grid th:not(:first-child):not(:nth-child(2)),.team-schedule-grid td:not(:first-child):not(:nth-child(2)){width:73px!important;min-width:73px!important;max-width:73px!important;} .team-schedule-grid .ts-team{font-size:10px!important;} .team-schedule-grid .ts-cat{font-size:8px!important;} }
 </style>

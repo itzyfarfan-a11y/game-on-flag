@@ -462,7 +462,6 @@ body.home-screen{overflow:hidden!important}
 </style>
 <style id="gof-final-corrections">
 .calendar-mode-bar{margin:4px 0 7px!important}.calendar-mode-bar button{padding:8px 12px!important;border-radius:10px!important}
-.calendar-label-accordion .gof-action-copy b{font-size:15px}.calendar-label-accordion .gof-action-copy small{font-size:11px}.calendar-label-accordion .gof-action-body{background:#120e19}.calendar-label-accordion{margin-bottom:8px}.calendar-label-accordion summary{min-height:52px!important}.calendar-label-accordion[open] summary{border-bottom:1px solid var(--line)}
 
 .view{padding-top:0!important}.view>h2{margin:4px 0 12px!important;line-height:1.05!important}.back-menu{margin-top:0!important;margin-bottom:8px!important}.view>.card:first-of-type{margin-top:8px!important}main{padding-top:8px!important}.gof-final-header .gof-actions{gap:6px!important}.gof-final-header .gof-icon{width:38px!important;height:38px!important}.gof-final-header .gof-badge{display:none!important}.admin-player-row{padding:10px!important;margin-bottom:8px!important}.admin-player-row .form{gap:7px!important}.admin-player-row .ap-preview{width:64px!important;height:64px!important}#elist{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}#elist>.card{margin:0!important;padding:10px!important}#elist>.card .row{gap:7px!important}#elist>.card .tag{font-size:10px!important;padding:4px 6px!important}#elist>.card .toolbar button{padding:7px 8px!important;font-size:11px!important}@media(max-width:650px){main{padding:7px 10px 24px!important}.view>h2{font-size:28px!important;margin:3px 0 9px!important}.back-menu{font-size:14px!important;padding:7px 11px!important}.view>.notice{margin:8px 0!important}.view>.card{padding:12px!important;margin:9px 0!important}.gof-final-header .gof-icon{width:34px!important;height:34px!important;font-size:16px!important}.gof-final-header .gof-actions{gap:4px!important}.admin-player-row .form{grid-template-columns:1fr 90px!important}.admin-player-row .ap-photo,.admin-player-row .ap-curp{grid-column:1/-1!important}}
 </style>
@@ -877,13 +876,13 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 <div id="adminRosterList" style="display:none"></div>
 <div class="gof-step-nav gof-step-3"><button type="button" onclick="setView('torneos')">← Torneo</button><div class="step-current">Paso 3 de 7</div><button class="primary" type="button" onclick="setView('calendario')">Siguiente: Calendario →</button></div>
 </section>
-<section class="view" id="calendario"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📅 Calendario</h2><div class="workflow-kicker" style="margin-top:6px">PASO 4 DE 7 · CALENDARIO</div><div class="toolbar calendar-mode-bar"><button id="calModeGeneral" class="primary" type="button" onclick="setScheduleMode('general')">📊 General</button><button id="calModeCategory" type="button" onclick="setScheduleMode('category')">🏷️ Por categoría</button></div><div class="gof-accordion-list calendar-label-accordion">
-<details class="gof-action-accordion"><summary><span class="gof-action-number">1</span><span class="gof-action-icon">🗓️</span><span class="gof-action-copy"><b>Seleccionar calendario</b><small>Torneo · categoría · fecha · campo · hora</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="form"><label class="field-label">Liga<select id="ct"></select></label><label class="field-label">Categoría<select id="cc"></select></label><label class="field-label">Fecha<input id="cd" type="date"/></label><label class="field-label">Campo<input id="cf" placeholder="Campo 1–5"/></label><label class="field-label">Hora<input id="ch" type="time"/></label></div></div></details>
-<details class="gof-action-accordion"><summary><span class="gof-action-number">2</span><span class="gof-action-icon">🎲</span><span class="gof-action-copy"><b>Generar calendario</b><small>Generar categoría o todo el torneo</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="toolbar"><button class="primary" onclick="generateSchedule()">🎲 Generar / regenerar categoría</button><button class="gold" onclick="generateFullTournamentSchedule()">🚀 GENERAR TODO EL TORNEO</button><button onclick="validateSchedule()">✅ Validar calendario completo</button><button onclick="scrollToSchedulePublishing()">📢 Publicar por semana</button><button onclick="manualMatch()">✏️ Crear juego manual</button></div><div class="notice">Flujo: <b>generar → revisar → editar/mover → validar → publicar semana por semana.</b> Las demás semanas permanecen ocultas.</div></div></details>
+<section class="view" id="calendario"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📅 Calendario</h2><div class="workflow-kicker" style="margin-top:6px">PASO 4 DE 7 · CALENDARIO</div><div class="toolbar calendar-mode-bar"><button id="calModeGeneral" class="primary" type="button" onclick="setScheduleMode('general')">📊 General</button><button id="calModeCategory" type="button" onclick="setScheduleMode('category')">🏷️ Por categoría</button></div><div class="gof-accordion-list">
+<details class="gof-action-accordion" open><summary><span class="gof-action-number">1</span><span class="gof-action-icon">🗓️</span><span class="gof-action-copy"><b>Seleccionar calendario</b><small>Torneo · categoría · fecha · campo · hora</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="form"><label class="field-label">Liga<select id="ct"></select></label><label class="field-label">Categoría<select id="cc"></select></label><label class="field-label">Fecha<input id="cd" type="date"/></label><label class="field-label">Campo<input id="cf" placeholder="Campo 1–5"/></label><label class="field-label">Hora<input id="ch" type="time"/></label></div></div></details>
+<details class="gof-action-accordion"><summary><span class="gof-action-number">2</span><span class="gof-action-icon">🎲</span><span class="gof-action-copy"><b>Generar calendario</b><small>Generar categoría o todo el torneo</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="toolbar"><button class="primary" onclick="generateSchedule()">🎲 Generar / regenerar categoría</button><button class="gold" onclick="generateFullTournamentSchedule()">🚀 GENERAR TODO EL TORNEO</button><button onclick="validateSchedule()">✅ Validar calendario completo</button><button onclick="scrollToSchedulePublishing()">📢 Publicar por semana</button><button onclick="manualMatch()">✏️ Crear juego manual</button></div><div class="notice">Flujo: <b>generar → revisar → editar/mover → validar → publicar semana por semana.</b> Las demás semanas permanecen ocultas.<br><b>Reglas automáticas:</b> un equipo no puede tener dos partidos en la misma jornada; <b>Mixto no puede coincidir en el mismo horario con Silver Femenil, Silver Varonil ni Bronce Femenil</b>; tampoco se permite que un mismo equipo quede cruzado en el mismo horario.</div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">3</span><span class="gof-action-icon">⚙️</span><span class="gof-action-copy"><b>Campos y horarios por jornada</b><small>1–5 campos · inicio editable · intervalo · relámpago 50 min</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="row"><b>Configuración de jornadas</b><button class="gold" type="button" onclick="saveScheduleSettings()">💾 Guardar configuración</button></div><div id="scheduleRoundSettings" style="margin-top:10px"></div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">4</span><span class="gof-action-icon">✏️</span><span class="gof-action-copy"><b>Editar / mover partidos</b><small>Adelantar o atrasar a otra jornada, fecha, hora o campo</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Desde cada partido usa <b>✏️ Editar / mover</b>. Puedes cambiar la <b>Jornada destino</b>, fecha, hora y campo. Por ejemplo, un partido de la Jornada 6 puede adelantarse a la Jornada 4 o atrasarse a la Jornada 7. El sistema revisa empalmes antes de guardar.</div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">5</span><span class="gof-action-icon">📢</span><span class="gof-action-copy"><b>Publicar por semana</b><small>Publica solamente la semana que ya revisaste</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div id="schedulePublishControls"><div class="mut small">Selecciona un torneo y revisa el calendario para ver las semanas.</div></div></div></details>
-<details class="gof-action-accordion"><summary><span class="gof-action-number">6</span><span class="gof-action-icon">🔁</span><span class="gof-action-copy"><b>Reposición / equipo sustituto</b><small>Programa una semana especial para un equipo que entra después</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">El partido de reposición cuenta para el equipo que necesita completar sus semanas; el rival queda excluido de sus estadísticas.</div><div class="form"><select id="mt"></select><select id="mc"></select><select id="mmake"></select><select id="mopp"></select><input id="mround" min="1" placeholder="Semana de reposición" type="number"/><input id="mdate" type="date"/><input id="mtime" type="time"/><input id="mfield" placeholder="Cancha 1–5"/><input id="mnote" placeholder="Motivo / observación"/></div><div class="toolbar" style="margin-top:9px"><button class="gold" onclick="createMakeupMatch()">➕ Crear partido de reposición</button></div><div class="mut small" id="makeupStatus" style="margin-top:8px"></div></div></details>
+<details class="gof-action-accordion"><summary><span class="gof-action-number">6</span><span class="gof-action-icon">🔁</span><span class="gof-action-copy"><b>Reposición de equipo</b><small>Programa una semana especial para un equipo que entra después</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">El partido de reposición cuenta para el equipo que necesita completar sus semanas; el rival queda excluido de sus estadísticas.</div><div class="form"><select id="mt"></select><select id="mc"></select><select id="mmake"></select><select id="mopp"></select><input id="mround" min="1" placeholder="Semana de reposición" type="number"/><input id="mdate" type="date"/><input id="mtime" type="time"/><input id="mfield" placeholder="Cancha 1–5"/><input id="mnote" placeholder="Motivo / observación"/></div><div class="toolbar" style="margin-top:9px"><button class="gold" onclick="createMakeupMatch()">➕ Crear partido de reposición</button></div><div class="mut small" id="makeupStatus" style="margin-top:8px"></div></div></details>
 </div><div id="scheduleList"></div><div class="gof-step-nav gof-step-4"><button type="button" onclick="setView('rosters')">← Rosters</button><div class="step-current">Paso 3 de 6</div><button class="primary" type="button" onclick="setView('resultados')">Siguiente: Resultados →</button></div></section>
 <section class="view" id="resultados"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏈 Resultados</h2><div class="workflow-kicker" style="margin-top:6px">PASO 5 DE 7 · RESULTADOS</div><div class="notice">INCOMPARECENCIA = <b>18–0</b>. El equipo ausente conserva el adeudo del arbitraje.</div><div id="resultsList"></div><div class="gof-step-nav gof-step-5"><button type="button" onclick="setView('calendario')">← Calendario</button><div class="step-current">Paso 4 de 6</div><button class="primary" type="button" onclick="setView('tabla')">Siguiente: Tabla →</button></div></section>
 <section class="view" id="tabla"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📊 Tabla de posiciones</h2><div class="workflow-kicker" style="margin-top:6px">PASO 6 DE 7 · TABLA</div><div class="card"><div class="form"><select id="st"></select><select id="sc"></select></div></div><div id="standings"></div><div class="gof-step-nav gof-step-6"><button type="button" onclick="setView('resultados')">← Resultados</button><div class="step-current">Paso 5 de 6</div><button class="primary" type="button" onclick="setView('playoffs')">Siguiente: Playoffs →</button></div></section>
@@ -902,7 +901,7 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 <div><label class="small mut">Fecha</label><input id="emDate" type="date"/></div>
 <div><label class="small mut">Hora</label><input id="emTime" type="time"/></div>
 <div><label class="small mut">Campo</label><select id="emField"><option value="Campo 1">Campo 1</option><option value="Campo 2">Campo 2</option><option value="Campo 3">Campo 3</option><option value="Campo 4">Campo 4</option><option value="Campo 5">Campo 5 (solo administración)</option></select><div class="small mut" style="margin-top:4px">Al cambiar el campo, el partido se mostrará físicamente en esa columna del Calendario General.</div></div>
-<div><label class="small mut">Jornada destino (puedes adelantar o atrasar)</label><input id="emRound" max="7" min="1" type="number"/><div class="small mut" style="margin-top:4px">Puedes adelantar o atrasar este partido a otra jornada. La jornada anterior quedará libre.</div></div>
+<div><label class="small mut">Semana destino</label><input id="emRound" max="7" min="1" type="number"/><div class="small mut" style="margin-top:4px">Puedes adelantar o atrasar este partido a otra jornada. La jornada anterior quedará libre.</div></div>
 </div>
 <div class="small mut" style="margin-top:8px">Los conflictos estructurales se detienen. Los avisos de Club/Coach u otros empalmes pueden guardarse manualmente confirmando.</div><div id="editWarnings"></div>
 <div class="modal-actions">
@@ -1038,7 +1037,7 @@ async function changeFinancePassword(){
 function lockFinance(){financeUnlocked=false;sessionStorage.removeItem('gof_finance_unlocked');toast('🔒 Contabilidad bloqueada');setView('inicio')}
 async function setView(v){
   if(v==='contabilidad' && !(await enterFinance()))return;
-  if(v==='inscripciones')bindTournamentManagementAccordions();
+  if(v==='inscripciones')bindTournamentManagementAccordions(); if(v==='calendario')bindCalendarAccordions();
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.body.classList.toggle('home-screen',v==='inicio');
   const target=document.getElementById(v); if(!target)return; target.classList.add('active');
   requestAnimationFrame(()=>{window.scrollTo({top:0,left:0,behavior:'instant'});document.documentElement.scrollTop=0;document.body.scrollTop=0;});
@@ -1046,6 +1045,17 @@ async function setView(v){
   ({organizaciones:loadMisLigas,torneos:loadT,inscripciones:loadEnrollmentSelectors,equipos:loadE,rosters:loadRosterSelects,calendario:loadScheduleSelectors,resultados:loadResults,tabla:loadStandingsSelectors,playoffs:loadPlayoffSelectors,avisos:loadNotices,contabilidad:loadFinance,inicio:refreshDashboard}[v]||(()=>{}))();
 }
 document.querySelectorAll('.nav button[data-v]').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+function bindCalendarAccordions(){
+  const root=document.getElementById('calendario');
+  if(!root||root.dataset.gofCalendarBound==='1')return;
+  root.dataset.gofCalendarBound='1';
+  const details=[...root.querySelectorAll('.gof-accordion-list > details.gof-action-accordion')];
+  details.forEach(d=>d.addEventListener('toggle',()=>{
+    if(!d.open)return;
+    details.forEach(other=>{if(other!==d)other.open=false;});
+  }));
+}
+
 async function refreshAllSelectors(){if(!sb)return;await loadEnrollmentSelectors();await loadRosterSelects();await loadScheduleSelectors();await loadStandingsSelectors();await loadPlayoffSelectors()}
 
 async function saveNewPassword(){
@@ -1596,31 +1606,13 @@ async function loadScheduleSelectors(){
  const cc=document.getElementById('cc'); if(cc)cc.onchange=loadSchedule;
  await scheduleCats(); await loadMakeupSelectors();
 }
-document.addEventListener('click',function(e){
- const summary=e.target.closest('#calendario .gof-action-accordion > summary');
- if(!summary)return;
- const current=summary.parentElement;
- setTimeout(()=>{
-   if(current.open){
-     document.querySelectorAll('#calendario .gof-action-accordion[open]').forEach(d=>{if(d!==current)d.open=false;});
-   }
- },0);
-});
-
 async function scheduleCats(){
  const tid=val('ct'),el=document.getElementById('cc'); if(!el)return;
  if(!tid){el.innerHTML='<option value="">Selecciona torneo</option>';await loadScheduleSettings();await loadSchedule();return;}
- const {data:links,error:le}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);
- if(le)return alert('No se pudieron cargar las categorías: '+le.message);
- const ids=[...(links||[])].map(x=>x.category_id).filter(Boolean);
- let cats=[];
- if(ids.length){
-   const {data:rows,error:ce}=await sb.from('categories').select('id,name').in('id',ids).order('name');
-   if(ce)return alert('No se pudieron cargar los nombres de las categorías: '+ce.message);
-   cats=rows||[];
- }
- const keep=el.value;
- el.innerHTML='<option value="">📅 Todas las categorías</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+ const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
+ if(error)return alert('No se pudieron cargar las categorías: '+error.message);
+ const cats=(data||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'})).filter(x=>x.id);
+ const keep=el.value; el.innerHTML='<option value="">📅 Todas las categorías</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
  if(keep&&cats.some(x=>x.id===keep))el.value=keep; else el.value='';
  await loadScheduleSettings(); await loadSchedule();
 }

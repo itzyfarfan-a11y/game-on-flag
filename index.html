@@ -212,7 +212,38 @@ footer b{font-size:16px;color:#ddd5e5}
  .gof-public-title{font-size:21px}.gof-public-app{font-size:11px}.gof-public-head-buttons,.gof-head-btn{width:106px}
  .gof-head-btn strong{font-size:9px}
 }
-</style>
+
+/* ===== GAME ON FLAG · PORTAL PÚBLICO COMPLETO ===== */
+.gof-section-toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.gof-back{border:2px solid var(--purple);background:#180e23;color:#fff;border-radius:12px;padding:9px 14px;font-weight:900}
+.gof-pub-image{margin:12px 0;border:2px solid var(--purple);border-radius:18px;background:#0e0b13;padding:8px;overflow:hidden}
+.gof-pub-image img{display:block;width:100%;height:auto;max-height:700px;object-fit:contain;border-radius:11px;background:#08070d}
+.gof-pub-image figcaption{padding:8px 4px 2px;color:#cfc6da;font-size:13px}
+.roster-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.roster-tools label{display:block;color:var(--gold);font-weight:900;font-size:14px}
+.roster-tools select{margin-top:6px}
+.roster-team{border:2px solid var(--line);border-radius:17px;background:#121019;padding:13px;margin:10px 0}
+.roster-team-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.roster-team-head img{width:52px;height:52px;border-radius:12px;object-fit:contain;background:#202027}
+.roster-player-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.roster-player{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:9px;background:#0f0d14}
+.roster-player img{width:55px;height:55px;border-radius:10px;object-fit:cover;background:#25222b}
+.roster-number{font-size:18px;font-weight:900;color:var(--gold)}
+.category-chip{display:inline-block;padding:5px 9px;border-radius:999px;background:#251735;color:#d8b8ff;font-size:12px;font-weight:900}
+.notice-card{border-left:4px solid var(--purple);background:#121019;border-radius:12px;padding:13px;margin:9px 0}
+.notice-card b{font-size:17px}
+.pub-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pub-card{border:1px solid var(--line);border-radius:15px;padding:10px;background:#121019}
+.pub-card img{width:100%;max-height:420px;object-fit:contain;background:#08070d;border-radius:10px}
+.home-quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}
+.home-quick button{border:1px solid var(--line);border-radius:13px;background:#15111d;color:#fff;padding:11px;font-weight:900}
+@media(max-width:650px){
+ .roster-tools,.roster-player-grid,.pub-grid{grid-template-columns:1fr}
+ .home-quick{grid-template-columns:1fr 1fr}
+ .gof-pub-image img{max-height:520px}
+}
+
+\n/* ===== MOBILE FIRST v2 ===== */\n.welcome-public{display:flex;align-items:center;gap:16px;padding:20px;border:2px solid var(--purple);border-radius:20px;background:linear-gradient(145deg,#21132e,#0e0a12);margin:8px 0 14px}\n.welcome-mark{width:64px;height:64px;display:grid;place-items:center;border-radius:18px;background:#18111f;border:1px solid var(--purple);font-size:34px;flex:0 0 64px}\n.welcome-public h1{margin:0;font-size:30px}.welcome-public h1 span{color:var(--green)}.welcome-public p{margin:6px 0 0;color:var(--muted)}\n.welcome-card{margin-top:0}.category-public-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.category-public-card{min-height:82px;display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border:2px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#1b1723,#100d15);color:#fff;position:relative}.category-public-card:hover,.category-public-card:focus{border-color:var(--purple)}.category-public-card .category-icon{font-size:25px}.category-public-card span:nth-child(2){min-width:0;display:flex;flex-direction:column}.category-public-card b{font-size:16px}.category-public-card small{color:var(--muted);margin-top:4px}.category-arrow{margin-left:auto;color:var(--purple2);font-size:28px}\n@media(max-width:650px){\n body{font-size:15px}\n .gof-public-top{height:auto;min-height:0;position:sticky;top:0}\n .gof-public-head{height:auto;min-height:0;padding:8px;display:grid;grid-template-columns:72px minmax(0,1fr);grid-template-areas:\"logo brand\" \"actions actions\";gap:7px;background:#08070d}\n .gof-header-logo-upload{grid-area:logo;width:72px;height:64px}.gof-header-logo-upload img{width:72px;height:64px}\n .gof-public-brand{grid-area:brand;align-items:flex-start;text-align:left;padding-left:2px}\n .gof-public-title{font-size:25px}.gof-public-app{font-size:12px;letter-spacing:4px;margin-top:5px}.gof-public-sub{font-size:7px;letter-spacing:2px;margin-top:5px}\n .gof-public-head-buttons{grid-area:actions;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:7px}\n .gof-head-btn{width:100%;height:42px;border-radius:11px;padding:0 9px;gap:7px}.gof-head-btn strong{font-size:11px}.gof-head-btn small{font-size:9px}.gof-head-btn span{font-size:18px}\n main{padding:10px 10px 24px}\n .gof-public-identity{grid-template-columns:1fr 86px;gap:7px}.gof-public-league{min-height:88px;padding:12px;border-radius:16px}.gof-public-logo-card{height:88px;border-radius:16px;padding:7px}.gof-public-league b{font-size:19px}.gof-public-league span{font-size:12px;margin-top:6px}\n .gof-public-selectors{grid-template-columns:1fr;gap:8px}.gof-public-select-card{border-width:2px;border-radius:15px;padding:9px}.gof-public-select-card span{font-size:12px;margin-bottom:7px}.gof-public-select-card select{height:44px;font-size:14px;border-radius:11px}\n #nav{grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}\n #nav button{height:70px;border-radius:14px;padding:7px 26px 7px 8px;gap:7px}\n #nav button>span:first-child{font-size:25px;flex:0 0 28px}\n #nav button b{font-size:14px}.nav button small,#nav button small{font-size:9px;margin-top:3px}.nav button:after,#nav button:after{font-size:25px;right:7px}\n h2{font-size:23px}.card{padding:12px;border-radius:14px}.grid{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:10px;font-size:12px}.stat b{font-size:20px}\n .home-quick{grid-template-columns:1fr 1fr;gap:7px}.home-quick button{min-height:52px;font-size:12px;padding:8px;border-radius:12px}\n .welcome-public{padding:14px;border-radius:16px;gap:10px}.welcome-mark{width:52px;height:52px;flex-basis:52px;font-size:28px;border-radius:14px}.welcome-public h1{font-size:22px}.welcome-public p{font-size:12px}\n .category-public-grid{grid-template-columns:1fr}.category-public-card{min-height:68px}\n .gof-section-toolbar{align-items:flex-start}.gof-section-toolbar h2{margin:4px 0}.gof-back{padding:8px 10px;font-size:12px}\n .calendar-filter-buttons{display:grid;grid-template-columns:1fr 1fr}.calendar-filter-buttons button,.calendar-full-btn{font-size:12px;padding:9px}\n .match{grid-template-columns:1fr;gap:5px}.score{font-size:23px}.roster-tools{grid-template-columns:1fr!important}.roster-player-grid{grid-template-columns:1fr!important}\n .pub-grid{grid-template-columns:1fr!important}.gof-pub-image img{max-height:none;width:100%}\n}\n@media(max-width:370px){#nav{grid-template-columns:1fr}.gof-public-identity{grid-template-columns:1fr}.gof-public-logo-card{height:100px}.gof-public-logo-upload{max-width:150px;margin:auto}.gof-public-head-buttons{grid-template-columns:1fr}.gof-public-title{font-size:22px}}\n</style>
 </head>
 <body>
 <header class="gof-public-top">
@@ -230,8 +261,8 @@ footer b{font-size:16px;color:#ddd5e5}
       <a class="gof-head-btn" href="./admin.html" aria-label="Administrador">
         <span>👤</span><span class="head-copy"><strong>Administrador</strong><small>Acceso restringido</small></span><span aria-hidden="true">›</span>
       </a>
-      <button class="gof-head-btn announce-btn" type="button" onclick="togglePublicAnnouncements()" aria-label="Anuncios">
-        <span>📣</span><span class="head-copy"><strong>Anuncios</strong><small>Novedades y avisos</small></span><b class="gof-badge">3</b><span aria-hidden="true">›</span>
+      <button class="gof-head-btn announce-btn" type="button" onclick="openPublicTab('avisos')" aria-label="Anuncios">
+        <span>📣</span><span class="head-copy"><strong>Anuncios</strong><small>Novedades y avisos</small></span><b class="gof-badge" id="noticeBadge">0</b><span aria-hidden="true">›</span>
       </button>
     </div>
   </div>
@@ -240,7 +271,7 @@ footer b{font-size:16px;color:#ddd5e5}
 <main>
   <div class="gof-public-identity">
     <div class="gof-public-league">
-      <div><b>Liga: NFFL — La Nueva Era</b><span>Portal público</span></div>
+      <div><b id="publicLeagueName">GAME ON FLAG</b><span id="publicLeagueSub">Portal público</span></div>
     </div>
     <div class="gof-public-logo-card">
       <div class="gof-public-logo-upload">
@@ -263,9 +294,10 @@ footer b{font-size:16px;color:#ddd5e5}
   </div>
 
   <div class="card muted" id="status" style="display:none"></div>
-  <div class="nav" id="nav"></div>
+  <div class="nav" id="nav"><button type="button" data-tab="inicio"><span>🏠</span><span><b>Inicio</b><small>Resumen de la liga</small></span></button><button type="button" data-tab="categorias"><span>🏷️</span><span><b>Categorías</b><small>Categorías del torneo</small></span></button><button type="button" data-tab="equipos"><span>👥</span><span><b>Equipos</b><small>Todos los equipos</small></span></button><button type="button" data-tab="jugadores"><span>👕</span><span><b>Roster</b><small>Jugadores y plantillas</small></span></button><button type="button" data-tab="enfrentamientos"><span>⚔️</span><span><b>Enfrentamientos</b><small>Rivales por jornada</small></span></button><button type="button" data-tab="calendario"><span>📅</span><span><b>Calendario</b><small>Jornadas y campos</small></span></button><button type="button" data-tab="resultados"><span>🏈</span><span><b>Resultados</b><small>Marcadores publicados</small></span></button><button type="button" data-tab="tabla"><span>📊</span><span><b>Tabla General</b><small>Clasificaciones</small></span></button><button type="button" data-tab="playoffs"><span>🏆</span><span><b>Playoffs</b><small>Fase final</small></span></button><button type="button" data-tab="campeones"><span>🥇</span><span><b>Campeones</b><small>Ganadores</small></span></button><button type="button" data-tab="avisos"><span>📣</span><span><b>Avisos</b><small>Novedades de la liga</small></span></button><button type="button" data-tab="publicaciones"><span>🖼️</span><span><b>Publicaciones</b><small>Imágenes oficiales</small></span></button></div>
 
   <section id="inicio"></section>
+  <section id="categorias"></section>
   <section id="equipos"></section>
   <section id="jugadores"></section>
   <section id="calendario"></section>
@@ -274,97 +306,363 @@ footer b{font-size:16px;color:#ddd5e5}
   <section id="tabla"></section>
   <section id="playoffs"></section>
   <section id="campeones"></section>
+  <section id="avisos"></section>
+  <section id="publicaciones"></section>
 </main>
 
 <footer>
   <b>GAME ON FLAG APPLICATION</b><br>
-  NFFL — La Nueva Era · Portal público<br><br>
+  <span id="publicFooterLeague">GAME ON FLAG</span> · Portal público<br><br>
   📷 Game On Flag &nbsp;|&nbsp; 🔵 Game On Flag
 </footer>
+
 <script>
-const U='https://picivrqgmckrwutarhyw.supabase.co',K='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl',H={apikey:K,'Content-Type':'application/json',Accept:'application/json'},t=document.getElementById('t'),c=document.getElementById('c'),status=document.getElementById('status'),nav=document.getElementById('nav');const GOF_PUBLIC_LEAGUE_SLUG=(new URLSearchParams(location.search).get('liga')||new URLSearchParams(location.search).get('league')||localStorage.getItem('gof_public_league_slug')||'').trim();let data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]},tab='calendario';const sec=['inicio','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones'];function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}async function rpc(n,b={}){const r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b),cache:'no-store'}),x=await r.text();if(!r.ok)throw Error('HTTP '+r.status);return JSON.parse(x)}function team(id){return data.teams.find(x=>x.id===id)||{name:'Por definir'}}function cat(id){return data.categories.find(x=>x.id===id)?.name||'Categoría'}function field(v){const m=String(v||'').match(/(?:campo|cancha)\s*(\d+)/i);return m?+m[1]:99}function cclass(n){n=String(n||'').toLowerCase();return n.includes('mixto')?'mixto':n.includes('bronce')?'bronce':n.includes('silver femenil')?'sf':n.includes('silver varonil')?'sv':n.includes('35')?'g35':n.includes('golden')?'golden':''}
+const U='https://picivrqgmckrwutarhyw.supabase.co',
+K='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl',
+H={apikey:K,'Content-Type':'application/json',Accept:'application/json'},
+t=document.getElementById('t'),
+c=document.getElementById('c'),
+status=document.getElementById('status'),
+nav=document.getElementById('nav');
+
+const Q=new URLSearchParams(location.search);
+const GOF_PUBLIC_LEAGUE_SLUG=(Q.get('liga')||Q.get('league')||localStorage.getItem('gof_public_league_slug')||'').trim();
+
+let league={};
+let data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]};
+let publications=[];
+let notices=[];
+let tab='inicio';
+const sec=['inicio','categorias','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones','avisos','publicaciones'];
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function team(id){return data.teams.find(x=>x.id===id)||{name:'Por definir',logo_url:''}}
+function cat(id){return data.categories.find(x=>x.id===id)?.name||'Categoría'}
+function cclass(n){n=String(n||'').toLowerCase();return n.includes('mixto')?'mixto':n.includes('bronce')?'bronce':n.includes('silver femenil')?'sf':n.includes('silver varonil')?'sv':n.includes('35')?'g35':n.includes('golden')?'golden':''}
+
+async function rpc(n,b={}){
+  const r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b),cache:'no-store'});
+  const x=await r.text(); if(!r.ok) throw Error('RPC '+n+' HTTP '+r.status+' '+x); return x?JSON.parse(x):null;
+}
+async function tableGet(table,params){
+  const u=new URL(U+'/rest/v1/'+table);
+  Object.entries(params||{}).forEach(([k,v])=>u.searchParams.set(k,v));
+  const r=await fetch(u,{headers:{apikey:K,Accept:'application/json'},cache:'no-store'});
+  const x=await r.text(); if(!r.ok) throw Error('REST '+table+' HTTP '+r.status); return x?JSON.parse(x):[];
+}
+
+function openPublicTab(next){
+  tab=sec.includes(next)?next:'inicio';
+  render();
+  if(tab!=='inicio') setTimeout(()=>document.getElementById(tab)?.scrollIntoView({behavior:'smooth',block:'start'}),40);
+}
+function goHome(){openPublicTab('inicio')}
+
+function imageFor(section){
+  const p=publications.filter(x=>x.section===section && x.is_published);
+  if(!p.length)return '';
+  const selected=c.value;
+  return p.find(x=>selected && x.category_id===selected)?.image_url || p.find(x=>!x.category_id)?.image_url || p[0].image_url || '';
+}
+function publicationCard(section,title){
+  const url=imageFor(section); if(!url)return '';
+  const p=publications.find(x=>x.section===section && x.image_url===url);
+  return '<figure class="gof-pub-image"><img src="'+esc(url)+'" alt="'+esc(title)+'"><figcaption>📌 '+esc(p?.title||title)+'</figcaption></figure>';
+}
+function allPublicationCards(){
+  if(!publications.length)return '<div class="empty">No hay imágenes publicadas todavía.</div>';
+  const labels={categorias:'Categorías',calendario:'Calendario',enfrentamientos:'Enfrentamientos',resultados:'Resultados',tablas:'Tabla General',playoffs:'Playoffs',mvps:'MVPs'};
+  return '<div class="pub-grid">'+publications.map(p=>'<div class="pub-card"><span class="category-chip">'+esc(labels[p.section]||p.section)+'</span>'+(p.category_id?'<span class="category-chip" style="margin-left:5px">'+esc(cat(p.category_id))+'</span>':'')+'<h3>'+esc(p.title||labels[p.section]||'Publicación')+'</h3><img src="'+esc(p.image_url)+'" alt="'+esc(p.title||'Publicación')+'"></div>').join('')+'</div>';
+}
+
+function navButton(id,ico,title,sub){
+  return '<button type="button" data-tab="'+id+'" class="'+(tab===id?'active':'')+'"><span aria-hidden="true">'+ico+'</span><span><b>'+title+'</b><small>'+sub+'</small></span></button>';
+}
+function render(){
+  document.body.classList.toggle('home-screen',tab==='inicio');
+  nav.innerHTML=
+    navButton('inicio','🏠','Inicio','Resumen de la liga')+
+    navButton('categorias','🏷️','Categorías','Categorías del torneo')+
+    navButton('equipos','👥','Equipos','Todos los equipos')+
+    navButton('jugadores','👕','Roster','Jugadores y plantillas')+
+    navButton('enfrentamientos','⚔️','Enfrentamientos','Rivales por jornada')+
+    navButton('calendario','📅','Calendario','Jornadas y campos')+
+    navButton('resultados','🏈','Resultados','Marcadores publicados')+
+    navButton('tabla','📊','Tabla General','Clasificaciones')+
+    navButton('playoffs','🏆','Playoffs','Fase final')+
+    navButton('campeones','🥇','Campeones','Ganadores')+
+    navButton('avisos','📣','Avisos','Novedades de la liga')+
+    navButton('publicaciones','🖼️','Publicaciones','Imágenes oficiales');
+
+  sec.forEach(x=>{const el=document.getElementById(x); if(el){el.classList.toggle('public-open',x===tab);el.style.display=x===tab?'block':'none'}});
+  if(tab==='inicio')home();
+  if(tab==='categorias')categories();
+  if(tab==='equipos')teams();
+  if(tab==='jugadores')players();
+  if(tab==='calendario')calendar();
+  if(tab==='enfrentamientos')matchups();
+  if(tab==='resultados')results();
+  if(tab==='tabla')table();
+  if(tab==='playoffs')playoffs();
+  if(tab==='campeones')champions();
+  if(tab==='avisos')renderNotices();
+  if(tab==='publicaciones')renderPublications();
+}
+
+document.addEventListener('click',function(ev){
+  const b=ev.target.closest('#nav button[data-tab]'); if(!b)return;
+  ev.preventDefault(); openPublicTab(b.getAttribute('data-tab'));
+});
+
+function home(){
+  const n=data.matches.filter(m=>m.status==='jugado'||m.status==='incomparecencia').length;
+  const next=data.matches.filter(m=>m.match_date && m.status!=='jugado' && m.status!=='incomparecencia').sort((a,b)=>(String(a.match_date)+String(a.match_time)).localeCompare(String(b.match_date)+String(b.match_time)))[0];
+  const hasData=!!league.id && !!t.value;
+  if(!hasData){
+    document.getElementById('inicio').innerHTML='<div class=\"welcome-public\"><div class=\"welcome-mark\">🏈</div><div><h1>GAME ON <span>FLAG</span></h1><p>Portal público de ligas y torneos</p></div></div>'+
+      '<div class=\"card welcome-card\"><h2>Consulta pública</h2><p class=\"muted\">Selecciona una opción del menú para consultar la información de la liga. Los datos aparecen automáticamente cuando entras mediante el enlace público de la liga.</p><div class=\"home-quick\">'+
+      '<button onclick=\"openPublicTab(\'categorias\')\">🏷️ Categorías</button>'+
+      '<button onclick=\"openPublicTab(\'jugadores\')\">👕 Roster</button>'+
+      '<button onclick=\"openPublicTab(\'calendario\')\">📅 Calendario</button>'+
+      '<button onclick=\"openPublicTab(\'enfrentamientos\')\">⚔️ Enfrentamientos</button>'+
+      '<button onclick=\"openPublicTab(\'resultados\')\">🏈 Resultados</button>'+
+      '<button onclick=\"openPublicTab(\'tabla\')\">📊 Tabla General</button>'+
+      '<button onclick=\"openPublicTab(\'playoffs\')\">🏆 Playoffs</button>'+
+      '<button onclick=\"openPublicTab(\'publicaciones\')\">🖼️ Publicaciones</button>'+
+      '</div></div>';
+    return;
+  }
+  document.getElementById('inicio').innerHTML=
+    '<div class=\"card\"><h2>🏟️ '+esc(data.tournament?.name||'Torneo')+'</h2>'+
+    '<p class=\"muted\">Temporada '+esc(data.tournament?.season||'')+'</p>'+
+    '<div class=\"grid\"><div class=\"stat\"><b>'+data.teams.length+'</b><br>Equipos</div>'+
+    '<div class=\"stat\"><b>'+data.categories.length+'</b><br>Categorías</div>'+
+    '<div class=\"stat\"><b>'+n+'</b><br>Juegos registrados</div>'+
+    '<div class=\"stat\"><b>'+data.playoffs.length+'</b><br>Playoffs</div></div>'+
+    (next?'<div class=\"card\" style=\"margin-bottom:0\"><b>📅 Próximo partido</b><p>'+esc(team(next.home_team_id).name)+' vs '+esc(team(next.away_team_id).name)+'</p><span class=\"muted\">'+esc(next.match_date||'')+' · '+esc(next.match_time?String(next.match_time).slice(0,5):'Hora por definir')+' · '+esc(next.field_name||'')+'</span></div>':'')+
+    '<div class=\"home-quick\">'+
+    '<button onclick=\"openPublicTab(\'categorias\')\">🏷️ Categorías</button>'+
+    '<button onclick=\"openPublicTab(\'jugadores\')\">👕 Ver Roster</button>'+
+    '<button onclick=\"openPublicTab(\'calendario\')\">📅 Calendario</button>'+
+    '<button onclick=\"openPublicTab(\'enfrentamientos\')\">⚔️ Enfrentamientos</button>'+
+    '<button onclick=\"openPublicTab(\'resultados\')\">🏈 Resultados</button>'+
+    '<button onclick=\"openPublicTab(\'tabla\')\">📊 Tabla</button>'+
+    '<button onclick=\"openPublicTab(\'playoffs\')\">🏆 Playoffs</button>'+
+    '<button onclick=\"openPublicTab(\'publicaciones\')\">🖼️ Publicaciones</button></div></div>'+
+    publicationCard('categorias','Categorías');
+}
+
+function categories(){
+  const s=document.getElementById('categorias');
+  const list=data.categories||[];
+  const cards=list.map(x=>'<button type=\"button\" class=\"category-public-card '+cclass(x.name)+'\" onclick=\"selectPublicCategory(\''+esc(x.id)+'\')\"><span class=\"category-icon\">🏷️</span><span><b>'+esc(x.name)+'</b><small>Ver equipos y roster</small></span><span class=\"category-arrow\">›</span></button>').join('');
+  s.innerHTML='<div class=\"gof-section-toolbar\"><h2>🏷️ Categorías</h2><button class=\"gof-back\" onclick=\"goHome()\">← Inicio</button></div>'+(list.length?'<div class=\"category-public-grid\">'+cards+'</div>':'<div class=\"empty\">Aún no hay categorías publicadas.</div>')+publicationCard('categorias','Categorías publicadas');
+}
+function selectPublicCategory(id){c.value=id;rosterCategory=id;render();openPublicTab('jugadores');}
+function teams(){
+  const list=c.value?data.teams.filter(tm=>data.matches.some(m=>m.category_id===c.value&&(m.home_team_id===tm.id||m.away_team_id===tm.id))):data.teams;
+  document.getElementById('equipos').innerHTML='<div class="gof-section-toolbar"><h2>👥 Equipos'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+
+    '<div class="grid">'+(list.length?list.map(x=>'<div class="card" style="display:flex;align-items:center;gap:12px">'+(x.logo_url?'<img src="'+esc(x.logo_url)+'" style="width:58px;height:58px;object-fit:contain;border-radius:10px;background:#202027">':'')+'<div><b>'+esc(x.name)+'</b></div></div>').join(''):'<div class="empty">No hay equipos para esta selección.</div>')+'</div>';
+}
+
+let rosterCategory='',rosterTeam='';
+async function players(){
+  const s=document.getElementById('jugadores');
+  const categories=data.categories;
+  const teams=c.value?data.teams.filter(tm=>data.matches.some(m=>m.category_id===c.value&&(m.home_team_id===tm.id||m.away_team_id===tm.id))):data.teams;
+  rosterCategory=c.value||rosterCategory||categories[0]?.id||'';
+  const teamOptions=teams.map(tm=>'<option value="'+esc(tm.id)+'">'+esc(tm.name)+'</option>').join('');
+  s.innerHTML='<div class="gof-section-toolbar"><h2>👕 Roster</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+
+    '<div class="card"><p class="muted">Aquí cualquier visitante puede consultar las plantillas publicadas, con foto, número y nombre del jugador.</p>'+
+    '<div class="roster-tools"><label>Categoría<select id="rosterCat">'+categories.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===rosterCategory?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label>'+
+    '<label>Equipo<select id="rosterTeam"><option value="">Selecciona un equipo</option>'+teamOptions+'</select></label></div></div>'+
+    '<div id="rosterBody"><div class="empty">Selecciona un equipo para ver su roster.</div></div>';
+  const rc=document.getElementById('rosterCat'),rt=document.getElementById('rosterTeam');
+  if(c.value && teams.length) rt.value=rosterTeam||teams[0].id;
+  rc.onchange=()=>{rosterCategory=rc.value;rosterTeam='';c.value=rc.value;players()};
+  rt.onchange=()=>{rosterTeam=rt.value;loadRoster()};
+  if(rt.value)loadRoster();
+}
+async function loadRoster(){
+  const s=document.getElementById('rosterBody'); if(!s||!rosterTeam||!rosterCategory)return;
+  s.innerHTML='<div class="loading">Cargando roster…</div>';
+  try{
+    const tm=team(rosterTeam);
+    const ps=await rpc('public_get_roster',{p_tournament_id:t.value,p_category_id:rosterCategory,p_team_id:rosterTeam,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});
+    if(!ps.length){s.innerHTML='<div class="empty">Este equipo todavía no tiene jugadores publicados.</div>';return}
+    s.innerHTML='<div class="roster-team"><div class="roster-team-head">'+(tm.logo_url?'<img src="'+esc(tm.logo_url)+'">':'')+'<div><h3 style="margin:0">'+esc(tm.name)+'</h3><span class="category-chip">'+esc(cat(rosterCategory))+'</span></div></div>'+
+      '<div class="roster-player-grid">'+ps.map(x=>'<div class="roster-player">'+(x.photo_url?'<img src="'+esc(x.photo_url)+'" alt="'+esc(x.full_name)+'">':'<div style="width:55px;height:55px;border-radius:10px;background:#25222b;display:grid;place-items:center">👤</div>')+'<div><div class="roster-number">#'+esc(x.jersey_number??'—')+'</div><b>'+esc(x.full_name)+'</b></div></div>').join('')+'</div></div>';
+  }catch(e){s.innerHTML='<div class="empty">No se pudo cargar el roster público.</div>'}
+}
+
+function cell(m){
+  if(!m)return'<div class="empty">—</div>';
+  const p=m.kind==='playoff',cn=p?(m.stage||'Playoff'):cat(m.category_id),a=p?team(m.team_a_id).name:team(m.home_team_id).name,b=p?team(m.team_b_id).name:team(m.away_team_id).name;
+  return'<div class="game '+cclass(cn)+'"><div class="cat">'+esc(cn)+(m.round_number?' · Jornada '+m.round_number:'')+'</div><div class="teams">'+esc(a)+' <span>vs</span> '+esc(b)+'</div><div class="meta">'+(p?'🏆':'🏈')+' '+esc(m.match_time?String(m.match_time).slice(0,5):'Hora por definir')+' · '+esc(m.field_name||'Campo por definir')+'</div></div>';
+}
+function calendar(){
+  const s=document.getElementById('calendario'),selected=c.value||'',catLabel=selected?cat(selected):'Todas las categorías',mode=window.__calendarMode||'category';
+  const items=data.matches.filter(m=>mode==='all'||!selected||m.category_id===selected).map(m=>({...m,kind:'regular'})).concat(data.playoffs.filter(p=>mode==='all'||!selected||!p.category_id||p.category_id===selected).map(p=>({...p,kind:'playoff'})));
+  const groups={};items.forEach(m=>{const k=m.kind==='playoff'?'PLAYOFFS':String(m.round_number||'SIN JORNADA');(groups[k]??=[]).push(m)});
+  let h='<div class="gof-section-toolbar"><h2>📅 Calendario</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+
+  '<div class="card"><div class="calendar-filter"><span>Mostrar calendario de:</span><div class="calendar-filter-buttons"><button type="button" class="'+(mode==='category'?'active':'')+'" onclick="setCalendarMode(\'category\')">Solo esta categoría</button><button type="button" class="'+(mode==='all'?'active':'')+'" onclick="setCalendarMode(\'all\')">Todas las categorías</button></div></div><div class="calendar-current"><b>'+esc(catLabel)+'</b></div></div>';
+  h+=publicationCard('calendario','Calendario publicado');
+  if(!items.length)h+='<div class="empty">No hay partidos publicados para esta selección.</div>';
+  Object.keys(groups).sort((a,b)=>(a==='PLAYOFFS'?999:+a)-(b==='PLAYOFFS'?999:+b)).forEach(w=>{
+    const arr=groups[w];const dates=[...new Set(arr.map(m=>m.match_date||''))].filter(Boolean);
+    h+='<div class="card calendar-round"><div class="calendar-round-head"><h3>📅 '+(w==='PLAYOFFS'?'PLAYOFFS':'Jornada '+esc(w))+'</h3><span>📅 '+esc(dates[0]||'Fecha por definir')+'</span></div><div class="scroll"><table class="wide"><thead><tr><th>HORA</th><th>CAMPO</th><th>CATEGORÍA</th><th>EQUIPO LOCAL</th><th>VS</th><th>EQUIPO VISITANTE</th></tr></thead><tbody>';
+    arr.sort((a,b)=>String(a.match_time||'').localeCompare(String(b.match_time||''))).forEach(m=>{
+      const isP=m.kind==='playoff',cn=isP?(m.stage||'Playoff'):cat(m.category_id),a=isP?team(m.team_a_id).name:team(m.home_team_id).name,b=isP?team(m.team_b_id).name:team(m.away_team_id).name;
+      h+='<tr><td>'+esc(m.match_time?String(m.match_time).slice(0,5):'—')+'</td><td>'+esc(m.field_name||'—')+'</td><td>'+esc(cn)+'</td><td>'+esc(a)+'</td><td>VS</td><td>'+esc(b)+'</td></tr>';
+    });h+='</tbody></table></div></div>';
+  });
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="calendar-full-btn" onclick="setCalendarMode(\'all\')">📅 Ver calendario completo</button><button type="button" class="calendar-full-btn" onclick="downloadPublicCalendarPNG()">🖼️ Descargar imagen</button></div>';
+  s.innerHTML=h;
+}
+function setCalendarMode(mode){window.__calendarMode=mode;calendar();document.getElementById('calendario')?.scrollIntoView({behavior:'smooth',block:'start'})}
+
+function matchups(){
+  const s=document.getElementById('enfrentamientos');
+  if(!c.value){s.innerHTML='<div class="gof-section-toolbar"><h2>⚔️ Enfrentamientos</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div><div class="empty">Selecciona una categoría para ver los rivales Jornada 1–7.</div>';return}
+  let h='<div class="gof-section-toolbar"><h2>⚔️ Enfrentamientos · '+esc(cat(c.value))+'</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('enfrentamientos','Enfrentamientos publicados')+
+  '<div class="card"><div class="scroll"><table class="wide"><thead><tr><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>';
+  data.teams.filter(tm=>data.matches.some(m=>m.category_id===c.value&&(m.home_team_id===tm.id||m.away_team_id===tm.id))).forEach(tm=>{
+    h+='<tr><td><b>'+esc(tm.name)+'</b></td>';
+    for(let r=1;r<=7;r++){const m=data.matches.find(x=>x.category_id===c.value&&+x.round_number===r&&(x.home_team_id===tm.id||x.away_team_id===tm.id));h+='<td>'+esc(m?(m.home_team_id===tm.id?team(m.away_team_id).name:team(m.home_team_id).name):'—')+'</td>'}
+    h+='</tr>';
+  });
+  s.innerHTML=h+'</tbody></table></div></div>';
+}
+
+function results(){
+  const s=document.getElementById('resultados'),a=data.matches.filter(m=>(!c.value||m.category_id===c.value)&&(m.status==='jugado'||m.status==='incomparecencia'));
+  s.innerHTML='<div class="gof-section-toolbar"><h2>🏈 Resultados</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('resultados','Resultados publicados')+
+  (a.length?a.map(m=>'<div class="card"><span class="badge">'+esc(cat(m.category_id))+' · Jornada '+esc(m.round_number)+'</span><div class="match"><b>'+esc(team(m.home_team_id).name)+'</b><div class="score">'+(m.home_score??0)+'-'+(m.away_score??0)+'</div><b>'+esc(team(m.away_team_id).name)+'</b></div><div class="muted" style="text-align:center;margin-top:7px">'+esc(m.match_date||'')+' · '+esc(m.field_name||'')+'</div></div>').join(''):'<div class="empty">Aún no hay resultados publicados.</div>');
+}
+function table(){
+  const s=document.getElementById('tabla');
+  if(!c.value){s.innerHTML='<div class="gof-section-toolbar"><h2>📊 Tabla General</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div><div class="empty">Selecciona una categoría para mostrar su tabla.</div>';return}
+  const m={};data.matches.filter(x=>x.category_id===c.value&&(x.status==='jugado'||x.status==='incomparecencia')).forEach(x=>{
+    m[x.home_team_id]??={id:x.home_team_id,jj:0,jg:0,pa:0,pc:0};m[x.away_team_id]??={id:x.away_team_id,jj:0,jg:0,pa:0,pc:0};
+    const a=m[x.home_team_id],b=m[x.away_team_id],hs=Number(x.home_score||0),as=Number(x.away_score||0);
+    a.jj++;b.jj++;a.pa+=hs;a.pc+=as;b.pa+=as;b.pc+=hs;if(hs>as)a.jg++;else if(as>hs)b.jg++;
+  });
+  const rows=Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.pa-a.pa||b.dif-a.dif||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));
+  s.innerHTML='<div class="gof-section-toolbar"><h2>📊 Tabla General · '+esc(cat(c.value))+'</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('tablas','Tabla General publicada')+
+  '<div class="card"><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>'+
+  (rows.length?rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+esc(team(x.id).name)+'</b></td><td>'+x.jj+'</td><td>'+x.jg+'</td><td>'+x.pa+'</td><td>'+x.pc+'</td><td>'+x.dif+'</td></tr>').join(''):'<tr><td colspan="7">No hay partidos registrados para esta categoría.</td></tr>')+
+  '</tbody></table></div></div>';
+}
+function playoffs(){
+  const s=document.getElementById('playoffs'),list=data.playoffs.filter(p=>!c.value||!p.category_id||p.category_id===c.value);
+  s.innerHTML='<div class="gof-section-toolbar"><h2>🏆 Playoffs'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('playoffs','Playoffs publicados')+
+  (list.length?list.map(p=>'<div class="card"><span class="badge">'+esc(p.stage||'Playoff')+' · '+esc(cat(p.category_id))+'</span><div class="match"><b>'+esc(team(p.team_a_id).name)+'</b><div class="score">'+(p.score_a??'—')+'-'+(p.score_b??'—')+'</div><b>'+esc(team(p.team_b_id).name)+'</b></div></div>').join(''):'<div class="empty">El bracket aún no ha sido publicado.</div>');
+}
+function champions(){
+  const s=document.getElementById('campeones'),finals=data.playoffs.filter(p=>p.published!==false&&p.winner_team_id&&/final/i.test(String(p.stage||'')));
+  s.innerHTML='<div class="gof-section-toolbar"><h2>🥇 Campeones</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+
+  (finals.length?finals.map(p=>'<div class="card"><span class="badge">'+esc(p.stage||'Final')+'</span><h3 style="font-size:28px;margin-top:12px">🏆 '+esc(team(p.winner_team_id).name)+'</h3><div class="muted">'+esc(cat(p.category_id))+'</div></div>').join(''):'<div class="empty">Los campeones aparecerán aquí cuando la administración publique la final con su ganador.</div>');
+}
+function renderNotices(){
+  const s=document.getElementById('avisos');
+  s.innerHTML='<div class="gof-section-toolbar"><h2>📣 Avisos</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+
+  (notices.length?notices.map(n=>'<div class="notice-card"><b>'+esc(n.title||'Aviso')+'</b><div class="muted">'+esc(n.notice_date||'')+'</div>'+(n.team?'<div>👥 '+esc(n.team)+'</div>':'')+(n.person?'<div>👤 '+esc(n.person)+'</div>':'')+(n.reason?'<div>Motivo: '+esc(n.reason)+'</div>':'')+(n.sanction?'<div>Sanción: '+esc(n.sanction)+'</div>':'')+(n.description?'<p>'+esc(n.description)+'</p>':'')+'</div>').join(''):'<div class="empty">No hay avisos publicados.</div>');
+}
+function renderPublications(){
+  const s=document.getElementById('publicaciones');
+  s.innerHTML='<div class="gof-section-toolbar"><h2>🖼️ Publicaciones oficiales</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div><p class="muted">Imágenes publicadas directamente por la administración. Estas imágenes son informativas y no modifican los datos automáticos de la liga.</p>'+allPublicationCards();
+}
+
+async function loadPublicData(){
+  // El menú público debe existir incluso si alguien abre index.html sin el enlace de liga.
+  render();
+  if(!GOF_PUBLIC_LEAGUE_SLUG){
+    t.innerHTML='<option value=\"\">Selecciona una liga desde su enlace público</option>';
+    status.innerHTML='<b>Portal público GAME ON FLAG</b><br>El menú está disponible. Para cargar torneos, roster, calendario, resultados y tablas abre el enlace público generado para la liga desde Administración.';
+    status.style.display='block';
+    return false;
+  }
+  try{
+    league=await rpc('public_get_league_by_slug',{p_league_slug:GOF_PUBLIC_LEAGUE_SLUG})||{};
+    if(!league.id){status.innerHTML='<b>Liga no encontrada.</b><br>El enlace público no corresponde a una liga activa.';status.style.display='block';return false;}
+    document.getElementById('publicLeagueName').textContent='Liga: '+(league.name||'GAME ON FLAG');
+    document.getElementById('publicLeagueSub').textContent='Portal público · '+(league.slug||'');
+    document.getElementById('publicFooterLeague').textContent=league.name||'GAME ON FLAG';
+    if(league.logo_url)applyPublicLeagueLogo(league.logo_url);
+
+    const ts=await rpc('public_list_tournaments',{p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});
+    if(!ts.length){status.textContent='Aún no hay torneos publicados para esta liga.';status.style.display='block';return false;}
+    t.innerHTML=ts.map(y=>'<option value="'+esc(y.id)+'">'+esc(y.name)+'</option>').join('');
+    const preferred=Q.get('torneo')||Q.get('tournament');
+    if(preferred && ts.some(x=>x.id===preferred))t.value=preferred;
+
+    await loadTournament();
+    try{notices=await rpc('public_list_notices',{p_league_slug:GOF_PUBLIC_LEAGUE_SLUG})||[]}catch(e){notices=[]}
+    document.getElementById('noticeBadge').textContent=String(notices.length||0);
+
+    try{
+      publications=await tableGet('publication_images',{
+        select:'id,league_id,tournament_id,category_id,section,title,image_url,is_published,created_at',
+        league_id:'eq.'+league.id,
+        tournament_id:'eq.'+t.value,
+        is_published:'eq.true',
+        order:'created_at.desc'
+      });
+    }catch(e){publications=[]}
+    render();
+    return true;
+  }catch(e){
+    status.textContent='No se pudo cargar la información pública de esta liga.';
+    status.style.display='block';return false;
+  }
+}
+async function loadTournament(){
+  if(!t.value)return;
+  data=await rpc('public_get_tournament_data',{p_tournament_id:t.value,p_category_id:null,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});
+  c.innerHTML='<option value="">Todas las categorías</option>'+data.categories.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');
+  c.value='';
+  rosterCategory='';rosterTeam='';
+  try{
+    publications=await tableGet('publication_images',{
+      select:'id,league_id,tournament_id,category_id,section,title,image_url,is_published,created_at',
+      league_id:'eq.'+(league.id||''),
+      tournament_id:'eq.'+t.value,
+      is_published:'eq.true',
+      order:'created_at.desc'
+    });
+  }catch(e){publications=[]}
+}
+t.onchange=async()=>{try{await loadTournament();tab='inicio';render()}catch(e){status.textContent='No se pudo cargar el torneo.';status.style.display='block'}};
+c.onchange=()=>{rosterCategory=c.value;rosterTeam='';render()};
+
+(async()=>{await loadPublicData()})();
+</script>
+<script>
 function savePublicAppLogo(input){const f=input?.files?.[0];if(!f)return;if(!/^image\/(png|jpeg|webp)$/.test(f.type))return alert('Selecciona una imagen PNG, JPG o WEBP.');const r=new FileReader();r.onload=()=>{try{localStorage.setItem('gof_app_logo',r.result)}catch(e){}applyPublicAppLogo(r.result)};r.readAsDataURL(f)}
 function applyPublicAppLogo(src){const im=document.getElementById('publicAppLogoPreview'),tx=document.getElementById('publicAppLogoText');if(im&&src){im.src=src;im.style.display='block';if(tx)tx.style.display='none'}}
-function restorePublicAppLogo(){try{const u=localStorage.getItem('gof_app_logo');if(u){applyPublicAppLogo(u);return}}catch(e){}}
+function restorePublicAppLogo(){try{const u=localStorage.getItem('gof_app_logo');if(u)applyPublicAppLogo(u)}catch(e){}}
 setTimeout(restorePublicAppLogo,0);
-function savePublicLeagueLogo(input){const f=input?.files?.[0];if(!f)return;if(!/^image\/(png|jpeg|webp)$/.test(f.type))return alert('Selecciona una imagen PNG, JPG o WEBP.');const r=new FileReader();r.onload=()=>{try{localStorage.setItem('gof_league_logo',r.result)}catch(e){}applyPublicLeagueLogo(r.result);const adminPreview=document.getElementById('homeLeagueLogoPreview');if(adminPreview)adminPreview.src=r.result};r.readAsDataURL(f)}
 function applyPublicLeagueLogo(src){const im=document.getElementById('publicLeagueLogoPreview'),tx=document.getElementById('publicLeagueLogoText');if(im&&src){im.src=src;im.style.display='block';if(tx)tx.style.display='none'}}
 function restorePublicLeagueLogo(){try{const u=localStorage.getItem('gof_league_logo');if(u)applyPublicLeagueLogo(u)}catch(e){}}
 setTimeout(restorePublicLeagueLogo,0);
 
-/* Navegación pública: los módulos se despliegan debajo de la portada, sin cambiar de página. */
-function togglePublicAnnouncements(){const el=document.getElementById('publicAnnouncements');if(el){el.remove();return}const nav=document.getElementById('nav');const box=document.createElement('div');box.id='publicAnnouncements';box.innerHTML='<b>📣 Anuncios</b><div style="margin-top:5px;color:#cfc6da">Los avisos publicados por la administración aparecerán aquí.</div>';nav.insertAdjacentElement('afterend',box);box.scrollIntoView({behavior:'smooth',block:'nearest'})}
-document.addEventListener('click',function(ev){
-  const b=ev.target.closest('#nav button[data-tab]');
-  if(!b)return;
-  ev.preventDefault();
-  const next=b.getAttribute('data-tab');
-  tab=(tab===next)?'inicio':next;
-  render();
-  if(tab!=='inicio'){setTimeout(()=>document.getElementById(tab)?.scrollIntoView({behavior:'smooth',block:'start'}),30)}
-});
-function render(){
-  document.body.classList.toggle('home-screen',tab==='inicio');
-  nav.innerHTML=[['calendario','📅','Calendario|Jornadas y campos'],['enfrentamientos','🏈','Enfrentamientos|Todos los partidos'],['equipos','👥','Equipos|Conoce los equipos'],['jugadores','👕','Jugadores|Plantillas y rosters'],['resultados','📊','Resultados|Marcadores y estadísticas'],['tabla','📈','Tabla|Clasificaciones'],['playoffs','🏆','Playoffs|Fase final'],['campeones','🥇','Campeones|Campeones NFFL']].map(x=>{const q=x[2].split('|');return '<button type="button" data-tab="'+x[0]+'" class="'+(tab===x[0]?'active':'')+'"><span aria-hidden="true">'+x[1]+'</span><span><b>'+q[0]+'</b><small>'+q[1]+'</small></span></button>'}).join('');
-  sec.forEach(x=>{const el=document.getElementById(x);el.classList.toggle('public-open',x===tab);el.style.display=x===tab?'block':'none'});
-  if(tab==='inicio')home();
-  if(tab==='equipos')teams();if(tab==='jugadores')players();if(tab==='calendario')calendar();if(tab==='enfrentamientos')matchups();if(tab==='resultados')results();if(tab==='tabla')table();if(tab==='playoffs')playoffs();if(tab==='campeones')champions();
+function downloadPublicCalendarPNG(){
+  const table=document.querySelector('#calendario table.wide');
+  if(!table)return alert('No hay calendario visible para descargar.');
+  const rows=[...table.querySelectorAll('tr')].map(r=>[...r.children].map(c=>(c.innerText||'').trim()));
+  const cols=rows[0]?.length||1,cw=[90,100,130,220,60,220],widths=Array.from({length:cols},(_,i)=>cw[i]||160),rowH=42,pad=24;
+  const title=(league.name||'GAME ON FLAG')+' · '+(data.tournament?.name||'Calendario');
+  const w=widths.reduce((a,b)=>a+b,0)+pad*2,h=86+rows.length*rowH+pad;
+  let svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><rect width="100%" height="100%" fill="#ffffff"/><text x="'+pad+'" y="34" font-family="Arial" font-size="24" font-weight="700" fill="#111">'+esc(title)+'</text>';
+  let y=70;
+  for(let r=0;r<rows.length;r++){let x=pad;for(let j=0;j<cols;j++){const ww=widths[j];svg+='<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="'+rowH+'" fill="'+(r===0?'#eeeeee':'#ffffff')+'" stroke="#aaaaaa"/><text x="'+(x+8)+'" y="'+(y+27)+'" font-family="Arial" font-size="14" font-weight="'+(r===0?'700':'400')+'" fill="#111">'+esc(rows[r][j]||'')+'</text>';x+=ww}y+=rowH}
+  svg+='</svg>';
+  const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();
+  img.onload=()=>{const cn=document.createElement('canvas');cn.width=w*2;cn.height=h*2;const x=cn.getContext('2d');x.scale(2,2);x.drawImage(img,0,0);URL.revokeObjectURL(url);cn.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='GAME-ON-FLAG_Calendario.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)},'image/png')};
+  img.onerror=()=>{URL.revokeObjectURL(url);alert('No se pudo generar la imagen en este navegador.')};
+  img.src=url;
 }
-function home(){document.getElementById('inicio').innerHTML='';}
-{const n=data.matches.filter(m=>m.status==='jugado'||m.status==='incomparecencia').length;document.getElementById('inicio').innerHTML='<div class="card"><h2>'+esc(data.tournament?.name||'NFFL')+'</h2><p class="muted">Temporada '+esc(data.tournament?.season||'')+'</p><div class="grid"><div class="stat"><b>'+data.teams.length+'</b><br>Equipos</div><div class="stat"><b>'+n+'</b><br>Juegos registrados</div><div class="stat"><b>'+data.playoffs.length+'</b><br>Playoffs</div></div></div>'}function teams(){const list=c.value?data.teams.filter(tm=>data.matches.some(m=>m.category_id===c.value&&(m.home_team_id===tm.id||m.away_team_id===tm.id))):data.teams;document.getElementById('equipos').innerHTML='<h2>Equipos'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><div class="grid">'+list.map(x=>'<div class="card"><b>'+esc(x.name)+'</b></div>').join('')+'</div>'}async function players(){const s=document.getElementById('jugadores');if(!c.value){s.innerHTML='<div class="empty">Selecciona una categoría para consultar rosters aprobados.</div>';return}s.innerHTML='<div class="loading">Cargando jugadores…</div>';let h='<h2>Jugadores</h2>',found=0;for(const tm of data.teams){const ps=await rpc('public_get_roster',{p_tournament_id:t.value,p_category_id:c.value,p_team_id:tm.id,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});if(ps.length){found+=ps.length;h+='<div class="card"><h3>'+esc(tm.name)+'</h3>'+ps.map(x=>'<div class="player">'+(x.photo_url?'<img src="'+esc(x.photo_url)+'">':'')+'<div><b>#'+esc(x.jersey_number)+' '+esc(x.full_name)+'</b></div></div>').join('')+'</div>'}}s.innerHTML=found?h:'<div class="empty">No hay rosters aprobados.</div>'}
-function champions(){const s=document.getElementById('campeones');const finals=data.playoffs.filter(p=>p.published!==false&&p.winner_team_id&&/final/i.test(String(p.stage||'')));if(!finals.length){s.innerHTML='<h2>🏆 Campeones</h2><div class="empty">Los campeones aparecerán aquí cuando la administración publique la final con su ganador.</div>';return}let h='<h2>🏆 Campeones</h2>';finals.forEach(p=>{h+='<div class="card"><span class="badge">'+esc(p.stage||'Final')+'</span><h3 style="font-size:28px;margin-top:12px">🏆 '+esc(team(p.winner_team_id).name)+'</h3><div class="muted">'+esc(cat(p.category_id))+'</div></div>'});s.innerHTML=h}function cell(m){if(!m)return'<div class="empty">—</div>';const p=m.kind==='playoff',cn=p?(m.stage||'Playoff'):cat(m.category_id),a=p?team(m.team_a_id).name:team(m.home_team_id).name,b=p?team(m.team_b_id).name:team(m.away_team_id).name;return'<div class="game '+cclass(cn)+'"><div class="cat">'+esc(cn)+(m.round_number?' · Semana '+m.round_number:'')+'</div><div class="teams">'+esc(a)+' <span>vs</span> '+esc(b)+'</div><div class="meta">'+(p?'🏆':'🏈')+' '+esc(m.match_time?String(m.match_time).slice(0,5):'Hora por definir')+' · '+esc(m.field_name||'Campo por definir')+'</div></div>'}
-function calendar(){
-  const s=document.getElementById('calendario');
-  const selected=c.value||'';
-  const catLabel=selected?cat(selected):'Todas las categorías';
-  const mode=window.__calendarMode||'category';
-  const items=data.matches.filter(m=>mode==='all'||!selected||m.category_id===selected).map(m=>({...m,kind:'regular'}))
-    .concat(data.playoffs.filter(p=>mode==='all'||!selected||!p.category_id||p.category_id===selected).map(p=>({...p,kind:'playoff'})));
-  const groups={};
-  items.forEach(m=>{const k=m.kind==='playoff'?'PLAYOFFS':String(m.round_number||'SIN SEMANA');(groups[k]??=[]).push(m)});
-  let h='<div class="calendar-panel-head"><div><h2>📅 Calendario</h2><p>Jornadas y horarios de los partidos</p></div><div class="calendar-filter"><span>Mostrar calendario de:</span><div class="calendar-filter-buttons"><button type="button" class="'+(mode==='category'?'active':'')+'" onclick="setCalendarMode(\'category\')">Solo esta categoría</button><button type="button" class="'+(mode==='all'?'active':'')+'" onclick="setCalendarMode(\'all\')">Todas las categorías</button></div></div></div>';
-  h+='<div class="calendar-current"><b>'+esc(catLabel)+'</b></div>';
-  if(!items.length){h+='<div class="empty">No hay partidos publicados para esta selección.</div>';}
-  Object.keys(groups).sort((a,b)=>(a==='PLAYOFFS'?999:+a)-(b==='PLAYOFFS'?999:+b)).forEach(w=>{
-    const arr=groups[w];
-    const dates=[...new Set(arr.map(m=>m.match_date||''))].filter(Boolean);
-    const dateLabel=dates.length?dates[0]:'Fecha por definir';
-    h+='<div class="card calendar-round"><div class="calendar-round-head"><h3>📅 '+(w==='PLAYOFFS'?'PLAYOFFS':'Jornada '+esc(w))+'</h3><span>📅 '+esc(dateLabel)+'</span></div><div class="scroll"><table class="wide"><thead><tr><th>HORA</th><th>CAMPO</th><th>CATEGORÍA</th><th>EQUIPO LOCAL</th><th>VS</th><th>EQUIPO VISITANTE</th></tr></thead><tbody>';
-    arr.sort((a,b)=>String(a.match_time||'').localeCompare(String(b.match_time||''))).forEach(m=>{
-      const isP=m.kind==='playoff';
-      const cn=isP?(m.stage||'Playoff'):cat(m.category_id);
-      const a=isP?team(m.team_a_id).name:team(m.home_team_id).name;
-      const b=isP?team(m.team_b_id).name:team(m.away_team_id).name;
-      h+='<tr><td>'+esc(m.match_time?String(m.match_time).slice(0,5):'—')+'</td><td>'+esc(m.field_name||'—')+'</td><td>'+esc(cn)+'</td><td>'+esc(a)+'</td><td>VS</td><td>'+esc(b)+'</td></tr>';
-    });
-    h+='</tbody></table></div></div>';
-  });
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="calendar-full-btn" onclick="setCalendarMode(\'all\')">📅 Ver calendario completo <span>›</span></button><button type="button" class="calendar-full-btn" onclick="downloadPublicCalendarPNG()">🖼️ Descargar imagen</button></div>';
-  s.innerHTML=h;
-}
-function setCalendarMode(mode){window.__calendarMode=mode;calendar();const el=document.getElementById('calendario');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
-
-function matchups(){const s=document.getElementById('enfrentamientos');if(!c.value){s.innerHTML='<div class="empty">Selecciona una categoría para ver los rivales Semana 1–7.</div>';return}let h='<h2>Enfrentamientos Semana 1–7</h2><div class="card"><div class="scroll"><table class="wide"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>S7</th></tr></thead><tbody>';data.teams.filter(tm=>data.matches.some(m=>m.category_id===c.value&&(m.home_team_id===tm.id||m.away_team_id===tm.id))).forEach(tm=>{h+='<tr><td>'+esc(cat(c.value))+'</td><td><b>'+esc(tm.name)+'</b></td>';for(let r=1;r<=7;r++){const m=data.matches.find(x=>x.category_id===c.value&&+x.round_number===r&&(x.home_team_id===tm.id||x.away_team_id===tm.id));h+='<td>'+esc(m?(m.home_team_id===tm.id?team(m.away_team_id).name:team(m.home_team_id).name):'—')+'</td>'}h+='</tr>'});s.innerHTML=h+'</tbody></table></div></div>'}
-function results(){const s=document.getElementById('resultados'),a=data.matches.filter(m=>(!c.value||m.category_id===c.value)&&(m.status==='jugado'||m.status==='incomparecencia'));s.innerHTML='<h2>Resultados</h2>'+(a.length?a.map(m=>'<div class="card"><span class="badge">Semana '+esc(m.round_number)+'</span><div class="match"><b>'+esc(team(m.home_team_id).name)+'</b><div class="score">'+(m.home_score??0)+'-'+(m.away_score??0)+'</div><b>'+esc(team(m.away_team_id).name)+'</b></div></div>').join(''):'<div class="empty">Aún no hay resultados publicados.</div>')}
-function table(){const s=document.getElementById('tabla');if(!c.value){s.innerHTML='<h2>Tabla de posiciones</h2><div class="empty">Selecciona una categoría para mostrar su tabla.</div>';return}const m={};data.matches.filter(x=>x.category_id===c.value&&(x.status==='jugado'||x.status==='incomparecencia')).forEach(x=>{m[x.home_team_id]??={id:x.home_team_id,jj:0,jg:0,pa:0,pc:0};m[x.away_team_id]??={id:x.away_team_id,jj:0,jg:0,pa:0,pc:0};const a=m[x.home_team_id],b=m[x.away_team_id],hs=Number(x.home_score||0),as=Number(x.away_score||0);a.jj++;b.jj++;a.pa+=hs;a.pc+=as;b.pa+=as;b.pc+=hs;if(hs>as)a.jg++;else if(as>hs)b.jg++});const rows=Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.pa-a.pa||b.dif-a.dif||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));s.innerHTML='<h2>Tabla de posiciones · '+esc(cat(c.value))+'</h2><div class="card"><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PC</th><th>DIF</th></tr></thead><tbody>'+(rows.length?rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+esc(team(x.id).name)+'</b></td><td>'+x.jj+'</td><td>'+x.jg+'</td><td>'+x.pa+'</td><td>'+x.pc+'</td><td>'+x.dif+'</td></tr>').join(''):'<tr><td colspan="7">No hay partidos registrados para esta categoría.</td></tr>')+'</tbody></table></div></div>'}
-function playoffs(){const s=document.getElementById('playoffs'),list=data.playoffs.filter(p=>!c.value||!p.category_id||p.category_id===c.value);s.innerHTML='<h2>Playoffs'+(c.value?' · '+esc(cat(c.value)):'')+'</h2>'+(list.length?list.map(p=>'<div class="card"><span class="badge">'+esc(p.stage||'Playoff')+'</span><div class="match"><b>'+esc(team(p.team_a_id).name)+'</b><div class="score">'+(p.score_a??'—')+'-'+(p.score_b??'—')+'</div><b>'+esc(team(p.team_b_id).name)+'</b></div></div>').join(''):'<div class="empty">El bracket aún no ha sido publicado.</div>')}
-async function refresh(){if(!t.value)return;try{data=await rpc('public_get_tournament_data',{p_tournament_id:t.value,p_category_id:null,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});c.innerHTML='<option value="">Todas las categorías</option>'+data.categories.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');render()}catch(e){status.textContent='No se pudo cargar el torneo.';status.style.display='block'}}t.onchange=()=>{c.value='';refresh()};c.onchange=render;(async()=>{try{if(!GOF_PUBLIC_LEAGUE_SLUG){status.innerHTML='<b>Portal público listo.</b><br>Esta publicación todavía no tiene una liga asignada. Abre el enlace público generado desde la administración para cargar sus torneos.';status.style.display='block';return}const x=await rpc('public_list_tournaments',{p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});if(!x.length){status.textContent='Aún no hay torneos publicados.';status.style.display='block';return}t.innerHTML=x.map(y=>'<option value="'+esc(y.id)+'">'+esc(y.name)+'</option>').join('');await refresh()}catch(e){status.textContent='No se pudo cargar la información pública.';status.style.display='block'}})();
 </script>
-<script>
-// Fallback league logo: restore saved logo, otherwise show a clean NFFL label.
-(function(){
-  function syncLeagueFallback(){
-    const img=document.getElementById('publicLeagueLogoPreview'), fb=document.querySelector('.gof-public-logo-fallback');
-    if(!img) return;
-    try{ const u=localStorage.getItem('gof_league_logo'); if(u){img.src=u;img.style.display='block';if(fb)fb.style.display='none';return;} }catch(e){}
-    if(!img.getAttribute('src')) img.style.display='none';
-  }
-  syncLeagueFallback();
-})();
-
-function downloadPublicCalendarPNG(){const table=document.querySelector('#calendario table.wide');if(!table)return alert('No hay calendario visible para descargar.');const rows=[...table.querySelectorAll('tr')].map(r=>[...r.children].map(c=>(c.innerText||'').trim()));const cols=rows[0]?.length||1;const cw=[90,100,130,220,60,220];const widths=Array.from({length:cols},(_,i)=>cw[i]||160);const rowH=42,pad=24,title='NFFL — La Nueva Era · Calendario público',w=widths.reduce((a,b)=>a+b,0)+pad*2,h=86+rows.length*rowH+pad;let svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><rect width="100%" height="100%" fill="#ffffff"/><text x="'+pad+'" y="34" font-family="Arial" font-size="24" font-weight="700" fill="#111">'+esc(title)+'</text>';let y=70;for(let r=0;r<rows.length;r++){let x=pad;for(let c=0;c<cols;c++){const ww=widths[c];svg+='<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="'+rowH+'" fill="'+(r===0?'#eeeeee':'#ffffff')+'" stroke="#aaaaaa"/><text x="'+(x+8)+'" y="'+(y+27)+'" font-family="Arial" font-size="14" font-weight="'+(r===0?'700':'400')+'" fill="#111">'+esc(rows[r][c]||'')+'</text>';x+=ww}y+=rowH}svg+='</svg>';const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const cn=document.createElement('canvas');cn.width=w*2;cn.height=h*2;const x=cn.getContext('2d');x.scale(2,2);x.drawImage(img,0,0);URL.revokeObjectURL(url);cn.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='GAME-ON-FLAG_Calendario.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)},'image/png')};img.onerror=()=>{URL.revokeObjectURL(url);alert('No se pudo generar la imagen en este navegador.')};img.src=url}
-</script>
-
 
 </body>
 </html>

@@ -840,7 +840,7 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 
   <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('view')"><span>👀</span><span><b>Ver Rosters</b><small>Consulta los rosters completos por torneo</small></span><span class="gof-roster-chevron">›</span></button>
   <div id="gofRosterPanel-view" class="gof-roster-panel">
-    <div class="form"><select id="vrt"></select><select id="vrFilter"><option value="todos">Todos</option><option value="femenil">Femenil</option><option value="varonil">Varonil</option><option value="mixto">Mixto</option></select></div>
+    <div class="form"><select id="vrt"></select><select id="vrFilter"><option value="todos">Todas las categorías</option></select></div>
     <div id="viewRosterList" style="margin-top:10px"></div>
   </div>
 
@@ -1499,8 +1499,53 @@ function clearQuickPlayerForm(){quickRosterContext.editing=null;['qrName','qrNum
 function editQuickPlayer(p){quickRosterContext.editing=p.player_id;document.getElementById('qrName').value=p.full_name||'';document.getElementById('qrNumber').value=p.jersey_number??'';document.getElementById('qrDob').value=p.date_of_birth||'';document.getElementById('qrCurp').value=p.curp||'';document.getElementById('qrPhoto').value=p.photo_url||'';const pr=document.getElementById('qrPhotoPreview');if(pr&&p.photo_url){pr.src=p.photo_url;pr.style.display='block'}document.getElementById('quickRosterFormTitle').textContent='✏️ Editando jugador';window.scrollTo({top:document.getElementById('rosters').offsetTop||0,behavior:'smooth'})}
 function readQuickPhoto(input){const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=900,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const data=c.toDataURL('image/jpeg',.78);document.getElementById('qrPhoto').value=data;const pr=document.getElementById('qrPhotoPreview');pr.src=data;pr.style.display='block'};img.src=reader.result};reader.readAsDataURL(file)}
 async function saveQuickPlayer(){const tid=val('qrt'),cat=val('qrc'),team=val('qre');if(!tid||!cat||!team)return alert('Selecciona torneo, categoría y equipo.');const name=val('qrName').trim(),num=val('qrNumber').trim(),dob=val('qrDob'),photo=val('qrPhoto').trim(),curp=val('qrCurp').trim();if(!name||!num||!photo)return alert('Nombre, número y foto son obligatorios.');const rows=await fetchQuickRoster();const idx=quickRosterContext.editing?rows.findIndex(x=>x.player_id===quickRosterContext.editing):-1;const item={player_id:quickRosterContext.editing||null,full_name:name,photo_url:photo,jersey_number:num,curp,date_of_birth:dob};if(idx>=0)rows[idx]=item;else rows.push(item);if(rows.length>18)return alert('El roster no puede tener más de 18 jugadores.');if(rows.some((x,i)=>rows.findIndex(y=>String(y.jersey_number)===String(x.jersey_number))!==i))return alert('No puede haber números de jersey duplicados.');const {data,error}=await sb.rpc('admin_save_roster',{p_tournament_id:tid,p_category_id:cat,p_team_id:team,p_players:rows});if(error)return alert(error.message);toast(quickRosterContext.editing?'Jugador actualizado correctamente':'Jugador guardado correctamente');clearQuickPlayerForm();await loadQuickRoster()}
-async function loadViewRosterSelectors(){const sel=document.getElementById('vrt');if(!sel)return;const {data:t,error}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});if(error)return alert(error.message);fill('vrt',t||[],'id','name');await loadViewRosters()}
-async function loadViewRosters(){const tid=val('vrt'),filter=val('vrFilter')||'todos',out=document.getElementById('viewRosterList');if(!out||!tid){if(out)out.innerHTML='<div class="empty">Selecciona un torneo.</div>';return}const {data:ins,error}=await sb.from('tournament_teams').select('team_id,category_id,categories(id,name),teams(id,name)').eq('tournament_id',tid).eq('is_active',true);if(error)return alert(error.message);const rows=(ins||[]).filter(x=>{const n=String(x.categories?.name||'').toLowerCase();return filter==='todos'||n.includes(filter)});if(!rows.length){out.innerHTML='<div class="empty">No hay equipos para ese filtro.</div>';return}const cards=[];for(const r of rows){const {data:players,error:pe}=await sb.from('roster_registrations').select('status,players(full_name,photo_url,jersey_number,date_of_birth)').eq('tournament_id',tid).eq('category_id',r.category_id).eq('team_id',r.team_id).order('created_at');if(pe)return alert(pe.message);const ps=(players||[]).filter(x=>x.players).map(x=>({...x.players,status:x.status}));cards.push(`<details class="card roster-view-card"><summary><b>${esc(r.teams?.name||'Equipo')}</b><span class="tag">${esc(r.categories?.name||'Categoría')} · ${ps.length}/18</span></summary><div style="margin-top:9px">${ps.length?`<div class="roster-mini-grid">${ps.map(p=>`<div class="roster-mini-player"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')}${p.date_of_birth?' · '+esc(p.date_of_birth):''}</div></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div></details>`)}out.innerHTML=cards.join('')}
+async function loadViewRosterSelectors(){
+  const sel=document.getElementById('vrt');if(!sel)return;
+  const {data:t,error}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});
+  if(error)return alert(error.message);
+  fill('vrt',t||[],'id','name');
+  await loadViewRosterCategories();
+}
+async function loadViewRosterCategories(){
+  const tid=val('vrt'),f=document.getElementById('vrFilter');if(!f)return;
+  if(!tid){f.innerHTML='<option value="todos">Todas las categorías</option>';return loadViewRosters();}
+  const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
+  if(error)return alert(error.message);
+  const cats=(data||[]).map(x=>({id:x.categories?.id||x.category_id,name:x.categories?.name||'Categoría'})).filter(x=>x.id);
+  f.innerHTML='<option value="todos">Todas las categorías</option>'+cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  await loadViewRosters();
+}
+async function loadViewRosters(){
+  const tid=val('vrt'),filter=val('vrFilter')||'todos',out=document.getElementById('viewRosterList');
+  if(!out||!tid){if(out)out.innerHTML='<div class="empty">Selecciona un torneo.</div>';return}
+  const {data:ins,error}=await sb.from('tournament_teams').select('team_id,category_id').eq('tournament_id',tid).eq('is_active',true);
+  if(error)return alert(error.message);
+  let rows=ins||[];
+  if(filter!=='todos')rows=rows.filter(x=>x.category_id===filter);
+  const catIds=[...new Set(rows.map(x=>x.category_id).filter(Boolean))],teamIds=[...new Set(rows.map(x=>x.team_id).filter(Boolean))];
+  const [{data:cats,error:ce},{data:teams,error:te}]=await Promise.all([
+    catIds.length?sb.from('categories').select('id,name').in('id',catIds):Promise.resolve({data:[],error:null}),
+    teamIds.length?sb.from('teams').select('id,name').in('id',teamIds):Promise.resolve({data:[],error:null})
+  ]);
+  if(ce)return alert(ce.message);if(te)return alert(te.message);
+  const catMap=Object.fromEntries((cats||[]).map(x=>[x.id,x.name])),teamMap=Object.fromEntries((teams||[]).map(x=>[x.id,x.name]));
+  if(!rows.length){out.innerHTML='<div class="empty">No hay equipos registrados en este torneo para la categoría seleccionada.</div>';return}
+  const groups={};
+  rows.forEach(r=>{const cid=r.category_id||'sin-categoria';if(!groups[cid])groups[cid]={name:catMap[cid]||'Categoría',teams:[]};groups[cid].teams.push(r)});
+  const cards=[];
+  for(const [cid,g] of Object.entries(groups)){
+    const teamCards=[];
+    for(const r of g.teams){
+      const {data:players,error:pe}=await sb.from('roster_registrations').select('status,players(full_name,photo_url,jersey_number,date_of_birth)').eq('tournament_id',tid).eq('category_id',r.category_id).eq('team_id',r.team_id).order('created_at');
+      if(pe)return alert(pe.message);
+      const ps=(players||[]).filter(x=>x.players).map(x=>({...x.players,status:x.status}));
+      teamCards.push(`<details class="card roster-view-card"><summary><div class="row"><b>${esc(teamMap[r.team_id]||'Equipo')}</b><span class="tag">${ps.length}/18 jugadores</span></div></summary><div style="margin-top:9px">${ps.length?`<div class="roster-mini-grid">${ps.map(p=>`<div class="roster-mini-player"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')}${p.date_of_birth?' · '+esc(p.date_of_birth):''} · ${esc(p.status||'pendiente')}</div></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div></details>`);
+    }
+    cards.push(`<div style="margin-bottom:14px"><div class="section-title" style="margin-bottom:8px"><b>${esc(g.name)}</b><span class="tag">${teamCards.length} equipo${teamCards.length===1?'':'s'}</span></div>${teamCards.join('')}</div>`);
+  }
+  out.innerHTML=cards.join('');
+}
+
 async function generateLink(){
   const tournament_id=val('rt'),category_id=val('rc'),team_id=val('re');
   if(!tournament_id||!category_id||!team_id)return alert('Selecciona torneo, categoría y equipo.');
@@ -2396,7 +2441,7 @@ function bindQuickRosterControls(){
 }
 function bindViewRosterControls(){
   const a=document.getElementById('vrt'),b=document.getElementById('vrFilter');
-  if(a&&!a.dataset.gofBound){a.dataset.gofBound='1';a.addEventListener('change',loadViewRosters)}
+  if(a&&!a.dataset.gofBound){a.dataset.gofBound='1';a.addEventListener('change',loadViewRosterCategories)}
   if(b&&!b.dataset.gofBound){b.dataset.gofBound='1';b.addEventListener('change',loadViewRosters)}
 }
 async function loadApproveRosterSelectors(){
@@ -2421,22 +2466,76 @@ async function loadApproveRoster(){
   const pending=(rr||[]).filter(x=>x.status==='pendiente'), byCat={};
   cats.forEach(c=>byCat[c.id]={name:c.name,teams:{}});
   pending.forEach(r=>{if(!byCat[r.category_id])byCat[r.category_id]={name:'Categoría',teams:{}};const id=r.team_id;if(!byCat[r.category_id].teams[id])byCat[r.category_id].teams[id]={name:r.teams?.name||'Equipo',count:0};byCat[r.category_id].teams[id].count++});
-  out.innerHTML=cats.map(c=>{const teams=Object.entries(byCat[c.id]?.teams||{}),total=teams.reduce((n,[,x])=>n+x.count,0);return `<details class="card" style="margin-bottom:10px"><summary><div class="row"><b>${esc(c.name)}</b><span class="tag">${total} pendiente${total===1?'':'s'}</span></div></summary><div style="margin-top:10px">${teams.length?teams.map(([teamId,t])=>`<div class="card" style="margin-bottom:8px"><div class="row"><div><b>${esc(t.name)}</b><div class="mut small">${t.count} jugador${t.count===1?'':'es'} pendiente${t.count===1?'':'s'}</div></div><div class="toolbar"><button type="button" onclick="showApproveRosterTeam('${tid}','${c.id}','${teamId}')">👀 Ver roster</button><button class="gold" type="button" onclick="approveRosterTeam('${tid}','${c.id}','${teamId}',${t.count})">✅ Aprobar roster</button></div></div></div>`).join(''):'<div class="empty">No hay jugadores pendientes en esta categoría.</div>'}</div></details>`}).join('');
+  const pendingTotal=pending.length;
+out.innerHTML=`<div class="card" style="margin-bottom:12px"><div class="row"><div><b>Aprobación general del torneo</b><div class="mut small">Puedes aprobar todos los jugadores pendientes de una sola vez o revisar jugador por jugador.</div></div><span class="tag">${pendingTotal} pendiente${pendingTotal===1?'':'s'}</span></div>${pendingTotal?`<div class="toolbar" style="margin-top:9px"><button type="button" class="gold" onclick="approveAllRosterTournament('${tid}',${pendingTotal})">✅ Aprobar todo el roster pendiente</button></div>`:''}</div>`+cats.map(c=>{const teams=Object.entries(byCat[c.id]?.teams||{}),total=teams.reduce((n,[,x])=>n+x.count,0);return `<details class="card" style="margin-bottom:10px"><summary><div class="row"><b>${esc(c.name)}</b><span class="tag">${total} pendiente${total===1?'':'s'}</span></div></summary><div style="margin-top:10px">${teams.length?teams.map(([teamId,t])=>`<div class="card" style="margin-bottom:8px"><div class="row"><div><b>${esc(t.name)}</b><div class="mut small">${t.count} jugador${t.count===1?'':'es'} pendiente${t.count===1?'':'s'}</div></div><div class="toolbar"><button type="button" class="gold" onclick="approveRosterTeam('${tid}','${c.id}','${teamId}',${t.count})">✅ Aprobar todo el roster</button><button type="button" onclick="showApproveRosterTeam('${tid}','${c.id}','${teamId}')">👀 Revisar jugadores</button></div></div></div>`).join(''):'<div class="empty">No hay jugadores pendientes en esta categoría.</div>'}</div></details>`}).join('');
 }
 async function showApproveRosterTeam(tid,cat,team){
   const out=document.getElementById('approveRosterDetail');if(!out)return;
-  const {data,error}=await sb.from('roster_registrations').select('id,status,players(full_name,photo_url,jersey_number,date_of_birth)').eq('tournament_id',tid).eq('category_id',cat).eq('team_id',team).order('created_at');
+  const {data,error}=await sb.from('roster_registrations').select('id,status,players(id,full_name,photo_url,jersey_number,date_of_birth,curp)').eq('tournament_id',tid).eq('category_id',cat).eq('team_id',team).order('created_at');
   if(error)return alert(error.message);const rows=data||[];
-  out.innerHTML=`<div class="card"><div class="row"><b>Roster del equipo</b><button type="button" onclick="document.getElementById('approveRosterDetail').innerHTML=''">✕ Cerrar</button></div><div style="margin-top:10px">${rows.length?rows.map(r=>`<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div style="display:flex;gap:8px;align-items:center"><img src="${esc(r.players?.photo_url||'')}" onerror="this.style.display='none'" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px"><div><b>${esc(r.players?.full_name||'Jugador')}</b><div class="mut small">#${esc(r.players?.jersey_number??'')} · ${r.status==='aprobado'?'Aprobado':r.status==='rechazado'?'Rechazado':'Pendiente'}</div></div></div></div>`).join(''):'<div class="empty">Roster vacío.</div>'}</div></div>`;
+  const statusLabel=s=>s==='aprobado'?'APROBADO':s==='rechazado'?'RECHAZADO':'PENDIENTE';
+  out.innerHTML=`<div class="card">
+    <div class="row"><div><b>Revisión individual del roster</b><div class="mut small">Cada jugador se aprueba, rechaza o quita por separado.</div></div><button type="button" onclick="document.getElementById('approveRosterDetail').innerHTML=''">✕ Cerrar</button></div>
+    <div style="margin-top:10px">
+      ${rows.length?rows.map(r=>`<div class="card roster-review-player" style="margin-bottom:9px;border:1px solid var(--line);padding:10px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <img src="${esc(r.players?.photo_url||'')}" onerror="this.style.display='none'" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line);flex:0 0 64px">
+          <div style="min-width:0;flex:1"><b>${esc(r.players?.full_name||'Jugador')}</b><div class="mut small">#${esc(r.players?.jersey_number??'')} · ${statusLabel(r.status)}</div>${r.players?.date_of_birth?`<div class="mut small">Nacimiento: ${esc(r.players.date_of_birth)}</div>`:''}</div>
+        </div>
+        <div class="toolbar" style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap">
+          <button type="button" class="gold" onclick="setRosterPlayerStatus('${r.id}','aprobado','${tid}','${cat}','${team}')">✅ Aprobar</button>
+          <button type="button" onclick="setRosterPlayerStatus('${r.id}','rechazado','${tid}','${cat}','${team}')">⛔ Rechazar</button>
+          <button type="button" style="border-color:#8b2940;color:#ff9aaa" onclick='removeRosterPlayer(${JSON.stringify(r.id)},${JSON.stringify(r.players?.full_name||'este jugador')},${JSON.stringify(tid)},${JSON.stringify(cat)},${JSON.stringify(team)})'>🗑️ Quitar jugador</button>
+        </div>
+      </div>`).join(''):'<div class="empty">Roster vacío.</div>'}
+    </div>
+  </div>`;
+}
+async function setRosterPlayerStatus(id,status,tid,cat,team){
+  const label=status==='aprobado'?'aprobar':'rechazar';
+  if(!confirm(`¿Quieres ${label} a este jugador?`))return;
+  const {error}=await sb.rpc('admin_set_roster_player_status',{p_roster_id:id,p_status:status});
+  if(error)return alert(error.message);
+  toast(status==='aprobado'?'✅ Jugador aprobado':'⛔ Jugador rechazado');
+  await showApproveRosterTeam(tid,cat,team);
+  await loadApproveRoster();
+}
+async function removeRosterPlayer(id,name,tid,cat,team){
+  if(!confirm(`¿Quitar a ${name} del roster?\n\nEsta acción eliminará su registro de este roster. Si el jugador no pertenece a ningún otro roster, también se eliminará su ficha de jugador.`))return;
+  const {data,error}=await sb.rpc('admin_remove_roster_player',{p_roster_id:id});
+  if(error)return alert(error.message);
+  if(!data?.ok)return alert('No se confirmó que el jugador haya sido quitado.');
+  toast('🗑️ Jugador quitado del roster');
+  await showApproveRosterTeam(tid,cat,team);
+  await loadApproveRoster();
 }
 async function approveRosterTeam(tid,cat,team,count){
   if(!count)return;
-  if(!confirm(`¿Aprobar el roster completo? Se aprobarán ${count} jugador${count===1?'':'es'} pendiente${count===1?'':'s'} de este equipo.`))return;
+  if(!confirm(`¿Aprobar los ${count} jugadores pendientes de este roster?\n\nEsta acción aprobará todo el roster del equipo.`))return;
   const {data,error}=await sb.from('roster_registrations').select('id').eq('tournament_id',tid).eq('category_id',cat).eq('team_id',team).eq('status','pendiente');
-  if(error)return alert(error.message);let approved=0;
-  for(const row of (data||[])){const res=await sb.rpc('admin_set_roster_player_status',{p_roster_id:row.id,p_status:'aprobado'});if(res.error)return alert(res.error.message);approved++}
-  toast(`✅ Roster aprobado: ${approved} jugador${approved===1?'':'es'}`);await loadApproveRoster();
+  if(error)return alert(error.message);
+  const ids=(data||[]).map(x=>x.id);
+  const results=await Promise.all(ids.map(id=>sb.rpc('admin_set_roster_player_status',{p_roster_id:id,p_status:'aprobado'})));
+  const failed=results.filter(x=>x.error);
+  if(failed.length)return alert(`Se aprobaron ${ids.length-failed.length} jugadores, pero ${failed.length} no pudieron aprobarse.\n\n${failed[0].error.message}`);
+  toast(`✅ Roster aprobado: ${ids.length} jugadores`);
+  await loadApproveRoster();
+  await showApproveRosterTeam(tid,cat,team);
 }
+async function approveAllRosterTournament(tid,count){
+  if(!count)return;
+  if(!confirm(`¿Aprobar los ${count} jugadores pendientes de TODO el torneo?\n\nEsta acción aprobará todos los jugadores pendientes en todas las categorías y equipos.`))return;
+  const {data,error}=await sb.from('roster_registrations').select('id').eq('tournament_id',tid).eq('status','pendiente');
+  if(error)return alert(error.message);
+  const ids=(data||[]).map(x=>x.id);
+  const results=await Promise.all(ids.map(id=>sb.rpc('admin_set_roster_player_status',{p_roster_id:id,p_status:'aprobado'})));
+  const failed=results.filter(x=>x.error);
+  if(failed.length)return alert(`Se aprobaron ${ids.length-failed.length} jugadores, pero ${failed.length} no pudieron aprobarse.\n\n${failed[0].error.message}`);
+  toast(`✅ Roster del torneo aprobado: ${ids.length} jugadores`);
+  await loadApproveRoster();
+  const detail=document.getElementById('approveRosterDetail');if(detail)detail.innerHTML='';
+}
+
 async function gofRosterPanel(name){
   const ids=['links','edit','approve','view','review','exceptions'];
   ids.forEach(id=>{const p=document.getElementById('gofRosterPanel-'+id);if(p)p.classList.toggle('open',id===name&&!p.classList.contains('open'))});

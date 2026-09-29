@@ -306,6 +306,83 @@ footer b{font-size:16px;color:#ddd5e5}
   #nav button{height:51px}#nav button b{font-size:12px}#nav button small{font-size:7.5px}
 }
 
+
+/* ===== AJUSTE SOLICITADO · LIGA + LOGO + MENÚ ===== */
+@media(max-width:650px){
+  .gof-public-identity{
+    grid-template-columns:minmax(0,1fr) 96px;
+    gap:7px;
+    margin-bottom:7px;
+  }
+  .gof-public-league{
+    min-height:70px;
+    padding:9px 11px;
+  }
+  .gof-public-league b{
+    font-size:16px;
+    line-height:1.05;
+  }
+  .gof-public-league span{
+    font-size:9px;
+    margin-top:5px;
+  }
+  .gof-public-logo-card{
+    height:70px;
+    padding:5px;
+  }
+  .gof-public-logo-upload{
+    min-width:0;
+    min-height:0;
+  }
+  .gof-public-logo-upload img{
+    width:100%;
+    height:100%;
+    max-width:none;
+    max-height:none;
+    object-fit:contain;
+    object-position:center;
+  }
+  #status{
+    font-size:11px;
+    line-height:1.25;
+    padding:8px 10px;
+    margin:5px 0 7px;
+    border-radius:10px;
+  }
+  #status b{
+    font-size:13px;
+  }
+}
+@media(max-width:430px){
+  .gof-public-identity{
+    grid-template-columns:minmax(0,1fr) 88px;
+    gap:6px;
+  }
+  .gof-public-league{
+    min-height:64px;
+    padding:8px 9px;
+  }
+  .gof-public-league b{font-size:15px}
+  .gof-public-league span{font-size:8.5px}
+  .gof-public-logo-card{height:64px}
+  #status{
+    font-size:10.5px;
+    padding:7px 9px;
+  }
+  #status b{font-size:12px}
+}
+@media(max-width:370px){
+  .gof-public-identity{
+    grid-template-columns:minmax(0,1fr) 82px;
+  }
+  .gof-public-league{
+    min-height:60px;
+    padding:7px 8px;
+  }
+  .gof-public-logo-card{height:60px}
+  .gof-public-league b{font-size:14px}
+}
+
 </style>
 </head>
 <body>
@@ -334,7 +411,7 @@ footer b{font-size:16px;color:#ddd5e5}
 <main>
   <div class="gof-public-identity">
     <div class="gof-public-league">
-      <div><b id="publicLeagueName">GAME ON FLAG</b><span id="publicLeagueSub">Portal público</span></div>
+      <div><b id="publicLeagueName">Nombre de la liga</b><span id="publicLeagueSub">Portal público</span></div>
     </div>
     <div class="gof-public-logo-card">
       <div class="gof-public-logo-upload">
@@ -375,7 +452,7 @@ footer b{font-size:16px;color:#ddd5e5}
 
 <footer>
   <b>GAME ON FLAG APPLICATION</b><br>
-  <span id="publicFooterLeague">GAME ON FLAG</span> · Portal público<br><br>
+  <span id="publicFooterLeague">Nombre de la liga</span> · Portal público<br><br>
   📷 Game On Flag &nbsp;|&nbsp; 🔵 Game On Flag
 </footer>
 
@@ -444,9 +521,7 @@ function navButton(id,ico,title,sub){
 function render(){
   document.body.classList.toggle('home-screen',tab==='inicio');
   nav.innerHTML=
-    navButton('inicio','🏠','Inicio','Resumen de la liga')+
     navButton('categorias','🏷️','Categorías','Categorías del torneo')+
-    navButton('equipos','👥','Equipos','Todos los equipos')+
     navButton('jugadores','👕','Roster','Jugadores y plantillas')+
     navButton('enfrentamientos','⚔️','Enfrentamientos','Rivales por jornada')+
     navButton('calendario','📅','Calendario','Jornadas y campos')+

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>GAME ON FLAG — Centro de Administración</title><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><meta content="no-cache" http-equiv="Pragma"/><meta content="0" http-equiv="Expires"/><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>GAME ON FLAG — Centro de Administración</title><meta name="gof-build" content="2026-09-28-publicacion-v2"><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><meta content="no-cache" http-equiv="Pragma"/><meta content="0" http-equiv="Expires"/><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 function previewLeagueLogo(){const f=document.getElementById('leagueLogoUpload')?.files?.[0],o=document.getElementById('leagueLogoPreview');if(!f||!o)return;const u=URL.createObjectURL(f);o.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><img src="${u}" alt="Logo de organización" style="width:54px;height:54px;object-fit:contain;border-radius:12px;border:1px solid var(--line);background:#0b0910;padding:4px"><span>Logo seleccionado: <b>${esc(f.name)}</b></span></div>`;o.dataset.previewUrl=u}
 </script>
 
@@ -817,12 +817,11 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 <button class="gof-workflow-step" onclick="setView('resultados')"><span class="step-no">5</span><span class="step-icon">🏈</span><span class="step-copy"><b>Resultados</b><small>Captura los marcadores.</small></span><span class="step-arrow">›</span></button>
 <button class="gof-workflow-step" onclick="setView('tabla')"><span class="step-no">6</span><span class="step-icon">📊</span><span class="step-copy"><b>Tablas</b><small>Clasificación automática.</small></span><span class="step-arrow">›</span></button>
 <button class="gof-workflow-step" onclick="setView('playoffs')"><span class="step-no">7</span><span class="step-icon">🏆</span><span class="step-copy"><b>Playoff</b><small>Fase final y campeonato.</small></span><span class="step-arrow">›</span></button>
-<button class="gof-workflow-step" onclick="setView('publicacion')"><span class="step-no">8</span><span class="step-icon">📤</span><span class="step-copy"><b>Publicación</b><small>Publica imágenes de calendario, resultados y tablas.</small></span><span class="step-arrow">›</span></button>
+<button class="gof-workflow-step" onclick="setView('publicacion')"><span class="step-no">8</span><span class="step-icon">📤</span><span class="step-copy"><b>Publicación</b><small>Publica categorías, calendario, enfrentamientos, resultados, tablas, playoffs y MVPs.</small></span><span class="step-arrow">›</span></button>
 </div></div>
 
 <div class="gof-secondary-tools"><div class="gof-secondary-title">HERRAMIENTAS ADMINISTRATIVAS</div><div class="gof-secondary-grid"><button class="admin-home-btn" onclick="setView('credenciales')"><span class="ico">🪪</span><span><b>Credenciales</b><small>Generar e imprimir acreditaciones</small></span></button><button class="admin-home-btn" onclick="setView('avisos')"><span class="ico">📢</span><span><b>Avisos</b><small>Comunicados y sanciones</small></span></button><button class="admin-home-btn goldline" onclick="setView('contabilidad')"><span class="ico">💰</span><span><b>Contabilidad</b><small>Pagos y gastos</small></span></button><button class="admin-home-btn" onclick="setView('configuracion')"><span class="ico">⚙️</span><span><b>Configuración</b><small>Ajustes de la organización</small></span></button></div></div>
 <div class="gof-promo gof-home-promo"><span>Play Flag Repeat</span></div><div class="gof-admin-social"><span>📸 Game On Flag</span><span>│</span><span>🔵 Game On Flag</span></div></section>
-
 <style id="gof-publicacion-directa-css">
 .gof-pub-wrap{max-width:980px;margin:0 auto;padding-bottom:30px}
 .gof-pub-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}

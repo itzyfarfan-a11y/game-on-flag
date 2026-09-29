@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>GAME ON FLAG — Centro de Administración</title><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><meta content="no-cache" http-equiv="Pragma"/><meta content="0" http-equiv="Expires"/><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta name="gof-calendar-build" content="2026-09-28-calendar-6-tags-status-fix">
+<title>GAME ON FLAG — Centro de Administración</title><meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/><meta content="no-cache" http-equiv="Pragma"/><meta content="0" http-equiv="Expires"/><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 function previewLeagueLogo(){const f=document.getElementById('leagueLogoUpload')?.files?.[0],o=document.getElementById('leagueLogoPreview');if(!f||!o)return;const u=URL.createObjectURL(f);o.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><img src="${u}" alt="Logo de organización" style="width:54px;height:54px;object-fit:contain;border-radius:12px;border:1px solid var(--line);background:#0b0910;padding:4px"><span>Logo seleccionado: <b>${esc(f.name)}</b></span></div>`;o.dataset.previewUrl=u}
 </script>
 
@@ -926,6 +927,12 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 </div>
 </div>
 <script>
+/* GAME ON FLAG — CALENDARIO FIX 2026-09-28
+   Los partidos nuevos SIEMPRE se guardan con el estado válido del ENUM match_status: programado.
+   Nunca usar 'borrador' para matches; 'borrador' pertenece únicamente a avisos.
+*/
+const GOF_MATCH_STATUS_PROGRAMADO = 'programado';
+
 async function saveHomeLeagueLogo(input){
  const f=input?.files?.[0]; if(!f)return;
  if(!gofCurrentOrganizationId){input.value='';return alert('Selecciona una liga antes de cargar su logo.');}
@@ -1598,7 +1605,7 @@ function openRosterLink(){const f=document.getElementById('linkField');if(f&&f.v
 async function loadMakeupSelectors(){const tid=val('mt'),cat=val('mc');if(!tid){return}const {data:tc}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);fill('mc',(tc||[]).map(x=>({id:x.category_id,name:x.categories.name})),'id','name');await loadMakeupTeams()}
 async function loadMakeupTeams(){const tid=val('mt'),cat=val('mc');if(!tid||!cat){fill('mmake',[],'id','name');fill('mopp',[],'id','name');return}const {data:ins,error:ie}=await sb.from('tournament_teams').select('team_id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(ie){fill('mmake',[],'id','name');fill('mopp',[],'id','name');return}const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);if(!ids.length){fill('mmake',[],'id','name');fill('mopp',[],'id','name');return}const {data:teams,error:te}=await sb.from('teams').select('id,name').in('id',ids).order('name');if(te){fill('mmake',[],'id','name');fill('mopp',[],'id','name');return}const arr=(teams||[]).map(x=>({id:x.id,name:x.name}));fill('mmake',arr,'id','name');fill('mopp',arr,'id','name');syncMakeupOpponent()}
 function syncMakeupOpponent(){const make=document.getElementById('mmake'),opp=document.getElementById('mopp');if(!make||!opp)return;const selected=make.value;[...opp.options].forEach(o=>{o.disabled=!!selected&&o.value===selected});if(selected&&opp.value===selected){opp.value='';}if(selected){opp.title='El rival debe ser diferente al equipo que repone.';}else{opp.title='';}}
-async function createMakeupMatch(){const tid=val('mt'),cat=val('mc'),make=val('mmake'),opp=val('mopp');const round=Number(val('mround'));if(!tid||!cat||!make||!opp||make===opp||!round)return alert('Selecciona torneo, categoría, equipo que repone, rival y semana.');const date=val('mdate')||null,time=val('mtime')||null,field=val('mfield').trim()||null,note=val('mnote').trim()||'Reposición por sustitución';if(date&&time){const conflicts=await getUnifiedConflicts(tid,date,time,field,null,'regular',make,opp);if(conflicts.length){const errors=conflicts.filter(x=>x.type==='error');if(errors.length)return alert(errors.map(x=>x.text).join('\n'));if(!confirm('Hay avisos de empalme:\n\n'+conflicts.map(x=>'• '+x.text).join('\n')+'\n\n¿Crear de todos modos?'))return;}}const {data,error}=await sb.from('matches').insert({tournament_id:tid,category_id:cat,round_number:round,match_date:date,match_time:time,field_name:field,home_team_id:make,away_team_id:opp,status:'programado',published:false,is_makeup:true,stats_exclude_team_id:opp,replacement_note:note}).select('id').single();if(error)return alert(error.message);document.getElementById('makeupStatus').textContent='Partido de reposición creado. El rival quedará excluido de las estadísticas de este partido.';toast('Reposición creada');await loadSchedule()}
+async function createMakeupMatch(){const tid=val('mt'),cat=val('mc'),make=val('mmake'),opp=val('mopp');const round=Number(val('mround'));if(!tid||!cat||!make||!opp||make===opp||!round)return alert('Selecciona torneo, categoría, equipo que repone, rival y semana.');const date=val('mdate')||null,time=val('mtime')||null,field=val('mfield').trim()||null,note=val('mnote').trim()||'Reposición por sustitución';if(date&&time){const conflicts=await getUnifiedConflicts(tid,date,time,field,null,'regular',make,opp);if(conflicts.length){const errors=conflicts.filter(x=>x.type==='error');if(errors.length)return alert(errors.map(x=>x.text).join('\n'));if(!confirm('Hay avisos de empalme:\n\n'+conflicts.map(x=>'• '+x.text).join('\n')+'\n\n¿Crear de todos modos?'))return;}}const {data,error}=await sb.from('matches').insert({tournament_id:tid,category_id:cat,round_number:round,match_date:date,match_time:time,field_name:field,home_team_id:make,away_team_id:opp,status:GOF_MATCH_STATUS_PROGRAMADO,published:false,is_makeup:true,stats_exclude_team_id:opp,replacement_note:note}).select('id').single();if(error)return alert(error.message);document.getElementById('makeupStatus').textContent='Partido de reposición creado. El rival quedará excluido de las estadísticas de este partido.';toast('Reposición creada');await loadSchedule()}
 async function loadScheduleSelectors(){
  const {data:t}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
  fill('ct',t,'id','name'); fill('mt',t,'id','name');
@@ -1946,7 +1953,7 @@ async function generateFullTournamentSchedule(){
    if(!best)best={date,time:gofTimePlusMinutes(cfg.start,0),field:1,clubs};
    scheduled.push({...g,teamIds:[g.a.id,g.b.id],...best});
  }
- const created=scheduled.map(x=>({tournament_id:tid,category_id:x.categoryId,round_number:x.round,home_team_id:x.a.id,away_team_id:x.b.id,match_date:x.date,match_time:x.time,field_name:'Campo '+x.field,status:'programado',referee_fee_due:true,published:false,schedule_generated_at:new Date().toISOString(),schedule_manual_override:false,schedule_override_note:null,schedule_override_at:null}));
+ const created=scheduled.map(x=>({tournament_id:tid,category_id:x.categoryId,round_number:x.round,home_team_id:x.a.id,away_team_id:x.b.id,match_date:x.date,match_time:x.time,field_name:'Campo '+x.field,status:GOF_MATCH_STATUS_PROGRAMADO,referee_fee_due:true,published:false,schedule_generated_at:new Date().toISOString(),schedule_manual_override:false,schedule_override_note:null,schedule_override_at:null}));
  const {error:e}=await sb.from('matches').insert(created);if(e)return alert('No se pudo guardar el calendario: '+e.message);
  toast(`🚀 Calendario completo generado: ${rounds} jornadas · ${created.length} partidos.`);await loadSchedule();await validateSchedule();
 }
@@ -1968,7 +1975,7 @@ async function generateSchedule(){
  const rounds=gofBuildScheduleRounds(teams,requested),created=[];
  for(let rIdx=0;rIdx<rounds.length;rIdx++){
    const cfg=gofRoundScheduleConfig(tour?.schedule_settings,rIdx+1,tour?.tournament_type==='relampago');
-   rounds[rIdx].forEach(([a,b],idx)=>{const slot=Math.floor(idx/cfg.fields),field=(idx%cfg.fields)+1;created.push({tournament_id:tid,category_id:cat,round_number:rIdx+1,home_team_id:a.id,away_team_id:b.id,match_date:tour.start_date?gofDateAdd(tour.start_date,rIdx*7):null,match_time:gofTimePlusMinutes(cfg.start,slot*cfg.interval),field_name:'Campo '+field,status:'programado',referee_fee_due:true,published:false,schedule_generated_at:new Date().toISOString()});});
+   rounds[rIdx].forEach(([a,b],idx)=>{const slot=Math.floor(idx/cfg.fields),field=(idx%cfg.fields)+1;created.push({tournament_id:tid,category_id:cat,round_number:rIdx+1,home_team_id:a.id,away_team_id:b.id,match_date:tour.start_date?gofDateAdd(tour.start_date,rIdx*7):null,match_time:gofTimePlusMinutes(cfg.start,slot*cfg.interval),field_name:'Campo '+field,status:GOF_MATCH_STATUS_PROGRAMADO,referee_fee_due:true,published:false,schedule_generated_at:new Date().toISOString()});});
  }
  if(!created.length)return alert('No fue posible generar los enfrentamientos.');
  const {error:e}=await sb.from('matches').insert(created);if(e)return alert(e.message);
@@ -1983,7 +1990,7 @@ async function manualMatch(){
  if(!Number.isInteger(r)||r<1||r>maxRounds||!teams[ai-1]||!teams[bi-1]||ai===bi)return alert('Datos de juego inválidos.');
  const date=val('cd')||null,time=val('ch')||null,field=val('cf').trim()||null;
  if(date&&time){const conflicts=await getUnifiedConflicts(tid,date,time,field,null,'regular',teams[ai-1].id,teams[bi-1].id);if(conflicts.length){const errors=conflicts.filter(x=>x.type==='error');if(errors.length)return alert(errors.map(x=>x.text).join('\n'));if(!confirm('Hay avisos de empalme:\n\n'+conflicts.map(x=>'• '+x.text).join('\n')+'\n\n¿Crear de todos modos?'))return;}}
- const {error}=await sb.from('matches').insert({tournament_id:tid,category_id:cat,round_number:r,home_team_id:teams[ai-1].id,away_team_id:teams[bi-1].id,match_date:date,match_time:time,field_name:field,status:'programado',referee_fee_due:true,published:false,is_makeup:false});if(error)alert(error.message);else{toast('Juego creado');loadSchedule()}
+ const {error}=await sb.from('matches').insert({tournament_id:tid,category_id:cat,round_number:r,home_team_id:teams[ai-1].id,away_team_id:teams[bi-1].id,match_date:date,match_time:time,field_name:field,status:GOF_MATCH_STATUS_PROGRAMADO,referee_fee_due:true,published:false,is_makeup:false});if(error)alert(error.message);else{toast('Juego creado');loadSchedule()}
 }
 let editingMatch=null;
 async function editMatch(id){

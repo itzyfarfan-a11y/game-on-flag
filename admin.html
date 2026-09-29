@@ -1880,12 +1880,34 @@ async function loadSchedule(){
     }
   });
   const teamRows=[...teamMap.values()].sort((a,b)=>a.category.localeCompare(b.category,'es')||a.name.localeCompare(b.name,'es'));
-  html+=`<div class="card team-schedule-card"><h3>📋 Enfrentamientos por equipo</h3><div class="notice">Consulta rápidamente contra quién juega cada equipo en J1–J7. Esta tabla muestra únicamente la fase regular; los playoffs aparecen por separado.</div><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
-  teamRows.forEach(t=>{
-    html+=`<tr><td class="ts-cat">${esc(t.category)}</td><td class="ts-team">${esc(t.name)}</td>${[1,2,3,4,5,6,7].map(r=>`<td>${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`;
-  });
-  html+='</tbody></table></div><div class="small mut cg-legend">Cada fila corresponde a un equipo. Las columnas J1–J7 muestran su rival de cada semana.</div></div>';
+  const tsCatClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'cat-mixto';if(x.includes('silver femenil'))return 'cat-silverf';if(x.includes('silver varonil'))return 'cat-silverv';if(x.includes('bronce')||x.includes('bronze'))return 'cat-bronce';if(x.includes('35'))return 'cat-35';if(x.includes('moms'))return 'cat-moms';if(x.includes('golden'))return 'cat-golden';return 'cat-other'};
+  const tsDot=n=>{const c=tsCatClass(n);return c==='cat-mixto'?'#8bd23e':c==='cat-silverf'?'#e28b9e':c==='cat-silverv'?'#6eb7ce':c==='cat-bronce'?'#d28a3f':c==='cat-35'?'#e04b52':c==='cat-moms'?'#a56be0':c==='cat-golden'?'#d9b54a':'#8f7aaa'};
+  html+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3><div class="team-schedule-actions"><button type="button" class="primary" onclick="downloadTeamScheduleImage()">🖼️ Descargar imagen</button></div></div><div class="notice">Todos los equipos y todas las categorías de la fase regular. Desliza horizontalmente para ver J1–J7; el nombre del equipo permanece visible.</div><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
+  teamRows.forEach(t=>{const cc=tsCatClass(t.category);html+=`<tr class="cat-row"><td class="ts-cat"><span class="ts-cat-badge"><span class="ts-cat-dot" style="background:${tsDot(t.category)}"></span>${esc(t.category)}</span></td><td class="ts-team">${esc(t.name)}</td>${[1,2,3,4,5,6,7].map(r=>`<td class="ts-j ${cc}">${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`;});
+  html+=`</tbody></table></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo. J1–J7 muestran su rival de cada jornada. En teléfono puedes deslizar un poco hacia la derecha/izquierda sin perder el nombre del equipo.</div></div>`;
   box.innerHTML=html;
+}
+async function downloadTeamScheduleImage(){
+ const tid=val('ct'); if(!tid)return alert('Selecciona un torneo.');
+ const {data,error}=await sb.from('matches').select('round_number,category_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name),categories(name)').eq('tournament_id',tid).gte('round_number',1).lte('round_number',7).eq('is_makeup',false).neq('status','cancelado');
+ if(error)return alert(error.message);
+ const games=data||[]; if(!games.length)return alert('No hay enfrentamientos de fase regular para descargar.');
+ const {data:tour}=await sb.from('tournaments').select('name').eq('id',tid).single();
+ const title=String(tour?.name||'GAME ON FLAG');
+ const catClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'mixto';if(x.includes('silver femenil'))return 'silverf';if(x.includes('silver varonil'))return 'silverv';if(x.includes('bronce')||x.includes('bronze'))return 'bronce';if(x.includes('35'))return '35';if(x.includes('moms'))return 'moms';if(x.includes('golden'))return 'golden';return 'other'};
+ const color=n=>{const c=catClass(n);return c==='mixto'?'#8bd23e':c==='silverf'?'#e28b9e':c==='silverv'?'#6eb7ce':c==='bronce'?'#d28a3f':c==='35'?'#e04b52':c==='moms'?'#a56be0':c==='golden'?'#d9b54a':'#8f7aaa'};
+ const map=new Map(); games.forEach(g=>{for(const side of ['home','away']){const team=g[side]?.name;if(!team)continue;const key=(g.categories?.name||'Categoría')+'|'+team;if(!map.has(key))map.set(key,{category:g.categories?.name||'Categoría',team,rounds:{}});const opp=side==='home'?g.away?.name:g.home?.name;map.get(key).rounds[g.round_number]=opp||'Por definir';}});
+ const rows=[...map.values()].sort((a,b)=>a.category.localeCompare(b.category,'es')||a.team.localeCompare(b.team,'es'));
+ const W=1900,rowH=54,headH=185,tableHead=54,catW=240,teamW=260,jW=(W-catW-teamW)/7,pad=38,H=pad+headH+tableHead+rows.length*rowH+55;
+ const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#08070c';x.fillRect(0,0,W,H);
+ const rr=(xx,yy,w,h,r,fill,stroke)=>{x.beginPath();x.roundRect(xx,yy,w,h,r);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=3;x.stroke()}};
+ rr(pad,pad,W-pad*2,headH,18,'#17131f','#7b2cff');
+ const logo=gofCurrentOrganization?.logo_url||'';if(logo){try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=logo});const sc=Math.min(1,150/img.width,95/img.height);x.drawImage(img,pad+20,pad+20,img.width*sc,img.height*sc)}catch(e){}}
+ x.fillStyle='#fff';x.font='900 42px Arial';x.fillText('ENFRENTAMIENTOS',pad+200,pad+58);x.font='900 34px Arial';x.fillText(title.slice(0,55),pad+200,pad+104);x.fillStyle='#b7a8c7';x.font='700 21px Arial';x.fillText('Calendario completo · fase regular · J1 a J7',pad+200,pad+142);x.fillStyle='#8f7aaa';x.font='600 16px Arial';x.fillText('GAME ON FLAG',W-pad-150,pad+38);
+ let y=pad+headH;rr(pad,y,W-pad*2,tableHead+rows.length*rowH,14,'#0d0b12','#3b3344');x.fillStyle='#211b2b';x.fillRect(pad,y,W-pad*2,tableHead);x.fillStyle='#fff';x.font='900 18px Arial';x.fillText('CATEGORÍA',pad+14,y+34);x.fillText('EQUIPO',pad+catW+14,y+34);for(let r=1;r<=7;r++)x.fillText('J'+r,pad+catW+teamW+(r-1)*jW+jW/2-10,y+34);
+ rows.forEach((t,i)=>{const yy=y+tableHead+i*rowH;x.fillStyle=i%2?'#110f16':'#15121c';x.fillRect(pad,yy,W-pad*2,rowH);x.fillStyle=color(t.category);x.fillRect(pad,yy,7,rowH);x.strokeStyle='#302938';x.strokeRect(pad,yy,W-pad*2,rowH);x.fillStyle='#fff';x.font='800 14px Arial';x.fillText(t.category.slice(0,26),pad+16,yy+33);x.fillStyle='#fff';x.font='900 16px Arial';x.fillText(t.team.slice(0,28),pad+catW+14,yy+33);for(let r=1;r<=7;r++){const gx=pad+catW+teamW+(r-1)*jW;x.fillStyle=color(t.category);x.fillRect(gx+2,yy+6,4,rowH-12);x.fillStyle='#eee';x.font='800 14px Arial';x.fillText((t.rounds[r]||'—').slice(0,24),gx+16,yy+33);x.strokeStyle='#302938';x.strokeRect(gx,yy,jW,rowH);}});
+ x.fillStyle='#7f738d';x.font='600 13px Arial';x.fillText(`GAME ON FLAG · ${rows.length} equipos · J1–J7`,pad,H-20);
+ const a=document.createElement('a');a.download=`GameOnFlag_Enfrentamientos_${String(title).replace(/[^a-z0-9áéíóúñ]+/gi,'_')}.png`;a.href=c.toDataURL('image/png');a.click();toast('🖼️ Imagen de enfrentamientos descargada');
 }
 async function getUnifiedConflicts(tid,date,time,field,excludeId,kind,mTeamA,mTeamB){
   if(!tid||!date||!time)return [];

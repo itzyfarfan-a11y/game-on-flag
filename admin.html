@@ -58,24 +58,10 @@ function previewLeagueLogo(){const f=document.getElementById('leagueLogoUpload')
 .image-download-modal .modalbox{max-width:520px}
 .image-download-modal .download-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#17131f;margin-top:8px}
 .image-download-modal .download-option select{flex:1}
-/* GAME ON FLAG · Enfrentamientos compactos en móvil */
-@media (max-width:700px){
-  .team-schedule-card{padding:8px!important;margin-top:8px!important}
-  .team-schedule-card h3{font-size:15px!important;margin:2px 0 6px!important}
-  .team-schedule-card .notice{font-size:9px!important;padding:6px!important;margin:6px 0!important}
-  .team-schedule-grid{min-width:0!important;width:100%!important;table-layout:fixed!important}
-  .team-schedule-grid th,.team-schedule-grid td{font-size:7px!important;padding:3px 1px!important;white-space:normal!important;line-height:1.05!important;overflow-wrap:anywhere}
-  .team-schedule-grid th:first-child,.team-schedule-grid td:first-child{width:16%!important}
-  .team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){width:22%!important;min-width:0!important;position:static!important}
-  .team-schedule-grid th:nth-child(n+3),.team-schedule-grid td:nth-child(n+3){width:8.85%!important}
-  .ts-cat{font-size:7px!important}
-  .ts-team{font-size:8px!important;min-width:0!important}
-  .team-schedule-card .cg-legend{font-size:7px!important;margin-top:4px!important}
-}
 </style>
 <style>.enrolled-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;margin-bottom:8px}.enrolled-list{display:grid;gap:6px}.enrolled-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.025)}.enrolled-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,214,82,.15);font-weight:800}
 .cg-scroll{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:12px}.calendar-grid{min-width:980px;width:100%;border-collapse:separate;border-spacing:0;background:#0d0b12}.calendar-grid th,.calendar-grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:7px}.calendar-grid thead th{position:sticky;top:0;background:#17131f;color:#fff;text-align:center;font-weight:900;z-index:2}.calendar-grid thead th:first-child{width:92px}.calendar-grid .cg-day td{background:#241b31;color:var(--gold);font-size:14px;font-weight:900;padding:10px 12px;text-transform:none}.calendar-grid .cg-day td>div{justify-content:flex-start!important}.calendar-grid .cg-day td>div>button{flex:0 0 auto}.calendar-grid .cg-time{width:92px;text-align:center;white-space:nowrap;color:#fff;background:#15121c;font-size:12px}.cg-game{min-height:104px;border-radius:10px;padding:9px;background:#17131f;border-left:5px solid #777;display:flex;flex-direction:column;gap:5px}.cg-cat{font-size:11px;font-weight:900;text-transform:none;color:#ddd}.cg-teams{font-size:13px;font-weight:900;line-height:1.25}.cg-teams span{font-weight:500;opacity:.6}.cg-meta{font-size:10px;color:var(--mut)}.cg-actions{display:flex;gap:5px;margin-top:auto}.cg-actions button{padding:6px 8px;font-size:11px}.cg-empty{min-height:104px;display:flex;align-items:center;justify-content:center;color:#625b6d;font-size:20px}.cg-mixto{background:#26351b;border-left-color:#8bd23e}.cg-bronce{background:#3a2c1c;border-left-color:#d28a3f}.cg-silverf{background:#38252d;border-left-color:#e28b9e}.cg-silverv{background:#20333b;border-left-color:#6eb7ce}.cg-35{background:#302f29;border-left-color:#e4d6a0}.cg-golden{background:#3a3320;border-left-color:var(--gold)}.cg-other{background:#25202c;border-left-color:#8f7aaa}
-.team-schedule-card{margin-top:14px}.team-schedule-grid{min-width:1080px}.team-schedule-grid th,.team-schedule-grid td{text-align:center;white-space:nowrap}.team-schedule-grid th:first-child,.team-schedule-grid td:first-child{text-align:left}.team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){text-align:left;position:sticky;left:0;background:#15121c;z-index:1}.team-schedule-grid thead th:nth-child(2){z-index:3}.team-schedule-grid tbody tr:nth-child(even) td{background:#110f16}.ts-cat{font-size:11px;font-weight:800;color:var(--mut)}.ts-team{font-weight:900;min-width:170px}.team-schedule-grid td{font-size:12px}.team-schedule-grid td:not(:first-child):not(:nth-child(2)){min-width:125px}
+.team-schedule-card{margin-top:14px}.team-schedule-grid{min-width:760px}.team-schedule-grid th,.team-schedule-grid td{text-align:center;white-space:nowrap}.team-schedule-grid th:first-child,.team-schedule-grid td:first-child{text-align:left}.team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){text-align:left;position:sticky;left:0;background:#15121c;z-index:1}.team-schedule-grid thead th:nth-child(2){z-index:3}.team-schedule-grid tbody tr:nth-child(even) td{background:#110f16}.ts-cat{font-size:11px;font-weight:800;color:var(--mut)}.ts-team{font-weight:900;min-width:115px}.team-schedule-grid td{font-size:10px}.team-schedule-grid td:not(:first-child):not(:nth-child(2)){min-width:78px}
 
 .back-menu{display:inline-flex;align-items:center;gap:7px;margin:0 0 12px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:#17131d;color:#fff;font-weight:700;cursor:pointer;font-size:14px;transition:.18s}.back-menu:hover{transform:translateX(-2px);border-color:#6e4b9b;background:#211a2d}.back-menu span{font-size:18px;line-height:1}
 </style>
@@ -971,52 +957,55 @@ function openWeekImageModal(week){
 function closeWeekImageModal(){weekImageTarget=null;document.getElementById('weekImageModal')?.classList.remove('show')}
 function gofImageEsc(s){return String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\':'\\\\','"':'&quot;'}[c]))}
 async function downloadWeekCalendarImage(){
- const tid=val('ct'),catId=document.getElementById('weekImageCategory')?.value||'',week=weekImageTarget;
- if(!tid||!week)return;
- const {data:allGames,error}=await sb.from('matches').select('id,match_date,match_time,field_name,category_id,published,home_team_id,away_team_id,categories(name),home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name)').eq('tournament_id',tid).eq('round_number',week).eq('is_makeup',false).neq('status','cancelado').order('match_time',{ascending:true}).order('field_name',{ascending:true});
+ const tid=val('ct'),catId=document.getElementById('weekImageCategory')?.value||'__ALL__',week=weekImageTarget;if(!tid||!week)return;
+ const {data,error}=await sb.from('matches').select('id,match_date,match_time,field_name,category_id,published,home_team_id,away_team_id,categories(name),home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name)').eq('tournament_id',tid).eq('round_number',week).eq('is_makeup',false).neq('status','cancelado').order('match_time',{ascending:true}).order('field_name',{ascending:true});
  if(error)return alert(error.message);
- const full=(allGames||[]);
- if(!full.length)return alert('No hay partidos para descargar en esta semana.');
- const selected=catId?full.filter(g=>g.category_id===catId):full;
- if(!selected.length)return alert('No hay partidos para la categoría seleccionada.');
+ const allGames=(data||[]);
+ const selectedGames=catId==='__ALL__'?allGames:allGames.filter(g=>g.category_id===catId);
+ if(!selectedGames.length)return alert('No hay partidos para descargar con ese filtro.');
  const {data:tour}=await sb.from('tournaments').select('name').eq('id',tid).single();
  const title=String(tour?.name||'GAME ON FLAG');
- const selectedName=selected[0]?.categories?.name||'Categoría seleccionada';
- const dates=[...new Set(full.map(g=>g.match_date).filter(Boolean))];
+ const selectedCat=catId==='__ALL__'?'Todas las categorías':(selectedGames[0]?.categories?.name||'Categoría');
+ const dates=[...new Set(allGames.map(g=>g.match_date).filter(Boolean))];
  const dateText=dates.length?new Date(dates[0]+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric',timeZone:'UTC'}):'Fecha pendiente';
  const fieldNo=f=>{const m=String(f||'').match(/(?:campo|cancha)\s*[-#:]?\s*(\d+)/i);return m?Number(m[1]):99};
- const maxField=Math.max(4,...full.map(g=>fieldNo(g.field_name)).filter(n=>n<99));
+ const maxField=Math.max(4,...allGames.map(g=>fieldNo(g.field_name)).filter(n=>n<99));
  const fields=Array.from({length:Math.min(5,maxField)},(_,i)=>i+1);
- const color=n=>{const q=String(n||'').toLowerCase();if(q.includes('mixto'))return '#8bd23e';if(q.includes('bronce'))return '#f0a44a';if(q.includes('silver femenil'))return '#ef91b0';if(q.includes('silver varonil'))return '#55a9e8';if(q.includes('35'))return '#ef5350';if(q.includes('moms'))return '#a875d8';if(q.includes('golden'))return '#e5c04f';return '#9b7bd6'};
- const logo=gofCurrentOrganization?.logo_url||'';
- const W=1400,pad=42,innerW=W-pad*2;
- const timesFor=arr=>[...new Set(arr.map(g=>String(g.match_time||'').slice(0,5)||'Pendiente'))].sort();
- const rowH=108, sectionHead=64, headerH=205;
- const topTimes=timesFor(selected), fullTimes=timesFor(full);
- const topRows=Math.max(1,topTimes.length), fullRows=Math.max(1,fullTimes.length);
- const H=pad+headerH+70+sectionHead+44+topRows*rowH+55+sectionHead+44+fullRows*rowH+70;
+ const times=[...new Set(allGames.map(g=>String(g.match_time||'').slice(0,5)||'Pendiente'))].sort();
+ const color=n=>{const q=String(n||'').toLowerCase();if(q.includes('mixto'))return '#8bd23e';if(q.includes('bronce'))return '#d28a3f';if(q.includes('silver femenil'))return '#e28b9e';if(q.includes('silver varonil'))return '#6eb7ce';if(q.includes('35'))return '#e04b52';if(q.includes('moms'))return '#a56be0';if(q.includes('golden'))return '#d9b54a';return '#9b7bd6'};
+ const W=1700,pad=48,headerH=190,sectionGap=28,topHead=48,miniRow=76,gridHead=52,rowH=112,timeW=120,fieldW=(W-pad*2-timeW)/fields.length;
+ const topRows=Math.max(1,selectedGames.length), topH=topHead+topRows*miniRow;
+ const gridH=gridHead+Math.max(1,times.length)*rowH;
+ const H=pad+headerH+sectionGap+topH+sectionGap+gridH+62;
  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
- x.fillStyle='#09070e';x.fillRect(0,0,W,H);
- const roundRect=(xx,yy,ww,hh,rr,fill,stroke)=>{x.beginPath();x.roundRect(xx,yy,ww,hh,rr);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=3;x.stroke()}};
- roundRect(pad,pad,innerW,headerH,'#17121f','#54258a');
- if(logo){try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=logo});const sc=Math.min(1,150/img.width,82/img.height);x.drawImage(img,pad+22,pad+22,img.width*sc,img.height*sc)}catch(e){}}
- x.fillStyle='#fff';x.font='900 44px Arial';x.fillText(`SEMANA ${week}`,pad+200,pad+55);
- x.fillStyle='#e6c04d';x.font='900 25px Arial';x.fillText(title.slice(0,55),pad+200,pad+91);
- x.fillStyle='#d7cfe2';x.font='700 22px Arial';x.fillText(dateText,pad+200,pad+126);
- x.fillStyle='#9f91ae';x.font='600 17px Arial';x.fillText('GAME ON FLAG · Calendario semanal',pad+200,pad+158);
- x.fillStyle='#fff';x.font='900 28px Arial';x.fillText('HORARIO DE '+selectedName.toUpperCase(),pad,pad+headerH+43);
- let y=pad+headerH+70;
- const drawGrid=(arr,times,labelY)=>{
-   x.fillStyle='#211a2b';x.fillRect(pad,labelY,innerW,44);x.fillStyle='#fff';x.font='900 17px Arial';x.fillText('HORARIO',pad+14,labelY+28);
-   fields.forEach((f,i)=>{const fw=(innerW-105)/fields.length;x.fillText('CAMPO '+f,pad+105+i*fw+12,labelY+28)});
-   const fw=(innerW-105)/fields.length;
-   times.forEach((tm,ri)=>{const yy=labelY+44+ri*rowH;x.fillStyle='#111018';x.fillRect(pad,yy,innerW,rowH);x.strokeStyle='#3b3344';x.strokeRect(pad,yy,innerW,rowH);x.fillStyle='#fff';x.font='900 22px Arial';x.fillText(tm,pad+14,yy+35);fields.forEach((f,ci)=>{const gx=pad+105+ci*fw;x.strokeStyle='#3b3344';x.strokeRect(gx,yy,fw,rowH);const g=arr.find(m=>fieldNo(m.field_name)===f&&String(m.match_time||'').slice(0,5)===tm);if(!g)return;const cn=g.categories?.name||'Categoría';const accent=color(cn);x.fillStyle=accent;x.fillRect(gx+6,yy+7,6,rowH-14);x.fillStyle='#cfc7d9';x.font='800 14px Arial';x.fillText(cn.slice(0,22),gx+20,yy+28);x.fillStyle='#fff';x.font='900 19px Arial';const a=(g.home?.name||'Por definir').slice(0,20),b=(g.away?.name||'Por definir').slice(0,20);x.fillText(a,gx+20,yy+58);x.fillStyle='#8f849c';x.font='700 13px Arial';x.fillText('VS',gx+20,yy+78);x.fillStyle='#fff';x.font='900 19px Arial';x.fillText(b,gx+52,yy+78);x.fillStyle='#8f849c';x.font='600 12px Arial';x.fillText(g.published?'● Publicado':'● Pendiente',gx+20,yy+98)});});
- };
- drawGrid(selected,topTimes,y); y=y+44+topRows*rowH+58;
- x.fillStyle='#fff';x.font='900 28px Arial';x.fillText(`CALENDARIO COMPLETO · SEMANA ${week}`,pad,y); y+=sectionHead;
- drawGrid(full,fullTimes,y);
- x.fillStyle='#8f849d';x.font='600 14px Arial';x.fillText('GAME ON FLAG · Calendario de administración',pad,H-22);
- const a=document.createElement('a');a.download=`GameOnFlag_Semana_${week}_${String(selectedName).replace(/[^a-z0-9áéíóúñ]+/gi,'_')}.png`;a.href=c.toDataURL('image/png');a.click();closeWeekImageModal();toast('🖼️ Imagen visual descargada');
+ x.fillStyle='#09070d';x.fillRect(0,0,W,H);
+ const roundRect=(xx,yy,w,h,r,fill,stroke)=>{x.beginPath();x.roundRect(xx,yy,w,h,r);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=3;x.stroke()}};
+ roundRect(pad,pad,W-pad*2,headerH,18,'#17131f','#6b2db2');
+ const logo=gofCurrentOrganization?.logo_url||'';
+ if(logo){try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=logo});const scale=Math.min(1,180/img.width,82/img.height);x.drawImage(img,pad+22,pad+20,img.width*scale,img.height*scale)}catch(e){}}
+ x.fillStyle='#fff';x.font='900 42px Arial';x.fillText(`CALENDARIO · SEMANA ${week}`,pad+225,pad+54);
+ x.fillStyle='#d9cde5';x.font='700 24px Arial';x.fillText(title.slice(0,70),pad+225,pad+92);
+ x.fillStyle='#b7a8c7';x.font='600 21px Arial';x.fillText(dateText,pad+225,pad+126);
+ x.fillStyle='#8f7aaa';x.font='600 17px Arial';x.fillText(`${allGames.length} partido(s) · Calendario oficial GAME ON FLAG`,pad+225,pad+157);
+ // Parte superior: únicamente la categoría seleccionada.
+ let y=pad+headerH+sectionGap;
+ roundRect(pad,y,W-pad*2,topH,14,'#111018','#3b3344');
+ x.fillStyle='#fff';x.font='900 22px Arial';x.fillText(`🏷️ HORARIO · ${selectedCat}`,pad+18,y+32);
+ x.fillStyle='#211b2b';x.fillRect(pad,y+topHead,W-pad*2,topRows*miniRow);
+ const miniCols=[['HORARIO',pad+12,105],['CAMPO',pad+135,170],['EQUIPOS',pad+325,W-pad*2-350]];
+ x.fillStyle='#fff';x.font='900 16px Arial';x.fillText('HORARIO',pad+14,y+topHead-16);x.fillText('CAMPO',pad+135,y+topHead-16);x.fillText('ENFRENTAMIENTO',pad+325,y+topHead-16);
+ selectedGames.forEach((g,i)=>{const yy=y+topHead+i*miniRow; x.strokeStyle='#332c3c';x.strokeRect(pad,yy,W-pad*2,miniRow);const cn=g.categories?.name||'Categoría';x.fillStyle=color(cn);x.fillRect(pad+5,yy+7,5,miniRow-14);x.fillStyle='#fff';x.font='900 20px Arial';x.fillText(String(g.match_time||'').slice(0,5)||'—',pad+14,yy+32);x.fillStyle='#d6ccdf';x.font='700 16px Arial';x.fillText(String(g.field_name||'Campo').slice(0,14),pad+135,yy+32);x.fillStyle='#fff';x.font='900 19px Arial';x.fillText(`${(g.home?.name||'Por definir').slice(0,28)}  vs  ${(g.away?.name||'Por definir').slice(0,28)}`,pad+325,yy+32);x.fillStyle='#a99bb6';x.font='600 13px Arial';x.fillText(g.published?'● Publicado':'● Pendiente',pad+325,yy+56)});
+ // Parte inferior: calendario completo en cuadrícula horizontal por horario y campo.
+ y+=topH+sectionGap;
+ roundRect(pad,y,W-pad*2,gridH,14,'#111018','#6b2db2');
+ x.fillStyle='#fff';x.font='900 24px Arial';x.fillText(`📅 CALENDARIO COMPLETO · SEMANA ${week}`,pad+18,y+34);
+ const gh=y+gridHead;x.fillStyle='#211b2b';x.fillRect(pad,gh,W-pad*2,52);
+ x.fillStyle='#fff';x.font='900 17px Arial';x.fillText('HORARIO',pad+16,gh+33);
+ fields.forEach((f,i)=>x.fillText(`CAMPO ${f}`,pad+timeW+i*fieldW+18,gh+33));
+ const bySlot=(tm,f)=>allGames.filter(g=>fieldNo(g.field_name)===f&&(String(g.match_time||'').slice(0,5)||'Pendiente')===tm);
+ times.forEach((tm,ri)=>{const yy=gh+52+ri*rowH;x.fillStyle='#0e0c12';x.fillRect(pad,yy,W-pad*2,rowH);x.strokeStyle='#3b3344';x.strokeRect(pad,yy,W-pad*2,rowH);x.fillStyle='#fff';x.font='900 21px Arial';x.fillText(tm,pad+16,yy+38);fields.forEach((f,ci)=>{const gx=pad+timeW+ci*fieldW;x.strokeStyle='#3b3344';x.strokeRect(gx,yy,fieldW,rowH);const gs=bySlot(tm,f);if(!gs.length){x.fillStyle='#5b5262';x.font='700 18px Arial';x.fillText('—',gx+18,yy+38);return;}gs.slice(0,2).forEach((g,idx)=>{const gy=yy+8+idx*50,cn=g.categories?.name||'Categoría';x.fillStyle=color(cn);x.fillRect(gx+6,gy,5,42);x.fillStyle='#cfc4da';x.font='700 12px Arial';x.fillText(cn.slice(0,20),gx+18,gy+15);x.fillStyle='#fff';x.font='900 15px Arial';const a=(g.home?.name||'Por definir').slice(0,22),b=(g.away?.name||'Por definir').slice(0,22);x.fillText(`${a}  vs  ${b}`,gx+18,gy+34);});});});
+ x.fillStyle='#7f738d';x.font='600 14px Arial';x.fillText('GAME ON FLAG · Calendario de administración',pad,H-20);
+ const a=document.createElement('a');a.download=`GameOnFlag_Semana_${week}${catId!=='__ALL__'?'_'+String(selectedCat).replace(/[^a-z0-9áéíóúñ]+/gi,'_'):''}.png`;a.href=c.toDataURL('image/png');a.click();closeWeekImageModal();toast('🖼️ Imagen del calendario descargada');
 }
 </script>
 <div class="modal" id="weekModal" onclick="if(event.target===this)closeWeekModal()">

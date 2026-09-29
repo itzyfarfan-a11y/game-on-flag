@@ -32,49 +32,49 @@ function previewLeagueLogo(){const f=document.getElementById('leagueLogoUpload')
 
 <style>
 :root{--bg:#07070b;--card:#15121d;--card2:#1d1828;--line:#382e48;--purple:#7d22ff;--gold:#e6c04d;--txt:#fff;--mut:#aaa4b7;--ok:#50d890;--red:#ff6378;--blue:#62a8ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#35105f,#07070b 48%);color:var(--txt);font-family:Arial,sans-serif}.app{max-width:1180px;margin:auto;min-height:100vh}.top{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#09090eed;backdrop-filter:blur(12px);z-index:10}.brand{font-weight:900;font-size:22px}.brand b{color:var(--gold)}.sub{font-size:10px;letter-spacing:3px;color:var(--mut);margin-top:3px}.hidden{display:none!important}.nav{display:flex;gap:6px;overflow:auto;padding:9px 12px;border-bottom:1px solid var(--line);position:sticky;top:68px;background:#09090ef5;z-index:9}.nav button{white-space:nowrap}button{border:0;border-radius:10px;padding:10px 13px;background:#292333;color:#fff;font-weight:800;cursor:pointer}button:hover{filter:brightness(1.15)}.nav button.active,.primary{background:var(--purple)}.gold{background:var(--gold);color:#17120a}.danger{background:#632031}.blue{background:#244e80}.view{display:none}.view.active{display:block}main{padding:18px}.card{background:linear-gradient(145deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}.hero{padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.stat{font-size:28px;font-weight:900;margin-top:5px}.mut{color:var(--mut)}.tag{display:inline-block;padding:5px 8px;border-radius:99px;background:#2b213b;color:#ddceff;font-size:11px}.ok{color:var(--ok)}.red{color:var(--red)}.notice{padding:12px;border-left:3px solid var(--gold);background:#211b2b;border-radius:9px;margin:12px 0}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px}.full{grid-column:1/-1}input,select{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line);background:#0d0c12;color:#fff}.linkbox{word-break:break-all;background:#0c0b10;padding:11px;border-radius:9px;border:1px dashed #5a4b70;margin-top:8px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{color:var(--gold)}.small{font-size:12px}.match{display:grid;grid-template-columns:80px 1fr 1fr 170px;gap:10px;align-items:center}.team{font-weight:800}.score{font-size:20px;font-weight:900}.bracket{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.bracketcol{display:flex;flex-direction:column;gap:12px}.gamebox{background:#100d16;border:1px solid var(--line);border-radius:12px;padding:12px}.gamebox b{display:block;margin:4px 0}.toast{position:fixed;right:15px;bottom:15px;background:#1c1725;border:1px solid var(--line);padding:13px 16px;border-radius:12px;display:none;z-index:50}.empty{padding:20px;text-align:center;color:var(--mut)}.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal.show{display:flex}.modalbox{width:min(560px,100%);max-height:90vh;overflow:auto;background:linear-gradient(145deg,#241d2e,#15121d);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 20px 70px #000}.modalbox h3{margin:0 0 5px}.modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}.warning{padding:11px 12px;border-left:3px solid var(--gold);background:#302719;border-radius:9px;margin-top:10px}.warning b{color:var(--gold)}@media(max-width:700px){main{padding:11px}.top{padding:13px}.nav{top:62px}.hero{padding:18px}.match{grid-template-columns:55px 1fr 1fr;}.match .actions{grid-column:1/-1}.bracket{grid-template-columns:1fr}.brand{font-size:18px}}
+
+/* GAME ON FLAG · Calendario compacto móvil */
+@media (max-width:700px){
+  .cg-scroll{overflow-x:hidden!important;margin-top:8px}
+  .calendar-grid{min-width:0!important;width:100%;table-layout:fixed}
+  .calendar-grid th,.calendar-grid td{padding:3px 2px!important}
+  .calendar-grid thead th{font-size:9px!important;white-space:nowrap}
+  .calendar-grid thead th:first-child,.calendar-grid .cg-time{width:42px!important;font-size:9px!important}
+  .calendar-grid .cg-day td{font-size:10px!important;padding:6px 5px!important}
+  .cg-game{min-height:72px!important;padding:4px!important;border-radius:7px!important;gap:2px!important;border-left-width:3px!important}
+  .cg-cat{font-size:8px!important;line-height:1.05!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cg-teams{font-size:9px!important;line-height:1.05!important;word-break:break-word}
+  .cg-meta{font-size:7px!important;display:none}
+  .cg-actions{gap:3px!important;margin-top:2px!important;align-items:center}
+  .cg-actions button{padding:2px 5px!important;font-size:12px!important;min-width:24px!important;min-height:22px!important;border-radius:6px!important}
+  .cg-actions .status-dot{display:inline-flex!important;width:10px!important;height:10px!important;border-radius:50%!important;background:#f2c94c!important;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+  .cg-actions .status-dot.published{background:#35d07f!important}
+  .cg-empty{min-height:72px!important;font-size:13px!important}
+  .week-tools{display:flex!important;gap:5px!important;flex-wrap:wrap!important}
+  .week-tools button{padding:4px 7px!important;font-size:11px!important}
+}
+.week-tools{display:inline-flex;align-items:center;gap:6px;margin-left:6px}
+.week-tools button{white-space:nowrap}
+.image-download-modal .modalbox{max-width:520px}
+.image-download-modal .download-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#17131f;margin-top:8px}
+.image-download-modal .download-option select{flex:1}
+/* GAME ON FLAG · Enfrentamientos compactos en móvil */
+@media (max-width:700px){
+  .team-schedule-card{padding:8px!important;margin-top:8px!important}
+  .team-schedule-card h3{font-size:15px!important;margin:2px 0 6px!important}
+  .team-schedule-card .notice{font-size:9px!important;padding:6px!important;margin:6px 0!important}
+  .team-schedule-grid{min-width:0!important;width:100%!important;table-layout:fixed!important}
+  .team-schedule-grid th,.team-schedule-grid td{font-size:7px!important;padding:3px 1px!important;white-space:normal!important;line-height:1.05!important;overflow-wrap:anywhere}
+  .team-schedule-grid th:first-child,.team-schedule-grid td:first-child{width:16%!important}
+  .team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){width:22%!important;min-width:0!important;position:static!important}
+  .team-schedule-grid th:nth-child(n+3),.team-schedule-grid td:nth-child(n+3){width:8.85%!important}
+  .ts-cat{font-size:7px!important}
+  .ts-team{font-size:8px!important;min-width:0!important}
+  .team-schedule-card .cg-legend{font-size:7px!important;margin-top:4px!important}
+}
 </style>
 <style>.enrolled-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;margin-bottom:8px}.enrolled-list{display:grid;gap:6px}.enrolled-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.025)}.enrolled-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,214,82,.15);font-weight:800}
-.cg-scroll{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:12px}
-.calendar-grid{min-width:980px;width:100%;border-collapse:separate;border-spacing:0;background:#0d0b12}
-.calendar-grid th,.calendar-grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:7px}
-.calendar-grid thead th{position:sticky;top:0;background:#17131f;color:#fff;text-align:center;font-weight:900;z-index:2}
-.calendar-grid thead th:first-child{width:92px}
-.calendar-grid .cg-day td{background:#241b31;color:var(--gold);font-size:14px;font-weight:900;padding:10px 12px}
-.calendar-grid .cg-day td>div{justify-content:flex-start!important}
-.calendar-grid .cg-day td>div>button{flex:0 0 auto}
-.calendar-grid .cg-time{width:92px;text-align:center;white-space:nowrap;color:#fff;background:#15121c;font-size:12px}
-.cg-game{min-height:104px;border-radius:10px;padding:9px;background:#17131f;border-left:5px solid #777;display:flex;flex-direction:column;gap:5px}
-.cg-cat{font-size:11px;font-weight:900;text-transform:none;color:#ddd}
-.cg-teams{font-size:13px;font-weight:900;line-height:1.25}
-.cg-teams span{font-weight:500;opacity:.6}
-.cg-meta{font-size:10px;color:var(--mut)}
-.cg-actions{display:flex;gap:5px;margin-top:auto;align-items:center}
-.cg-actions button{padding:6px 8px;font-size:11px}
-.cg-actions .cg-edit-icon,.cg-actions .cg-status-dot{width:27px;height:27px;min-width:27px;padding:0!important;border-radius:8px;display:inline-flex;align-items:center;justify-content:center}
-.cg-actions .cg-status-dot{font-size:15px;background:#2a2432;border:0}
-.cg-empty{min-height:104px;display:flex;align-items:center;justify-content:center;color:#625b6d;font-size:20px}
-.cg-mixto{background:#26351b;border-left-color:#8bd23e}.cg-bronce{background:#3a2c1c;border-left-color:#d28a3f}
-.cg-silverf{background:#38252d;border-left-color:#e28b9e}.cg-silverv{background:#20333b;border-left-color:#6eb7ce}
-.cg-35{background:#302f29;border-left-color:#e4d6a0}.cg-golden{background:#3a3320;border-left-color:var(--gold)}
-.cg-other{background:#25202c;border-left-color:#8f7aaa}
-.calendar-week-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.calendar-week-tools button{min-width:36px;min-height:34px;padding:5px 8px!important;font-size:16px!important;line-height:1}
-.calendar-week-tools .week-publish{font-size:12px!important;min-width:0}
-.calendar-week-tools .week-image{background:#16a05d!important;color:#fff}
-@media (max-width:700px){
-  .cg-scroll{overflow-x:hidden;margin-top:8px}
-  .calendar-grid{min-width:0;width:100%;table-layout:fixed}
-  .calendar-grid th,.calendar-grid td{padding:3px}
-  .calendar-grid thead th{font-size:10px;padding:5px 2px;white-space:nowrap}
-  .calendar-grid thead th:first-child,.calendar-grid .cg-time{width:45px;font-size:10px}
-  .calendar-grid .cg-day td{font-size:12px;padding:6px 7px}
-  .cg-game{min-height:78px;border-radius:8px;padding:5px;border-left-width:4px;gap:3px}
-  .cg-cat{font-size:9px;line-height:1.05}.cg-teams{font-size:10px;line-height:1.08;overflow-wrap:anywhere}
-  .cg-meta{display:none}
-  .cg-actions{margin-top:2px}.cg-actions .cg-edit-icon,.cg-actions .cg-status-dot{width:25px;height:25px;min-width:25px;font-size:14px}
-  .calendar-week-tools{gap:5px}.calendar-week-tools button{min-width:34px;min-height:32px;padding:4px 7px!important}
-  .calendar-week-tools .week-publish{font-size:11px!important;padding:5px 8px!important}
-}
+.cg-scroll{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:12px}.calendar-grid{min-width:980px;width:100%;border-collapse:separate;border-spacing:0;background:#0d0b12}.calendar-grid th,.calendar-grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:7px}.calendar-grid thead th{position:sticky;top:0;background:#17131f;color:#fff;text-align:center;font-weight:900;z-index:2}.calendar-grid thead th:first-child{width:92px}.calendar-grid .cg-day td{background:#241b31;color:var(--gold);font-size:14px;font-weight:900;padding:10px 12px;text-transform:none}.calendar-grid .cg-day td>div{justify-content:flex-start!important}.calendar-grid .cg-day td>div>button{flex:0 0 auto}.calendar-grid .cg-time{width:92px;text-align:center;white-space:nowrap;color:#fff;background:#15121c;font-size:12px}.cg-game{min-height:104px;border-radius:10px;padding:9px;background:#17131f;border-left:5px solid #777;display:flex;flex-direction:column;gap:5px}.cg-cat{font-size:11px;font-weight:900;text-transform:none;color:#ddd}.cg-teams{font-size:13px;font-weight:900;line-height:1.25}.cg-teams span{font-weight:500;opacity:.6}.cg-meta{font-size:10px;color:var(--mut)}.cg-actions{display:flex;gap:5px;margin-top:auto}.cg-actions button{padding:6px 8px;font-size:11px}.cg-empty{min-height:104px;display:flex;align-items:center;justify-content:center;color:#625b6d;font-size:20px}.cg-mixto{background:#26351b;border-left-color:#8bd23e}.cg-bronce{background:#3a2c1c;border-left-color:#d28a3f}.cg-silverf{background:#38252d;border-left-color:#e28b9e}.cg-silverv{background:#20333b;border-left-color:#6eb7ce}.cg-35{background:#302f29;border-left-color:#e4d6a0}.cg-golden{background:#3a3320;border-left-color:var(--gold)}.cg-other{background:#25202c;border-left-color:#8f7aaa}
 .team-schedule-card{margin-top:14px}.team-schedule-grid{min-width:1080px}.team-schedule-grid th,.team-schedule-grid td{text-align:center;white-space:nowrap}.team-schedule-grid th:first-child,.team-schedule-grid td:first-child{text-align:left}.team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){text-align:left;position:sticky;left:0;background:#15121c;z-index:1}.team-schedule-grid thead th:nth-child(2){z-index:3}.team-schedule-grid tbody tr:nth-child(even) td{background:#110f16}.ts-cat{font-size:11px;font-weight:800;color:var(--mut)}.ts-team{font-weight:900;min-width:170px}.team-schedule-grid td{font-size:12px}.team-schedule-grid td:not(:first-child):not(:nth-child(2)){min-width:125px}
 
 .back-menu{display:inline-flex;align-items:center;gap:7px;margin:0 0 12px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:#17131d;color:#fff;font-weight:700;cursor:pointer;font-size:14px;transition:.18s}.back-menu:hover{transform:translateX(-2px);border-color:#6e4b9b;background:#211a2d}.back-menu span{font-size:18px;line-height:1}
@@ -950,6 +950,75 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 </div>
 </div>
 </div>
+<div class="modal image-download-modal" id="weekImageModal" onclick="if(event.target===this)closeWeekImageModal()">
+<div class="modalbox">
+<h3>🖼️ DESCARGAR CALENDARIO</h3>
+<div class="mut small" id="weekImageTitle" style="margin-bottom:12px"></div>
+<div class="notice">Elige si quieres la semana completa o solamente una categoría. La imagen conservará el estilo del calendario, mostrará los campos y llevará el logo de la liga cuando esté disponible.</div>
+<div class="download-option"><b>Contenido</b><select id="weekImageCategory"><option value="__ALL__">📅 Toda la jornada</option></select></div>
+<div class="modal-actions"><button onclick="closeWeekImageModal()">Cancelar</button><button class="primary" onclick="downloadWeekCalendarImage()">🖼️ Descargar imagen</button></div>
+</div></div>
+<script>
+let weekImageTarget=null;
+function openWeekImageModal(week){
+  weekImageTarget=Number(week); if(!weekImageTarget)return;
+  const tid=val('ct'); if(!tid)return alert('Selecciona un torneo.');
+  document.getElementById('weekImageTitle').textContent=`SEMANA ${weekImageTarget} · Selecciona qué quieres descargar.`;
+  const sel=document.getElementById('weekImageCategory');
+  sel.innerHTML='<option value="__ALL__">📅 Toda la jornada</option>';
+  (async()=>{const {data,error}=await sb.from('matches').select('category_id,categories(name)').eq('tournament_id',tid).eq('round_number',weekImageTarget).eq('is_makeup',false).neq('status','cancelado');if(error)return alert(error.message);const seen=new Set();(data||[]).forEach(x=>{const n=x.categories?.name||'Categoría';if(!seen.has(x.category_id)){seen.add(x.category_id);const o=document.createElement('option');o.value=x.category_id;o.textContent='🏷️ '+n;sel.appendChild(o)}});document.getElementById('weekImageModal').classList.add('show')})()
+}
+function closeWeekImageModal(){weekImageTarget=null;document.getElementById('weekImageModal')?.classList.remove('show')}
+function gofImageEsc(s){return String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\':'\\\\','"':'&quot;'}[c]))}
+async function downloadWeekCalendarImage(){
+ const tid=val('ct'),catId=document.getElementById('weekImageCategory')?.value||'',week=weekImageTarget;
+ if(!tid||!week)return;
+ const {data:allGames,error}=await sb.from('matches').select('id,match_date,match_time,field_name,category_id,published,home_team_id,away_team_id,categories(name),home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name)').eq('tournament_id',tid).eq('round_number',week).eq('is_makeup',false).neq('status','cancelado').order('match_time',{ascending:true}).order('field_name',{ascending:true});
+ if(error)return alert(error.message);
+ const full=(allGames||[]);
+ if(!full.length)return alert('No hay partidos para descargar en esta semana.');
+ const selected=catId?full.filter(g=>g.category_id===catId):full;
+ if(!selected.length)return alert('No hay partidos para la categoría seleccionada.');
+ const {data:tour}=await sb.from('tournaments').select('name').eq('id',tid).single();
+ const title=String(tour?.name||'GAME ON FLAG');
+ const selectedName=selected[0]?.categories?.name||'Categoría seleccionada';
+ const dates=[...new Set(full.map(g=>g.match_date).filter(Boolean))];
+ const dateText=dates.length?new Date(dates[0]+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric',timeZone:'UTC'}):'Fecha pendiente';
+ const fieldNo=f=>{const m=String(f||'').match(/(?:campo|cancha)\s*[-#:]?\s*(\d+)/i);return m?Number(m[1]):99};
+ const maxField=Math.max(4,...full.map(g=>fieldNo(g.field_name)).filter(n=>n<99));
+ const fields=Array.from({length:Math.min(5,maxField)},(_,i)=>i+1);
+ const color=n=>{const q=String(n||'').toLowerCase();if(q.includes('mixto'))return '#8bd23e';if(q.includes('bronce'))return '#f0a44a';if(q.includes('silver femenil'))return '#ef91b0';if(q.includes('silver varonil'))return '#55a9e8';if(q.includes('35'))return '#ef5350';if(q.includes('moms'))return '#a875d8';if(q.includes('golden'))return '#e5c04f';return '#9b7bd6'};
+ const logo=gofCurrentOrganization?.logo_url||'';
+ const W=1400,pad=42,innerW=W-pad*2;
+ const timesFor=arr=>[...new Set(arr.map(g=>String(g.match_time||'').slice(0,5)||'Pendiente'))].sort();
+ const rowH=108, sectionHead=64, headerH=205;
+ const topTimes=timesFor(selected), fullTimes=timesFor(full);
+ const topRows=Math.max(1,topTimes.length), fullRows=Math.max(1,fullTimes.length);
+ const H=pad+headerH+70+sectionHead+44+topRows*rowH+55+sectionHead+44+fullRows*rowH+70;
+ const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ x.fillStyle='#09070e';x.fillRect(0,0,W,H);
+ const roundRect=(xx,yy,ww,hh,rr,fill,stroke)=>{x.beginPath();x.roundRect(xx,yy,ww,hh,rr);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=3;x.stroke()}};
+ roundRect(pad,pad,innerW,headerH,'#17121f','#54258a');
+ if(logo){try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=logo});const sc=Math.min(1,150/img.width,82/img.height);x.drawImage(img,pad+22,pad+22,img.width*sc,img.height*sc)}catch(e){}}
+ x.fillStyle='#fff';x.font='900 44px Arial';x.fillText(`SEMANA ${week}`,pad+200,pad+55);
+ x.fillStyle='#e6c04d';x.font='900 25px Arial';x.fillText(title.slice(0,55),pad+200,pad+91);
+ x.fillStyle='#d7cfe2';x.font='700 22px Arial';x.fillText(dateText,pad+200,pad+126);
+ x.fillStyle='#9f91ae';x.font='600 17px Arial';x.fillText('GAME ON FLAG · Calendario semanal',pad+200,pad+158);
+ x.fillStyle='#fff';x.font='900 28px Arial';x.fillText('HORARIO DE '+selectedName.toUpperCase(),pad,pad+headerH+43);
+ let y=pad+headerH+70;
+ const drawGrid=(arr,times,labelY)=>{
+   x.fillStyle='#211a2b';x.fillRect(pad,labelY,innerW,44);x.fillStyle='#fff';x.font='900 17px Arial';x.fillText('HORARIO',pad+14,labelY+28);
+   fields.forEach((f,i)=>{const fw=(innerW-105)/fields.length;x.fillText('CAMPO '+f,pad+105+i*fw+12,labelY+28)});
+   const fw=(innerW-105)/fields.length;
+   times.forEach((tm,ri)=>{const yy=labelY+44+ri*rowH;x.fillStyle='#111018';x.fillRect(pad,yy,innerW,rowH);x.strokeStyle='#3b3344';x.strokeRect(pad,yy,innerW,rowH);x.fillStyle='#fff';x.font='900 22px Arial';x.fillText(tm,pad+14,yy+35);fields.forEach((f,ci)=>{const gx=pad+105+ci*fw;x.strokeStyle='#3b3344';x.strokeRect(gx,yy,fw,rowH);const g=arr.find(m=>fieldNo(m.field_name)===f&&String(m.match_time||'').slice(0,5)===tm);if(!g)return;const cn=g.categories?.name||'Categoría';const accent=color(cn);x.fillStyle=accent;x.fillRect(gx+6,yy+7,6,rowH-14);x.fillStyle='#cfc7d9';x.font='800 14px Arial';x.fillText(cn.slice(0,22),gx+20,yy+28);x.fillStyle='#fff';x.font='900 19px Arial';const a=(g.home?.name||'Por definir').slice(0,20),b=(g.away?.name||'Por definir').slice(0,20);x.fillText(a,gx+20,yy+58);x.fillStyle='#8f849c';x.font='700 13px Arial';x.fillText('VS',gx+20,yy+78);x.fillStyle='#fff';x.font='900 19px Arial';x.fillText(b,gx+52,yy+78);x.fillStyle='#8f849c';x.font='600 12px Arial';x.fillText(g.published?'● Publicado':'● Pendiente',gx+20,yy+98)});});
+ };
+ drawGrid(selected,topTimes,y); y=y+44+topRows*rowH+58;
+ x.fillStyle='#fff';x.font='900 28px Arial';x.fillText(`CALENDARIO COMPLETO · SEMANA ${week}`,pad,y); y+=sectionHead;
+ drawGrid(full,fullTimes,y);
+ x.fillStyle='#8f849d';x.font='600 14px Arial';x.fillText('GAME ON FLAG · Calendario de administración',pad,H-22);
+ const a=document.createElement('a');a.download=`GameOnFlag_Semana_${week}_${String(selectedName).replace(/[^a-z0-9áéíóúñ]+/gi,'_')}.png`;a.href=c.toDataURL('image/png');a.click();closeWeekImageModal();toast('🖼️ Imagen visual descargada');
+}
+</script>
 <div class="modal" id="weekModal" onclick="if(event.target===this)closeWeekModal()">
 <div class="modalbox">
 <h3>📅 EDITAR FECHA DE LA SEMANA</h3>
@@ -962,22 +1031,6 @@ html.gof-hard-entry-v3 body{overflow:hidden!important}
 <div class="modal-actions">
 <button onclick="closeWeekModal()">Cancelar</button>
 <button class="primary" onclick="saveWeekDate()">💾 Guardar fecha de la semana</button>
-</div>
-</div>
-</div>
-<div class="modal" id="weekImageModal" onclick="if(event.target===this)closeWeekImageModal()">
-<div class="modalbox">
-<h3>🖼️ DESCARGAR CALENDARIO</h3>
-<div class="mut small" id="weekImageTitle" style="margin-bottom:12px"></div>
-<div class="notice">La imagen tendrá arriba el horario de la categoría seleccionada y abajo el <b>calendario completo de toda la semana</b>.</div>
-<div class="form" style="margin-top:10px">
-<label class="field-label">Categoría para mostrar arriba
-<select id="weekImageCategory"></select>
-</label>
-</div>
-<div class="modal-actions">
-<button onclick="closeWeekImageModal()">Cancelar</button>
-<button class="primary" onclick="downloadWeekCalendarImage()">🖼️ Descargar imagen</button>
 </div>
 </div>
 </div>
@@ -1797,9 +1850,8 @@ async function loadSchedule(){
     const cname=isPo?(m.categories?.name||'Playoffs'):(m.categories?.name||'Categoría');
     const a=isPo?(m.a?.name||'Por definir'):(m.home?.name||'Local');
     const b=isPo?(m.b?.name||'Por definir'):(m.away?.name||'Visitante');
-    const editFn=isPo?`editPlayoffSchedule('${m.id}')`:`editMatch('${m.id}')`;
-    const status=m.published?'🟢':'🟡';
-    return `<div class="cg-game ${catClass(cname)}"><div class="cg-cat">${esc(cname)}${isPo?' · '+esc(m.stage||''):''}</div><div class="cg-teams">${esc(a)} <span>vs</span> ${esc(b)}</div><div class="cg-meta">${isPo?'🏆':'🏈'} ${m.round_number?'Semana '+m.round_number:''}</div><div class="cg-actions"><button type="button" class="cg-edit-icon" title="Editar / mover" aria-label="Editar / mover" onclick="${editFn}">✏️</button><span class="cg-status-dot" title="${m.published?'Publicado':'Pendiente'}" aria-label="${m.published?'Publicado':'Pendiente'}">${status}</span></div></div>`;
+    const published=!!m.published;
+    return `<div class="cg-game ${catClass(cname)}"><div class="cg-cat">${esc(cname)}${isPo?' · '+esc(m.stage||''):''}</div><div class="cg-teams">${esc(a)} <span>vs</span> ${esc(b)}</div><div class="cg-meta">${isPo?'🏆':'🏈'} ${m.round_number?'Semana '+m.round_number:''}</div><div class="cg-actions"><button type="button" title="Editar / mover partido" aria-label="Editar / mover partido" onclick="${isPo?`editPlayoffSchedule('${m.id}')`:`editMatch('${m.id}')`}">✏️</button><span class="status-dot ${published?'published':''}" title="${published?'Publicado':'Pendiente de aprobación'}" aria-label="${published?'Publicado':'Pendiente de aprobación'}"></span></div></div>`;
   };
   const showField5=all.some(m=>fieldNo(m._field)===5); const fields=showField5?[1,2,3,4,5]:[1,2,3,4];
   let html=`<div class="card"><h3>📊 Calendario General</h3><div class="notice"><b>${all.length} partidos</b> · ${regular.length} fase regular · ${po.length} playoffs · ${cat?'Filtro: '+esc(document.getElementById('cc')?.selectedOptions?.[0]?.textContent||'categoría'):'Todas las categorías'}${showField5?' · 🔐 Campo 5 visible solo en Administración':''}</div><div class="cg-scroll"><table class="calendar-grid"><thead><tr><th>HORARIO</th>${fields.map(f=>`<th>CAMPO ${f}${f===5?' 🔐':''}</th>`).join('')}</tr></thead><tbody>`;
@@ -1810,10 +1862,9 @@ async function loadSchedule(){
     const weekPublished=weekGames.filter(m=>m._kind==='regular'&&m.published).length;
     const weekRegular=weekGames.filter(m=>m._kind==='regular'&&m.status!=='cancelado').length;
     const weekAllPublished=weekRegular>0&&weekPublished===weekRegular;
-    const weekPublishButton=canEditWeek&&weekRegular?`<button type="button" class="${weekAllPublished?'gold':'primary'} week-publish" onclick="publishScheduleRound('${esc(tid)}',${Number(wk)},${weekAllPublished})">${weekAllPublished?'🔒 Ocultar semana':'📢 Publicar semana '+Number(wk)}</button>`:'';
-    const weekImageButton=canEditWeek&&weekRegular?`<button type="button" class="week-image" title="Descargar imagen de la semana" aria-label="Descargar imagen de la semana" onclick="openWeekImageModal(${Number(wk)})">🖼️</button>`:'';
+    const weekPublishButton=canEditWeek&&weekRegular?`<button type="button" class="${weekAllPublished?'gold':'primary'}" style="padding:6px 10px" onclick="publishScheduleRound('${esc(tid)}',${Number(wk)},${weekAllPublished})">${weekAllPublished?'🔒 Ocultar semana':'📢 Publicar semana '+Number(wk)}</button>`:'';
     const weekStatus=weekRegular?`<span class="tag">${weekAllPublished?'🟢 Publicada':weekPublished?`🟡 ${weekPublished}/${weekRegular} publicados`:'🟡 No publicada'}</span>`:'';
-    html+=`<tr class="cg-day"><td colspan="${fields.length+1}"><div class="calendar-week-tools"><b>${esc(weekLabel(wk))}</b>${canEditWeek?`<button type="button" aria-label="Editar fecha de ${esc(weekLabel(wk))}" title="Editar fecha" class="gold" onclick="openWeekDateModal('${esc(wk)}','${esc(weekDateValue(weekGames))}')">✏️</button>`:''}${weekImageButton}${weekPublishButton}${weekStatus}<span class="small mut">${esc(weekDateLabel(weekGames))}</span></div></td></tr>`;
+    html+=`<tr class="cg-day"><td colspan="${fields.length+1}"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><b>${esc(weekLabel(wk))}</b><span class="week-tools">${canEditWeek?`<button type="button" aria-label="Editar fecha de ${esc(weekLabel(wk))}" title="Editar fecha" class="gold" style="padding:5px 8px;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;min-width:34px;min-height:30px" onclick="openWeekDateModal('${esc(wk)}','${esc(weekDateValue(weekGames))}')">✏️</button>`:''}${canEditWeek&&weekRegular?`<button type="button" class="primary" title="Descargar imagen de esta semana" style="padding:5px 8px;font-size:14px;line-height:1" onclick="openWeekImageModal(${Number(wk)})">🖼️</button>`:''}${weekPublishButton}</span>${weekStatus}<span class="small mut">${esc(weekDateLabel(weekGames))}</span></div></td></tr>`;
     const dayTimes=[...new Set(weekGames.map(m=>m._time?String(m._time).slice(0,5):'SIN HORA'))].sort();
     for(const tm of dayTimes){
       html+=`<tr><th class="cg-time">${esc(tm==='SIN HORA'?'Pendiente':tm)}</th>`;
@@ -1846,106 +1897,6 @@ async function loadSchedule(){
   });
   html+='</tbody></table></div><div class="small mut cg-legend">Cada fila corresponde a un equipo. Las columnas J1–J7 muestran su rival de cada semana.</div></div>';
   box.innerHTML=html;
-  window.gofScheduleSnapshot={tid,regular,po,all,fields};
-}
-
-let gofImageWeek=null;
-function openWeekImageModal(week){
-  const snap=window.gofScheduleSnapshot;
-  if(!snap)return alert('Primero carga el calendario.');
-  gofImageWeek=Number(week);
-  const games=snap.all.filter(m=>m._kind==='regular'&&Number(m.round_number)===gofImageWeek&&m.status!=='cancelado');
-  const cats=[...new Set(games.map(m=>m.categories?.name).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
-  const sel=document.getElementById('weekImageCategory');
-  if(!sel)return;
-  sel.innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  const first=cats.find(c=>/escolar/i.test(c))||cats[0]||'';
-  if(first)sel.value=first;
-  document.getElementById('weekImageTitle').textContent=`SEMANA ${gofImageWeek} · Selecciona una categoría para mostrar su horario arriba.`;
-  document.getElementById('weekImageModal').classList.add('show');
-}
-function closeWeekImageModal(){gofImageWeek=null;document.getElementById('weekImageModal')?.classList.remove('show')}
-function gofImageCategoryColor(name){
-  const n=String(name||'').toLowerCase();
-  if(n.includes('silver femenil'))return '#e98ca8';
-  if(n.includes('silver varonil'))return '#5db7e8';
-  if(n.includes('mixto'))return '#78d53f';
-  if(n.includes('35'))return '#ef4444';
-  if(n.includes('moms')||n.includes("mom's")||n.includes('mom'))return '#9b59d6';
-  if(n.includes('golden femenil'))return '#f5b83d';
-  if(n.includes('golden varonil'))return '#d99b2b';
-  if(n.includes('bronce'))return '#e58a3a';
-  if(n.includes('escolar'))return '#b68cff';
-  return '#8f7aaa';
-}
-function gofImageWeekDate(games){
-  const ds=[...new Set(games.map(m=>m._date||m.match_date).filter(Boolean))].sort();
-  if(!ds.length)return 'Fecha pendiente';
-  return new Date(ds[0]+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long',year:'numeric',timeZone:'UTC'}).replace(/^./,c=>c.toUpperCase());
-}
-function gofCanvasRoundRect(ctx,x,y,w,h,r){
-  const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath();
-}
-async function gofLoadImage(url){
-  if(!url)return null;
-  return await new Promise(resolve=>{
-    const im=new Image();
-    im.onload=()=>resolve(im); im.onerror=()=>resolve(null);
-    im.crossOrigin='anonymous'; im.src=url;
-  });
-}
-async function downloadWeekCalendarImage(){
-  const snap=window.gofScheduleSnapshot, sel=document.getElementById('weekImageCategory');
-  const category=sel?.value||'';
-  if(!snap||!gofImageWeek)return alert('No hay calendario cargado.');
-  const weekGames=snap.all.filter(m=>m._kind==='regular'&&Number(m.round_number)===gofImageWeek&&m.status!=='cancelado')
-    .sort((a,b)=>String(a._time||'').localeCompare(String(b._time||''))||String(a._field||'').localeCompare(String(b._field||'')));
-  const topGames=category?weekGames.filter(m=>(m.categories?.name||'')===category):weekGames;
-  const logo=await gofLoadImage(gofCurrentOrganization?.logo_url||'');
-  const W=1800, rowH=92, headerH=190, topTitleH=70, topHeadH=54, gap=42, bottomTitleH=92;
-  const topRows=Math.max(1,topGames.length), bottomRows=Math.max(1,weekGames.length);
-  const H=headerH+topTitleH+topHeadH+topRows*rowH+gap+bottomTitleH+topHeadH+bottomRows*rowH+70;
-  const c=document.createElement('canvas');c.width=W;c.height=H;
-  const ctx=c.getContext('2d');
-  const grad=ctx.createLinearGradient(0,0,W,H);grad.addColorStop(0,'#0b0912');grad.addColorStop(.55,'#171020');grad.addColorStop(1,'#09070d');ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#7b35d9';ctx.lineWidth=5;ctx.strokeRect(24,24,W-48,H-48);
-  if(logo){const max=110,s=Math.min(max/logo.width,max/logo.height),lw=logo.width*s,lh=logo.height*s;ctx.drawImage(logo,55,50,lw,lh);}
-  ctx.fillStyle='#fff';ctx.font='900 48px Arial';ctx.fillText('CALENDARIO · SEMANA '+gofImageWeek,190,78);
-  ctx.fillStyle='#c8bfd5';ctx.font='600 27px Arial';ctx.fillText(gofImageWeekDate(weekGames),190,120);
-  ctx.fillStyle='#8f7aaa';ctx.font='600 23px Arial';ctx.fillText((gofCurrentOrganization?.name||'GAME ON FLAG')+' · Calendario oficial',190,157);
-  function drawSection(title,games,y,subtitle){
-    ctx.fillStyle='#241b31';gofCanvasRoundRect(ctx,45,y,W-90,topTitleH-10,18);ctx.fill();
-    ctx.fillStyle='#fff';ctx.font='900 34px Arial';ctx.fillText(title,75,y+43);
-    ctx.fillStyle='#bdb3ca';ctx.font='600 20px Arial';ctx.fillText(subtitle,75,y+68);
-    let yy=y+topTitleH;
-    ctx.fillStyle='#17131f';ctx.fillRect(45,yy,W-90,topHeadH);
-    const cols=[90,300,520,520,250];const labels=['HORA','CATEGORÍA','LOCAL','VS','CAMPO'];let xx=45;
-    labels.forEach((l,i)=>{ctx.fillStyle='#fff';ctx.font='900 20px Arial';ctx.fillText(l,xx+12,yy+34);xx+=cols[i]});
-    yy+=topHeadH;
-    games.forEach(m=>{
-      const cat=m.categories?.name||'Categoría', color=gofImageCategoryColor(cat);
-      ctx.fillStyle='#121019';ctx.fillRect(45,yy,W-90,rowH-2);
-      ctx.fillStyle=color;ctx.fillRect(45,yy,8,rowH-2);
-      const vals=[String(m._time||m.match_time||'').slice(0,5)||'--:--',cat,m.home?.name||'Por definir','VS',m._field||m.field_name||'Campo'];
-      const xs=[45,135,435,955,1475];
-      ctx.fillStyle='#fff';ctx.font='900 23px Arial';ctx.fillText(vals[0],xs[0]+12,yy+37);
-      ctx.fillStyle=color;ctx.font='900 18px Arial';ctx.fillText(vals[1].slice(0,28),xs[1]+12,yy+31);
-      ctx.fillStyle='#fff';ctx.font='900 25px Arial';ctx.fillText(String(vals[2]).slice(0,30),xs[2]+12,yy+33);
-      ctx.fillStyle='#8f8798';ctx.font='900 19px Arial';ctx.fillText('VS',xs[3]+12,yy+33);
-      ctx.fillStyle='#ddd';ctx.font='800 20px Arial';ctx.fillText(String(vals[4]).slice(0,18),xs[4]+12,yy+33);
-      ctx.fillStyle='#aaa0b1';ctx.font='600 16px Arial';ctx.fillText((m.away?.name||'Por definir').slice(0,35),xs[2]+12,yy+62);
-      yy+=rowH;
-    });
-    return yy;
-  }
-  let y=headerH;
-  y=drawSection(category?`HORARIO · ${category}`:'HORARIO · TODAS LAS CATEGORÍAS',topGames,y,`${topGames.length} partido(s) · selección de categoría`);
-  y+=gap;
-  y=drawSection(`CALENDARIO COMPLETO · SEMANA ${gofImageWeek}`,weekGames,y,`${weekGames.length} partido(s) · todas las categorías programadas`);
-  ctx.fillStyle='#8d8298';ctx.font='600 17px Arial';ctx.fillText('GAME ON FLAG · Calendario de administración',55,H-28);
-  const a=document.createElement('a');a.download=`GAME_ON_FLAG_Semana_${gofImageWeek}${category?'_'+category.replace(/[^a-z0-9]+/gi,'_'):''}.png`;a.href=c.toDataURL('image/png');a.click();
-  toast('🖼️ Imagen del calendario descargada');
-  closeWeekImageModal();
 }
 async function getUnifiedConflicts(tid,date,time,field,excludeId,kind,mTeamA,mTeamB){
   if(!tid||!date||!time)return [];

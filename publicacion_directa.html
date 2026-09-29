@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GAME ON FLAG · Publicación directa</title>
+<style>
+:root{--bg:#090b13;--panel:#151827;--panel2:#1c2032;--line:#30364e;--accent:#8b5cf6;--ok:#22c55e;--text:#f7f8ff;--muted:#aeb5cb}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#090b13,#111426);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}.wrap{width:min(760px,100%);margin:auto;padding:12px 10px 40px}.top{position:sticky;top:0;z-index:5;background:rgba(9,11,19,.95);backdrop-filter:blur(12px);padding:10px 4px 14px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px}.badge{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#4c1d95);display:grid;place-items:center;font-weight:900}.brand h1{font-size:18px;margin:0}.brand p{font-size:12px;color:var(--muted);margin:2px 0 0}.card{background:rgba(21,24,39,.96);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:11px}.field{margin-bottom:10px}label{display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:5px}select,input[type=file]{width:100%;background:#0f1220;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px}.note{font-size:11px;color:var(--muted);line-height:1.45}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.section{border:1px solid var(--line);background:var(--panel2);border-radius:16px;padding:12px}.section h3{font-size:14px;margin:0 0 4px}.section small{display:block;color:var(--muted);font-size:11px;min-height:28px}.actions{display:flex;gap:7px;margin-top:9px}.btn{flex:1;border:0;border-radius:10px;padding:10px 8px;font-weight:800;font-size:11px;cursor:pointer}.preview{display:none;margin-top:8px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0b0e17}.preview img{display:block;width:100%;max-height:300px;object-fit:contain}.upload{background:#343a52;color:#fff}.publish{background:var(--ok);color:#03100a}.status{font-size:11px;min-height:16px;margin-top:7px;color:var(--muted)}.ok{color:#86efac}.err{color:#fca5a5}.history-row{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:9px 0;font-size:11px}.thumb{width:48px;height:40px;object-fit:cover;border-radius:7px;background:#0b0d16}.grow{flex:1}.tag{font-size:9px;padding:4px 6px;border-radius:999px;background:#24334b;color:#bfdbfe}.off{background:#3a2630;color:#fecaca}@media(max-width:560px){.grid{grid-template-columns:1fr}.actions .btn{min-height:38px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div class="brand"><div class="badge">GO</div><div><h1>GAME ON FLAG</h1><p>📤 Publicación directa · respaldo rápido</p></div></div></div>
+
+<div class="card">
+  <div class="field"><label>LIGA</label><select id="league"></select></div>
+  <div class="field"><label>TORNEO</label><select id="tournament"></select></div>
+  <div class="field"><label>CATEGORÍA DE LA IMAGEN</label><select id="category"></select></div>
+  <div class="note">Esta pantalla es independiente de la captura automática. Tú preparas la información en Excel, Corel, Canva, etc.; aquí solo subes la imagen y la publicas. <b>El roster y los datos automáticos no se modifican.</b></div>
+</div>
+
+<div id="sections" class="grid"></div>
+
+<div class="card">
+  <h3 style="margin:0 0 4px">📌 Publicaciones del torneo</h3>
+  <div class="note">La publicación nueva reemplaza la anterior de la misma sección y categoría.</div>
+  <div id="history"></div>
+</div>
+</div>
+
+<script>
+const FN='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/direct-publication';
+const sections=[
+ ['categorias','🏷️ CATEGORÍAS'],['calendario','📅 CALENDARIO'],['enfrentamientos','⚔️ ENFRENTAMIENTOS'],
+ ['resultados','🏈 RESULTADOS'],['tablas','📊 TABLAS'],['playoffs','🏆 PLAYOFFS'],['mvps','⭐ MVPs']
+];
+let state={leagues:[],tournaments:[],categories:[],token:''};
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function tokenFromSession(){
+  for(const k of Object.keys(localStorage)){
+    if(!k.includes('auth-token')) continue;
+    try{const v=JSON.parse(localStorage.getItem(k));if(v?.access_token)return v.access_token}catch{}
+  }
+  return '';
+}
+async function api(path,options={}){
+  state.token=state.token||tokenFromSession();
+  if(!state.token)throw new Error('No hay una sesión de administrador activa. Abre primero el panel de administración.');
+  const headers=new Headers(options.headers||{});
+  headers.set('Authorization','Bearer '+state.token);
+  const r=await fetch(FN+path,{...options,headers});
+  const text=await r.text();let data;try{data=JSON.parse(text)}catch{data={error:text}}
+  if(!r.ok)throw new Error(data.error||data.message||'Error de conexión');
+  return data;
+}
+function renderSections(){
+ $('sections').innerHTML=sections.map(([key,label])=>`
+ <div class="section">
+   <h3>${label}</h3><small>Sube la imagen que ya preparaste y publícala directamente.</small>
+   <input type="file" accept="image/png,image/jpeg,image/webp" id="file-${key}">
+   <div class="preview" id="preview-${key}"><img id="img-${key}"></div>
+   <div class="actions"><button class="btn upload" onclick="previewFile('${key}')">👁️ Vista previa</button><button class="btn publish" onclick="publish('${key}')">🚀 Publicar</button></div>
+   <div class="status" id="status-${key}"></div>
+ </div>`).join('');
+ sections.forEach(([key])=>$(('file-'+key)).addEventListener('change',()=>previewFile(key)));
+}
+function status(key,msg,type=''){const e=$('status-'+key);e.textContent=msg;e.className='status '+type}
+function previewFile(key){const f=$('file-'+key).files?.[0];if(!f){status(key,'Selecciona una imagen.','err');return}if(f.size>15*1024*1024){status(key,'Máximo 15 MB.','err');return}$('img-'+key).src=URL.createObjectURL(f);$('preview-'+key).style.display='block';status(key,'Imagen lista.','ok')}
+async function bootstrap(){
+ try{
+   const preferred=localStorage.getItem('gameOnFlagActiveLeagueId')||localStorage.getItem('activeLeagueId')||'';
+   const d=await api('/?action=bootstrap'+(preferred?'&league_id='+encodeURIComponent(preferred):''));
+   state.leagues=d.leagues||[];state.tournaments=d.tournaments||[];
+   $('league').innerHTML=state.leagues.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+   if(d.selectedLeague)$('league').value=d.selectedLeague;
+   $('tournament').innerHTML=state.tournaments.length?state.tournaments.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join(''):'<option value="">Sin torneos</option>';
+   await loadCategories();renderSections();
+ }catch(e){document.querySelector('.wrap').insertAdjacentHTML('beforeend','<div class="card"><div class="status err">'+esc(e.message)+'</div></div>')}
+}
+async function changeLeague(){
+ localStorage.setItem('gameOnFlagActiveLeagueId',$('league').value);
+ const d=await api('/?action=bootstrap&league_id='+encodeURIComponent($('league').value));
+ state.tournaments=d.tournaments||[];
+ $('tournament').innerHTML=state.tournaments.length?state.tournaments.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join(''):'<option value="">Sin torneos</option>';
+ await loadCategories();
+}
+async function loadCategories(){
+ const lid=$('league').value,tid=$('tournament').value;if(!lid||!tid){$('category').innerHTML='<option value="">Todas las categorías</option>';return}
+ const d=await api('/?action=categories&league_id='+encodeURIComponent(lid)+'&tournament_id='+encodeURIComponent(tid));
+ state.categories=d.categories||[];
+ $('category').innerHTML='<option value="">Todas las categorías</option>'+state.categories.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+ await loadHistory();
+}
+async function loadHistory(){
+ const lid=$('league').value,tid=$('tournament').value;if(!lid||!tid)return;
+ try{
+  const d=await api('/?action=history&league_id='+encodeURIComponent(lid)+'&tournament_id='+encodeURIComponent(tid));
+  $('history').innerHTML=(d.publications||[]).map(x=>`
+   <div class="history-row"><img class="thumb" src="${esc(x.image_url)}"><div class="grow"><b>${esc((sections.find(s=>s[0]===x.section)||['',x.section])[1])}</b><br>${esc(x.categories?.name||'Todas las categorías')} · ${esc(x.title||'imagen')}</div><span class="tag ${x.is_published?'':'off'}">${x.is_published?'PUBLICADA':'OCULTA'}</span></div>`).join('')||'<div class="note" style="padding-top:10px">Todavía no hay publicaciones manuales.</div>';
+ }catch(e){$('history').innerHTML='<div class="status err">'+esc(e.message)+'</div>'}
+}
+async function publish(section){
+ const f=$('file-'+section).files?.[0];if(!f){status(section,'Selecciona una imagen.','err');return}
+ if(f.size>15*1024*1024){status(section,'Máximo 15 MB.','err');return}
+ const fd=new FormData();fd.append('league_id',$('league').value);fd.append('tournament_id',$('tournament').value);fd.append('category_id',$('category').value||'');fd.append('section',section);fd.append('file',f);
+ status(section,'Subiendo y publicando…');
+ try{await api('/?action=publish',{method:'POST',body:fd});status(section,'¡Publicado correctamente!','ok');await loadHistory()}catch(e){status(section,e.message,'err')}
+}
+$('league').addEventListener('change',()=>changeLeague());
+$('tournament').addEventListener('change',()=>loadCategories());
+bootstrap();
+</script>
+</body>
+</html>

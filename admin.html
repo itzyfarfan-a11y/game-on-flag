@@ -58,7 +58,7 @@ function previewLeagueLogo(){const f=document.getElementById('leagueLogoUpload')
 .image-download-modal .modalbox{max-width:520px}
 .image-download-modal .download-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#17131f;margin-top:8px}
 .image-download-modal .download-option select{flex:1}
-</style>
+.team-schedule-filter{margin:10px 0 12px}.team-schedule-filter select{width:100%;font-weight:800}.team-schedule-grid .ts-j.cat-mixto{background:rgba(139,210,62,.13);border-left:3px solid #8bd23e}.team-schedule-grid .ts-j.cat-silverf{background:rgba(226,139,158,.13);border-left:3px solid #e28b9e}.team-schedule-grid .ts-j.cat-silverv{background:rgba(110,183,206,.13);border-left:3px solid #6eb7ce}.team-schedule-grid .ts-j.cat-bronce{background:rgba(210,138,63,.13);border-left:3px solid #d28a3f}.team-schedule-grid .ts-j.cat-35{background:rgba(224,75,82,.13);border-left:3px solid #e04b52}.team-schedule-grid .ts-j.cat-moms{background:rgba(165,107,224,.13);border-left:3px solid #a56be0}.team-schedule-grid .ts-j.cat-golden{background:rgba(217,181,74,.13);border-left:3px solid #d9b54a}.team-schedule-grid .ts-j.cat-other{background:rgba(143,122,170,.13);border-left:3px solid #8f7aaa}.team-schedule-grid .ts-cat.cat-mixto{color:#8bd23e}.team-schedule-grid .ts-cat.cat-silverf{color:#e28b9e}.team-schedule-grid .ts-cat.cat-silverv{color:#6eb7ce}.team-schedule-grid .ts-cat.cat-bronce{color:#d28a3f}.team-schedule-grid .ts-cat.cat-35{color:#e04b52}.team-schedule-grid .ts-cat.cat-moms{color:#a56be0}.team-schedule-grid .ts-cat.cat-golden{color:#d9b54a}</style>
 <style>.enrolled-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;margin-bottom:8px}.enrolled-list{display:grid;gap:6px}.enrolled-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.025)}.enrolled-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,214,82,.15);font-weight:800}
 .cg-scroll{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:12px}.calendar-grid{min-width:980px;width:100%;border-collapse:separate;border-spacing:0;background:#0d0b12}.calendar-grid th,.calendar-grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:7px}.calendar-grid thead th{position:sticky;top:0;background:#17131f;color:#fff;text-align:center;font-weight:900;z-index:2}.calendar-grid thead th:first-child{width:92px}.calendar-grid .cg-day td{background:#241b31;color:var(--gold);font-size:14px;font-weight:900;padding:10px 12px;text-transform:none}.calendar-grid .cg-day td>div{justify-content:flex-start!important}.calendar-grid .cg-day td>div>button{flex:0 0 auto}.calendar-grid .cg-time{width:92px;text-align:center;white-space:nowrap;color:#fff;background:#15121c;font-size:12px}.cg-game{min-height:104px;border-radius:10px;padding:9px;background:#17131f;border-left:5px solid #777;display:flex;flex-direction:column;gap:5px}.cg-cat{font-size:11px;font-weight:900;text-transform:none;color:#ddd}.cg-teams{font-size:13px;font-weight:900;line-height:1.25}.cg-teams span{font-weight:500;opacity:.6}.cg-meta{font-size:10px;color:var(--mut)}.cg-actions{display:flex;gap:5px;margin-top:auto}.cg-actions button{padding:6px 8px;font-size:11px}.cg-empty{min-height:104px;display:flex;align-items:center;justify-content:center;color:#625b6d;font-size:20px}.cg-mixto{background:#26351b;border-left-color:#8bd23e}.cg-bronce{background:#3a2c1c;border-left-color:#d28a3f}.cg-silverf{background:#38252d;border-left-color:#e28b9e}.cg-silverv{background:#20333b;border-left-color:#6eb7ce}.cg-35{background:#302f29;border-left-color:#e4d6a0}.cg-golden{background:#3a3320;border-left-color:var(--gold)}.cg-other{background:#25202c;border-left-color:#8f7aaa}
 .team-schedule-card{margin-top:14px}.team-schedule-grid{min-width:760px}.team-schedule-grid th,.team-schedule-grid td{text-align:center;white-space:nowrap}.team-schedule-grid th:first-child,.team-schedule-grid td:first-child{text-align:left}.team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){text-align:left;position:sticky;left:0;background:#15121c;z-index:1}.team-schedule-grid thead th:nth-child(2){z-index:3}.team-schedule-grid tbody tr:nth-child(even) td{background:#110f16}.ts-cat{font-size:11px;font-weight:800;color:var(--mut)}.ts-team{font-weight:900;min-width:115px}.team-schedule-grid td{font-size:10px}.team-schedule-grid td:not(:first-child):not(:nth-child(2)){min-width:78px}
@@ -1882,16 +1882,26 @@ async function loadSchedule(){
   const teamRows=[...teamMap.values()].sort((a,b)=>a.category.localeCompare(b.category,'es')||a.name.localeCompare(b.name,'es'));
   const tsCatClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'cat-mixto';if(x.includes('silver femenil'))return 'cat-silverf';if(x.includes('silver varonil'))return 'cat-silverv';if(x.includes('bronce')||x.includes('bronze'))return 'cat-bronce';if(x.includes('35'))return 'cat-35';if(x.includes('moms'))return 'cat-moms';if(x.includes('golden'))return 'cat-golden';return 'cat-other'};
   const tsDot=n=>{const c=tsCatClass(n);return c==='cat-mixto'?'#8bd23e':c==='cat-silverf'?'#e28b9e':c==='cat-silverv'?'#6eb7ce':c==='cat-bronce'?'#d28a3f':c==='cat-35'?'#e04b52':c==='cat-moms'?'#a56be0':c==='cat-golden'?'#d9b54a':'#8f7aaa'};
-  html+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3><div class="team-schedule-actions"><button type="button" class="primary" onclick="downloadTeamScheduleImage()">🖼️ Descargar imagen</button></div></div><div class="notice">Todos los equipos y todas las categorías de la fase regular. Desliza horizontalmente para ver J1–J7; el nombre del equipo permanece visible.</div><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
-  teamRows.forEach(t=>{const cc=tsCatClass(t.category);html+=`<tr class="cat-row"><td class="ts-cat"><span class="ts-cat-badge"><span class="ts-cat-dot" style="background:${tsDot(t.category)}"></span>${esc(t.category)}</span></td><td class="ts-team">${esc(t.name)}</td>${[1,2,3,4,5,6,7].map(r=>`<td class="ts-j ${cc}">${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`;});
-  html+=`</tbody></table></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo. J1–J7 muestran su rival de cada jornada. En teléfono puedes deslizar un poco hacia la derecha/izquierda sin perder el nombre del equipo.</div></div>`;
+  const teamCategories=[...new Set(teamRows.map(t=>t.category))].sort((a,b)=>a.localeCompare(b,'es'));
+  html+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3><div class="team-schedule-actions"><button type="button" class="primary" onclick="downloadTeamScheduleImage()">🖼️ Descargar imagen</button></div></div><div class="notice">Consulta una categoría completa o todas. Selecciona la categoría y verás únicamente sus equipos y sus enfrentamientos J1–J7. En <b>Todas</b> aparecen todas las categorías diferenciadas por color.</div><div class="team-schedule-filter"><label class="field-label" style="margin:0">🏷️ Ver categoría<select id="teamCatFilter" onchange="filterTeamSchedule()"><option value="">Todas las categorías</option>${teamCategories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label></div><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
+  teamRows.forEach(t=>{const cc=tsCatClass(t.category);html+=`<tr class="cat-row" data-team-category="${esc(t.category)}"><td class="ts-cat ${cc}"><span class="ts-cat-badge"><span class="ts-cat-dot" style="background:${tsDot(t.category)}"></span>${esc(t.category)}</span></td><td class="ts-team">${esc(t.name)}</td>${[1,2,3,4,5,6,7].map(r=>`<td class="ts-j ${cc}">${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`;});
+  html+=`</tbody></table></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo. J1–J7 muestran su rival de cada jornada. En teléfono puedes deslizar derecha/izquierda; <b>CATEGORÍA</b> y <b>EQUIPO</b> permanecen visibles.</div></div>`;
   box.innerHTML=html;
 }
+function filterTeamSchedule(){
+ const select=document.getElementById('teamCatFilter');
+ const wanted=select?String(select.value||''):'';
+ document.querySelectorAll('.team-schedule-grid tbody tr[data-team-category]').forEach(row=>{
+   row.style.display=!wanted || row.dataset.teamCategory===wanted ? '' : 'none';
+ });
+}
+
 async function downloadTeamScheduleImage(){
  const tid=val('ct'); if(!tid)return alert('Selecciona un torneo.');
  const {data,error}=await sb.from('matches').select('round_number,category_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name),categories(name)').eq('tournament_id',tid).gte('round_number',1).lte('round_number',7).eq('is_makeup',false).neq('status','cancelado');
  if(error)return alert(error.message);
- const games=data||[]; if(!games.length)return alert('No hay enfrentamientos de fase regular para descargar.');
+ const selectedCat=String(document.getElementById('teamCatFilter')?.value||'');
+ const games=(data||[]).filter(g=>!selectedCat || String(g.categories?.name||'')===selectedCat); if(!games.length)return alert(selectedCat?`No hay enfrentamientos para ${selectedCat}.`:'No hay enfrentamientos de fase regular para descargar.');
  const {data:tour}=await sb.from('tournaments').select('name').eq('id',tid).single();
  const title=String(tour?.name||'GAME ON FLAG');
  const catClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'mixto';if(x.includes('silver femenil'))return 'silverf';if(x.includes('silver varonil'))return 'silverv';if(x.includes('bronce')||x.includes('bronze'))return 'bronce';if(x.includes('35'))return '35';if(x.includes('moms'))return 'moms';if(x.includes('golden'))return 'golden';return 'other'};
@@ -3021,3 +3031,31 @@ window.addEventListener('load',async function(){
 </script>
 
 </body></html>
+<style>
+/* GAME ON FLAG · Enfrentamientos J1–J7: tabla horizontal móvil */
+.team-schedule-card .cg-scroll{overflow-x:auto!important;-webkit-overflow-scrolling:touch;touch-action:pan-x;scrollbar-width:thin;}
+.team-schedule-grid{min-width:660px!important;width:max-content!important;table-layout:fixed;}
+.team-schedule-grid th,.team-schedule-grid td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.team-schedule-grid th:first-child,.team-schedule-grid td:first-child{position:sticky;left:0;z-index:4;width:88px;min-width:88px;max-width:88px;background:#17131f;}
+.team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){position:sticky;left:88px;z-index:4;width:122px;min-width:122px;max-width:122px;background:#15121c;}
+.team-schedule-grid thead th{z-index:5;background:#17131f;}
+.team-schedule-grid thead th:nth-child(2){z-index:6;}
+.team-schedule-grid th:not(:first-child):not(:nth-child(2)),.team-schedule-grid td:not(:first-child):not(:nth-child(2)){width:64px;min-width:64px;max-width:64px;}
+.team-schedule-grid td{font-size:10px;line-height:1.15;padding:7px 5px;}
+.team-schedule-grid th{font-size:10px;padding:7px 4px;}
+.team-schedule-grid .ts-team{font-size:11px;font-weight:900;}
+.team-schedule-grid .ts-cat{font-size:9px;font-weight:900;}
+.team-schedule-grid .ts-j{border-left-width:3px!important;}
+.team-schedule-scroll-note{font-size:10px!important;margin-top:7px;color:var(--mut);}
+@media(max-width:700px){
+  .team-schedule-card .cg-scroll{overflow-x:auto!important;display:block!important;max-width:100%;}
+  .team-schedule-grid{min-width:660px!important;}
+  .team-schedule-grid th:first-child,.team-schedule-grid td:first-child{width:82px;min-width:82px;max-width:82px;}
+  .team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){left:82px;width:118px;min-width:118px;max-width:118px;}
+  .team-schedule-grid th:not(:first-child):not(:nth-child(2)),.team-schedule-grid td:not(:first-child):not(:nth-child(2)){width:62px;min-width:62px;max-width:62px;}
+  .team-schedule-grid td{font-size:10px!important;padding:6px 4px!important;}
+  .team-schedule-grid th{font-size:10px!important;padding:6px 4px!important;}
+  .team-schedule-grid .ts-team{font-size:11px!important;}
+  .team-schedule-grid .ts-cat{font-size:9px!important;}
+}
+</style>

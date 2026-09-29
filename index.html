@@ -473,6 +473,9 @@ let data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]};
 let publications=[];
 let notices=[];
 let tab='inicio';
+let publicSyncTimer=null;
+let publicSyncBusy=false;
+const PUBLIC_SYNC_MS=15000;
 const sec=['inicio','categorias','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones','avisos','publicaciones'];
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -611,7 +614,7 @@ async function players(){
   rosterCategory=c.value||rosterCategory||categories[0]?.id||'';
   const teamOptions=teams.map(tm=>'<option value="'+esc(tm.id)+'">'+esc(tm.name)+'</option>').join('');
   s.innerHTML='<div class="gof-section-toolbar"><h2>👕 Roster</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+
-    '<div class="card"><p class="muted">Aquí cualquier visitante puede consultar las plantillas publicadas, con foto, número y nombre del jugador.</p>'+
+    '<div class="card"><p class="muted">Aquí cualquier visitante puede consultar el roster directamente desde Administración, con foto, número y nombre. Los jugadores pendientes también se muestran; la aprobación administrativa no es requisito para su visualización pública.</p>'+
     '<div class="roster-tools"><label>Categoría<select id="rosterCat">'+categories.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===rosterCategory?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label>'+
     '<label>Equipo<select id="rosterTeam"><option value="">Selecciona un equipo</option>'+teamOptions+'</select></label></div></div>'+
     '<div id="rosterBody"><div class="empty">Selecciona un equipo para ver su roster.</div></div>';
@@ -711,6 +714,46 @@ function renderPublications(){
   s.innerHTML='<div class="gof-section-toolbar"><h2>🖼️ Publicaciones oficiales</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div><p class="muted">Imágenes publicadas directamente por la administración. Estas imágenes son informativas y no modifican los datos automáticos de la liga.</p>'+allPublicationCards();
 }
 
+async function refreshPublicPortal({rerender=true}={}){
+  if(publicSyncBusy || !GOF_PUBLIC_LEAGUE_SLUG || !league.id || !t.value)return;
+  publicSyncBusy=true;
+  try{
+    const selectedCategory=c.value||'';
+    const selectedTeam=rosterTeam||'';
+    const currentTournament=t.value;
+    const fresh=await rpc('public_get_tournament_data',{p_tournament_id:currentTournament,p_category_id:null,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});
+    data=fresh||{tournament:{},categories:[],teams:[],matches:[],playoffs:[]};
+
+    if(selectedCategory && data.categories.some(x=>x.id===selectedCategory)) c.value=selectedCategory;
+    else c.value='';
+    rosterCategory=selectedCategory&&data.categories.some(x=>x.id===selectedCategory)?selectedCategory:'';
+    if(selectedTeam && data.teams.some(x=>x.id===selectedTeam)) rosterTeam=selectedTeam;
+    else if(!data.teams.some(x=>x.id===rosterTeam)) rosterTeam='';
+
+    try{notices=await rpc('public_list_notices',{p_league_slug:GOF_PUBLIC_LEAGUE_SLUG})||[]}catch(e){/* keep previous notices if endpoint is temporarily unavailable */}
+    document.getElementById('noticeBadge').textContent=String(notices.length||0);
+    try{
+      publications=await tableGet('publication_images',{
+        select:'id,league_id,tournament_id,category_id,section,title,image_url,is_published,created_at',
+        league_id:'eq.'+league.id,
+        tournament_id:'eq.'+currentTournament,
+        is_published:'eq.true',
+        order:'created_at.desc'
+      });
+    }catch(e){/* keep previous publications if temporarily unavailable */}
+
+    if(rerender) render();
+    if(tab==='jugadores' && rosterTeam && rosterCategory) loadRoster();
+  }catch(e){
+    console.warn('Sincronización pública:',e);
+  }finally{publicSyncBusy=false}
+}
+function startPublicLiveSync(){
+  if(publicSyncTimer)clearInterval(publicSyncTimer);
+  publicSyncTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshPublicPortal();},PUBLIC_SYNC_MS);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshPublicPortal({rerender:false})});
+}
+
 async function loadPublicData(){
   // El menú público debe existir incluso si alguien abre index.html sin el enlace de liga.
   render();
@@ -773,7 +816,7 @@ async function loadTournament(){
 t.onchange=async()=>{try{await loadTournament();tab='inicio';render()}catch(e){status.textContent='No se pudo cargar el torneo.';status.style.display='block'}};
 c.onchange=()=>{rosterCategory=c.value;rosterTeam='';render()};
 
-(async()=>{await loadPublicData()})();
+(async()=>{const ok=await loadPublicData();if(ok)startPublicLiveSync()})();
 </script>
 <script>
 function savePublicAppLogo(input){const f=input?.files?.[0];if(!f)return;if(!/^image\/(png|jpeg|webp)$/.test(f.type))return alert('Selecciona una imagen PNG, JPG o WEBP.');const r=new FileReader();r.onload=()=>{try{localStorage.setItem('gof_app_logo',r.result)}catch(e){}applyPublicAppLogo(r.result)};r.readAsDataURL(f)}

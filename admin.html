@@ -491,12 +491,23 @@ body.home-screen{overflow:hidden!important}
 
 .view{padding-top:0!important}.view>h2{margin:4px 0 12px!important;line-height:1.05!important}.back-menu{margin-top:0!important;margin-bottom:8px!important}.view>.card:first-of-type{margin-top:8px!important}main{padding-top:8px!important}.gof-final-header .gof-actions{gap:6px!important}.gof-final-header .gof-icon{width:38px!important;height:38px!important}.gof-final-header .gof-badge{display:none!important}.admin-player-row{padding:10px!important;margin-bottom:8px!important}.admin-player-row .form{gap:7px!important}.admin-player-row .ap-preview{width:64px!important;height:64px!important}#elist{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}#elist>.card{margin:0!important;padding:10px!important}#elist>.card .row{gap:7px!important}#elist>.card .tag{font-size:10px!important;padding:4px 6px!important}#elist>.card .toolbar button{padding:7px 8px!important;font-size:11px!important}@media(max-width:650px){main{padding:7px 10px 24px!important}.view>h2{font-size:28px!important;margin:3px 0 9px!important}.back-menu{font-size:14px!important;padding:7px 11px!important}.view>.notice{margin:8px 0!important}.view>.card{padding:12px!important;margin:9px 0!important}.gof-final-header .gof-icon{width:34px!important;height:34px!important;font-size:16px!important}.gof-final-header .gof-actions{gap:4px!important}.admin-player-row .form{grid-template-columns:1fr 90px!important}.admin-player-row .ap-photo,.admin-player-row .ap-curp{grid-column:1/-1!important}}
 
-/* GAME ON FLAG — roster edit/view corrections */
-.gof-edit-player-photo{width:72px;height:72px;object-fit:cover;border-radius:14px;border:1px solid var(--line);flex:0 0 72px}
-.gof-edit-player-card .toolbar button{min-width:54px;min-height:50px;font-size:22px}
-.gof-view-roster-photo{width:92px!important;height:92px!important;object-fit:cover;border-radius:16px!important;flex:0 0 92px!important}
-.roster-mini-player.gof-roster-big-player{min-height:112px;padding:12px!important;gap:12px!important}
-@media(max-width:700px){.gof-edit-player-photo{width:78px;height:78px;flex-basis:78px}.gof-view-roster-photo{width:104px!important;height:104px!important;flex-basis:104px!important}.roster-mini-player.gof-roster-big-player{min-height:124px}}
+/* GAME ON FLAG — roster edit/view final layout */
+#quickRosterList{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important}
+#quickRosterList .quick-player-card{margin:0!important;padding:10px!important;min-width:0;overflow:hidden}
+#quickRosterList .quick-player-card>.row{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important}
+#quickRosterList .quick-player-card .gof-quick-player-main{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:0;text-align:center}
+.gof-edit-player-photo{width:76px!important;height:76px!important;object-fit:cover;border-radius:13px;border:1px solid var(--line);flex:0 0 76px}
+#quickRosterList .gof-edit-player-name{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:16px}
+#quickRosterList .gof-edit-player-meta{font-size:12px;line-height:1.25;text-align:center}
+#quickRosterList .gof-edit-player-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:6px!important;width:100%}
+.gof-edit-player-card .gof-edit-player-actions button{min-width:0!important;width:100%;min-height:42px!important;height:42px!important;padding:4px!important;font-size:20px!important;border-radius:11px!important}
+#quickRosterList .gof-edit-player-card .danger{background:#751d35!important}
+.gof-view-roster-photo{width:100%!important;height:auto!important;aspect-ratio:1/1;object-fit:cover;border-radius:16px!important;display:block}
+.roster-mini-player.gof-roster-big-player{display:flex!important;flex-direction:column!important;align-items:stretch!important;min-height:0!important;padding:10px!important;gap:8px!important}
+.roster-mini-player.gof-roster-big-player .gof-view-player-info{min-width:0;text-align:left}
+.roster-mini-player.gof-roster-big-player .gof-view-player-name{display:block;font-size:17px;line-height:1.2;margin-bottom:3px;white-space:normal;overflow-wrap:anywhere}
+.roster-mini-player.gof-roster-big-player .gof-view-player-meta{font-size:13px;line-height:1.35;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:700px){#quickRosterList{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}.gof-edit-player-photo{width:68px!important;height:68px!important;flex-basis:68px}.roster-mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}}
 </style>
 <style id="gof-linear-workflow-styles">
 .gof-home-context{margin-top:14px!important}
@@ -1732,7 +1743,7 @@ async function loadQuickRoster(){
   const form=document.getElementById('quickRosterForm'); if(form)form.style.display='none';
   const rows=await fetchQuickRoster();
   const out=document.getElementById('quickRosterList'); if(!out)return;
-  out.innerHTML=rows.map(p=>`<div class="card quick-player-card gof-edit-player-card"><div class="row"><div style="display:flex;align-items:center;gap:12px;min-width:0"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt="" class="gof-edit-player-photo"><div style="min-width:0"><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')} · ${esc(p.status||'pendiente')}</div></div></div><div class="toolbar"><button type="button" title="Editar jugador" onclick='editQuickPlayer(${JSON.stringify(p).replace(/</g,'\u003c')})'>✏️</button><button type="button" class="danger" title="Quitar jugador" onclick='deleteQuickPlayer(${JSON.stringify(p.roster_id||'')},${JSON.stringify(p.full_name||'este jugador')})'>🗑️</button></div></div></div>`).join('')||'<div class="empty">Este equipo todavía no tiene jugadores registrados. Pulsa «➕ AGREGAR JUGADOR» para crear el primero.</div>';
+  out.innerHTML=rows.map(p=>`<div class="card quick-player-card gof-edit-player-card"><div class="row"><div class="gof-quick-player-main"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt="" class="gof-edit-player-photo"><b class="gof-edit-player-name">${esc(p.full_name)}</b><div class="mut small gof-edit-player-meta">#${esc(p.jersey_number??'')} · ${esc(p.status||'pendiente')}</div></div><div class="toolbar gof-edit-player-actions"><button type="button" title="Editar jugador" aria-label="Editar jugador" onclick='editQuickPlayer(${JSON.stringify(p).replace(/</g,'\u003c')})'>✏️</button><button type="button" class="danger" title="Quitar jugador" aria-label="Quitar jugador" onclick='deleteQuickPlayer(${JSON.stringify(p.roster_id||'')},${JSON.stringify(p.full_name||'este jugador')})'>🗑️</button></div></div></div>`).join('')||'<div class="empty" style="grid-column:1/-1">Este equipo todavía no tiene jugadores registrados. Pulsa «➕ AGREGAR JUGADOR» para crear el primero.</div>';
   await updateQuickRosterLateFeeNotice();
 }
 function clearQuickPlayerForm(){
@@ -1845,7 +1856,7 @@ async function loadViewRosters(){
       const {data:players,error:pe}=await sb.from('roster_registrations').select('id,status,players(full_name,photo_url,jersey_number,date_of_birth)').eq('tournament_id',tid).eq('category_id',r.category_id).eq('team_id',r.team_id).order('created_at');
       if(pe)return alert(pe.message);
       const ps=(players||[]).filter(x=>x.players).map(x=>({...x.players,status:x.status,roster_id:x.id}));
-      teamCards.push(`<details class="card roster-view-card"><summary><div class="row"><b>${esc(teamMap[r.team_id]||'Equipo')}</b><span class="tag">${ps.length}/18 jugadores</span></div></summary><div style="margin-top:12px">${ps.length?`<div class="roster-mini-grid">${ps.map(p=>`<div class="roster-mini-player gof-roster-big-player"><img class="gof-view-roster-photo" src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div style="min-width:0;flex:1"><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')}${p.date_of_birth?' · '+esc(p.date_of_birth):''} · ${esc(p.status||'pendiente')}</div></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div></details>`);
+      teamCards.push(`<details class="card roster-view-card"><summary><div class="row"><b>${esc(teamMap[r.team_id]||'Equipo')}</b><span class="tag">${ps.length}/18 jugadores</span></div></summary><div style="margin-top:12px">${ps.length?`<div class="roster-mini-grid">${ps.map(p=>`<div class="roster-mini-player gof-roster-big-player"><img class="gof-view-roster-photo" src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div class="gof-view-player-info"><b class="gof-view-player-name">${esc(p.full_name)}</b><div class="mut small gof-view-player-meta">#${esc(p.jersey_number??'')}${p.date_of_birth?' · Fecha de nacimiento: '+esc(p.date_of_birth):''}${p.curp?' · CURP: '+esc(p.curp):''} · ${esc(p.status||'pendiente')}</div></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div></details>`);
     }
     cards.push(`<div style="margin-bottom:14px"><div class="section-title" style="margin-bottom:8px"><b>${esc(cat.name)}</b><span class="tag">${teamCards.length} equipo${teamCards.length===1?'':'s'}</span></div>${teamCards.length?teamCards.join(''):'<div class="empty">No hay equipos activos registrados en esta categoría.</div>'}</div>`);
   }

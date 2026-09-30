@@ -3645,3 +3645,35 @@ window.addEventListener('load',async function(){
 </style>
 
 <style id="gof-roster-photo-fix">.roster-mini-player img{width:82px!important;height:82px!important;display:block!important}.roster-mini-player{flex-direction:column!important;align-items:center!important;text-align:center!important;gap:6px!important}.roster-mini-player>div{text-align:center!important}.admin-player-row .ap-preview{width:100px!important;height:100px!important}</style>
+<script id="gof-publicacion-directa-final-fix">
+(function(){
+  function initPublication(){
+    try{
+      if(typeof window.gofInitPublicacionDirecta==='function'){
+        window.gofInitPublicacionDirecta();
+      }
+    }catch(e){
+      console.error('GAME ON FLAG Publicación Directa:',e);
+    }
+  }
+  const current=window.setView;
+  if(typeof current==='function' && !current.__gofPublicationFinalFix){
+    const wrapped=function(v){
+      const result=current.apply(this,arguments);
+      if(v==='publicacion'){
+        setTimeout(initPublication,0);
+        setTimeout(initPublication,250);
+      }
+      return result;
+    };
+    wrapped.__gofPublicationFinalFix=true;
+    window.setView=wrapped;
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    const view=document.getElementById('publicacion');
+    if(view && view.classList.contains('active')){
+      initPublication();
+    }
+  });
+})();
+</script>

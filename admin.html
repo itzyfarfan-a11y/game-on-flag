@@ -2899,12 +2899,9 @@ async function loadCredentialCategoriesFinal(){
  if(tm)tm.innerHTML='<option value="">Selecciona equipo</option>';
  if(pl)pl.innerHTML='<option value="">Selecciona jugador</option>';
  if(!tid){c.innerHTML='<option value="">Selecciona categoría</option>';return;}
- const {data:links,error}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);
+ const {data:cats,error}=await sb.rpc('gof_credential_categories',{p_tournament_id:tid});
  if(error){c.innerHTML='<option value="">No se pudieron cargar categorías</option>';console.error('Credenciales categorías',error);return;}
- const ids=(links||[]).map(x=>x.category_id).filter(Boolean);
- if(!ids.length){c.innerHTML='<option value="">Sin categorías en este torneo</option>';return;}
- const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',ids).order('name');
- if(ce){c.innerHTML='<option value="">No se pudieron cargar categorías</option>';console.error('Credenciales nombres categorías',ce);return;}
+ if(!(cats||[]).length){c.innerHTML='<option value="">Sin categorías en este torneo</option>';return;}
  c.innerHTML='<option value="">Selecciona categoría</option>'+(cats||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
 }
 async function loadCredentialTeamsFinal(){
@@ -2912,24 +2909,18 @@ async function loadCredentialTeamsFinal(){
  if(!e)return;
  if(pl)pl.innerHTML='<option value="">Selecciona jugador</option>';
  if(!tid||!cid){e.innerHTML='<option value="">Selecciona equipo</option>';return;}
- const {data:links,error}=await sb.from('tournament_teams').select('team_id').eq('tournament_id',tid).eq('category_id',cid).eq('is_active',true);
+ const {data:teams,error}=await sb.rpc('gof_credential_teams',{p_tournament_id:tid,p_category_id:cid});
  if(error){e.innerHTML='<option value="">No se pudieron cargar equipos</option>';console.error('Credenciales equipos',error);return;}
- const ids=(links||[]).map(x=>x.team_id).filter(Boolean);
- if(!ids.length){e.innerHTML='<option value="">Sin equipos en esta categoría</option>';return;}
- const {data:teams,error:te}=await sb.from('teams').select('id,name').in('id',ids).order('name');
- if(te){e.innerHTML='<option value="">No se pudieron cargar equipos</option>';console.error('Credenciales nombres equipos',te);return;}
+ if(!(teams||[]).length){e.innerHTML='<option value="">Sin equipos en esta categoría</option>';return;}
  e.innerHTML='<option value="">Selecciona equipo</option>'+(teams||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
 }
 async function loadCredentialPlayersFinal(){
  const tid=val('crTournament'),cid=val('crCategory'),team=val('crTeam'),e=document.getElementById('crPlayer');
  if(!e)return;
  if(!tid||!cid||!team){e.innerHTML='<option value="">Selecciona jugador</option>';return;}
- const {data:regs,error}=await sb.from('roster_registrations').select('player_id').eq('tournament_id',tid).eq('category_id',cid).eq('team_id',team).eq('status','aprobado');
+ const {data:players,error}=await sb.rpc('gof_credential_players',{p_tournament_id:tid,p_category_id:cid,p_team_id:team});
  if(error){e.innerHTML='<option value="">No se pudieron cargar jugadores</option>';console.error('Credenciales jugadores',error);return;}
- const ids=(regs||[]).map(x=>x.player_id).filter(Boolean);
- if(!ids.length){e.innerHTML='<option value="">Sin jugadores aprobados</option>';return;}
- const {data:players,error:pe}=await sb.from('players').select('id,full_name,jersey_number,photo_url').in('id',ids).order('full_name');
- if(pe){e.innerHTML='<option value="">No se pudieron cargar jugadores</option>';console.error('Credenciales datos jugador',pe);return;}
+ if(!(players||[]).length){e.innerHTML='<option value="">Sin jugadores aprobados</option>';return;}
  e.innerHTML='<option value="">Selecciona jugador</option>'+(players||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.full_name||'Jugador')}${x.jersey_number!==null&&x.jersey_number!==undefined?' · #'+esc(x.jersey_number):''}</option>`).join('');
 }
 async function saveSportweyReviewFinal(){const pid=val('swPlayer'),status=val('swStatus'),source=val('swSource').trim()||null,notes=val('swNotes').trim()||null;if(!pid)return alert('Selecciona un jugador.');await loadLeagueContextFinal();const u=(await sb.auth.getUser()).data.user;if(!gofCurrentOrganizationId||!u?.id)return alert('No hay organización activa.');const {error}=await sb.from('sportwey_review_log').insert({league_id:gofCurrentOrganizationId,player_id:pid,status,source_url:source,notes,reviewed_by:u.id,reviewed_at:new Date().toISOString()});if(error)return alert(error.message);toast('Revisión registrada');document.getElementById('swNotes').value='';await loadSportweyReviewsFinal()}
@@ -3511,14 +3502,18 @@ window.gofPubPublish=async function(key){
  if(f.size>15*1024*1024){if(st)st.textContent='La imagen no puede superar 15 MB.';return}
  if(st)st.textContent='Publicando...';
  try{
-   let session=(await sb.auth.getSession()).data?.session;
-   if(!session){const rr=await sb.auth.refreshSession();session=rr.data?.session||null;}
-   if(!session?.access_token)throw new Error('No hay una sesión activa. Regresa al menú y vuelve a entrar a GAME ON FLAG.');
-   const fd=new FormData();
-   fd.append('league_id',lid);fd.append('tournament_id',tid);fd.append('section',key);fd.append('category_id','');fd.append('title',key.toUpperCase());fd.append('file',f);
-   const r=await fetch('https://picivrqgmckrwutarhyw.supabase.co/functions/v1/direct-publication?action=publish',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,apikey:window.GOF_SUPABASE_KEY||key},body:fd});
-   const raw=await r.text();let data={};try{data=JSON.parse(raw)}catch{}
-   if(!r.ok)throw new Error(data.error||raw||'No se pudo publicar.');
+   const {data:{user},error:ue}=await sb.auth.getUser();
+   if(ue||!user)throw new Error('No hay una sesión activa. Regresa al menú principal y vuelve a entrar.');
+   const ext=f.type==='image/png'?'png':f.type==='image/webp'?'webp':'jpg';
+   const safeName=(f.name||'publicacion').replace(/[^a-zA-Z0-9._-]/g,'_');
+   const path=`${lid}/${tid}/${key}/all/${Date.now()}-${safeName}`;
+   const up=await sb.storage.from('league-publications').upload(path,f,{contentType:f.type,cacheControl:'31536000',upsert:false});
+   if(up.error)throw new Error(up.error.message||'No se pudo subir la imagen.');
+   const {data:pub}=sb.storage.from('league-publications').getPublicUrl(path);
+   const hide=await sb.from('publication_images').update({is_published:false,updated_at:new Date().toISOString()}).eq('league_id',lid).eq('tournament_id',tid).eq('section',key).eq('is_published',true).is('category_id',null);
+   if(hide.error)throw new Error(hide.error.message);
+   const ins=await sb.from('publication_images').insert({league_id:lid,tournament_id:tid,category_id:null,section:key,title:f.name,image_url:pub.publicUrl,storage_path:path,is_published:true,created_by:user.id}).select('id').single();
+   if(ins.error)throw new Error(ins.error.message);
    if(st)st.textContent='✅ Publicada correctamente en su sección del Portal Público.';
    input.value='';const pre=document.getElementById('gofPubPreview-'+key);if(pre){pre.removeAttribute('src');pre.style.display='none'}
  }catch(e){if(st)st.textContent='❌ '+(e?.message||'No se pudo publicar.')}

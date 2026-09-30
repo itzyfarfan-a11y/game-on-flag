@@ -487,9 +487,16 @@ body.home-screen{overflow:hidden!important}
 @media(max-width:650px){.roster-mini-grid{grid-template-columns:1fr 1fr}.gof-actions .gof-icon{width:34px!important;height:34px!important;font-size:16px!important}}
 </style>
 <style id="gof-final-corrections">
-.gof-league-upload.has-logo span{display:none!important}.gof-league-upload.has-logo img{opacity:1!important;display:block!important;visibility:visible!important}.gof-league-upload:not(.has-logo) img{opacity:0!important}.calendar-mode-bar{margin:4px 0 7px!important}.calendar-mode-bar button{padding:8px 12px!important;border-radius:10px!important}
+.calendar-mode-bar{margin:4px 0 7px!important}.calendar-mode-bar button{padding:8px 12px!important;border-radius:10px!important}
 
 .view{padding-top:0!important}.view>h2{margin:4px 0 12px!important;line-height:1.05!important}.back-menu{margin-top:0!important;margin-bottom:8px!important}.view>.card:first-of-type{margin-top:8px!important}main{padding-top:8px!important}.gof-final-header .gof-actions{gap:6px!important}.gof-final-header .gof-icon{width:38px!important;height:38px!important}.gof-final-header .gof-badge{display:none!important}.admin-player-row{padding:10px!important;margin-bottom:8px!important}.admin-player-row .form{gap:7px!important}.admin-player-row .ap-preview{width:64px!important;height:64px!important}#elist{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}#elist>.card{margin:0!important;padding:10px!important}#elist>.card .row{gap:7px!important}#elist>.card .tag{font-size:10px!important;padding:4px 6px!important}#elist>.card .toolbar button{padding:7px 8px!important;font-size:11px!important}@media(max-width:650px){main{padding:7px 10px 24px!important}.view>h2{font-size:28px!important;margin:3px 0 9px!important}.back-menu{font-size:14px!important;padding:7px 11px!important}.view>.notice{margin:8px 0!important}.view>.card{padding:12px!important;margin:9px 0!important}.gof-final-header .gof-icon{width:34px!important;height:34px!important;font-size:16px!important}.gof-final-header .gof-actions{gap:4px!important}.admin-player-row .form{grid-template-columns:1fr 90px!important}.admin-player-row .ap-photo,.admin-player-row .ap-curp{grid-column:1/-1!important}}
+
+/* GAME ON FLAG — roster edit/view corrections */
+.gof-edit-player-photo{width:72px;height:72px;object-fit:cover;border-radius:14px;border:1px solid var(--line);flex:0 0 72px}
+.gof-edit-player-card .toolbar button{min-width:54px;min-height:50px;font-size:22px}
+.gof-view-roster-photo{width:92px!important;height:92px!important;object-fit:cover;border-radius:16px!important;flex:0 0 92px!important}
+.roster-mini-player.gof-roster-big-player{min-height:112px;padding:12px!important;gap:12px!important}
+@media(max-width:700px){.gof-edit-player-photo{width:78px;height:78px;flex-basis:78px}.gof-view-roster-photo{width:104px!important;height:104px!important;flex-basis:104px!important}.roster-mini-player.gof-roster-big-player{min-height:124px}}
 </style>
 <style id="gof-linear-workflow-styles">
 .gof-home-context{margin-top:14px!important}
@@ -853,7 +860,7 @@ window.gofPubPublish=async function(key){const input=$('gofPubFile-'+key),f=inpu
 $('gofPubLeague')?.addEventListener('change',changeLeague);window.gofInitPublicacionDirecta=function(){render();bootstrap()};const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?oldSetView.apply(this,arguments):undefined;if(v==='publicacion')setTimeout(()=>gofInitPublicacionDirecta(),50);return r};render();})();
 </script>
 <section class="view" id="organizaciones"><div id="gofOwnerLeaguePanel" data-gof-admin-version="2026-09-26-owner-controls-v4" class="card" style="display:none"><h2>🏟️ Ligas activas de GAME ON FLAG</h2><p class="mut small">Administradora principal: crea, administra, consulta códigos y elimina tus ligas.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0"><button class="primary" style="width:100%;font-size:18px;padding:14px" type="button" onclick="gofOpenCreateLeaguePanel()">➕ CREAR LIGA NUEVA</button></div><div id="gofCreateLeagueInline" style="display:none;margin:12px 0;padding:14px;border:1px solid #6d28d9;border-radius:14px"><h3 style="margin:0 0 8px">➕ Crear liga para otro administrador</h3><p class="mut small">Escribe el nombre. Al crearla se generará automáticamente su código de acceso.</p><div class="form"><input id="gofMasterCreateName" placeholder="Nombre de la nueva liga"><input id="gofMasterCreateSlug" placeholder="Identificador (opcional)"><input id="gofMasterCreateColor" type="text" value="#6d28d9" placeholder="Color principal"><button class="gold" type="button" onclick="gofCreateLeagueFromDashboard()">CREAR Y GENERAR CÓDIGO</button></div></div><div id="gofOwnerCreateFallback" style="margin-top:10px"></div><div id="gofOwnerActiveList" style="margin-top:10px">Cargando ligas...</div></div><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏟️ Organizaciones</h2><div class="card gof-organization-manager"><h3>➕ Crear una organización independiente</h3><div class="form"><input id="newLeagueName" placeholder="Nombre de la organización"/><input id="newLeagueSlug" placeholder="Identificador (opcional)"/><input id="newLeagueColor" type="text" value="#6d28d9" placeholder="Color principal"/><button class="primary" type="button" onclick="createLeagueFinal()">Crear liga</button></div><p class="mut small">Cada liga tiene sus propios torneos, equipos, categorías, rosters, calendario y resultados.</p></div><div class="card"><h3>🔑 Acceso para otro administrador</h3><div class="form"><select id="leagueCodeLeague"><option value="">Selecciona una liga</option></select><button class="gold" type="button" onclick="generateLeagueCodeFinal()">Generar código</button><input id="redeemLeagueCode" placeholder="Código recibido de otra liga"/><button class="secondary" type="button" onclick="redeemLeagueCodeFinal()">Entrar con código</button></div><div id="leagueCodesList" class="league-code-list"></div></div><div class="card"><div class="row"><div><h3 style="margin:0">Mis Organizaciones propias</h3><p class="mut small" style="margin:5px 0 0">Solo puedes eliminar definitivamente las organizaciones/torneos creados por tu cuenta.</p></div><button type="button" onclick="loadMisLigas()">🔄 Actualizar</button></div><div class="grid" id="ownLeagues" style="margin-top:10px"></div></div><div class="card"><h3>🔑 Organizaciones de otros administradores</h3><p class="mut">Los accesos por código se reservan para ligas externas que utilicen Game On Flag Application. Desactivar un código nunca elimina la información de la organización.</p><div class="empty" id="externalLeagues">La gestión de códigos se mostrará aquí cuando se conecte el módulo de accesos externos.</div></div></section>
-<section class="view" id="torneos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏆 Torneos</h2><div class="workflow-kicker" style="margin-top:6px">PASO 1 DE 7 · TORNEOS</div><div class="card"><div class="form"><input id="tn" placeholder="Nombre del torneo"/><input id="tseason" placeholder="Temporada (ej. 2026)"/><input id="ts" type="date"/><select id="ttype"><option selected="" value="regular">🏆 Torneo regular · 7 juegos</option><option value="relampago">⚡ Torneo relámpago · 3 juegos</option></select><button class="primary" onclick="createTournament()">+ Crear torneo</button></div><details class="gof-info-accordion"><summary>ℹ️ ¿Cómo funciona el torneo?</summary><div class="notice"><b>Torneo regular:</b> 7 jornadas de fase regular por equipo.<br/><b>Torneo relámpago:</b> 3 partidos obligatorios de fase inicial por equipo.<br/><br/>Los playoffs se configuran manualmente por categoría: <b>Cuartos de final → Semifinal → Final</b> o <b>Semifinal → Final</b>.<br/><br/>Al activar el torneo, el roster de coaches permanece abierto. El cierre se realiza únicamente desde <b>🔒 CERRAR ROSTER DE COACHES</b>. Administración siempre conserva el control.</div></details></div><div id="tlist"></div><div class="gof-step-nav gof-step-1"><button type="button" onclick="setView('inicio')">← Menú principal</button><div class="step-current">Paso 1 de 7</div><button class="primary" type="button" onclick="openEnrollmentStep()">Siguiente: Inscribir equipos →</button></div></section>
+<section class="view" id="torneos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏆 Torneos</h2><div class="workflow-kicker" style="margin-top:6px">PASO 1 DE 7 · TORNEOS</div><div class="card"><div class="form"><input id="tn" placeholder="Nombre del torneo"/><input id="tseason" placeholder="Temporada (ej. 2026)"/><input id="ts" type="date"/><select id="ttype"><option selected="" value="regular">🏆 Torneo regular · 7 juegos</option><option value="relampago">⚡ Torneo relámpago · 3 juegos</option></select><button class="primary" onclick="createTournament()">+ Crear torneo</button></div><details class="gof-info-accordion"><summary>ℹ️ ¿Cómo funciona el torneo?</summary><div class="notice"><b>Torneo regular:</b> 7 jornadas de fase regular por equipo.<br/><b>Torneo relámpago:</b> 3 partidos obligatorios de fase inicial por equipo.<br/><br/>Los playoffs se configuran manualmente por categoría: <b>Cuartos de final → Semifinal → Final</b> o <b>Semifinal → Final</b>.<br/><br/>Al activar el torneo, los enlaces de roster de los coaches dejan de permitir cambios. Administración sí puede editar el roster desde <b>Rosters</b>.</div></details></div><div id="tlist"></div><div class="gof-step-nav gof-step-1"><button type="button" onclick="setView('inicio')">← Menú principal</button><div class="step-current">Paso 1 de 7</div><button class="primary" type="button" onclick="openEnrollmentStep()">Siguiente: Inscribir equipos →</button></div></section>
 <section class="view" id="inscripciones">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
 <h2>📝 Inscribir equipos en categorías</h2>
@@ -890,6 +897,27 @@ $('gofPubLeague')?.addEventListener('change',changeLeague);window.gofInitPublica
   <button type="button" class="gof-roster-menu-btn" onclick="gofRosterPanel('edit')"><span>✏️</span><span><b>Agregar / editar jugador</b><small>Consulta jugadores y edita uno existente</small></span><span class="gof-roster-chevron">›</span></button>
   <div id="gofRosterPanel-edit" class="gof-roster-panel">
     <div class="form"><select id="qrt"></select><select id="qrc"></select><select id="qre"></select></div>
+    <div class="card gof-quick-add-card" style="margin-top:10px">
+      <div class="row"><div><b>Administración del jugador</b><div id="quickRosterFormTitle" class="mut small">Selecciona «Agregar jugador» o el lápiz de un jugador existente.</div></div><button type="button" class="gold" onclick="toggleQuickPlayerForm()">➕ AGREGAR JUGADOR</button></div>
+      <div id="quickRosterForm" style="display:none;margin-top:12px">
+        <div class="form">
+          <label class="field-label">Nombre completo<input id="qrName" placeholder="Nombre completo"></label>
+          <label class="field-label">Número de jersey<input id="qrNumber" type="number" min="0" max="99" placeholder="#"></label>
+          <label class="field-label">Fecha de nacimiento<input id="qrDob" type="date"></label>
+          <label class="field-label">CURP<input id="qrCurp" placeholder="CURP (cuando corresponda)"></label>
+          <label class="field-label">Foto / URL<input id="qrPhoto" placeholder="URL o fotografía del jugador"></label>
+          <label class="field-label">📷 Seleccionar foto<input id="qrPhotoFile" type="file" accept="image/*" onchange="readQuickPhoto(this)"></label>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:9px">
+          <img id="qrPhotoPreview" alt="Vista previa" style="display:none;width:92px;height:92px;object-fit:cover;border-radius:14px;border:1px solid var(--line)">
+          <div class="toolbar">
+            <button type="button" class="gold" onclick="saveQuickPlayer()">💾 GUARDAR JUGADOR</button>
+            <button type="button" onclick="clearQuickPlayerForm();document.getElementById('quickRosterForm').style.display='none'">✕ Cancelar</button>
+          </div>
+        </div>
+        <div id="quickRosterLateFeeNotice" class="notice" style="display:none;margin-top:10px">💰 <b>Alta posterior al cierre:</b> este jugador genera un cargo de <b>$50</b> en Contabilidad.</div>
+      </div>
+    </div>
     <div id="quickRosterList" class="grid" style="margin-top:10px"></div>
   </div>
 
@@ -1408,7 +1436,7 @@ async function publishNotice(id){if(!confirm('¿Publicar este aviso en el Portal
 async function unpublishNotice(id){if(!confirm('¿Quitar este aviso del Portal Público y dejarlo como borrador?'))return;const {error}=await sb.from('nffl_notices').update({status:'borrador',published_at:null,updated_at:new Date().toISOString()}).eq('id',id);if(error)return alert(error.message);toast('Aviso retirado del Portal Público');await loadNotices()}
 async function deleteNotice(id){if(!confirm('¿Borrar este aviso definitivamente?'))return;const {error}=await sb.from('nffl_notices').delete().eq('id',id);if(error)return alert(error.message);toast('Aviso borrado');if(editingNoticeId===id)clearNoticeForm();await loadNotices()}
 async function loadT(){await loadLeagueContextFinal();if(!gofCurrentOrganizationId){document.getElementById('tlist').innerHTML='<div class="empty">Selecciona una organización para ver sus torneos.</div>';return;}const {data,error}=await sb.from('tournaments').select('*').eq('league_id',gofCurrentOrganizationId);if(error)return alert(error.message);const ordered=(data||[]).sort((a,b)=>{const af=a.status==='finalizado'?1:0,bf=b.status==='finalizado'?1:0;return af-bf||new Date(b.created_at)-new Date(a.created_at)});document.getElementById('tlist').innerHTML=ordered.map(t=>{const st=t.status==='proximo'?'Preparación':t.status==='activo'?'Activo':'Finalizado';return `<div class="card"><div class="row"><b>${esc(t.name)}</b><span class="tag">${st}</span></div><div class="mut small">${t.season?`Temporada ${esc(t.season)} · `:''}Inicio: ${t.start_date||'sin fecha'} · ${t.tournament_type==='relampago'?'⚡ Relámpago · 3 juegos asegurados':'🏆 Regular · 7 juegos regulares'}</div><div class="toolbar" style="margin-top:9px">${t.status==='proximo'?`<button class="primary" onclick="activateTournament('${t.id}')">▶ Activar torneo</button>`:''}${t.status!=='finalizado'?`<button class="danger" onclick="finishTournament('${t.id}')">✓ Finalizar</button>`:''}${t.status!=='activo'?`<button class="danger" onclick="deleteTournament('${t.id}','${esc(t.name)}')">🗑️ Eliminar torneo</button>`:''}</div></div>`}).join('')||'<div class="empty">Sin torneos.</div>';await loadEnrollmentSelectors();await loadReplacementSelectors();await loadDeactivateSelectors()}
-async function activateTournament(id){const {data:t,error:te}=await sb.from('tournaments').select('name,tournament_type,regular_rounds').eq('id',id).single();if(te)return alert(te.message);const label=t?.tournament_type==='relampago'?'⚡ Torneo relámpago · 3 juegos regulares por equipo':'🏆 Torneo regular · 7 juegos regulares por equipo';if(!confirm(`¿Activar ${t?.name||'torneo'}?\n\n${label}\n\n⚠️ Activar el torneo NO cerrará el roster de coaches.\nEl roster permanecerá abierto hasta que presiones manualmente “🔒 CERRAR ROSTER DE COACHES”.`))return;const {error}=await sb.from('tournaments').update({status:'activo'}).eq('id',id);if(error)alert(error.message);else{toast('Torneo activado. El roster de coaches permanece abierto.');await loadT();await loadRosterSelects();}}
+async function activateTournament(id){const {data:t,error:te}=await sb.from('tournaments').select('name,tournament_type,regular_rounds').eq('id',id).single();if(te)return alert(te.message);const label=t?.tournament_type==='relampago'?'⚡ Torneo relámpago · 3 juegos regulares por equipo':'🏆 Torneo regular · 7 juegos regulares por equipo';if(!confirm(`¿Activar ${t?.name||'torneo'}?\n\n${label}\n\nLos enlaces de roster quedarán cerrados.`))return;const {error}=await sb.from('tournaments').update({status:'activo'}).eq('id',id);if(error)alert(error.message);else{toast('Torneo activado. Rosters cerrados.');loadT();}}
 async function finishTournament(id){if(!confirm('¿Marcar torneo como finalizado?'))return;const {error}=await sb.from('tournaments').update({status:'finalizado'}).eq('id',id);if(error)alert(error.message);else{toast('Torneo finalizado');loadT()}}
 async function deleteTournament(id,name){
   const u=(await sb.auth.getUser()).data.user; if(!u)return alert('Sesión no disponible.');
@@ -1676,12 +1704,100 @@ let quickRosterContext={tid:'',cat:'',team:'',editing:null};
 async function loadQuickRosterSelectors(){const {data:t}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});fill('qrt',t,'id','name');await updateQuickRosterCats();await loadViewRosterSelectors()}
 async function updateQuickRosterCats(){const tid=val('qrt'),catEl=document.getElementById('qrc'),teamEl=document.getElementById('qre');if(!tid){catEl.innerHTML='<option value="">Selecciona categoría</option>';teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:tc,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);if(error)return alert(error.message);const cats=(tc||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'}));fill('qrc',cats,'id','name');if(cats.length)catEl.value=cats[0].id;await updateQuickRosterTeams()}
 async function updateQuickRosterTeams(){const tid=val('qrt'),cat=val('qrc'),teamEl=document.getElementById('qre');if(!tid||!cat){teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:ins,error}=await sb.from('tournament_teams').select('team_id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(error)return alert(error.message);const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);const {data:teams,error:te}=ids.length?await sb.from('teams').select('id,name').in('id',ids).order('name'):{data:[],error:null};if(te)return alert(te.message);fill('qre',teams||[],'id','name');if(teams?.length)teamEl.value=teams[0].id;await loadQuickRoster()}
-async function fetchQuickRoster(){const tid=val('qrt'),cat=val('qrc'),team=val('qre');if(!tid||!cat||!team)return [];const {data,error}=await sb.from('roster_registrations').select('player_id,status,players(id,full_name,photo_url,jersey_number,curp,date_of_birth)').eq('tournament_id',tid).eq('category_id',cat).eq('team_id',team).order('created_at');if(error){alert(error.message);return []}return (data||[]).map(r=>({player_id:r.player_id,status:r.status,full_name:r.players?.full_name||'',photo_url:r.players?.photo_url||'',jersey_number:r.players?.jersey_number??'',curp:r.players?.curp||'',date_of_birth:r.players?.date_of_birth||''}))}
-async function loadQuickRoster(){quickRosterContext={tid:val('qrt'),cat:val('qrc'),team:val('qre'),editing:null};clearQuickPlayerForm();const rows=await fetchQuickRoster();const out=document.getElementById('quickRosterList');if(!out)return;out.innerHTML=rows.map(p=>`<div class="card quick-player-card"><div class="row"><div style="display:flex;align-items:center;gap:9px"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt="" style="width:46px;height:46px;object-fit:cover;border-radius:9px;border:1px solid var(--line)"><div><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')} · ${esc(p.status||'aprobado')}</div></div></div><button type="button" onclick='editQuickPlayer(${JSON.stringify(p).replace(/</g,'\\u003c')})'>✏️</button></div></div>`).join('')||'<div class="empty">Este equipo todavía no tiene jugadores registrados.</div>'}
-function clearQuickPlayerForm(){quickRosterContext.editing=null;['qrName','qrNumber','qrDob','qrCurp','qrPhoto'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const f=document.getElementById('qrPhotoFile');if(f)f.value='';const pr=document.getElementById('qrPhotoPreview');if(pr){pr.src='';pr.style.display='none'}const t=document.getElementById('quickRosterFormTitle');if(t)t.textContent='Jugador nuevo'}
-function editQuickPlayer(p){quickRosterContext.editing=p.player_id;document.getElementById('qrName').value=p.full_name||'';document.getElementById('qrNumber').value=p.jersey_number??'';document.getElementById('qrDob').value=p.date_of_birth||'';document.getElementById('qrCurp').value=p.curp||'';document.getElementById('qrPhoto').value=p.photo_url||'';const pr=document.getElementById('qrPhotoPreview');if(pr&&p.photo_url){pr.src=p.photo_url;pr.style.display='block'}document.getElementById('quickRosterFormTitle').textContent='✏️ Editando jugador';window.scrollTo({top:document.getElementById('rosters').offsetTop||0,behavior:'smooth'})}
+async function fetchQuickRoster(){
+  const tid=val('qrt'),cat=val('qrc'),team=val('qre');
+  if(!tid||!cat||!team)return [];
+  const {data,error}=await sb.from('roster_registrations').select('id,player_id,status,players(id,full_name,photo_url,jersey_number,curp,date_of_birth)').eq('tournament_id',tid).eq('category_id',cat).eq('team_id',team).order('created_at');
+  if(error){alert(error.message);return []}
+  return (data||[]).map(r=>({roster_id:r.id,player_id:r.player_id,status:r.status,full_name:r.players?.full_name||'',photo_url:r.players?.photo_url||'',jersey_number:r.players?.jersey_number??'',curp:r.players?.curp||'',date_of_birth:r.players?.date_of_birth||''}));
+}
+function toggleQuickPlayerForm(force){
+  const form=document.getElementById('quickRosterForm'); if(!form)return;
+  const open=force===undefined?!(form.style.display!=='none'):!!force;
+  form.style.display=open?'block':'none';
+  if(!open)clearQuickPlayerForm();
+  updateQuickRosterLateFeeNotice();
+  if(open)form.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+async function updateQuickRosterLateFeeNotice(){
+  const el=document.getElementById('quickRosterLateFeeNotice'); if(!el)return;
+  const tid=val('qrt');
+  if(!tid){el.style.display='none';return}
+  const {data}=await sb.from('tournament_roster_closures').select('closed_at').eq('tournament_id',tid).maybeSingle();
+  el.style.display=data?.closed_at&&!quickRosterContext.editing?'block':'none';
+}
+async function loadQuickRoster(){
+  quickRosterContext={tid:val('qrt'),cat:val('qrc'),team:val('qre'),editing:null};
+  clearQuickPlayerForm();
+  const form=document.getElementById('quickRosterForm'); if(form)form.style.display='none';
+  const rows=await fetchQuickRoster();
+  const out=document.getElementById('quickRosterList'); if(!out)return;
+  out.innerHTML=rows.map(p=>`<div class="card quick-player-card gof-edit-player-card"><div class="row"><div style="display:flex;align-items:center;gap:12px;min-width:0"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt="" class="gof-edit-player-photo"><div style="min-width:0"><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')} · ${esc(p.status||'pendiente')}</div></div></div><div class="toolbar"><button type="button" title="Editar jugador" onclick='editQuickPlayer(${JSON.stringify(p).replace(/</g,'\u003c')})'>✏️</button><button type="button" class="danger" title="Quitar jugador" onclick='deleteQuickPlayer(${JSON.stringify(p.roster_id||'')},${JSON.stringify(p.full_name||'este jugador')})'>🗑️</button></div></div></div>`).join('')||'<div class="empty">Este equipo todavía no tiene jugadores registrados. Pulsa «➕ AGREGAR JUGADOR» para crear el primero.</div>';
+  await updateQuickRosterLateFeeNotice();
+}
+function clearQuickPlayerForm(){
+  quickRosterContext.editing=null;
+  ['qrName','qrNumber','qrDob','qrCurp','qrPhoto'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  const f=document.getElementById('qrPhotoFile');if(f)f.value='';
+  const pr=document.getElementById('qrPhotoPreview');if(pr){pr.src='';pr.style.display='none'}
+  const t=document.getElementById('quickRosterFormTitle');if(t)t.textContent='Selecciona «Agregar jugador» o el lápiz de un jugador existente.';
+}
+function editQuickPlayer(p){
+  quickRosterContext.editing=p.player_id;
+  document.getElementById('qrName').value=p.full_name||'';
+  document.getElementById('qrNumber').value=p.jersey_number??'';
+  document.getElementById('qrDob').value=p.date_of_birth||'';
+  document.getElementById('qrCurp').value=p.curp||'';
+  document.getElementById('qrPhoto').value=p.photo_url||'';
+  const pr=document.getElementById('qrPhotoPreview');if(pr&&p.photo_url){pr.src=p.photo_url;pr.style.display='block'}
+  document.getElementById('quickRosterFormTitle').textContent='✏️ Editando jugador';
+  const form=document.getElementById('quickRosterForm');if(form)form.style.display='block';
+  updateQuickRosterLateFeeNotice();
+  form?.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+async function deleteQuickPlayer(rosterId,name){
+  if(!rosterId)return alert('Registro de roster inválido.');
+  if(!confirm(`¿Quitar a ${name} del roster?\n\nEsta acción eliminará su registro de este roster. Si el jugador no pertenece a otro roster, también se eliminará su ficha.`))return;
+  const {data,error}=await sb.rpc('admin_remove_roster_player',{p_roster_id:rosterId});
+  if(error)return alert(error.message);
+  if(!data?.ok)return alert('No se confirmó que el jugador haya sido quitado.');
+  toast('🗑️ Jugador quitado del roster');
+  await loadQuickRoster();
+}
 function readQuickPhoto(input){const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=900,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const data=c.toDataURL('image/jpeg',.78);document.getElementById('qrPhoto').value=data;const pr=document.getElementById('qrPhotoPreview');pr.src=data;pr.style.display='block'};img.src=reader.result};reader.readAsDataURL(file)}
-async function saveQuickPlayer(){const tid=val('qrt'),cat=val('qrc'),team=val('qre');if(!tid||!cat||!team)return alert('Selecciona torneo, categoría y equipo.');const name=val('qrName').trim(),num=val('qrNumber').trim(),dob=val('qrDob'),photo=val('qrPhoto').trim(),curp=val('qrCurp').trim();if(!name||!num||!photo)return alert('Nombre, número y foto son obligatorios.');const rows=await fetchQuickRoster();const idx=quickRosterContext.editing?rows.findIndex(x=>x.player_id===quickRosterContext.editing):-1;const item={player_id:quickRosterContext.editing||null,full_name:name,photo_url:photo,jersey_number:num,curp,date_of_birth:dob};if(idx>=0)rows[idx]=item;else rows.push(item);if(rows.length>18)return alert('El roster no puede tener más de 18 jugadores.');if(rows.some((x,i)=>rows.findIndex(y=>String(y.jersey_number)===String(x.jersey_number))!==i))return alert('No puede haber números de jersey duplicados.');const {data,error}=await sb.rpc('admin_save_roster',{p_tournament_id:tid,p_category_id:cat,p_team_id:team,p_players:rows});if(error)return alert(error.message);toast(quickRosterContext.editing?'Jugador actualizado correctamente':'Jugador guardado correctamente');clearQuickPlayerForm();await loadQuickRoster()}
+async function saveQuickPlayer(){
+  const tid=val('qrt'),cat=val('qrc'),team=val('qre');
+  if(!tid||!cat||!team)return alert('Selecciona torneo, categoría y equipo.');
+  const name=val('qrName').trim(),num=val('qrNumber').trim(),dob=val('qrDob'),photo=val('qrPhoto').trim(),curp=val('qrCurp').trim();
+  if(!name||!num||!photo)return alert('Nombre, número y foto son obligatorios.');
+  const rows=await fetchQuickRoster();
+  const beforeIds=new Set(rows.map(x=>x.player_id).filter(Boolean));
+  const idx=quickRosterContext.editing?rows.findIndex(x=>x.player_id===quickRosterContext.editing):-1;
+  const item={player_id:quickRosterContext.editing||null,full_name:name,photo_url:photo,jersey_number:num,curp,date_of_birth:dob};
+  if(idx>=0)rows[idx]=item;else rows.push(item);
+  if(rows.length>18)return alert('El roster no puede tener más de 18 jugadores.');
+  if(rows.some((x,i)=>rows.findIndex(y=>String(y.jersey_number)===String(x.jersey_number))!==i))return alert('No puede haber números de jersey duplicados.');
+  const {data,error}=await sb.rpc('admin_save_roster',{p_tournament_id:tid,p_category_id:cat,p_team_id:team,p_players:rows.map(x=>({player_id:x.player_id||null,full_name:x.full_name,photo_url:x.photo_url,jersey_number:x.jersey_number,curp:x.curp,date_of_birth:x.date_of_birth}))});
+  if(error)return alert(error.message);
+  if(!quickRosterContext.editing){
+    const {data:closure}=await sb.from('tournament_roster_closures').select('closed_at').eq('tournament_id',tid).maybeSingle();
+    if(closure?.closed_at){
+      const {data:after}=await sb.from('roster_registrations').select('player_id,players(full_name)').eq('tournament_id',tid).eq('category_id',cat).eq('team_id',team);
+      const newPlayers=(after||[]).filter(x=>x.player_id&&!beforeIds.has(x.player_id));
+      if(newPlayers.length){
+        const {data:tt}=await sb.from('tournament_teams').select('id').eq('tournament_id',tid).eq('team_id',team).single();
+        if(tt){for(const np of newPlayers){
+          const {data:existingCharge}=await sb.from('finance_charges').select('id').eq('tournament_id',tid).eq('tournament_team_id',tt.id).eq('description',`Alta de jugador después del cierre de roster · ${np.players?.full_name||'Jugador'}`).maybeSingle();
+          if(!existingCharge){const {error:fe}=await sb.from('finance_charges').insert({tournament_id:tid,tournament_team_id:tt.id,concept_type:'regular',round_number:null,playoff_stage:null,description:`Alta de jugador después del cierre de roster · ${np.players?.full_name||'Jugador'}`,amount_due:50});if(fe)console.warn('No se pudo registrar cargo de alta tardía',fe.message)}}}
+      }
+    }
+  }
+  toast(quickRosterContext.editing?'✏️ Jugador actualizado correctamente':'✅ Jugador agregado correctamente'+(await isQuickRosterClosed(tid)?' · cargo de $50 registrado':'') );
+  clearQuickPlayerForm();
+  const form=document.getElementById('quickRosterForm');if(form)form.style.display='none';
+  await loadQuickRoster();
+}
+async function isQuickRosterClosed(tid){const {data}=await sb.from('tournament_roster_closures').select('closed_at').eq('tournament_id',tid).maybeSingle();return !!data?.closed_at}
 async function loadViewRosterSelectors(){
   const sel=document.getElementById('vrt'); if(!sel)return;
   const {data:t,error}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});
@@ -1729,7 +1845,7 @@ async function loadViewRosters(){
       const {data:players,error:pe}=await sb.from('roster_registrations').select('id,status,players(full_name,photo_url,jersey_number,date_of_birth)').eq('tournament_id',tid).eq('category_id',r.category_id).eq('team_id',r.team_id).order('created_at');
       if(pe)return alert(pe.message);
       const ps=(players||[]).filter(x=>x.players).map(x=>({...x.players,status:x.status,roster_id:x.id}));
-      teamCards.push(`<details class="card roster-view-card"><summary><div class="row"><b>${esc(teamMap[r.team_id]||'Equipo')}</b><span class="tag">${ps.length}/18 jugadores</span></div></summary><div style="margin-top:9px">${ps.length?`<div class="roster-mini-grid">${ps.map(p=>`<div class="roster-mini-player gof-roster-big-player"><img src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div style="min-width:0;flex:1"><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')}${p.date_of_birth?' · '+esc(p.date_of_birth):''} · ${esc(p.status||'pendiente')}</div></div><div class="toolbar" style="margin-left:auto"><button type="button" title="Editar" onclick="openAdminRosterEditor('${tid}','${r.category_id}','${r.team_id}')">✏️</button><button type="button" class="danger" title="Dar de baja" onclick='removeRosterPlayer(${JSON.stringify(p.roster_id||'')},${JSON.stringify(p.full_name||'este jugador')},${JSON.stringify(tid)},${JSON.stringify(r.category_id)},${JSON.stringify(r.team_id)})'>🗑️</button></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div></details>`);
+      teamCards.push(`<details class="card roster-view-card"><summary><div class="row"><b>${esc(teamMap[r.team_id]||'Equipo')}</b><span class="tag">${ps.length}/18 jugadores</span></div></summary><div style="margin-top:12px">${ps.length?`<div class="roster-mini-grid">${ps.map(p=>`<div class="roster-mini-player gof-roster-big-player"><img class="gof-view-roster-photo" src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div style="min-width:0;flex:1"><b>${esc(p.full_name)}</b><div class="mut small">#${esc(p.jersey_number??'')}${p.date_of_birth?' · '+esc(p.date_of_birth):''} · ${esc(p.status||'pendiente')}</div></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div></details>`);
     }
     cards.push(`<div style="margin-bottom:14px"><div class="section-title" style="margin-bottom:8px"><b>${esc(cat.name)}</b><span class="tag">${teamCards.length} equipo${teamCards.length===1?'':'s'}</span></div>${teamCards.length?teamCards.join(''):'<div class="empty">No hay equipos activos registrados en esta categoría.</div>'}</div>`);
   }
@@ -1745,7 +1861,7 @@ async function generateLink(){
   base.search='';
   base.hash='';
   const link=base.href+'?token='+encodeURIComponent(token);
-  document.getElementById('linkStatus').textContent='Enlace activo mientras el roster permanezca abierto. El código es único para este equipo y categoría.';
+  document.getElementById('linkStatus').textContent='Enlace activo mientras el torneo esté en Próximo. El código es único para este equipo y categoría.';
   document.getElementById('linkOut').innerHTML=
     `<div class="gof-access-code"><b>🔐 CÓDIGO DE ACCESO DEL COACH</b><code>${esc(token)}</code><button type="button" class="gold" onclick="copyCoachCode()">📋 COPIAR CÓDIGO</button></div>
      <input id="linkField" value="${esc(link)}" readonly style="margin-top:8px" onclick="this.select()">

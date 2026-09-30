@@ -826,7 +826,16 @@ main{height:auto!important;min-height:calc(100dvh - 96px)!important;overflow:vis
 .gof-forfeit-dot{display:inline-block;width:8px;height:8px;background:#e53935;border-radius:50%;margin-right:6px;vertical-align:middle;box-shadow:0 0 0 2px rgba(229,57,53,.15)}
 .gof-optional-note{font-size:10px;color:#aaa4b7;margin-top:3px}.gof-required-note{color:#ff6378;font-weight:800}.gof-export-brand{font-size:13px;font-weight:900;letter-spacing:1px}
 .gof-board-actions,.gof-standings-actions{margin-top:10px}.gof-standings-actions{display:flex;gap:8px;flex-wrap:wrap}
-</style></head><body><div class="app"><header class="top gof-top gof-final-header">
+</style></head><body><script id="gof-supabase-init">
+const SUPABASE_URL='https://picivrqgmckrwutarhyw.supabase.co';
+let sb=null;
+const key='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl';
+function makeClient(){
+  if(!window.supabase||!window.supabase.createClient) throw new Error('No se pudo cargar el sistema de acceso.');
+  return window.supabase.createClient(SUPABASE_URL,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
+}
+try{sb=makeClient()}catch(e){console.error(e)}
+</script><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
 <div class="gof-center-brand"><div class="gof-title">GAME ON FLAG</div><div class="gof-subtitle">CENTRO DE ADMINISTRACIÓN</div></div>
 <div class="gof-actions"><button class="gof-icon" onclick="openPublicPortal()" title="Portal Público" type="button">🌐</button><button class="gof-icon gof-header-gear" onclick="setView('configuracion')" title="Configuración" type="button">⚙️</button><button class="gof-icon" onclick="openAdminProfile()" title="Perfil de administradora" type="button">👤</button></div>

@@ -871,45 +871,43 @@ main{height:auto!important;min-height:calc(100dvh - 96px)!important;overflow:vis
 (function(){
 const GOF_DIRECT_PUBLICATION_URL='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/direct-publication';
 const sections=[['calendario','📅 CALENDARIO','Se publicará en Calendario del Portal Público.'],['enfrentamientos','⚔️ ENFRENTAMIENTOS','Se publicará en Enfrentamientos del Portal Público.'],['resultados','🏈 RESULTADOS','Se publicará en Resultados del Portal Público.'],['tablas','📊 TABLA GENERAL','Se publicará en Tabla General del Portal Público.']];
-const st={token:''};const $=id=>document.getElementById(id);
+const $=id=>document.getElementById(id);
 function escPub(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-async function getToken(){
- if(st.token)return st.token;
+function fillSelect(el,items,placeholder,formatter){if(!el)return;el.innerHTML='<option value="">'+placeholder+'</option>'+(items||[]).map(formatter).join('');el.disabled=false;el.style.pointerEvents='auto';el.removeAttribute('disabled')}
+async function ensureSession(){
  if(!window.sb)throw new Error('No se pudo conectar con la sesión de administración.');
  let session=(await sb.auth.getSession()).data?.session||null;
  if(!session){try{session=(await sb.auth.refreshSession()).data?.session||null}catch(_){} }
- if(!session){try{const a=await sb.auth.signInAnonymously();if(!a.error)session=a.data?.session||null}catch(_){} }
- st.token=session?.access_token||'';
- if(!st.token)throw new Error('Sesión no válida. Regresa al menú principal y vuelve a entrar a tu liga.');
- return st.token;
+ if(!session)throw new Error('Sesión de administración no válida. Regresa al menú principal y vuelve a entrar a tu liga.');
+ return session;
 }
-async function api(path,options={}){if(!window.sb)throw new Error('No se pudo conectar con la sesión de administración.');let session=(await sb.auth.getSession()).data?.session||null;if(!session){try{session=(await sb.auth.refreshSession()).data?.session||null}catch(_){} }if(!session)throw new Error('Sesión de administración no válida. Regresa al menú principal y vuelve a entrar a tu liga.');const send=async(s)=>{const headers=new Headers(options.headers||{});headers.set('Authorization','Bearer '+s.access_token);const r=await fetch(GOF_DIRECT_PUBLICATION_URL+path,{...options,headers});const txt=await r.text();let data;try{data=JSON.parse(txt)}catch{data={error:txt}}return {r,data}};let out=await send(session);if(out.r.status===401){try{const rr=await sb.auth.refreshSession();const fresh=rr.data?.session;if(fresh)out=await send(fresh)}catch(_){} }if(!out.r.ok)throw new Error(out.data?.error||out.data?.message||'Error de conexión con Publicación Directa.');return out.data}
+async function api(path,options={}){
+ let session=await ensureSession();
+ const send=async s=>{const h=new Headers(options.headers||{});h.set('Authorization','Bearer '+s.access_token);const r=await fetch(GOF_DIRECT_PUBLICATION_URL+path,{...options,headers:h});const txt=await r.text();let data;try{data=JSON.parse(txt)}catch{data={error:txt}}return {r,data}};
+ let out=await send(session);
+ if(out.r.status===401){try{const rr=await sb.auth.refreshSession();if(rr.data?.session)out=await send(rr.data.session)}catch(_){} }
+ if(!out.r.ok)throw new Error(out.data?.error||out.data?.message||'Error de conexión con Publicación Directa.');
+ return out.data;
+}
 function status(key,msg,type=''){const e=$('gofPubStatus-'+key);if(e){e.textContent=msg;e.className='gof-pub-status '+type}}
 function render(){const box=$('gofPubSections');if(!box)return;box.innerHTML=sections.map(([key,label,dest])=>`<div class="gof-pub-card"><h3>${label}</h3><small>${dest}</small><input class="gof-pub-file" type="file" accept="image/png,image/jpeg,image/webp" id="gofPubFile-${key}"><img class="gof-pub-preview" id="gofPubPreview-${key}" alt="Vista previa"><div class="gof-pub-destination">Cargar imagen → Publicar</div><button class="gof-pub-publish" type="button" onclick="gofPubPublish('${key}')">📤 PUBLICAR</button><div class="gof-pub-status" id="gofPubStatus-${key}"></div></div>`).join('');sections.forEach(([key])=>{const input=$('gofPubFile-'+key),preview=$('gofPubPreview-'+key);input?.addEventListener('change',()=>{const f=input.files?.[0];if(!f){preview.style.display='none';return}if(!/^image\/(png|jpeg|webp)$/.test(f.type)){status(key,'Solo se permiten PNG, JPG o WEBP.','err');input.value='';preview.style.display='none';return}preview.src=URL.createObjectURL(f);preview.style.display='block';status(key,'Imagen lista para publicar.')})})}
-function fillSelect(el,items,placeholder,formatter){if(!el)return;const current=el.value;el.innerHTML=`<option value="">${placeholder}</option>`+(items||[]).map(formatter).join('');if(current&&[...el.options].some(o=>o.value===current))el.value=current;else if(items?.length)el.value=items[0].id;el.disabled=false;el.style.pointerEvents='auto'}
-async function loadPublicationData(leagueId){
- await loadLeagueContextFinal();
- const preferred=leagueId||window.gofCurrentOrganizationId||localStorage.getItem('gameOnFlagActiveLeagueId')||localStorage.getItem('activeLeagueId')||'';
- if(!sb)throw new Error('No se pudo conectar con la base de datos.');
+async function loadPublicationTournaments(lid){const ts=$('gofPubTournament');if(!ts)return;if(!lid){fillSelect(ts,[],'Selecciona torneo',()=>{});ts.disabled=true;return}const {data,error}=await sb.from('tournaments').select('id,name,season,created_at').eq('league_id',lid).order('created_at',{ascending:false});if(error)throw error;fillSelect(ts,data||[],'Selecciona torneo',x=>`<option value="${escPub(x.id)}">${escPub(x.name)}${x.season?' · '+escPub(x.season):''}</option>`)}
+async function loadPublicationData(){
  const ls=$('gofPubLeague'),ts=$('gofPubTournament');
- const {data:leagues,error:le}=await sb.from('leagues').select('id,name').order('name');
- if(le)throw le;
- fillSelect(ls,leagues||[],'Selecciona liga',x=>`<option value="${escPub(x.id)}">${escPub(x.name)}</option>`);
- if(preferred&&[...ls.options].some(o=>o.value===preferred))ls.value=preferred;
- const lid=ls.value;
- await loadPublicationTournaments(lid);
-}
-async function loadPublicationTournaments(lid){
- const ts=$('gofPubTournament');if(!ts)return;
- if(!lid){ts.innerHTML='<option value="">Selecciona torneo</option>';ts.disabled=true;return;}
- const {data:tournaments,error}=await sb.from('tournaments').select('id,name,season,created_at').eq('league_id',lid).order('created_at',{ascending:false});
+ if(!window.sb)throw new Error('No se pudo conectar con la base de datos.');
+ // Publicación Directa debe poder elegir cualquier liga visible al administrador principal.
+ const {data:leagues,error}=await sb.from('leagues').select('id,name').order('name');
  if(error)throw error;
- fillSelect(ts,tournaments||[],'Selecciona torneo',x=>`<option value="${escPub(x.id)}">${escPub(x.name)}${x.season?' · '+escPub(x.season):''}</option>`);
+ fillSelect(ls,leagues||[],'Selecciona liga',x=>`<option value="${escPub(x.id)}">${escPub(x.name)}</option>`);
+ const preferred=window.GOF_ACTIVE_LEAGUE_ID||localStorage.getItem('gameOnFlagActiveLeagueId')||localStorage.getItem('activeLeagueId')||'';
+ if(preferred&&[...ls.options].some(o=>o.value===preferred))ls.value=preferred;
+ else if((leagues||[]).length)ls.value=leagues[0].id;
+ await loadPublicationTournaments(ls.value);
+ if(ts&&ts.options.length>1)ts.value=ts.options[1].value;
 }
-async function bootstrap(){const box=$('gofPubSections');try{render();await loadPublicationData()}catch(e){if(box)box.innerHTML=`<div class="card"><div class="gof-pub-status err">⚠️ ${escPub(e.message||'No se pudo cargar Publicación Directa.')}</div><button type="button" style="margin-top:10px" onclick="setView('inicio')">← Regresar al menú principal</button></div>`}}
-async function changeLeague(){try{const id=$('gofPubLeague').value;if(!id)return;localStorage.setItem('gameOnFlagActiveLeagueId',id);await loadPublicationTournaments(id)}catch(e){status('calendario',e.message||'No se pudieron cargar los torneos.','err')}}
+async function bootstrap(){try{render();await loadPublicationData()}catch(e){console.error('Publicación Directa:',e);const ls=$('gofPubLeague'),ts=$('gofPubTournament');if(ls){ls.innerHTML='<option value="">No se pudieron cargar las ligas</option>';ls.disabled=false}if(ts){ts.innerHTML='<option value="">Selecciona torneo</option>';ts.disabled=true}}}
 window.gofPubPublish=async function(key){const input=$('gofPubFile-'+key),f=input?.files?.[0],lid=$('gofPubLeague')?.value,tid=$('gofPubTournament')?.value;if(!lid||!tid)return status(key,'Selecciona liga y torneo.','err');if(!f)return status(key,'Primero selecciona la imagen.','err');if(!/^image\/(png|jpeg|webp)$/.test(f.type))return status(key,'Solo PNG, JPG o WEBP.','err');if(f.size>15*1024*1024)return status(key,'La imagen no puede superar 15 MB.','err');const fd=new FormData();fd.append('league_id',lid);fd.append('tournament_id',tid);fd.append('section',key);fd.append('title',sections.find(x=>x[0]===key)?.[1]||key);fd.append('file',f);status(key,'Publicando...');try{await api('?action=publish',{method:'POST',body:fd});status(key,'✅ Publicada correctamente en su sección del Portal Público.','ok');input.value='';const p=$('gofPubPreview-'+key);if(p){p.style.display='none';p.removeAttribute('src')}}catch(e){status(key,e.message||'No se pudo publicar.','err')}};
-window.gofInitPublicacionDirecta=function(){const ls=$('gofPubLeague');const ts=$('gofPubTournament');if(ls&&!ls.dataset.gofBound){ls.dataset.gofBound='1';ls.addEventListener('change',changeLeague)}if(ts&&!ts.dataset.gofBound){ts.dataset.gofBound='1'}bootstrap()};
+window.gofInitPublicacionDirecta=function(){const ls=$('gofPubLeague'),ts=$('gofPubTournament');if(ls&&!ls.dataset.gofBound){ls.dataset.gofBound='1';ls.addEventListener('change',async()=>{try{localStorage.setItem('gameOnFlagActiveLeagueId',ls.value);await loadPublicationTournaments(ls.value)}catch(e){console.error(e);}})}bootstrap()};
 const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?oldSetView.apply(this,arguments):undefined;if(v==='publicacion')setTimeout(()=>gofInitPublicacionDirecta(),50);return r};
 })();
 </script>

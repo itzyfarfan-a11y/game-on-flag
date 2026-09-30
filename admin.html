@@ -2744,8 +2744,8 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
     <h1>GAME ON FLAG</h1>
     <p>Selecciona cómo quieres ingresar</p>
     <div class="gof-entry-options">
-      <button class="gof-entry-btn" type="button" onclick="gofOpenCreateV2()"><span class="ei">🏟️</span><span><b>Administradora</b><small>Acceso principal de GAME ON FLAG</small></span></button>
-      <button class="gof-entry-btn" type="button" onclick="gofOpenLeagueV2()"><span class="ei">🔑</span><span><b>Ingresar a una liga existente</b><small>Usa el código de acceso de tu liga</small></span></button>
+      <button class="gof-entry-btn" type="button" onclick="gofOpenCreateV2()"><span class="ei">👑</span><span><b>Administradora GAME ON FLAG</b><small>Acceso principal de GAME ON FLAG</small></span></button>
+      <button class="gof-entry-btn" type="button" onclick="gofOpenLeagueV2()"><span class="ei">🔑</span><span><b>Administrador de liga</b><small>Usa el código de acceso de tu liga</small></span></button>
     </div>
     <div class="gof-entry-note">GAME ON FLAG · Administración de ligas</div>
     <div id="gofMasterV2" style="display:none !important">
@@ -2776,7 +2776,11 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
 <script id="gof-entry-v2-script">
 (function(){
 const GOF_ACCESS_URL='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/gof-access';
+const GOF_MASTER_DEVICE_KEY='gof_game_on_flag_master_device_v1';
 let gofEntryModeV2='';
+function gofMasterDeviceRemembered(){try{return localStorage.getItem(GOF_MASTER_DEVICE_KEY)==='1'}catch(_){return false}}
+function gofRememberMasterDevice(){try{localStorage.setItem(GOF_MASTER_DEVICE_KEY,'1')}catch(_){}}
+function gofForgetMasterDevice(){try{localStorage.removeItem(GOF_MASTER_DEVICE_KEY)}catch(_){}}
 
 function showEntryV2(){document.body.classList.add('gof-entry-lock');document.getElementById('entryV2')?.classList.remove('hidden');document.getElementById('gofEntryModal')?.classList.remove('show');document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('nav')?.classList.add('hidden')}
 function hideEntryV2(){document.body.classList.remove('gof-entry-lock');document.getElementById('entryV2')?.classList.add('hidden')}
@@ -2824,6 +2828,7 @@ window.gofSubmitModalV2=async function(){
    if(!gate.data?.ok)throw new Error(gate.data?.message||'Código de administradora incorrecto.');
    window.gofV2Authenticated=true;
    window.GOF_PLATFORM_MASTER=true;
+   gofRememberMasterDevice();
    if(typeof window.gofHardUnlockV3==='function') window.gofHardUnlockV3();
    hideEntryV2();
    gofCloseModalV2();
@@ -2869,6 +2874,7 @@ window.gofEnterMasterLeagueV2=async function(id){const {error}=await sb.rpc('set
 window.gofGenerateCodeV2=async function(id){const {data,error}=await sb.rpc('generate_league_access_code',{p_league_id:id});if(error)return alert(error.message);alert('Código de acceso: '+(data?.code||''));await gofLoadMasterV2()}
 window.gofEntryResetV2=async function(){
  try{await sb.auth.signOut()}catch(_){}
+ gofForgetMasterDevice();
  window.GOF_PLATFORM_MASTER=false;showEntryV2();
 }
 document.getElementById('gofEntryInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')gofSubmitModalV2()});
@@ -2883,6 +2889,26 @@ window.addEventListener('load',async function(){
   return;
  }
  if(window.gofV2Authenticated)return;
+ if(gofMasterDeviceRemembered()){
+  try{
+   if(!sb)sb=makeClient();
+   const session=(await sb.auth.getSession()).data?.session;
+   if(session){
+    window.gofV2Authenticated=true;
+    window.GOF_PLATFORM_MASTER=true;
+    if(typeof window.gofHardUnlockV3==='function') window.gofHardUnlockV3();
+    hideEntryV2();
+    gofCloseModalV2();
+    document.getElementById('nav')?.classList.remove('hidden');
+    document.querySelectorAll('#nav button[data-v=\"organizaciones\"]').forEach(b=>b.style.display='');
+    const sn=document.getElementById('sessionName'); if(sn)sn.textContent='Administradora GAME ON FLAG';
+    setView('organizaciones');
+    await refreshAllSelectors();
+    await loadMisLigas();
+    return;
+   }
+  }catch(_){}
+ }
  window.GOF_PLATFORM_MASTER=false;
  showEntryV2();
 });

@@ -1023,7 +1023,13 @@ async function login(){
     document.getElementById('nav').classList.remove('hidden');
     document.querySelectorAll('#nav button[data-v="organizaciones"]').forEach(b=>b.style.display='');
     document.getElementById('sessionName').textContent='Administradora GAME ON FLAG';
-    setView('organizaciones');
+    const activeLeague = window.GOF_ACTIVE_LEAGUE_ID || localStorage.getItem('gameOnFlagActiveLeagueId') || localStorage.getItem('activeLeagueId') || window.gofCurrentOrganizationId;
+    if(activeLeague){
+      try{ await loadLeagueContextFinal(activeLeague); }catch(e){ console.warn('No se pudo restaurar la liga activa:',e); }
+      if(gofCurrentOrganizationId) setView('inicio'); else setView('organizaciones');
+    }else{
+      setView('organizaciones');
+    }
     await refreshAllSelectors();
     await loadMisLigas();
     msg.textContent='';
@@ -1054,6 +1060,42 @@ async function categoryWarningFinal(){const box=document.getElementById('ceWarni
 async function loadExceptionTeamsFinal(){const tid=val('ceTournament'),cid=val('ceCategory');const te=document.getElementById('ceTeam'),pe=document.getElementById('cePlayer');if(te){const q=tid&&cid?await sb.from('tournament_teams').select('team_id,teams(id,name)').eq('tournament_id',tid).eq('category_id',cid):{data:[]};te.innerHTML='<option value="">Equipo (opcional)</option>'+(q.data||[]).map(x=>`<option value="${x.team_id}">${esc(x.teams?.name||'Equipo')}</option>`).join('');}if(pe){const q=await sb.from('players').select('id,full_name').eq('league_id',gofCurrentOrganizationId).order('full_name');pe.innerHTML='<option value="">Jugador (opcional)</option>'+(q.data||[]).map(x=>`<option value="${x.id}">${esc(x.full_name)}</option>`).join('');}categoryWarningFinal();}
 
 
+</script>
+<script id="gof-restored-setview">
+async function setView(v){
+  if(v==='contabilidad' && !(await enterFinance())) return;
+  if(v==='inscripciones' && typeof bindTournamentManagementAccordions==='function') bindTournamentManagementAccordions();
+  if(v==='calendario' && typeof bindCalendarAccordions==='function') bindCalendarAccordions();
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.body.classList.toggle('home-screen',v==='inicio');
+  const target=document.getElementById(v);
+  if(!target) return;
+  target.classList.add('active');
+  requestAnimationFrame(()=>{window.scrollTo({top:0,left:0,behavior:'instant'});document.documentElement.scrollTop=0;document.body.scrollTop=0;});
+  document.querySelectorAll('.nav button[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
+  const loaders={
+    organizaciones:()=>typeof loadMisLigas==='function'&&loadMisLigas(),
+    torneos:()=>typeof loadT==='function'&&loadT(),
+    inscripciones:()=>typeof loadEnrollmentSelectors==='function'&&loadEnrollmentSelectors(),
+    equipos:()=>typeof loadE==='function'&&loadE(),
+    rosters:()=>typeof loadRosterSelects==='function'&&loadRosterSelects(),
+    calendario:()=>typeof loadScheduleSelectors==='function'&&loadScheduleSelectors(),
+    resultados:()=>typeof loadResults==='function'&&loadResults(),
+    tabla:()=>typeof loadStandingsSelectors==='function'&&loadStandingsSelectors(),
+    playoffs:()=>typeof loadPlayoffSelectors==='function'&&loadPlayoffSelectors(),
+    avisos:()=>typeof loadNotices==='function'&&loadNotices(),
+    contabilidad:()=>typeof loadFinance==='function'&&loadFinance(),
+    inicio:()=>typeof refreshDashboard==='function'&&refreshDashboard()
+  };
+  try{ await (loaders[v]?.()||Promise.resolve()); }catch(e){console.error('GAME ON FLAG setView:',e)}
+  if(v==='credenciales' && typeof loadCredentialSelectorsFinal==='function'){
+    try{await loadCredentialSelectorsFinal();}catch(e){console.error('Credenciales:',e)}
+  }
+  if(v==='publicacion' && typeof gofInitPublicacionDirecta==='function'){
+    try{await gofInitPublicacionDirecta();}catch(e){console.error('Publicación Directa:',e)}
+  }
+}
+document.querySelectorAll('.nav button[data-v]').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 </script>
 <script id="gof-platform-role-guard">
 (function(){

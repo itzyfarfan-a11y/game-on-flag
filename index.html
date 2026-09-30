@@ -384,6 +384,12 @@ footer b{font-size:16px;color:#ddd5e5}
 }
 
 </style>
+<style id="gof-public-results-final">
+#resultados .wide{min-width:820px}
+#resultados .wide th,#resultados .wide td{white-space:nowrap;text-align:center}
+#resultados .wide td:nth-child(4),#resultados .wide td:nth-child(6){text-align:left}
+#resultados .wide .badge{display:inline-block;white-space:normal}
+</style>
 </head>
 <body>
 <header class="gof-public-top">
@@ -676,9 +682,13 @@ function matchups(){
 }
 
 function results(){
-  const s=document.getElementById('resultados'),a=data.matches.filter(m=>(!c.value||m.category_id===c.value)&&(m.status==='jugado'||m.status==='incomparecencia'));
-  s.innerHTML='<div class="gof-section-toolbar"><h2>🏈 Resultados</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('resultados','Resultados publicados')+
-  (a.length?a.map(m=>'<div class="card"><span class="badge">'+esc(cat(m.category_id))+' · Jornada '+esc(m.round_number)+'</span><div class="match"><b>'+esc(team(m.home_team_id).name)+'</b><div class="score">'+(m.home_score??0)+'-'+(m.away_score??0)+'</div>'+(m.status==='incomparecencia'?'<div class="badge" style="margin-top:8px">FORFEIT · Equipo que no se presentó: '+esc(team(m.absent_team_id).name)+'</div>':'')+'<b>'+esc(team(m.away_team_id).name)+'</b></div><div class="muted" style="text-align:center;margin-top:7px">'+esc(m.match_date||'')+' · '+esc(m.field_name||'')+'</div></div>').join(''):'<div class="empty">Aún no hay resultados publicados.</div>');
+  const s=document.getElementById('resultados'),a=data.matches.filter(m=>(!c.value||m.category_id===c.value)&&(m.status==='jugado'||m.status==='incomparecencia')).sort((x,y)=>String(x.match_date||'').localeCompare(String(y.match_date||''))||String(x.match_time||'').localeCompare(String(y.match_time||'')));
+  let h='<div class="gof-section-toolbar"><h2>🏈 Resultados</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('resultados','Resultados publicados');
+  if(!a.length){s.innerHTML=h+'<div class="empty">Aún no hay resultados publicados.</div>';return;}
+  h+='<div class="card"><div class="scroll"><table class="wide"><thead><tr><th>HORA</th><th>CAMPO</th><th>CATEGORÍA</th><th>EQUIPO 1</th><th>MARCADOR</th><th>EQUIPO 2</th><th>ESTADO</th></tr></thead><tbody>';
+  a.forEach(m=>{const absent=m.status==='incomparecencia'?team(m.absent_team_id)?.name:'';h+='<tr><td>'+esc(m.match_time?String(m.match_time).slice(0,5):'—')+'</td><td>'+esc(m.field_name||'—')+'</td><td>'+esc(cat(m.category_id))+'</td><td><b>'+esc(team(m.home_team_id).name)+'</b></td><td><b style="font-size:18px">'+(m.home_score??0)+' - '+(m.away_score??0)+'</b></td><td><b>'+esc(team(m.away_team_id).name)+'</b></td><td>'+(absent?'<span class="badge">FORFEIT · Equipo que no se presentó: '+esc(absent)+'</span>':'<span class="badge">JUGADO</span>')+'</td></tr>';});
+  h+='</tbody></table></div></div>';
+  s.innerHTML=h;
 }
 function table(){
   const s=document.getElementById('tabla');

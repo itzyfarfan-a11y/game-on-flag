@@ -2738,6 +2738,18 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
 </script>
 
 
+<script id="gof-entry-label-guard">
+(function(){
+  function applyGOFEntryLabels(){
+    const box=document.getElementById('entryV2'); if(!box) return;
+    const bs=box.querySelectorAll('.gof-entry-btn');
+    if(bs[0]){ const b=bs[0].querySelector('b'); const sm=bs[0].querySelector('small'); if(b)b.textContent='Administradora GAME ON FLAG'; if(sm)sm.textContent='Acceso principal de GAME ON FLAG'; const i=bs[0].querySelector('.ei'); if(i)i.textContent='👑'; }
+    if(bs[1]){ const b=bs[1].querySelector('b'); const sm=bs[1].querySelector('small'); if(b)b.textContent='Administrador de liga'; if(sm)sm.textContent='Usa el código de acceso de tu liga'; const i=bs[1].querySelector('.ei'); if(i)i.textContent='🔑'; }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',applyGOFEntryLabels); else applyGOFEntryLabels();
+  new MutationObserver(applyGOFEntryLabels).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 <div id="entryV2">
   <div class="gof-entry-box">
     <img class="gof-entry-logo" src="https://picivrqgmckrwutarhyw.supabase.co/storage/v1/object/public/game-on-flag/game-on-flag.png" alt="Game On Flag" onerror="this.style.display='none'">

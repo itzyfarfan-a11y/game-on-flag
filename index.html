@@ -678,7 +678,7 @@ function matchups(){
 function results(){
   const s=document.getElementById('resultados'),a=data.matches.filter(m=>(!c.value||m.category_id===c.value)&&(m.status==='jugado'||m.status==='incomparecencia'));
   s.innerHTML='<div class="gof-section-toolbar"><h2>🏈 Resultados</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('resultados','Resultados publicados')+
-  (a.length?a.map(m=>'<div class="card"><span class="badge">'+esc(cat(m.category_id))+' · Jornada '+esc(m.round_number)+'</span><div class="match"><b>'+esc(team(m.home_team_id).name)+'</b><div class="score">'+(m.home_score??0)+'-'+(m.away_score??0)+'</div>'+(m.status==='incomparecencia'?'<div class="badge" style="margin-top:8px">FORFEIT · No se presentó: '+esc(team(m.absent_team_id).name)+'</div>':'')+'<b>'+esc(team(m.away_team_id).name)+'</b></div><div class="muted" style="text-align:center;margin-top:7px">'+esc(m.match_date||'')+' · '+esc(m.field_name||'')+'</div></div>').join(''):'<div class="empty">Aún no hay resultados publicados.</div>');
+  (a.length?a.map(m=>'<div class="card"><span class="badge">'+esc(cat(m.category_id))+' · Jornada '+esc(m.round_number)+'</span><div class="match"><b>'+esc(team(m.home_team_id).name)+'</b><div class="score">'+(m.home_score??0)+'-'+(m.away_score??0)+'</div>'+(m.status==='incomparecencia'?'<div class="badge" style="margin-top:8px">FORFEIT · Equipo que no se presentó: '+esc(team(m.absent_team_id).name)+'</div>':'')+'<b>'+esc(team(m.away_team_id).name)+'</b></div><div class="muted" style="text-align:center;margin-top:7px">'+esc(m.match_date||'')+' · '+esc(m.field_name||'')+'</div></div>').join(''):'<div class="empty">Aún no hay resultados publicados.</div>');
 }
 function table(){
   const s=document.getElementById('tabla');
@@ -688,7 +688,7 @@ function table(){
     const a=m[x.home_team_id],b=m[x.away_team_id],hs=Number(x.home_score||0),as=Number(x.away_score||0);
     a.jj++;b.jj++;a.pa+=hs;a.pc+=as;b.pa+=as;b.pc+=hs;if(hs>as)a.jg++;else if(as>hs)b.jg++;
   });
-  const rows=Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.pa-a.pa||b.dif-a.dif||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));
+  const rows=Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.dif-a.dif||b.pa-a.pa||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));
   s.innerHTML='<div class="gof-section-toolbar"><h2>📊 Tabla General · '+esc(cat(c.value))+'</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('tablas','Tabla General publicada')+
   '<div class="card"><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>'+
   (rows.length?rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+esc(team(x.id).name)+'</b></td><td>'+x.jj+'</td><td>'+x.jg+'</td><td>'+x.pa+'</td><td>'+x.pc+'</td><td>'+x.dif+'</td></tr>').join(''):'<tr><td colspan="7">No hay partidos registrados para esta categoría.</td></tr>')+

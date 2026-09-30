@@ -875,7 +875,7 @@ const $=id=>document.getElementById(id);
 function escPub(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function fillSelect(el,items,placeholder,formatter){if(!el)return;el.innerHTML='<option value="">'+placeholder+'</option>'+(items||[]).map(formatter).join('');el.disabled=false;el.style.pointerEvents='auto';el.removeAttribute('disabled')}
 async function ensureSession(){
- if(!window.sb)throw new Error('No se pudo conectar con la sesión de administración.');
+ if(!sb)throw new Error('No se pudo conectar con la sesión de administración.');
  let session=(await sb.auth.getSession()).data?.session||null;
  if(!session){try{session=(await sb.auth.refreshSession()).data?.session||null}catch(_){} }
  if(!session)throw new Error('Sesión de administración no válida. Regresa al menú principal y vuelve a entrar a tu liga.');
@@ -894,7 +894,7 @@ function render(){const box=$('gofPubSections');if(!box)return;box.innerHTML=sec
 async function loadPublicationTournaments(lid){const ts=$('gofPubTournament');if(!ts)return;if(!lid){fillSelect(ts,[],'Selecciona torneo',()=>{});ts.disabled=true;return}const {data,error}=await sb.from('tournaments').select('id,name,season,created_at').eq('league_id',lid).order('created_at',{ascending:false});if(error)throw error;fillSelect(ts,data||[],'Selecciona torneo',x=>`<option value="${escPub(x.id)}">${escPub(x.name)}${x.season?' · '+escPub(x.season):''}</option>`)}
 async function loadPublicationData(){
  const ls=$('gofPubLeague'),ts=$('gofPubTournament');
- if(!window.sb)throw new Error('No se pudo conectar con la base de datos.');
+ if(!sb)throw new Error('No se pudo conectar con la base de datos.');
  // Publicación Directa debe poder elegir cualquier liga visible al administrador principal.
  const {data:leagues,error}=await sb.from('leagues').select('id,name').order('name');
  if(error)throw error;

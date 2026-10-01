@@ -2760,7 +2760,7 @@ async function loadLeagueContextFinal(preferredLeagueId=null){
  if(!sb)return null; const u=(await sb.auth.getUser()).data.user; if(!u)return null; gofSetOrganizationHomeVisibility();
  // La administradora principal no necesita ser miembro de cada liga.
  // Si acaba de seleccionar una liga desde "Ligas activas", cargamos esa liga directamente.
- const selectedId=preferredLeagueId || (window.GOF_PLATFORM_MASTER ? window.GOF_ACTIVE_LEAGUE_ID : null);
+ const selectedId=preferredLeagueId || window.GOF_ACTIVE_LEAGUE_ID || localStorage.getItem('gameOnFlagActiveLeagueId') || (window.GOF_PLATFORM_MASTER ? window.GOF_ACTIVE_LEAGUE_ID : null);
  if(selectedId){
    const {data:l,error}=await sb.from('leagues').select('id,name,slug,logo_url,primary_color,owner_id,status').eq('id',selectedId).eq('status','active').maybeSingle();
    if(error||!l){gofCurrentOrganizationId=null;gofCurrentOrganization=null;document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent='Selecciona una organización');return null;}
@@ -3614,7 +3614,18 @@ window.addEventListener('load',async function(){
     if(!(await waitForSb())){ce.innerHTML='<option value="">No se pudo iniciar la conexión</option>';return;}
     let t=null;
     try{t=await getActiveTournament();}catch(e){console.error(e)}
-    if(!t){ce.innerHTML='<option value="">No hay torneo activo/preparación</option>';return;}
+    if(!t){
+      // Último intento: si la liga está correcta, busca el torneo más reciente aunque su estado no sea el esperado.
+      const {data:anyT}=await sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds,created_at').eq('league_id',league).order('created_at',{ascending:false}).limit(1);
+      const fallback=anyT?.[0]||null;
+      if(fallback && ['proximo','activo'].includes(fallback.status)){ t=fallback; }
+      else {
+        ce.innerHTML='<option value="">No hay torneo activo/preparación</option>';
+        const info=document.getElementById('gofMatchupInfo');
+        if(info)info.innerHTML='<div class="gof-matchup-alert">⚠️ No encontré un torneo en <b>Preparación</b> o <b>Activo</b> para la organización seleccionada. Revisa el módulo <b>Torneo</b>.</div>';
+        return;
+      }
+    }
     te.innerHTML='<option value="'+t.id+'">'+(typeof esc==='function'?esc(t.name):t.name)+'</option>';
     te.value=t.id;
     te.dataset.type=t.tournament_type||'regular';
@@ -3844,6 +3855,10 @@ window.addEventListener('load',async function(){
       }
     }catch(e){console.warn('No se pudo restaurar la liga activa:',e)}
 
+    if(!gofCurrentOrganizationId){
+      const savedLeague=localStorage.getItem('gameOnFlagActiveLeagueId') || '';
+      if(savedLeague && typeof loadLeagueContextFinal==='function'){ try{ await loadLeagueContextFinal(savedLeague); }catch(e){} }
+    }
     if(!gofCurrentOrganizationId){
       te.innerHTML='<option value="">⚠️ Selecciona primero una liga activa</option>';
       if(ce)ce.innerHTML='<option value="">Selecciona un torneo primero</option>';

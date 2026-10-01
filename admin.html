@@ -821,6 +821,25 @@ main{height:auto!important;min-height:calc(100dvh - 96px)!important;overflow:vis
 @media(max-width:650px){.gof-public-link-btn{font-size:10px;padding:6px 8px}}
 </style>
 <style id="gof-results-board-final">.gof-results-board{overflow:hidden}.gof-board-head{display:flex;align-items:center;justify-content:space-between}.gof-board-filter{margin-top:7px}.gof-board-status{margin-top:5px}.gof-board-actions{margin-top:8px}.gof-results-table-wrap{overflow:hidden;border:1px solid var(--line);border-radius:10px}.gof-results-table{width:100%;table-layout:fixed;background:#fff;color:#14204a;border-collapse:collapse}.gof-results-table th{background:#0b3fa9;color:#fff;padding:5px 3px;font-size:8px;line-height:1.1;white-space:normal}.gof-results-table td{padding:5px 3px;border-bottom:1px solid #d8deec;color:#14204a;font-size:9px;line-height:1.15;white-space:normal;overflow-wrap:anywhere}.gof-results-table th:nth-child(1),.gof-results-table td:nth-child(1){width:11%}.gof-results-table th:nth-child(2),.gof-results-table td:nth-child(2){width:10%}.gof-results-table th:nth-child(3),.gof-results-table td:nth-child(3){width:17%}.gof-results-table th:nth-child(4),.gof-results-table td:nth-child(4){width:23%}.gof-results-table th:nth-child(5),.gof-results-table td:nth-child(5){width:16%}.gof-results-table th:nth-child(6),.gof-results-table td:nth-child(6){width:23%}.gof-results-table tr:nth-child(even):not(.gof-round-row) td{background:#f7f9fd}.gof-round-row td{background:#e8ecf7!important;color:#172554!important;font-weight:900;letter-spacing:.3px;padding:5px 6px}.gof-score-cell{font-weight:900;font-size:11px!important;text-align:center;white-space:nowrap!important}.gof-board-actions button{flex:1;min-width:0}.gof-results-table td b{font-size:9px}@media(max-width:380px){.gof-results-table th,.gof-results-table td{font-size:8px;padding:4px 2px}.gof-score-cell{font-size:10px!important}.gof-results-table td b{font-size:8px}}
+<style id="gof-home-menu-scroll-fix">
+/* GAME ON FLAG · Menú principal: permitir desplazamiento vertical en móvil */
+html,body{height:auto!important;min-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important}
+body.home-screen{overflow-y:auto!important}
+body.home-screen main{height:auto!important;min-height:calc(100dvh - 68px)!important;overflow:visible!important;padding-bottom:28px!important}
+body.home-screen #inicio{height:auto!important;min-height:0!important;overflow:visible!important;padding-bottom:18px!important}
+.gof-secondary-tools{display:block!important;visibility:visible!important;opacity:1!important}
+</style>
+</style>
+<style id="gof-preparation-button-css">
+.gof-preparation-btn{border:1px solid #7d22ff;background:#21152f;color:#fff}
+</style>
+
+<style id="gof-home-scroll-final">
+html,body{height:auto!important;min-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+body.home-screen{height:auto!important;min-height:100dvh!important;overflow-x:hidden!important;overflow-y:auto!important}
+body.home-screen .app{height:auto!important;min-height:100dvh!important;overflow:visible!important}
+body.home-screen main{height:auto!important;max-height:none!important;min-height:calc(100dvh - 68px)!important;overflow:visible!important;padding-bottom:80px!important}
+body.home-screen #inicio{height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;padding-bottom:50px!important}
 </style>
 </head><body><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
@@ -1011,15 +1030,15 @@ $('gofPubLeague')?.addEventListener('change',changeLeague);window.gofInitPublica
 </section>
 <section class="view" id="calendario"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📅 Calendario</h2><div class="workflow-kicker" style="margin-top:6px">PASO 5 DE 8 · CUÁNDO Y DÓNDE</div>
 <div class="card gof-calendar-builder" id="gofCalendarBuilder">
-  <div class="row"><div><h3 style="margin:0">🧩 Constructor de bloques</h3><p class="mut small" style="margin:4px 0 0">Primero eliges día, categoría, jornada, hora y campos. Después el sistema acomoda los enfrentamientos ya aprobados.</p></div><span class="tag">Todo editable</span></div>
-  <div class="notice" style="margin-top:9px"><b>Relámpago:</b> cada bloque ocupa 50 minutos; el partido dura 40. <b>Regular:</b> usa el intervalo que tú definas. No hay categorías predeterminadas para viernes, sábado o domingo.</div>
+  <div class="row"><div><h3 id="gofCalendarBuilderTitle" style="margin:0">🧩 Constructor de calendario</h3><p id="gofCalendarBuilderIntro" class="mut small" style="margin:4px 0 0">Primero selecciona el torneo y después define manualmente el orden de juego.</p></div><span class="tag">Todo editable</span></div>
+  <div id="gofCalendarModeNotice" class="notice" style="margin-top:9px">Selecciona un torneo para mostrar las reglas de su modalidad.</div>
   <div class="toolbar" style="margin-top:9px"><button class="gold" type="button" onclick="gofAddCalendarBlock()">＋ Agregar bloque</button><button type="button" onclick="gofLoadCalendarBlocks()">🔄 Cargar bloques guardados</button><button class="primary" type="button" onclick="gofSaveCalendarBlocks()">💾 Guardar bloques</button><button class="gold" type="button" onclick="gofGenerateCalendarFromMatchups()">🚀 Generar calendario desde enfrentamientos</button></div>
   <div id="gofCalendarBlocks" style="margin-top:10px"></div>
   <div id="gofCalendarBuilderStatus" class="mut small" style="margin-top:8px"></div>
 </div><div class="toolbar calendar-mode-bar"><button id="calModeGeneral" class="primary" type="button" onclick="setScheduleMode('general')">📊 General</button><button id="calModeCategory" type="button" onclick="setScheduleMode('category')">🏷️ Por categoría</button></div><div class="gof-accordion-list">
 <details class="gof-action-accordion" open><summary><span class="gof-action-number">1</span><span class="gof-action-icon">🗓️</span><span class="gof-action-copy"><b>Seleccionar calendario</b><small>Torneo · categoría · fecha · campo · hora</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="form"><label class="field-label">Liga<select id="ct"></select></label><label class="field-label">Categoría<select id="cc"></select></label><label class="field-label">Fecha<input id="cd" type="date"/></label><label class="field-label">Campo<input id="cf" placeholder="Campo 1–5"/></label><label class="field-label">Hora<input id="ch" type="time"/></label></div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">2</span><span class="gof-action-icon">🎲</span><span class="gof-action-copy"><b>Generar calendario</b><small>Generar categoría o todo el torneo</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="toolbar"><button class="primary" onclick="generateSchedule()">🎲 Generar / regenerar categoría</button><button class="gold" onclick="generateFullTournamentSchedule()">🚀 GENERAR TODO EL TORNEO</button><button onclick="validateSchedule()">✅ Validar calendario completo</button><button onclick="scrollToSchedulePublishing()">📢 Publicar por semana</button><button onclick="manualMatch()">✏️ Crear juego manual</button></div><div class="notice">Flujo: <b>generar → revisar → editar/mover → validar → publicar semana por semana.</b> Las demás semanas permanecen ocultas.<br><b>Reglas automáticas:</b> un equipo no puede tener dos partidos en la misma jornada; <b>Mixto no puede coincidir en el mismo horario con Silver Femenil, Silver Varonil ni Bronce Femenil</b>; tampoco se permite que un mismo equipo quede cruzado en el mismo horario.</div></div></details>
-<details class="gof-action-accordion"><summary><span class="gof-action-number">3</span><span class="gof-action-icon">⚙️</span><span class="gof-action-copy"><b>Campos y horarios por jornada</b><small>1–5 campos · inicio editable · intervalo · relámpago 50 min</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="row"><b>Configuración de jornadas</b><button class="gold" type="button" onclick="saveScheduleSettings()">💾 Guardar configuración</button></div><div id="scheduleRoundSettings" style="margin-top:10px"></div></div></details>
+<details class="gof-action-accordion"><summary><span class="gof-action-number">3</span><span class="gof-action-icon">⚙️</span><span class="gof-action-copy"><b id="gofCalendarSettingsTitle">Campos y horarios</b><small id="gofCalendarSettingsHint">1–5 campos · inicio editable · intervalo según modalidad</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="row"><b id="gofCalendarSettingsRowTitle">Configuración del calendario</b><button class="gold" type="button" onclick="saveScheduleSettings()">💾 Guardar configuración</button></div><div id="scheduleRoundSettings" style="margin-top:10px"></div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">4</span><span class="gof-action-icon">✏️</span><span class="gof-action-copy"><b>Editar / mover partidos</b><small>Adelantar o atrasar a otra jornada, fecha, hora o campo</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Desde cada partido usa <b>✏️ Editar / mover</b>. Puedes cambiar la <b>Jornada destino</b>, fecha, hora y campo. Por ejemplo, un partido de la Jornada 6 puede adelantarse a la Jornada 4 o atrasarse a la Jornada 7. El sistema revisa empalmes antes de guardar.</div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">5</span><span class="gof-action-icon">📢</span><span class="gof-action-copy"><b>Publicar por semana</b><small>Publica solamente la semana que ya revisaste</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div id="schedulePublishControls"><div class="mut small">Selecciona un torneo y revisa el calendario para ver las semanas.</div></div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">6</span><span class="gof-action-icon">🔁</span><span class="gof-action-copy"><b>Reposición de equipo</b><small>Programa una semana especial para un equipo que entra después</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">El partido de reposición cuenta para el equipo que necesita completar sus semanas; el rival queda excluido de sus estadísticas.</div><div class="form"><select id="mt"></select><select id="mc"></select><select id="mmake"></select><select id="mopp"></select><input id="mround" min="1" placeholder="Semana de reposición" type="number"/><input id="mdate" type="date"/><input id="mtime" type="time"/><input id="mfield" placeholder="Cancha 1–5"/><input id="mnote" placeholder="Motivo / observación"/></div><div class="toolbar" style="margin-top:9px"><button class="gold" onclick="createMakeupMatch()">➕ Crear partido de reposición</button></div><div class="mut small" id="makeupStatus" style="margin-top:8px"></div></div></details>
@@ -1412,7 +1431,7 @@ async function loadHomeTournamentSelector(){
   await loadHomeCategories(selected);
   box.innerHTML=rows.map(t=>{
     const isSel=t.id===selected; const isRel=t.tournament_type==='relampago';
-    const title=isRel?'Torneo Relámpago':'Temporada Regular'; const detail=isRel?'3 jornadas':'7 jornadas';
+    const title=isRel?'Torneo Relámpago':'Temporada Regular'; const detail=isRel?'3 partidos garantizados':'7 jornadas';
     return `<button type="button" class="gof-tournament-card ${isSel?'selected':''}" onclick="selectHomeTournament('${t.id}')"><span class="gof-tournament-icon">${isRel?'⚡':'🏆'}</span><span class="gof-tournament-copy"><b>${title}</b><small>${esc(t.name)}${t.season?' · '+esc(t.season):''} · ${detail}</small></span><span class="gof-tournament-arrow">›</span></button>`;
   }).join('');
 }
@@ -1444,7 +1463,7 @@ async function loadMisLigasLegacy(){
   const u=(await sb.auth.getUser()).data.user; if(!u){box.innerHTML='<div class="empty">Sesión no disponible.</div>';return;}
   const {data,error}=await sb.from('tournaments').select('id,name,season,start_date,status,tournament_type,created_by,created_at').eq('created_by',u.id).order('created_at',{ascending:false});
   if(error){box.innerHTML='<div class="empty">No se pudieron cargar tus ligas.</div>';return;}
-  box.innerHTML=(data||[]).map(t=>`<div class="card"><div class="row"><b>${esc(t.name)}</b><span class="tag">${t.status==='proximo'?'Preparación':t.status==='activo'?'Activo':'Finalizado'}</span></div><div class="mut small">${t.season?`Temporada ${esc(t.season)} · `:''}${t.tournament_type==='relampago'?'⚡ 3 jornadas':'🏆 7 jornadas'}${t.start_date?' · Inicio '+esc(t.start_date):''}</div><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="setView('torneos')">⚙️ Administrar</button>${t.status!=='activo'?`<button class="danger" onclick="deleteTournament('${t.id}','${esc(t.name)}')">🗑️ Eliminar definitivamente</button>`:'<span class="mut small">🔒 Torneo activo: eliminación deshabilitada</span>'}</div></div>`).join('')||'<div class="empty">No tienes torneos propios todavía.</div>';
+  box.innerHTML=(data||[]).map(t=>`<div class="card"><div class="row"><b>${esc(t.name)}</b><span class="tag">${t.status==='proximo'?'Preparación':t.status==='activo'?'Activo':'Finalizado'}</span></div><div class="mut small">${t.season?`Temporada ${esc(t.season)} · `:''}${t.tournament_type==='relampago'?'⚡ 3 partidos garantizados':'🏆 7 jornadas'}${t.start_date?' · Inicio '+esc(t.start_date):''}</div><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="setView('torneos')">⚙️ Administrar</button>${t.status!=='activo'?`<button class="danger" onclick="deleteTournament('${t.id}','${esc(t.name)}')">🗑️ Eliminar definitivamente</button>`:'<span class="mut small">🔒 Torneo activo: eliminación deshabilitada</span>'}</div></div>`).join('')||'<div class="empty">No tienes torneos propios todavía.</div>';
 }
 async function openAdminProfile(){
   const modal=document.getElementById('profileModal'); if(!modal)return; modal.classList.add('show');
@@ -1485,8 +1504,9 @@ async function editNotice(id){const {data,error}=await sb.from('nffl_notices').s
 async function publishNotice(id){if(!confirm('¿Publicar este aviso en el Portal Público?'))return;const {error}=await sb.from('nffl_notices').update({status:'publicado',published_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id);if(error)return alert(error.message);toast('📢 Aviso publicado');await loadNotices()}
 async function unpublishNotice(id){if(!confirm('¿Quitar este aviso del Portal Público y dejarlo como borrador?'))return;const {error}=await sb.from('nffl_notices').update({status:'borrador',published_at:null,updated_at:new Date().toISOString()}).eq('id',id);if(error)return alert(error.message);toast('Aviso retirado del Portal Público');await loadNotices()}
 async function deleteNotice(id){if(!confirm('¿Borrar este aviso definitivamente?'))return;const {error}=await sb.from('nffl_notices').delete().eq('id',id);if(error)return alert(error.message);toast('Aviso borrado');if(editingNoticeId===id)clearNoticeForm();await loadNotices()}
-async function loadT(){await loadLeagueContextFinal();if(!gofCurrentOrganizationId){document.getElementById('tlist').innerHTML='<div class="empty">Selecciona una organización para ver sus torneos.</div>';return;}const {data,error}=await sb.from('tournaments').select('*').eq('league_id',gofCurrentOrganizationId);if(error)return alert(error.message);const ordered=(data||[]).sort((a,b)=>{const af=a.status==='finalizado'?1:0,bf=b.status==='finalizado'?1:0;return af-bf||new Date(b.created_at)-new Date(a.created_at)});document.getElementById('tlist').innerHTML=ordered.map(t=>{const st=t.status==='proximo'?'Preparación':t.status==='activo'?'Activo':'Finalizado';return `<div class="card"><div class="row"><b>${esc(t.name)}</b><span class="tag">${st}</span></div><div class="mut small">${t.season?`Temporada ${esc(t.season)} · `:''}Inicio: ${t.start_date||'sin fecha'} · ${t.tournament_type==='relampago'?'⚡ Relámpago · 3 juegos asegurados':'🏆 Regular · 7 juegos regulares'}</div><div class="toolbar" style="margin-top:9px">${t.status==='proximo'?`<button class="primary" onclick="activateTournament('${t.id}')">▶ Activar torneo</button>`:''}${t.status!=='finalizado'?`<button class="danger" onclick="finishTournament('${t.id}')">✓ Finalizar</button>`:''}${t.status!=='activo'?`<button class="danger" onclick="deleteTournament('${t.id}','${esc(t.name)}')">🗑️ Eliminar torneo</button>`:''}</div></div>`}).join('')||'<div class="empty">Sin torneos.</div>';await loadEnrollmentSelectors();await loadReplacementSelectors();await loadDeactivateSelectors()}
-async function activateTournament(id){const {data:t,error:te}=await sb.from('tournaments').select('name,tournament_type,regular_rounds').eq('id',id).single();if(te)return alert(te.message);const label=t?.tournament_type==='relampago'?'⚡ Torneo relámpago · 3 juegos regulares por equipo':'🏆 Torneo regular · 7 juegos regulares por equipo';if(!confirm(`¿Activar ${t?.name||'torneo'}?\n\n${label}\n\nLos enlaces de roster quedarán cerrados.`))return;const {error}=await sb.from('tournaments').update({status:'activo'}).eq('id',id);if(error)alert(error.message);else{toast('Torneo activado. Rosters cerrados.');loadT();}}
+async function loadT(){await loadLeagueContextFinal();if(!gofCurrentOrganizationId){document.getElementById('tlist').innerHTML='<div class="empty">Selecciona una organización para ver sus torneos.</div>';return;}const {data,error}=await sb.from('tournaments').select('*').eq('league_id',gofCurrentOrganizationId);if(error)return alert(error.message);const ordered=(data||[]).sort((a,b)=>{const af=a.status==='finalizado'?1:0,bf=b.status==='finalizado'?1:0;return af-bf||new Date(b.created_at)-new Date(a.created_at)});document.getElementById('tlist').innerHTML=ordered.map(t=>{const st=t.status==='proximo'?'Preparación':t.status==='activo'?'Activo':'Finalizado';return `<div class="card"><div class="row"><b>${esc(t.name)}</b><span class="tag">${st}</span></div><div class="mut small">${t.season?`Temporada ${esc(t.season)} · `:''}Inicio: ${t.start_date||'sin fecha'} · ${t.tournament_type==='relampago'?'⚡ Relámpago · 3 partidos garantizados':'🏆 Regular · 7 jornadas'}</div><div class="toolbar" style="margin-top:9px">${t.status==='proximo'?`<button class="primary" onclick="activateTournament('${t.id}')">▶ Activar torneo</button>`:''}${t.status==='activo'?`<button type="button" onclick="resetTournamentToPreparation('${t.id}')">↩️ Regresar a preparación</button>`:''}${t.status!=='finalizado'?`<button class="danger" onclick="finishTournament('${t.id}')">✓ Finalizar</button>`:''}${t.status!=='activo'?`<button class="danger" onclick="deleteTournament('${t.id}','${esc(t.name)}')">🗑️ Eliminar torneo</button>`:''}</div></div>`}).join('')||'<div class="empty">Sin torneos.</div>';await loadEnrollmentSelectors();await loadReplacementSelectors();await loadDeactivateSelectors()}
+async function activateTournament(id){const {data:t,error:te}=await sb.from('tournaments').select('name,tournament_type,regular_rounds').eq('id',id).single();if(te)return alert(te.message);const label=t?.tournament_type==='relampago'?'⚡ Torneo relámpago · 3 partidos garantizados por equipo':'🏆 Torneo regular · 7 jornadas por equipo';if(!confirm(`¿Activar ${t?.name||'torneo'}?\n\n${label}\n\nLos enlaces de roster quedarán cerrados.`))return;const {error}=await sb.from('tournaments').update({status:'activo'}).eq('id',id);if(error)alert(error.message);else{toast('Torneo activado. Rosters cerrados.');loadT();}}
+async function resetTournamentToPreparation(id){const {data:t,error:te}=await sb.from('tournaments').select('name').eq('id',id).single();if(te)return alert(te.message);if(!confirm(`¿Regresar ${t?.name||'este torneo'} a PREPARACIÓN?\n\nEsto es para hacer pruebas sin tener que volver a cargar toda la información. El torneo volverá a mostrarse como próximo/preparación; no borra equipos, rosters, enfrentamientos, calendario ni resultados.`))return;const {error}=await sb.from('tournaments').update({status:'proximo'}).eq('id',id);if(error)return alert('No se pudo regresar a preparación: '+error.message);toast('↩️ Torneo regresado a preparación.');await loadT();await refreshDashboard();}
 async function finishTournament(id){if(!confirm('¿Marcar torneo como finalizado?'))return;const {error}=await sb.from('tournaments').update({status:'finalizado'}).eq('id',id);if(error)alert(error.message);else{toast('Torneo finalizado');loadT()}}
 async function deleteTournament(id,name){
   const u=(await sb.auth.getUser()).data.user; if(!u)return alert('Sesión no disponible.');
@@ -1931,8 +1951,9 @@ async function loadMakeupTeams(){const tid=val('mt'),cat=val('mc');if(!tid||!cat
 function syncMakeupOpponent(){const make=document.getElementById('mmake'),opp=document.getElementById('mopp');if(!make||!opp)return;const selected=make.value;[...opp.options].forEach(o=>{o.disabled=!!selected&&o.value===selected});if(selected&&opp.value===selected){opp.value='';}if(selected){opp.title='El rival debe ser diferente al equipo que repone.';}else{opp.title='';}}
 async function createMakeupMatch(){const tid=val('mt'),cat=val('mc'),make=val('mmake'),opp=val('mopp');const round=Number(val('mround'));if(!tid||!cat||!make||!opp||make===opp||!round)return alert('Selecciona torneo, categoría, equipo que repone, rival y semana.');const date=val('mdate')||null,time=val('mtime')||null,field=val('mfield').trim()||null,note=val('mnote').trim()||'Reposición por sustitución';if(date&&time){const conflicts=await getUnifiedConflicts(tid,date,time,field,null,'regular',make,opp);if(conflicts.length){const errors=conflicts.filter(x=>x.type==='error');if(errors.length)return alert(errors.map(x=>x.text).join('\n'));if(!confirm('Hay avisos de empalme:\n\n'+conflicts.map(x=>'• '+x.text).join('\n')+'\n\n¿Crear de todos modos?'))return;}}const {data,error}=await sb.from('matches').insert({tournament_id:tid,category_id:cat,round_number:round,match_date:date,match_time:time,field_name:field,home_team_id:make,away_team_id:opp,status:'programado',published:false,is_makeup:true,stats_exclude_team_id:opp,replacement_note:note}).select('id').single();if(error)return alert(error.message);document.getElementById('makeupStatus').textContent='Partido de reposición creado. El rival quedará excluido de las estadísticas de este partido.';toast('Reposición creada');await loadSchedule()}
 async function loadScheduleSelectors(){
- const {data:t}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
+ const {data:t}=await sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
  fill('ct',t,'id','name'); fill('mt',t,'id','name');
+ const ctType=document.getElementById('ct'); if(ctType){[...ctType.options].forEach(o=>{const x=(t||[]).find(z=>String(z.id)===String(o.value));if(x){o.dataset.type=x.tournament_type||'regular';o.dataset.rounds=x.tournament_type==='relampago'?3:Number(x.regular_rounds||7)}})}
  const ct=document.getElementById('ct'); if(ct)ct.onchange=async()=>{await scheduleCats();await loadMakeupSelectors();};
  const cc=document.getElementById('cc'); if(cc)cc.onchange=loadSchedule;
  await scheduleCats(); await loadMakeupSelectors();
@@ -1956,7 +1977,7 @@ async function loadScheduleSettings(){
  const rounds=isRelampago?3:Number(data?.regular_rounds||7)||7;
  const defaultInterval=isRelampago?50:60;
  const saved=data?.schedule_settings&&typeof data.schedule_settings==='object'?data.schedule_settings:{};
- out.innerHTML=`<div class="notice"><b>⚙️ Configuración de jornadas</b><br/>Puedes decidir <b>por cada jornada</b> cuántos campos se utilizan y a qué hora comienza el primer partido. El calendario se acomoda automáticamente usando el intervalo correspondiente.<br/><br/><b>Modo:</b> ${isRelampago?'🏆 Torneo relámpago · 50 min por bloque (40 min de juego + 10 min de transición/entrada/salida)':'📅 Jornada regular · 60 min por bloque por defecto'}<br/>Los campos pueden ser de <b>1 a 5</b>. En jornada regular también puedes modificar el intervalo entre partidos.</div>`+Array.from({length:7},(_,i)=>{const r=i+1,s=saved[String(r)]||{};const disabled=r>rounds;const interval=isRelampago?50:Math.max(30,Math.min(180,Number(s.interval)||defaultInterval));return `<div class="card schedule-round-row" style="margin-top:8px;opacity:${disabled?.55:1}"><div class="row"><b>Jornada ${r}</b><span class="tag">${r>rounds?'No usada':isRelampago?'Relámpago · 50 min':'Regular · '+interval+' min'}</span></div><div class="form" style="margin-top:8px;grid-template-columns:1fr 1fr 1fr"><label class="field-label">Campos (1–5)<input class="schedule-fields" data-round="${r}" type="number" min="1" max="5" value="${Number(s.fields)||4}" ${disabled?'disabled':''}></label><label class="field-label">Inicio del primer partido<input class="schedule-start" data-round="${r}" type="time" value="${esc(s.start||'08:00')}" ${disabled?'disabled':''}></label><label class="field-label">Intervalo entre partidos${isRelampago?' <span class="mut small">(fijo)</span>':''}<input class="schedule-interval" data-round="${r}" type="number" min="30" max="180" step="5" value="${interval}" ${disabled||isRelampago?'disabled':''}></label></div><div class="mut small" style="margin-top:6px">Ejemplo: ${esc(s.start||'08:00')} → ${gofTimePlusMinutes((s.start||'08:00'),interval).slice(0,5)} → ${gofTimePlusMinutes((s.start||'08:00'),interval*2).slice(0,5)}</div></div>`}).join('');
+ out.innerHTML=`<div class="notice"><b>⚙️ Configuración del calendario</b><br/>Puedes decidir <b>por cada jornada o partido garantizado</b> cuántos campos se utilizan y a qué hora comienza el primer partido. El calendario se acomoda automáticamente usando el intervalo correspondiente.<br/><br/><b>Modo:</b> ${isRelampago?'🏆 Torneo relámpago · 50 min por bloque (40 min de juego + 10 min de transición/entrada/salida)':'📅 Jornada regular · 60 min por bloque por defecto'}<br/>Los campos pueden ser de <b>1 a 5</b>. En jornada regular también puedes modificar el intervalo entre partidos.</div>`+Array.from({length:7},(_,i)=>{const r=i+1,s=saved[String(r)]||{};const disabled=r>rounds;const interval=isRelampago?50:Math.max(30,Math.min(180,Number(s.interval)||defaultInterval));return `<div class="card schedule-round-row" style="margin-top:8px;opacity:${disabled?.55:1}"><div class="row"><b>${isRelampago?'Partido garantizado '+r:'Jornada '+r}</b><span class="tag">${r>rounds?'No usado':isRelampago?'Relámpago · 50 min':'Regular · '+interval+' min'}</span></div><div class="form" style="margin-top:8px;grid-template-columns:1fr 1fr 1fr"><label class="field-label">Campos (1–5)<input class="schedule-fields" data-round="${r}" type="number" min="1" max="5" value="${Number(s.fields)||4}" ${disabled?'disabled':''}></label><label class="field-label">Inicio del primer partido<input class="schedule-start" data-round="${r}" type="time" value="${esc(s.start||'08:00')}" ${disabled?'disabled':''}></label><label class="field-label">Intervalo entre partidos${isRelampago?' <span class="mut small">(fijo)</span>':''}<input class="schedule-interval" data-round="${r}" type="number" min="30" max="180" step="5" value="${interval}" ${disabled||isRelampago?'disabled':''}></label></div><div class="mut small" style="margin-top:6px">Ejemplo: ${esc(s.start||'08:00')} → ${gofTimePlusMinutes((s.start||'08:00'),interval).slice(0,5)} → ${gofTimePlusMinutes((s.start||'08:00'),interval*2).slice(0,5)}</div></div>`}).join('');
 }
 async function saveScheduleSettings(){
  const tid=val('ct');if(!tid)return alert('Selecciona un torneo.');
@@ -2098,8 +2119,10 @@ async function loadSchedule(){
     }
   }
   html+='</tbody></table></div><div class="small mut cg-legend">Vista por semana · hora · campo. Los partidos se muestran directamente en su cancha para facilitar la revisión y los cambios manuales.</div></div>';
-  // Tabla de enfrentamientos por equipo: Semana 1 a Semana 7.
-  const regularOnly=(data||[]).filter(m=>m.round_number>=1&&m.round_number<=7&&!m.is_makeup);
+  // Tabla de enfrentamientos por equipo: 7 jornadas en regular / 3 partidos en relámpago.
+  const selectedTourType=String(document.getElementById('ct')?.selectedOptions?.[0]?.dataset?.type||'regular');
+  const teamMaxRound=selectedTourType==='relampago'?3:7;
+  const regularOnly=(data||[]).filter(m=>m.round_number>=1&&m.round_number<=teamMaxRound&&!m.is_makeup);
   const teamMap=new Map();
   regularOnly.forEach(m=>{
     const catName=m.categories?.name||'Categoría';
@@ -2116,9 +2139,9 @@ async function loadSchedule(){
   const tsCatClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'cat-mixto';if(x.includes('silver femenil'))return 'cat-silverf';if(x.includes('silver varonil'))return 'cat-silverv';if(x.includes('bronce')||x.includes('bronze'))return 'cat-bronce';if(x.includes('35'))return 'cat-35';if(x.includes('moms'))return 'cat-moms';if(x.includes('golden'))return 'cat-golden';return 'cat-other'};
   const tsDot=n=>{const c=tsCatClass(n);return c==='cat-mixto'?'#8bd23e':c==='cat-silverf'?'#e28b9e':c==='cat-silverv'?'#6eb7ce':c==='cat-bronce'?'#d28a3f':c==='cat-35'?'#e04b52':c==='cat-moms'?'#a56be0':c==='cat-golden'?'#d9b54a':'#8f7aaa'};
   const teamCategories=[...new Set(teamRows.map(t=>t.category))].sort((a,b)=>a.localeCompare(b,'es'));
-  html+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3><div class="team-schedule-actions"><button type="button" class="primary" onclick="downloadTeamScheduleImage()">🖼️ Descargar imagen</button></div></div><div class="notice">Consulta una categoría completa o todas. Selecciona la categoría y verás únicamente sus equipos y sus enfrentamientos J1–J7. En <b>Todas</b> aparecen todas las categorías diferenciadas por color.</div><div class="team-schedule-filter"><div class="team-filter-grid"><label class="field-label" style="margin:0">🏷️ Categoría<select id="teamCatFilter" onchange="filterTeamSchedule()"><option value="">Todas las categorías</option>${teamCategories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label></div></div><div class="team-schedule-scroll-tools"><button type="button" onclick="scrollTeamSchedule(-1)" aria-label="Desplazar enfrentamientos a la izquierda">◀</button><span>J1–J7 · desliza o usa las flechas</span><button type="button" onclick="scrollTeamSchedule(1)" aria-label="Desplazar enfrentamientos a la derecha">▶</button></div><div class="team-schedule-scroll-wrap"><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
-  teamRows.forEach(t=>{const cc=tsCatClass(t.category);html+=`<tr class="cat-row" data-team-category="${esc(t.category)}"><td class="ts-cat ${cc}"><span class="ts-cat-badge"><span class="ts-cat-dot" style="background:${tsDot(t.category)}"></span>${esc(t.category)}</span></td><td class="ts-team">${esc(t.name)}</td>${[1,2,3,4,5,6,7].map(r=>`<td class="ts-j ${cc}">${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`;});
-  html+=`</tbody></table></div></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo. J1–J7 muestran su rival de cada jornada. En teléfono puedes deslizar derecha/izquierda; <b>CATEGORÍA</b> y <b>EQUIPO</b> permanecen visibles.</div></div>`;
+  html+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3><div class="team-schedule-actions"><button type="button" class="primary" onclick="downloadTeamScheduleImage()">🖼️ Descargar imagen</button></div></div><div class="notice">Consulta una categoría completa o todas. Selecciona la categoría y verás únicamente sus equipos y sus enfrentamientos. En <b>Todas</b> aparecen todas las categorías diferenciadas por color.</div><div class="team-schedule-filter"><div class="team-filter-grid"><label class="field-label" style="margin:0">🏷️ Categoría<select id="teamCatFilter" onchange="filterTeamSchedule()"><option value="">Todas las categorías</option>${teamCategories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label></div></div><div class="team-schedule-scroll-tools"><button type="button" onclick="scrollTeamSchedule(-1)" aria-label="Desplazar enfrentamientos a la izquierda">◀</button><span>J1–J7 / P1–P3 · desliza o usa las flechas</span><button type="button" onclick="scrollTeamSchedule(1)" aria-label="Desplazar enfrentamientos a la derecha">▶</button></div><div class="team-schedule-scroll-wrap"><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th>${selectedTourType==='relampago'?'<th>P1</th><th>P2</th><th>P3</th>':'<th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th>'}</tr></thead><tbody>`;
+  teamRows.forEach(t=>{const cc=tsCatClass(t.category);html+=`<tr class="cat-row" data-team-category="${esc(t.category)}"><td class="ts-cat ${cc}"><span class="ts-cat-badge"><span class="ts-cat-dot" style="background:${tsDot(t.category)}"></span>${esc(t.category)}</span></td><td class="ts-team">${esc(t.name)}</td>${(selectedTourType==='relampago'?[1,2,3]:[1,2,3,4,5,6,7]).map(r=>`<td class="ts-j ${cc}">${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`;});
+  html+=`</tbody></table></div></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo. En regular J1–J7 muestran su rival de cada jornada; en relámpago P1–P3 muestran sus tres partidos garantizados. En teléfono puedes deslizar derecha/izquierda; <b>CATEGORÍA</b> y <b>EQUIPO</b> permanecen visibles.</div></div>`;
   box.innerHTML=html;
 }
 function filterTeamSchedule(){
@@ -3454,6 +3477,59 @@ window.addEventListener('load',async function(){
   #viewRosterList .gof-view-player-meta{font-size:11px !important}
 }
 </style>
+<script id="gof-calendar-mode-final">
+(function(){
+  function gofCalendarMode(){
+    const sel=document.getElementById('ct');
+    if(!sel)return 'regular';
+    const opt=sel.options[sel.selectedIndex];
+    return opt?.dataset?.type==='relampago'?'relampago':'regular';
+  }
+  window.gofUpdateCalendarModeUI=function(){
+    const type=gofCalendarMode(), rel=type==='relampago';
+    const title=document.getElementById('gofCalendarBuilderTitle');
+    const intro=document.getElementById('gofCalendarBuilderIntro');
+    const note=document.getElementById('gofCalendarModeNotice');
+    const st=document.getElementById('gofCalendarSettingsTitle');
+    const sh=document.getElementById('gofCalendarSettingsHint');
+    const sr=document.getElementById('gofCalendarSettingsRowTitle');
+    if(title)title.textContent=rel?'⚡ Constructor de torneo relámpago':'🏆 Constructor de torneo regular';
+    if(intro)intro.textContent=rel?'Elige libremente viernes, sábado o domingo, categoría, partido garantizado, hora y campos. Después el sistema acomoda los enfrentamientos aprobados.':'Define manualmente el orden de las 7 jornadas: día, categoría, jornada, hora y campos. Después el sistema acomoda los enfrentamientos aprobados.';
+    if(note)note.innerHTML=rel?'<b>⚡ Torneo relámpago:</b> cada equipo tiene <b>3 partidos garantizados</b>. Cada bloque ocupa <b>50 minutos</b> (40 de juego + 10 operativos). Tú decides qué categorías juegan viernes, sábado y domingo. El domingo se pueden completar pendientes y jugar playoffs; con más de 12 equipos se habilitan cuartos antes de semifinal y final.':'<b>🏆 Torneo regular:</b> son <b>7 jornadas</b> de fase regular por equipo. Tú decides el orden de las categorías y los horarios mediante los bloques. El intervalo entre partidos es editable y no se aplican categorías predeterminadas por día.';
+    if(st)st.textContent=rel?'Campos y horarios por partido garantizado':'Campos y horarios por jornada';
+    if(sh)sh.textContent=rel?'1–5 campos · inicio editable · 50 min fijos por bloque':'1–5 campos · inicio editable · intervalo editable';
+    if(sr)sr.textContent=rel?'Configuración de partidos garantizados':'Configuración de jornadas';
+    const gen=document.querySelector('#calendario .gof-action-accordion:nth-of-type(2) .gof-action-copy small');
+    if(gen)gen.textContent=rel?'Generar partidos garantizados o todo el torneo':'Generar categoría o todo el torneo';
+    const edit=document.querySelector('#calendario .gof-action-accordion:nth-of-type(4) .gof-action-copy small');
+    if(edit)edit.textContent=rel?'Adelantar o atrasar a otro partido garantizado, fecha, hora o campo':'Adelantar o atrasar a otra jornada, fecha, hora o campo';
+    const info=document.querySelector('#calendario .gof-action-accordion:nth-of-type(2) .notice');
+    if(info)info.innerHTML=rel?'Flujo: <b>generar → revisar → editar/mover → validar → publicar.</b> Cada categoría puede ir en viernes, sábado o domingo según tus bloques. El domingo puede recibir pendientes y playoffs.':'Flujo: <b>generar → revisar → editar/mover → validar → publicar semana por semana.</b> Tú defines el orden de las categorías y el intervalo de cada bloque.';
+    const manual=document.querySelector('#calendario #mround');
+    if(manual)manual.placeholder=rel?'Partido garantizado':'Semana de reposición';
+    const mmin=document.querySelector('#calendario #mround');
+    if(mmin)mmin.max=rel?'3':'7';
+  };
+  const oldLoad=window.loadScheduleSelectors;
+  if(typeof oldLoad==='function'){
+    window.loadScheduleSelectors=async function(){
+      const r=await oldLoad.apply(this,arguments);
+      const ct=document.getElementById('ct');
+      if(ct&&!ct.dataset.gofModeBound){
+        ct.dataset.gofModeBound='1';
+        ct.addEventListener('change',()=>setTimeout(window.gofUpdateCalendarModeUI,30));
+      }
+      window.gofUpdateCalendarModeUI();
+      return r;
+    };
+  }
+  const oldScheduleSettings=window.loadScheduleSettings;
+  if(typeof oldScheduleSettings==='function'){
+    window.loadScheduleSettings=async function(){const r=await oldScheduleSettings.apply(this,arguments);window.gofUpdateCalendarModeUI();return r;};
+  }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(window.gofUpdateCalendarModeUI,120));
+})();
+</script>
 </body></html>
 <style>
 /* GAME ON FLAG · Enfrentamientos J1–J7: tabla horizontal móvil */
@@ -3523,7 +3599,9 @@ window.addEventListener('load',async function(){
   function gVal(id){const e=document.getElementById(id);return e?e.value:''}
   function gType(){return document.getElementById('gofMatchupTournament')?.selectedOptions?.[0]?.dataset?.type||''}
   async function loadMatchupSelectors(){
-    if(!window.sb||!window.gofCurrentOrganizationId)return;
+    if(!window.sb)return;
+    if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function'){try{await loadLeagueContextFinal()}catch(e){console.warn('No se pudo cargar la organización activa',e)}}
+    if(!gofCurrentOrganizationId)return;
     const {data:t,error}=await sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
     if(error)return;
     const te=document.getElementById('gofMatchupTournament'); if(!te)return;
@@ -3533,6 +3611,7 @@ window.addEventListener('load',async function(){
     await loadMatchupCategories(); await gofLoadMatchups();
   }
   async function loadMatchupCategories(){
+    if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function'){try{await loadLeagueContextFinal()}catch(e){console.warn('No se pudo cargar la organización activa',e)}}
     const tid=gVal('gofMatchupTournament'),el=document.getElementById('gofMatchupCategory');if(!el)return;
     if(!tid){el.innerHTML='<option value="">Selecciona torneo</option>';return}
     const {data}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
@@ -3547,6 +3626,8 @@ window.addEventListener('load',async function(){
   }
   async function gofLoadMatchups(){
     const out=document.getElementById('gofMatchupList');if(!out)return;
+    if(!gVal('gofMatchupTournament')){await loadMatchupSelectors();}
+
     const rows=await fetchMatchups();matchupRows=rows;
     const info=document.getElementById('gofMatchupInfo'),status=document.getElementById('gofMatchupStatus');
     if(!rows.length){out.innerHTML='<div class="empty">Todavía no hay enfrentamientos sin resultado. Genera los enfrentamientos para empezar.</div>';if(info)info.textContent='';if(status)status.textContent='Sin enfrentamientos';return;}
@@ -3560,7 +3641,8 @@ window.addEventListener('load',async function(){
     if(status)status.textContent='Listos para revisar';
   }
   async function gofGenerateMatchups(){
-    const tid=gVal('gofMatchupTournament'),cat=gVal('gofMatchupCategory');if(!tid)return alert('Selecciona un torneo.');
+    if(!gVal('gofMatchupTournament')){await loadMatchupSelectors();}
+    const tid=gVal('gofMatchupTournament'),cat=gVal('gofMatchupCategory');if(!tid)return alert('No hay un torneo disponible. Revisa que Prueba 2 esté en Preparación o Activo y que la organización esté seleccionada.');
     const {data:tour,error:te}=await sb.from('tournaments').select('name,tournament_type,regular_rounds').eq('id',tid).single();if(te)return alert(te.message);
     const rounds=tour?.tournament_type==='relampago'?3:Number(tour?.regular_rounds||7)||7;
     const cats=cat?[{id:cat,name:document.getElementById('gofMatchupCategory')?.selectedOptions?.[0]?.textContent||'Categoría'}]:((await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid)).data||[]).map(x=>x.categories).filter(Boolean);
@@ -3587,13 +3669,14 @@ window.addEventListener('load',async function(){
   }
   function gofSwapMatchup(id){const a=document.getElementById('gma_'+id),b=document.getElementById('gmb_'+id);if(!a||!b)return;const x=a.value;a.value=b.value;b.value=x}
   async function gofApproveMatchups(){
+    if(!gVal('gofMatchupTournament')){await loadMatchupSelectors();}
     const rows=await fetchMatchups();if(!rows.length)return alert('No hay enfrentamientos pendientes.');
     const bad=[];const seen=new Set();rows.forEach(r=>{if(!r.home_team_id||!r.away_team_id||r.home_team_id===r.away_team_id)bad.push(`J${r.round_number}: equipo faltante o repetido`);const key=[r.category_id,r.round_number,[r.home_team_id,r.away_team_id].sort().join(':')].join('|');if(seen.has(key))bad.push(`J${r.round_number}: enfrentamiento repetido`);seen.add(key)});
     if(bad.length)return alert('Corrige antes de aprobar:\n\n'+bad.slice(0,12).join('\n'));
     localStorage.setItem('gof_matchups_approved_'+gVal('gofMatchupTournament'),'1');
     document.getElementById('gofMatchupStatus').textContent='🔒 Aprobados';toast('🔒 Enfrentamientos aprobados. Ya puedes construir el calendario.');
   }
-  function blockRoundOptions(tid,type,selected){const n=type==='relampago'?3:Number(document.getElementById('gofMatchupTournament')?.selectedOptions?.[0]?.dataset?.rounds||7);return ['<option value="">Selecciona jornada</option>',...Array.from({length:n},(_,i)=>`<option value="${i+1}" ${String(selected)==String(i+1)?'selected':''}>Jornada ${i+1}</option>`)].join('')}
+  function blockRoundOptions(tid,type,selected){const n=type==='relampago'?3:Number(document.getElementById('gofMatchupTournament')?.selectedOptions?.[0]?.dataset?.rounds||7);return ['<option value="">Selecciona jornada</option>',...Array.from({length:n},(_,i)=>`<option value="${i+1}" ${String(selected)==String(i+1)?'selected':''}>${type==='relampago'?'Partido '+(i+1):'Jornada '+(i+1)}</option>`)].join('')}
   async function gofLoadCalendarBlocks(){
     const tid=gVal('ct')||gVal('gofMatchupTournament');if(!tid){calendarBlocks=[];return renderBlocks()}
     const {data}=await sb.from('tournaments').select('tournament_type,schedule_settings,start_date').eq('id',tid).single();
@@ -3604,7 +3687,7 @@ window.addEventListener('load',async function(){
     const tid=gVal('ct')||gVal('gofMatchupTournament');const type=window.__gofCalendarType||gType()||'regular';
     if(!calendarBlocks.length){out.innerHTML='<div class="empty">No hay bloques. Agrega el primer bloque para decidir qué categoría juega primero.</div>';return}
     const cats=[...(document.getElementById('cc')?.options||[])].filter(o=>o.value).map(o=>({id:o.value,name:o.textContent}));
-    out.innerHTML=calendarBlocks.map((b,i)=>`<div class="gof-block-row"><div class="gof-block-grid"><label class="field-label">Día<input id="gcb_date_${i}" type="date" value="${gEsc(b.date||window.__gofCalendarStart||'')}"></label><label class="field-label">Categoría<select id="gcb_cat_${i}">${cats.map(c=>`<option value="${gEsc(c.id)}" ${String(c.id)===String(b.category_id)?'selected':''}>${gEsc(c.name)}</option>`).join('')}</select></label><label class="field-label">Jornada<select id="gcb_round_${i}">${blockRoundOptions(tid,type,b.round)}</select></label><label class="field-label">Inicio<input id="gcb_time_${i}" type="time" value="${gEsc(b.start||'08:00')}"></label><label class="field-label">Campos<input id="gcb_fields_${i}" type="number" min="1" max="5" value="${Math.max(1,Math.min(5,Number(b.fields)||4))}"></label><label class="field-label">Intervalo<input id="gcb_int_${i}" type="number" min="30" max="180" step="5" value="${type==='relampago'?50:Number(b.interval||60)}" ${type==='relampago'?'disabled':''}></label><button class="danger gof-block-remove" type="button" onclick="gofRemoveCalendarBlock(${i})">✕</button></div><div class="mut small" style="margin-top:6px">Bloque ${i+1} · ${type==='relampago'?'⚡ 50 min fijo (40 min juego)':'intervalo editable'} · el orden de arriba se respeta.</div></div>`).join('');
+    out.innerHTML=calendarBlocks.map((b,i)=>`<div class="gof-block-row"><div class="gof-block-grid"><label class="field-label">Día<input id="gcb_date_${i}" type="date" value="${gEsc(b.date||window.__gofCalendarStart||'')}"></label><label class="field-label">Categoría<select id="gcb_cat_${i}">${cats.map(c=>`<option value="${gEsc(c.id)}" ${String(c.id)===String(b.category_id)?'selected':''}>${gEsc(c.name)}</option>`).join('')}</select></label><label class="field-label">${type==='relampago'?'Partido garantizado':'Jornada'}<select id="gcb_round_${i}">${blockRoundOptions(tid,type,b.round)}</select></label><label class="field-label">Inicio<input id="gcb_time_${i}" type="time" value="${gEsc(b.start||'08:00')}"></label><label class="field-label">Campos<input id="gcb_fields_${i}" type="number" min="1" max="5" value="${Math.max(1,Math.min(5,Number(b.fields)||4))}"></label><label class="field-label">Intervalo<input id="gcb_int_${i}" type="number" min="30" max="180" step="5" value="${type==='relampago'?50:Number(b.interval||60)}" ${type==='relampago'?'disabled':''}></label><button class="danger gof-block-remove" type="button" onclick="gofRemoveCalendarBlock(${i})">✕</button></div><div class="mut small" style="margin-top:6px">Bloque ${i+1} · ${type==='relampago'?'⚡ 50 min fijo (40 min juego)':'intervalo editable'} · el orden de arriba se respeta.</div></div>`).join('');
   }
   function readBlocksFromUI(){
     calendarBlocks=calendarBlocks.map((b,i)=>({...b,date:gVal('gcb_date_'+i),category_id:gVal('gcb_cat_'+i),round:Number(gVal('gcb_round_'+i))||null,start:gVal('gcb_time_'+i)||'08:00',fields:Math.max(1,Math.min(5,Number(gVal('gcb_fields_'+i))||4)),interval:(window.__gofCalendarType==='relampago'?50:Math.max(30,Math.min(180,Number(gVal('gcb_int_'+i))||60)))}));return calendarBlocks;

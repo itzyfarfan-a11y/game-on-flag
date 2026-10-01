@@ -2717,6 +2717,18 @@ function gofSetOrganizationHomeVisibility(){
  const nav=document.querySelector('#nav button[data-v="organizaciones"]');
  if(nav)nav.style.display=window.GOF_PLATFORM_MASTER?'':'none';
 }
+async function gofEnsureDefaultCategories(leagueId){
+ if(!leagueId||!sb)return;
+ const defaults=['Golden Varonil','Golden Femenil','Silver Varonil','Silver Varonil B','Silver Femenil','Silver Femenil B','Bronce','Bronce B','+35','Moms','Mixto','Escolar','Otros'];
+ const {data:existing,error}=await sb.from('categories').select('id,name').eq('league_id',leagueId);
+ if(error)return console.warn('No se pudieron revisar categorías base:',error.message);
+ const have=new Set((existing||[]).map(x=>String(x.name||'').trim().toLowerCase()));
+ const missing=defaults.filter(name=>!have.has(name.toLowerCase())).map(name=>({league_id:leagueId,name}));
+ if(missing.length){
+   const {error:ie}=await sb.from('categories').insert(missing);
+   if(ie)console.warn('No se pudieron crear categorías base:',ie.message);
+ }
+}
 async function loadLeagueContextFinal(preferredLeagueId=null){
  if(!sb)return null; const u=(await sb.auth.getUser()).data.user; if(!u)return null; gofSetOrganizationHomeVisibility();
  // La administradora principal no necesita ser miembro de cada liga.
@@ -2726,6 +2738,7 @@ async function loadLeagueContextFinal(preferredLeagueId=null){
    const {data:l,error}=await sb.from('leagues').select('id,name,slug,logo_url,primary_color,owner_id,status').eq('id',selectedId).eq('status','active').maybeSingle();
    if(error||!l){gofCurrentOrganizationId=null;gofCurrentOrganization=null;document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent='Selecciona una organización');return null;}
    gofCurrentOrganizationId=l.id;gofCurrentOrganization=l;
+   await gofEnsureDefaultCategories(l.id);
    document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent=l.name||'Organización activa');
    restoreHomeLeagueLogo();
    return l;
@@ -2734,7 +2747,7 @@ async function loadLeagueContextFinal(preferredLeagueId=null){
  const {data:m}=await sb.from('league_members').select('league_id,role,is_current,active').eq('user_id',u.id).eq('active',true).eq('is_current',true).maybeSingle();
  if(!m){gofCurrentOrganizationId=null;gofCurrentOrganization=null;document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent='Selecciona una organización');return null;}
  const {data:l}=await sb.from('leagues').select('id,name,slug,logo_url,primary_color,owner_id,status').eq('id',m.league_id).maybeSingle();
- gofCurrentOrganizationId=m.league_id;gofCurrentOrganization=l||null; document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent=l?.name||'Organización activa'); restoreHomeLeagueLogo(); return l;
+ gofCurrentOrganizationId=m.league_id;gofCurrentOrganization=l||null; await gofEnsureDefaultCategories(gofCurrentOrganizationId); document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent=l?.name||'Organización activa'); restoreHomeLeagueLogo(); return l;
 }
 async function selectLeagueFinal(id){if(!id)return;const {error}=await sb.rpc('set_active_league',{p_league_id:id});if(error)return alert(error.message);await loadLeagueContextFinal();toast('Organización activa: '+(gofCurrentOrganization?.name||''));await refreshAllSelectors();await loadMisLigas();}
 async function ensurePlatformMaster(){
@@ -3605,23 +3618,54 @@ window.addEventListener('load',async function(){
     if(!window.sb)return;
     const te=document.getElementById('gofMatchupTournament'),ce=document.getElementById('gofMatchupCategory');
     if(!te)return;
-    te.innerHTML='<option value="">Cargando torneos…</option>';
+    te.innerHTML='<option value="">⏳ Cargando torneos…</option>';
     if(ce)ce.innerHTML='<option value="">Primero selecciona torneo</option>';
-    if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function'){try{await loadLeagueContextFinal()}catch(e){console.warn('No se pudo cargar la organización activa',e)}}
-    if(!gofCurrentOrganizationId){te.innerHTML='<option value="">Selecciona una liga activa primero</option>';return;}
-    const {data:t,error}=await sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
-    if(error){console.error('GAME ON FLAG Enfrentamientos — torneos:',error);te.innerHTML='<option value="">Error al cargar torneos</option>';if(ce)ce.innerHTML='<option value="">No se pudieron cargar categorías</option>';return;}
-    const keep=te.value;te.innerHTML=(t||[]).map(x=>`<option value="${gEsc(x.id)}" data-type="${gEsc(x.tournament_type||'regular')}" data-rounds="${x.tournament_type==='relampago'?3:Number(x.regular_rounds||7)}">${gEsc(x.name)}</option>`).join('')||'<option value="">Sin torneos</option>';
+
+    // Recupera la liga activa incluso si el contexto global todavía no quedó inicializado.
+    try{
+      if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function'){
+        const preferred=window.GOF_ACTIVE_LEAGUE_ID || localStorage.getItem('gameOnFlagActiveLeagueId') || localStorage.getItem('activeLeagueId') || '';
+        await loadLeagueContextFinal(preferred||null);
+      }
+    }catch(e){console.warn('No se pudo restaurar la liga activa:',e)}
+
+    if(!gofCurrentOrganizationId){
+      te.innerHTML='<option value="">⚠️ Selecciona primero una liga activa</option>';
+      if(ce)ce.innerHTML='<option value="">Selecciona un torneo primero</option>';
+      return;
+    }
+
+    const {data:t,error}=await sb.from('tournaments')
+      .select('id,name,status,tournament_type,regular_rounds,created_at')
+      .eq('league_id',gofCurrentOrganizationId)
+      .in('status',['proximo','activo'])
+      .order('created_at',{ascending:false});
+
+    if(error){
+      console.error('GAME ON FLAG Enfrentamientos — torneos:',error);
+      te.innerHTML='<option value="">❌ Error al cargar torneos</option>';
+      if(ce)ce.innerHTML='<option value="">❌ No se pudieron cargar categorías</option>';
+      return;
+    }
+
+    const keep=te.value;
+    te.innerHTML='<option value="">Selecciona torneo</option>'+
+      (t||[]).map(x=>`<option value="${gEsc(x.id)}" data-type="${gEsc(x.tournament_type||'regular')}" data-rounds="${x.tournament_type==='relampago'?3:Number(x.regular_rounds||7)}">${gEsc(x.name)}</option>`).join('');
     if(keep&&[...te.options].some(o=>o.value===keep))te.value=keep;
+
     te.onchange=async()=>{await loadMatchupCategories();await gofLoadMatchups()};
-    await loadMatchupCategories(); await gofLoadMatchups();
+    if(t?.length===1)te.value=t[0].id;
+    await loadMatchupCategories();
+    await gofLoadMatchups();
   }
   async function loadMatchupCategories(){
-    if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function'){try{await loadLeagueContextFinal()}catch(e){console.warn('No se pudo cargar la organización activa',e)}}
     const tid=gVal('gofMatchupTournament'),el=document.getElementById('gofMatchupCategory');if(!el)return;
     if(!tid){el.innerHTML='<option value="">Selecciona torneo</option>';return}
-    const {data}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
-    const old=el.value;el.innerHTML='<option value="">Todas las categorías</option>'+(data||[]).map(x=>`<option value="${gEsc(x.category_id)}">${gEsc(x.categories?.name||'Categoría')}</option>`).join('');if(old&&[...el.options].some(o=>o.value===old))el.value=old;
+    const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
+    if(error){console.error('GAME ON FLAG Enfrentamientos — categorías:',error);el.innerHTML='<option value="">❌ Error al cargar categorías</option>';return;}
+    const old=el.value;
+    el.innerHTML='<option value="">Selecciona categoría / Todas</option>'+(data||[]).map(x=>`<option value="${gEsc(x.category_id)}">${gEsc(x.categories?.name||'Categoría')}</option>`).join('');
+    if(old&&[...el.options].some(o=>o.value===old))el.value=old;
     el.onchange=gofLoadMatchups;
   }
   async function fetchMatchups(){

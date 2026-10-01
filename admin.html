@@ -2749,11 +2749,12 @@ window.gofGenerateOwnerCode=async function(id){
   alert('Código de acceso para el administrador:\n\n'+(data?.code||'No disponible'));
 }
 window.gofDeleteOwnerLeague=async function(id,name){
+  if(!id)return;
+  const ok=confirm('¿Seguro que quieres eliminar definitivamente la liga "'+String(name||'')+'"?\n\nSe eliminarán sus torneos, equipos, rosters, partidos, resultados, contabilidad y código de acceso. Esta acción no se puede deshacer.');
+  if(!ok)return;
+  const btns=[...document.querySelectorAll('.gof-delete-league-btn')];
+  btns.forEach(b=>{b.disabled=true;b.style.opacity='.55';});
   try{
-    if(!(await ensurePlatformMaster()))return;
-    if(!id)return;
-    const ok=confirm('¿Seguro que quieres eliminar definitivamente la liga "'+String(name||'')+'"?\n\nSe eliminarán sus torneos, equipos, rosters, partidos, resultados, contabilidad y código de acceso. Esta acción no se puede deshacer.');
-    if(!ok)return;
     if(!sb)sb=makeClient();
     const {data,error}=await sb.rpc('delete_league_as_platform_owner',{p_league_id:id});
     if(error)throw new Error(error.message||'No fue posible eliminar la liga.');
@@ -2763,6 +2764,8 @@ window.gofDeleteOwnerLeague=async function(id,name){
     await loadMisLigas();
   }catch(e){
     alert('No fue posible eliminar la liga: '+(e?.message||e));
+  }finally{
+    btns.forEach(b=>{b.disabled=false;b.style.opacity='';});
   }
 }
 async function createLeagueFinal(){

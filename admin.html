@@ -3603,11 +3603,14 @@ window.addEventListener('load',async function(){
   function gType(){return document.getElementById('gofMatchupTournament')?.selectedOptions?.[0]?.dataset?.type||''}
   async function loadMatchupSelectors(){
     if(!window.sb)return;
+    const te=document.getElementById('gofMatchupTournament'),ce=document.getElementById('gofMatchupCategory');
+    if(!te)return;
+    te.innerHTML='<option value="">Cargando torneos…</option>';
+    if(ce)ce.innerHTML='<option value="">Primero selecciona torneo</option>';
     if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function'){try{await loadLeagueContextFinal()}catch(e){console.warn('No se pudo cargar la organización activa',e)}}
-    if(!gofCurrentOrganizationId)return;
+    if(!gofCurrentOrganizationId){te.innerHTML='<option value="">Selecciona una liga activa primero</option>';return;}
     const {data:t,error}=await sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
-    if(error)return;
-    const te=document.getElementById('gofMatchupTournament'); if(!te)return;
+    if(error){console.error('GAME ON FLAG Enfrentamientos — torneos:',error);te.innerHTML='<option value="">Error al cargar torneos</option>';if(ce)ce.innerHTML='<option value="">No se pudieron cargar categorías</option>';return;}
     const keep=te.value;te.innerHTML=(t||[]).map(x=>`<option value="${gEsc(x.id)}" data-type="${gEsc(x.tournament_type||'regular')}" data-rounds="${x.tournament_type==='relampago'?3:Number(x.regular_rounds||7)}">${gEsc(x.name)}</option>`).join('')||'<option value="">Sin torneos</option>';
     if(keep&&[...te.options].some(o=>o.value===keep))te.value=keep;
     te.onchange=async()=>{await loadMatchupCategories();await gofLoadMatchups()};
@@ -3729,7 +3732,19 @@ window.addEventListener('load',async function(){
     const results=[];for(const x of assigned){const {error}=await sb.from('matches').update({match_date:x.date,match_time:x.time,field_name:x.field,status:'programado',schedule_generated_at:new Date().toISOString(),schedule_manual_override:false}).eq('id',x.id);if(error){conflicts.push(x.catName+': '+error.message)}else results.push(x)}
     const remainingCount=remaining.length;document.getElementById('gofCalendarBuilderStatus').innerHTML=`<div class="gof-ok">✅ ${results.length} partidos acomodados. ${conflicts.length?`⚠️ ${conflicts.length} aviso(s).`:''} ${remainingCount?'Quedan '+remainingCount+' pendientes.':''}</div>`;toast(`🚀 ${results.length} partidos enviados al calendario.`);await loadSchedule();
   }
-  async function initMatchupAndBuilder(){try{await loadMatchupSelectors();await gofLoadCalendarBlocks()}catch(e){console.warn('GAME ON FLAG matchup builder',e)}}
+  async function initMatchupAndBuilder(){
+    try{
+      if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function') await loadLeagueContextFinal();
+      await loadMatchupSelectors();
+      await gofLoadCalendarBlocks();
+    }catch(e){
+      console.error('GAME ON FLAG matchup builder',e);
+      const te=document.getElementById('gofMatchupTournament');
+      const ce=document.getElementById('gofMatchupCategory');
+      if(te && !te.value)te.innerHTML='<option value="">Error al inicializar Enfrentamientos</option>';
+      if(ce && !ce.value)ce.innerHTML='<option value="">Revisa la consola o vuelve a entrar a la liga</option>';
+    }
+  }
   window.gofLoadMatchups=gofLoadMatchups;window.gofGenerateMatchups=gofGenerateMatchups;window.gofSaveMatchup=gofSaveMatchup;window.gofSwapMatchup=gofSwapMatchup;window.gofApproveMatchups=gofApproveMatchups;window.gofAddCalendarBlock=gofAddCalendarBlock;window.gofRemoveCalendarBlock=gofRemoveCalendarBlock;window.gofSaveCalendarBlocks=gofSaveCalendarBlocks;window.gofLoadCalendarBlocks=gofLoadCalendarBlocks;window.gofGenerateCalendarFromMatchups=gofGenerateCalendarFromMatchups;
   window.setView=async function(v){
     const r=originalSetView?await originalSetView.apply(this,arguments):undefined;

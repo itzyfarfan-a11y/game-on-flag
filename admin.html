@@ -3687,7 +3687,7 @@ window.addEventListener('load',async function(){
     if(error)throw error;return (data||[]).map(x=>x.teams).filter(Boolean);
   }
   async function getRows(tid,cat){
-    let q=sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name),categories(name)').eq('tournament_id',tid).eq('category_id',cat).in('status',['pendiente','programado']).order('round_number').order('id');
+    let q=sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name),categories(name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
     const {data,error}=await q;if(error)throw error;return data||[];
   }
   function analyze(rows,teams,requiredRounds){
@@ -3900,7 +3900,7 @@ window.addEventListener('load',async function(){
   }
   async function fetchMatchups(){
     const tid=gVal('gofMatchupTournament'),cat=gVal('gofMatchupCategory');if(!tid)return [];
-    let q=sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,categories(name),home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).in('status',['pendiente','programado']);
+    let q=sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,categories(name),home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('status','programado');
     if(cat)q=q.eq('category_id',cat);
     const {data,error}=await q.order('category_id').order('round_number').order('id');if(error){alert(error.message);return []}return data||[];
   }
@@ -3927,16 +3927,16 @@ window.addEventListener('load',async function(){
     const rounds=tour?.tournament_type==='relampago'?3:Number(tour?.regular_rounds||7)||7;
     const cats=cat?[{id:cat,name:document.getElementById('gofMatchupCategory')?.selectedOptions?.[0]?.textContent||'Categoría'}]:((await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid)).data||[]).map(x=>x.categories).filter(Boolean);
     if(!cats.length)return alert('El torneo no tiene categorías.');
-    const existing=(await sb.from('matches').select('id,category_id,round_number,status,match_date').eq('tournament_id',tid).in('status',['pendiente','programado'])).data||[];
+    const existing=(await sb.from('matches').select('id,category_id,round_number,status,match_date').eq('tournament_id',tid).eq('status','programado')).data||[];
     const unscheduled=existing.filter(x=>!x.match_date);
-    if(unscheduled.length&& !confirm('Ya existen enfrentamientos pendientes. ¿Regenerarlos y reemplazarlos?'))return;
+    if(unscheduled.length&& !confirm('Ya existen enfrentamientos generados. ¿Regenerarlos y reemplazarlos?'))return;
     if(unscheduled.length){const ids=unscheduled.map(x=>x.id);const del=await sb.from('matches').delete().in('id',ids);if(del.error)return alert(del.error.message)}
     let created=0;
     for(const c of cats){
       const {data:rows,error}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',c.id).eq('is_active',true);if(error)return alert(error.message);
       const teams=(rows||[]).map(x=>x.teams).filter(Boolean);if(teams.length<2)continue;
       const roundsForCat=gofBuildScheduleRounds(teams,rounds);
-      const inserts=[];roundsForCat.forEach((pairs,ri)=>pairs.forEach(([a,b])=>inserts.push({tournament_id:tid,category_id:c.id,round_number:ri+1,home_team_id:a.id,away_team_id:b.id,status:'pendiente',published:false,is_makeup:false,referee_fee_due:true})));
+      const inserts=[];roundsForCat.forEach((pairs,ri)=>pairs.forEach(([a,b])=>inserts.push({tournament_id:tid,category_id:c.id,round_number:ri+1,home_team_id:a.id,away_team_id:b.id,status:'programado',published:false,is_makeup:false,referee_fee_due:true})));
       if(inserts.length){const {error:e}=await sb.from('matches').insert(inserts);if(e)return alert('No se pudieron crear los enfrentamientos de '+c.name+': '+e.message);created+=inserts.length;}
     }
     toast(`🎲 ${created} enfrentamientos generados. Ahora revísalos antes del calendario.`);await gofLoadMatchups();if(typeof window.gofValidateMatchups==='function')await window.gofValidateMatchups(true);
@@ -3984,7 +3984,7 @@ window.addEventListener('load',async function(){
     readBlocksFromUI();if(!calendarBlocks.length)return alert('Agrega al menos un bloque.');
     const approved=localStorage.getItem('gof_matchups_approved_'+tid)==='1';if(!approved&&!confirm('Los enfrentamientos todavía no están marcados como aprobados. ¿Continuar de todos modos?'))return;
     const {data:tour,error:te}=await sb.from('tournaments').select('tournament_type,schedule_settings').eq('id',tid).single();if(te)return alert(te.message);
-    const {data:matches,error:me}=await sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,categories(name)').eq('tournament_id',tid).in('status',['pendiente','programado']).is('match_date',null).order('round_number').order('id');if(me)return alert(me.message);if(!matches?.length)return alert('No hay enfrentamientos pendientes de calendario. Primero genera/revisa Enfrentamientos.');
+    const {data:matches,error:me}=await sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,categories(name)').eq('tournament_id',tid).eq('status','programado').is('match_date',null).order('round_number').order('id');if(me)return alert(me.message);if(!matches?.length)return alert('No hay enfrentamientos pendientes de calendario. Primero genera/revisa Enfrentamientos.');
     const {data:cats}=await sb.from('tournament_categories').select('category_id,categories(name)').eq('tournament_id',tid);const catName=new Map((cats||[]).map(x=>[x.category_id,x.categories?.name||'Categoría']));
     const assigned=[];const remaining=matches.map(m=>({...m,catName:catName.get(m.category_id)||m.categories?.name||'Categoría'}));const conflicts=[];
     for(const b of calendarBlocks){
@@ -4034,4 +4034,108 @@ window.addEventListener('load',async function(){
 </script>
 
 <!-- GAME ON FLAG ENFRENTAMIENTOS FINAL 2026-10-01 -->
+<!-- GAME ON FLAG SINGLE TOURNAMENT MODE 2026-10-01 -->
+<style id="gof-single-tournament-style">
+/* GAME ON FLAG: una sola liga + un solo torneo vigente. Los selectores siguen existiendo internamente para compatibilidad, pero el administrador no los elige. */
+.nav button[data-v="torneos"],
+.gof-workflow-step[onclick*="setView('torneos')"],
+#torneos{display:none!important}
+.gof-home-context{display:none!important}
+.gof-single-context{display:flex;flex-direction:column;gap:4px;margin:8px 0 12px;padding:12px 14px;border:1px solid #5a3d70;border-left:4px solid #e8c84a;border-radius:12px;background:linear-gradient(145deg,#21172b,#120d18)}
+.gof-single-context .gof-single-league{font-size:13px;font-weight:900;color:#fff}
+.gof-single-context .gof-single-tournament{font-size:12px;color:#d7cbe1}
+.gof-single-context .gof-single-tournament b{color:#e8c84a}
+.gof-hidden-tournament-field{display:none!important}
+.gof-pub-selects{display:none!important}
+</style>
+<script id="gof-single-tournament-script">
+(function(){
+  'use strict';
+  const TOURNAMENT_SELECT_IDS=['homeTournamentCourseSelect','homeTournamentSelect','at','rtour','deltour','rt','mt','ct','pt','ceTournament','crTournament','gofMatchupTournament','gofPubTournament'];
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  function setText(id,text){const e=document.getElementById(id);if(e)e.textContent=text||'';}
+  function hideTournamentField(el){
+    if(!el||el.dataset.gofSingleHidden==='1')return;
+    el.dataset.gofSingleHidden='1';
+    const lab=el.closest('label');
+    if(lab && (lab.textContent||'').toLowerCase().includes('torneo')) lab.classList.add('gof-hidden-tournament-field');
+    else if(el.parentElement && el.parentElement.classList.contains('form')) el.classList.add('gof-hidden-tournament-field');
+    else el.classList.add('gof-hidden-tournament-field');
+  }
+  function ensureContextCard(){
+    const home=document.getElementById('inicio');if(!home)return;
+    let box=document.getElementById('gofSingleContext');
+    if(!box){box=document.createElement('div');box.id='gofSingleContext';box.className='gof-single-context';const ident=home.querySelector('.gof-identity');if(ident)ident.insertAdjacentElement('afterend',box);else home.prepend(box);}
+    return box;
+  }
+  function renderContext(leagueName,tournamentName){
+    const box=ensureContextCard();if(!box)return;
+    box.innerHTML='<div class="gof-single-league">🏟️ '+escSafe(leagueName||'Liga')+'</div><div class="gof-single-tournament">🏆 <b>Torneo actual:</b> '+escSafe(tournamentName||'Cargando torneo…')+'</div>';
+  }
+  function escSafe(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  async function getCurrent(){
+    try{
+      if(typeof sb==='undefined'||!sb)return null;
+      if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function')await loadLeagueContextFinal();
+      const lid=typeof gofCurrentOrganizationId!=='undefined'?gofCurrentOrganizationId:'';
+      if(!lid)return null;
+      const [{data:league},{data:ts}]=await Promise.all([
+        sb.from('leagues').select('name').eq('id',lid).maybeSingle(),
+        sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds,season,start_date,created_at').eq('league_id',lid).order('created_at',{ascending:false})
+      ]);
+      const rows=ts||[];
+      const current=rows.find(x=>['proximo','activo'].includes(x.status))||rows[0]||null;
+      return {leagueId:lid,leagueName:league?.name||'Liga',tournament:current};
+    }catch(e){console.warn('GAME ON FLAG single tournament:',e);return null;}
+  }
+  function applyTournamentValue(tid){
+    if(!tid)return;
+    TOURNAMENT_SELECT_IDS.forEach(id=>{const el=document.getElementById(id);if(el){if(![...el.options].some(o=>o.value===tid))el.insertAdjacentHTML('afterbegin','<option value="'+escSafe(tid)+'"></option>');el.value=tid;hideTournamentField(el);}});
+    document.querySelectorAll('select').forEach(el=>{
+      const id=(el.id||'').toLowerCase();
+      const txt=(el.closest('label')?.textContent||'').toLowerCase();
+      if(id.includes('tournament')||id==='at'||id==='rtour'||id==='deltour'||id==='rt'||id==='mt'||id==='ct'||id==='pt'||id==='gofpubtournament'||txt.includes('torneo')){
+        if([...el.options].some(o=>o.value===tid))el.value=tid;
+        hideTournamentField(el);
+      }
+    });
+  }
+  async function applySingleMode(){
+    const cur=await getCurrent();
+    if(!cur){renderContext('Liga','No hay torneo configurado');return null;}
+    window.gofSingleTournamentId=cur.tournament?.id||'';
+    window.gofSingleTournament=cur.tournament||null;
+    localStorage.setItem('gof_home_tournament',cur.tournament?.id||'');
+    renderContext(cur.leagueName,cur.tournament?.name||'Sin torneo');
+    if(cur.tournament?.id)applyTournamentValue(cur.tournament.id);
+    // El nombre de la liga permanece visible; el torneo ya no se selecciona.
+    document.querySelectorAll('[data-current-league-name]').forEach(e=>{e.textContent=cur.leagueName||'Liga';});
+    return cur;
+  }
+  // Sustituye el selector de torneo de inicio por el contexto fijo Liga + Torneo actual.
+  const oldHome=window.loadHomeTournamentSelector;
+  window.loadHomeTournamentSelector=async function(){const r=await applySingleMode();return r;};
+  // Evita que una función antigua vuelva a pedir seleccionar torneo desde el inicio.
+  window.selectHomeTournament=async function(){return applySingleMode();};
+  // Los selectores internos se actualizan automáticamente cuando un módulo los llena.
+  const observer=new MutationObserver(()=>{const tid=window.gofSingleTournamentId;if(tid)applyTournamentValue(tid);});
+  function startObserver(){observer.observe(document.body,{childList:true,subtree:true});}
+  async function init(){
+    startObserver();
+    await applySingleMode();
+    // Ocultar/convertir textos visibles que ya no corresponden al flujo de un solo torneo.
+    document.querySelectorAll('.gof-action-copy small,.gof-action-body .notice,.workflow-kicker').forEach(e=>{
+      const t=(e.textContent||'');
+      if(/selecciona el torneo|selecciona torneo|elige torneo/i.test(t))e.textContent=t.replace(/selecciona el torneo/ig,'usa el torneo actual').replace(/selecciona torneo/ig,'usa el torneo actual').replace(/elige torneo/ig,'usa el torneo actual');
+    });
+    // Publicación Directa: liga y torneo son informativos, no selectores.
+    const pub=document.getElementById('publicacion');
+    if(pub){let box=document.getElementById('gofPubSingleContext');if(!box){box=document.createElement('div');box.id='gofPubSingleContext';box.className='gof-single-context';const head=pub.querySelector('.gof-pub-head');if(head)head.insertAdjacentElement('afterend',box);}const cur=window.gofSingleTournament;box.innerHTML='<div class="gof-single-league">🏟️ '+escSafe(cur?.leagueName||'Liga')+'</div><div class="gof-single-tournament">🏆 <b>Torneo actual:</b> '+escSafe(cur?.name||cur?.tournament?.name||'Torneo actual')+'</div>';}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,250));else setTimeout(init,250);
+  // Reaplica tras cambios de vista, porque algunos módulos llenan sus selectores al entrar.
+  const oldSet=window.setView;
+  if(typeof oldSet==='function')window.setView=async function(v){const r=await oldSet.apply(this,arguments);setTimeout(()=>applySingleMode(),60);return r;};
+})();
+</script>
 </body></html>

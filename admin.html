@@ -2845,7 +2845,7 @@ async function loadMisLigas(){
    const target=document.getElementById('gofOwnerActiveList');
    if(target){
      const createTop=document.getElementById('gofOwnerCreateFallback');
-     if(createTop)createTop.innerHTML='<button class="primary" style="width:100%;font-size:18px;padding:14px;margin-bottom:10px" type="button" onclick="gofOpenCreateLeaguePanel()">➕ CREAR LIGA NUEVA</button>';
+     if(createTop)createTop.innerHTML='';
      const {data,error}=await sb.from('leagues').select('id,name,status').eq('status','active').order('name');
      if(error){target.innerHTML='<div class="empty">No se pudo consultar la lista completa de ligas: '+esc(error.message)+'</div>';return;}
      const rows=await Promise.all((data||[]).map(async l=>{

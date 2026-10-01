@@ -3588,19 +3588,20 @@ window.addEventListener('load',async function(){
   const val=id=>document.getElementById(id)?.value||'';
   async function waitForSb(){
     for(let i=0;i<80;i++){
-      if(window.sb) return true;
+      if(typeof sb!=='undefined' && sb) return true;
+      try{ if(typeof makeClient==='function'){ sb=makeClient(); if(sb) return true; } }catch(e){ console.warn('GAME ON FLAG Supabase:',e); }
       await wait(125);
     }
     return false;
   }
   async function getActiveTournament(){
-    if(!window.sb) return null;
+    if(typeof sb==='undefined' || !sb) return null;
     try{
-      if(!window.gofCurrentOrganizationId && typeof window.loadLeagueContextFinal==='function') await window.loadLeagueContextFinal();
+      if(!gofCurrentOrganizationId && typeof loadLeagueContextFinal==='function') await loadLeagueContextFinal();
     }catch(e){console.warn(e)}
-    const league=window.gofCurrentOrganizationId;
+    const league=gofCurrentOrganizationId;
     if(!league) return null;
-    const {data,error}=await window.sb.from('tournaments')
+    const {data,error}=await sb.from('tournaments')
       .select('id,name,status,tournament_type,regular_rounds,created_at')
       .eq('league_id',league).in('status',['proximo','activo'])
       .order('created_at',{ascending:false});
@@ -3610,7 +3611,7 @@ window.addEventListener('load',async function(){
   async function loadSimpleEnfrentamientos(){
     const te=document.getElementById('gofMatchupTournament'), ce=document.getElementById('gofMatchupCategory');
     if(!te||!ce) return;
-    if(!(await waitForSb())){ce.innerHTML='<option value="">No se pudo conectar con la base de datos</option>';return;}
+    if(!(await waitForSb())){ce.innerHTML='<option value="">No se pudo iniciar la conexión</option>';return;}
     let t=null;
     try{t=await getActiveTournament();}catch(e){console.error(e)}
     if(!t){ce.innerHTML='<option value="">No hay torneo activo/preparación</option>';return;}
@@ -3618,7 +3619,7 @@ window.addEventListener('load',async function(){
     te.value=t.id;
     te.dataset.type=t.tournament_type||'regular';
     te.dataset.rounds=t.tournament_type==='relampago'?3:Number(t.regular_rounds||7);
-    const {data,error}=await window.sb.from('tournament_categories')
+    const {data,error}=await sb.from('tournament_categories')
       .select('category_id,categories(id,name)').eq('tournament_id',t.id);
     if(error){console.error(error);ce.innerHTML='<option value="">Error al cargar categorías</option>';return;}
     ce.innerHTML='<option value="">Selecciona categoría</option>'+(data||[]).map(x=>'<option value="'+x.category_id+'">'+(typeof esc==='function'?esc(x.categories?.name||'Categoría'):x.categories?.name||'Categoría')+'</option>').join('');
@@ -3668,14 +3669,14 @@ window.addEventListener('load',async function(){
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const gv=id=>document.getElementById(id)?.value||'';
   const esc2=v=>typeof window.gEsc==='function'?window.gEsc(v):String(v??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
-  async function db(){for(let i=0;i<80;i++){if(window.sb)return window.sb;await sleep(125)}return null}
+  async function db(){for(let i=0;i<80;i++){if(typeof sb!=='undefined' && sb)return sb;await sleep(125)}return null}
   async function getTid(){if(!gv('gofMatchupTournament')&&typeof window.gofInitSimpleMatchups==='function')try{await window.gofInitSimpleMatchups()}catch(_){}return gv('gofMatchupTournament')}
   async function getCatTeams(tid,cat){
-    const {data,error}=await window.sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
+    const {data,error}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
     if(error)throw error;return (data||[]).map(x=>x.teams).filter(Boolean);
   }
   async function getRows(tid,cat){
-    let q=window.sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name),categories(name)').eq('tournament_id',tid).eq('category_id',cat).in('status',['pendiente','programado']).order('round_number').order('id');
+    let q=sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name),categories(name)').eq('tournament_id',tid).eq('category_id',cat).in('status',['pendiente','programado']).order('round_number').order('id');
     const {data,error}=await q;if(error)throw error;return data||[];
   }
   function analyze(rows,teams,requiredRounds){
@@ -3715,7 +3716,7 @@ window.addEventListener('load',async function(){
   async function saveManual(id){
     const a=gv('gma_'+id),b=gv('gmb_'+id);
     if(!a||!b)return alert('Selecciona dos equipos diferentes.');
-    const {data:m,error:me}=await window.sb.from('matches').select('id,tournament_id,category_id,round_number,home_team_id,away_team_id').eq('id',id).maybeSingle();
+    const {data:m,error:me}=await sb.from('matches').select('id,tournament_id,category_id,round_number,home_team_id,away_team_id').eq('id',id).maybeSingle();
     if(me)return alert(me.message);
     if(!m)return alert('No se encontró el enfrentamiento. Actualiza la lista.');if(!a||!b||a===b)return alert('Selecciona dos equipos diferentes.');
     const before=await getRows(m.tournament_id,m.category_id);const duplicate=before.some(x=>x.id!==id&&Number(x.round_number)===Number(m.round_number)&&((x.home_team_id===a&&x.away_team_id===b)||(x.home_team_id===b&&x.away_team_id===a)));
@@ -3728,7 +3729,7 @@ window.addEventListener('load',async function(){
       const msg='⚠️ AVISO ANTES DE GUARDAR\n\n'+[...new Set(specific.length?specific:issues.slice(0,6))].join('\n')+'\n\n¿Quieres guardar este cambio de todos modos?';
       if(!confirm(msg))return;
     }
-    const {error}=await window.sb.from('matches').update({home_team_id:a,away_team_id:b}).eq('id',id);if(error)return alert(error.message);
+    const {error}=await sb.from('matches').update({home_team_id:a,away_team_id:b}).eq('id',id);if(error)return alert(error.message);
     if(typeof window.toast==='function')window.toast('💾 Enfrentamiento actualizado');
     await window.gofLoadMatchups();
     await validateCurrent(true);
@@ -3740,7 +3741,7 @@ window.addEventListener('load',async function(){
     if(missing.length)return alert('⚠️ No se puede publicar todavía.\n\n'+missing.join('\n')+'\n\nPrimero genera y revisa las 7 jornadas.');
     if(r.issues.length){if(!confirm('⚠️ Hay avisos en los enfrentamientos.\n\n'+r.issues.slice(0,12).join('\n')+'\n\nPuedes corregirlos o publicar bajo tu responsabilidad. ¿Publicar de todos modos?'))return;}
     if(!confirm('¿Publicar en el Portal Público los enfrentamientos de esta categoría?'))return;
-    const ids=r.rows.map(x=>x.id);const {error}=await window.sb.from('matches').update({published:true}).in('id',ids);if(error)return alert('No se pudieron publicar: '+error.message);
+    const ids=r.rows.map(x=>x.id);const {error}=await sb.from('matches').update({published:true}).in('id',ids);if(error)return alert('No se pudieron publicar: '+error.message);
     if(typeof window.toast==='function')window.toast('📢 Enfrentamientos publicados en el Portal Público');
     await window.gofLoadMatchups();
   }

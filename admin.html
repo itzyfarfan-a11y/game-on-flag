@@ -4683,14 +4683,14 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const hidden=document.getElementById('gofMatchupCategory');
     const old=hidden?.value||localStorage.getItem('gof_enf_category')||'';
     const selected=cats.some(c=>c.id===old)?old:'';
-    bar.innerHTML='<div class="gof-v2-title">🏷️ Categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button></div>';
+    bar.innerHTML='<div class="gof-v2-title">🏷️ Categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button><button type="button" id="gofMatrixApprove">💾 Aprobar y guardar</button><button type="button" id="gofMatrixPublish">📢 Publicar</button><button type="button" id="gofMatrixDownload">🖼️ Descargar tabla</button></div><div id="gofMatchupStatus" class="mut small" style="margin-top:8px">Sin aprobar</div>';
     const sel=document.getElementById('gofMatrixCategorySelect');
     const sync=async()=>{if(hidden)hidden.value=sel.value;localStorage.setItem('gof_enf_category',sel.value||'');await window.gofLoadMatchupsV2()};
     sel.onchange=sync;
     document.getElementById('gofMatrixRefresh').onclick=()=>window.gofLoadMatchupsV2();
-    document.getElementById('gofMatrixApprove').onclick=async()=>{try{await window.gofApproveMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}};
-    document.getElementById('gofMatrixPublish').onclick=async()=>{try{if(typeof window.gofPublishMatchups!=='function')return alert('La publicación de la tabla no está disponible todavía.');const ok=await getMatchupApproval(tid);if(!ok)return alert('Primero aprueba y guarda los enfrentamientos.');await window.gofPublishMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}};
-    document.getElementById('gofMatrixDownload').onclick=()=>{if(typeof window.gofDownloadMatchupsImage==='function')window.gofDownloadMatchupsImage();else alert('La descarga de la tabla no está disponible todavía.');};
+    document.getElementById('gofMatrixApprove')?.addEventListener('click',async()=>{try{await window.gofApproveMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}});
+    document.getElementById('gofMatrixPublish')?.addEventListener('click',async()=>{try{if(typeof window.gofPublishMatchups!=='function')return alert('La publicación de la tabla no está disponible todavía.');const ok=await getMatchupApproval(tid);if(!ok)return alert('Primero aprueba y guarda los enfrentamientos.');await window.gofPublishMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}});
+    document.getElementById('gofMatrixDownload')?.addEventListener('click',()=>{if(typeof window.gofDownloadMatchupsImage==='function')window.gofDownloadMatchupsImage();else alert('La descarga de la tabla no está disponible todavía.');});
     document.getElementById('gofMatrixGenerate').onclick=async()=>{
       const chosen=sel.value;
       if(!chosen)return alert('Primero selecciona una categoría.');

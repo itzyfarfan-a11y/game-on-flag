@@ -3,22 +3,6 @@
 function previewLeagueLogo(){const f=document.getElementById('leagueLogoUpload')?.files?.[0],o=document.getElementById('leagueLogoPreview');if(!f||!o)return;const u=URL.createObjectURL(f);o.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><img src="${u}" alt="Logo de organización" style="width:54px;height:54px;object-fit:contain;border-radius:12px;border:1px solid var(--line);background:#0b0910;padding:4px"><span>Logo seleccionado: <b>${esc(f.name)}</b></span></div>`;o.dataset.previewUrl=u}
 </script><style>
 :root{--bg:#07070b;--card:#15121d;--card2:#1d1828;--line:#382e48;--purple:#7d22ff;--gold:#e6c04d;--txt:#fff;--mut:#aaa4b7;--ok:#50d890;--red:#ff6378;--blue:#62a8ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#35105f,#07070b 48%);color:var(--txt);font-family:Arial,sans-serif}.app{max-width:1180px;margin:auto;min-height:100vh}.top{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#09090eed;backdrop-filter:blur(12px);z-index:10}.brand{font-weight:900;font-size:22px}.brand b{color:var(--gold)}.sub{font-size:10px;letter-spacing:3px;color:var(--mut);margin-top:3px}.hidden{display:none!important}.nav{display:flex;gap:6px;overflow:auto;padding:9px 12px;border-bottom:1px solid var(--line);position:sticky;top:68px;background:#09090ef5;z-index:9}.nav button{white-space:nowrap}button{border:0;border-radius:10px;padding:10px 13px;background:#292333;color:#fff;font-weight:800;cursor:pointer}button:hover{filter:brightness(1.15)}.nav button.active,.primary{background:var(--purple)}.gold{background:var(--gold);color:#17120a}.danger{background:#632031}.blue{background:#244e80}.view{display:none}.view.active{display:block}main{padding:18px}.card{background:linear-gradient(145deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}.hero{padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.stat{font-size:28px;font-weight:900;margin-top:5px}.mut{color:var(--mut)}.tag{display:inline-block;padding:5px 8px;border-radius:99px;background:#2b213b;color:#ddceff;font-size:11px}.ok{color:var(--ok)}.red{color:var(--red)}.notice{padding:12px;border-left:3px solid var(--gold);background:#211b2b;border-radius:9px;margin:12px 0}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px}.full{grid-column:1/-1}input,select{width:100%;padding:11px;border-radius:9px;border:1px solid var(--line);background:#0d0c12;color:#fff}.linkbox{word-break:break-all;background:#0c0b10;padding:11px;border-radius:9px;border:1px dashed #5a4b70;margin-top:8px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{color:var(--gold)}.small{font-size:12px}.match{display:grid;grid-template-columns:80px 1fr 1fr 170px;gap:10px;align-items:center}.team{font-weight:800}.score{font-size:20px;font-weight:900}.bracket{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.bracketcol{display:flex;flex-direction:column;gap:12px}.gamebox{background:#100d16;border:1px solid var(--line);border-radius:12px;padding:12px}.gamebox b{display:block;margin:4px 0}.toast{position:fixed;right:15px;bottom:15px;background:#1c1725;border:1px solid var(--line);padding:13px 16px;border-radius:12px;display:none;z-index:50}.empty{padding:20px;text-align:center;color:var(--mut)}.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal.show{display:flex}.modalbox{width:min(560px,100%);max-height:90vh;overflow:auto;background:linear-gradient(145deg,#241d2e,#15121d);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 20px 70px #000}.modalbox h3{margin:0 0 5px}.modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}.warning{padding:11px 12px;border-left:3px solid var(--gold);background:#302719;border-radius:9px;margin-top:10px}.warning b{color:var(--gold)}@media(max-width:700px){main{padding:11px}.top{padding:13px}.nav{top:62px}.hero{padding:18px}.match{grid-template-columns:55px 1fr 1fr;}.match .actions{grid-column:1/-1}.bracket{grid-template-columns:1fr}.brand{font-size:18px}}
-
-.gof-enf-card{margin-top:14px}
-.gof-enf-head{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
-.gof-enf-head .field-label{min-width:220px;flex:1}
-.gof-enf-table{min-width:1120px}
-.gof-enf-table th,.gof-enf-table td{text-align:center;white-space:nowrap;vertical-align:middle}
-.gof-enf-table th:first-child,.gof-enf-table td:first-child{text-align:left;position:sticky;left:0;z-index:2;background:#15121c}
-.gof-enf-table thead th{position:sticky;top:0;z-index:3;background:#21192d}
-.gof-enf-team{font-weight:900;min-width:190px}
-.gof-enf-cell{min-width:135px}
-.gof-enf-cell select{width:100%;min-width:125px;font-size:12px;font-weight:800;padding:8px 7px}
-.gof-enf-cell.locked{opacity:.65}
-.gof-enf-cell.locked select{cursor:not-allowed}
-.gof-enf-cell.empty{color:var(--mut);font-size:12px}
-.gof-enf-status{margin-top:9px;min-height:18px}
-@media(max-width:700px){.gof-enf-head .field-label{min-width:100%;}.gof-enf-table{min-width:1080px}.gof-enf-table th:first-child,.gof-enf-table td:first-child{left:0}.gof-enf-team{min-width:160px}}
 </style><style>.enrolled-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;margin-bottom:8px}.enrolled-list{display:grid;gap:6px}.enrolled-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.025)}.enrolled-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,214,82,.15);font-weight:800}
 .cg-scroll{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:12px}.calendar-grid{min-width:980px;width:100%;border-collapse:separate;border-spacing:0;background:#0d0b12}.calendar-grid th,.calendar-grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;padding:7px}.calendar-grid thead th{position:sticky;top:0;background:#17131f;color:#fff;text-align:center;font-weight:900;z-index:2}.calendar-grid thead th:first-child{width:92px}.calendar-grid .cg-day td{background:#241b31;color:var(--gold);font-size:14px;font-weight:900;padding:10px 12px;text-transform:none}.calendar-grid .cg-day td>div{justify-content:flex-start!important}.calendar-grid .cg-day td>div>button{flex:0 0 auto}.calendar-grid .cg-time{width:92px;text-align:center;white-space:nowrap;color:#fff;background:#15121c;font-size:12px}.cg-game{min-height:104px;border-radius:10px;padding:9px;background:#17131f;border-left:5px solid #777;display:flex;flex-direction:column;gap:5px}.cg-cat{font-size:11px;font-weight:900;text-transform:none;color:#ddd}.cg-teams{font-size:13px;font-weight:900;line-height:1.25}.cg-teams span{font-weight:500;opacity:.6}.cg-meta{font-size:10px;color:var(--mut)}.cg-actions{display:flex;gap:5px;margin-top:auto}.cg-actions button{padding:6px 8px;font-size:11px}.cg-empty{min-height:104px;display:flex;align-items:center;justify-content:center;color:#625b6d;font-size:20px}.cg-mixto{background:#26351b;border-left-color:#8bd23e}.cg-bronce{background:#3a2c1c;border-left-color:#d28a3f}.cg-silverf{background:#38252d;border-left-color:#e28b9e}.cg-silverv{background:#20333b;border-left-color:#6eb7ce}.cg-35{background:#302f29;border-left-color:#e4d6a0}.cg-golden{background:#3a3320;border-left-color:var(--gold)}.cg-other{background:#25202c;border-left-color:#8f7aaa}
 .team-schedule-card{margin-top:14px}.team-schedule-grid{min-width:1080px}.team-schedule-grid th,.team-schedule-grid td{text-align:center;white-space:nowrap}.team-schedule-grid th:first-child,.team-schedule-grid td:first-child{text-align:left}.team-schedule-grid th:nth-child(2),.team-schedule-grid td:nth-child(2){text-align:left;position:sticky;left:0;background:#15121c;z-index:1}.team-schedule-grid thead th:nth-child(2){z-index:3}.team-schedule-grid tbody tr:nth-child(even) td{background:#110f16}.ts-cat{font-size:11px;font-weight:800;color:var(--mut)}.ts-team{font-weight:900;min-width:170px}.team-schedule-grid td{font-size:12px}.team-schedule-grid td:not(:first-child):not(:nth-child(2)){min-width:125px}
@@ -448,7 +432,18 @@ body.home-screen{overflow:hidden!important}
 .calendar-mode-bar{margin:4px 0 7px!important}.calendar-mode-bar button{padding:8px 12px!important;border-radius:10px!important}
 
 .view{padding-top:0!important}.view>h2{margin:4px 0 12px!important;line-height:1.05!important}.back-menu{margin-top:0!important;margin-bottom:8px!important}.view>.card:first-of-type{margin-top:8px!important}main{padding-top:8px!important}.gof-final-header .gof-actions{gap:6px!important}.gof-final-header .gof-icon{width:38px!important;height:38px!important}.gof-final-header .gof-badge{display:none!important}.admin-player-row{padding:10px!important;margin-bottom:8px!important}.admin-player-row .form{gap:7px!important}.admin-player-row .ap-preview{width:64px!important;height:64px!important}#elist{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}#elist>.card{margin:0!important;padding:10px!important}#elist>.card .row{gap:7px!important}#elist>.card .tag{font-size:10px!important;padding:4px 6px!important}#elist>.card .toolbar button{padding:7px 8px!important;font-size:11px!important}@media(max-width:650px){main{padding:7px 10px 24px!important}.view>h2{font-size:28px!important;margin:3px 0 9px!important}.back-menu{font-size:14px!important;padding:7px 11px!important}.view>.notice{margin:8px 0!important}.view>.card{padding:12px!important;margin:9px 0!important}.gof-final-header .gof-icon{width:34px!important;height:34px!important;font-size:16px!important}.gof-final-header .gof-actions{gap:4px!important}.admin-player-row .form{grid-template-columns:1fr 90px!important}.admin-player-row .ap-photo,.admin-player-row .ap-curp{grid-column:1/-1!important}}
-</style></head><body><div class="app"><header class="top gof-top gof-final-header">
+</style><style id="gof-enfrentamientos-matrix">
+.ef-scroll{overflow-x:auto!important}.ef-grid{min-width:820px;background:#0d0b12}
+.ef-grid th,.ef-grid td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center;vertical-align:middle;padding:7px}
+.ef-grid th{position:sticky;top:0;background:#17131f;color:#f2c94c;z-index:3;font-size:11px}
+.ef-grid th:first-child,.ef-grid td:first-child{position:sticky;left:0;z-index:2;text-align:left;min-width:150px;background:#15121c}
+.ef-grid th:first-child{z-index:4}.ef-team{font-weight:900;font-size:12px}
+.ef-cell{min-width:92px;height:54px;padding:4px!important}.ef-opponent{width:100%;min-height:43px;padding:5px 6px;border-radius:9px;border:1px solid #40324f;background:#17131f;color:#fff;font-weight:800;font-size:10px;text-align:center;cursor:pointer}
+.ef-opponent:hover{border-color:#9b59ff;background:#21172d}.ef-opponent.locked{opacity:.55;cursor:not-allowed}.ef-opponent.empty{color:#756c82;font-weight:600}
+.ef-cell.ef-warning .ef-opponent{border-color:#d8a83e}.ef-cell.ef-self .ef-opponent{border-color:#ff6378}
+@media(max-width:650px){.ef-grid{min-width:760px}.ef-grid th:first-child,.ef-grid td:first-child{min-width:130px}.ef-team{font-size:11px}.ef-opponent{font-size:9px;min-height:40px}}
+</style>
+</head><body><div class="app"><header class="top gof-top gof-final-header">
 <div aria-hidden="true"></div>
 <div class="gof-center-brand"><div class="gof-title">GAME ON FLAG <b>APPLICATION</b></div><div class="gof-subtitle">CENTRO DE ADMINISTRACIÓN</div></div>
 <div class="gof-actions"><button class="gof-icon" onclick="openPublicPortal()" title="Portal Público" type="button">🌐</button><button class="gof-icon gof-header-gear" onclick="setView('configuracion')" title="Configuración" type="button">⚙️</button><button class="gof-icon" onclick="openAdminProfile()" title="Perfil de administradora" type="button">👤</button></div>
@@ -475,25 +470,25 @@ body.home-screen{overflow:hidden!important}
 <div class="card"><h3>🔄 Sustitución / baja de equipo</h3><div class="notice">Si un equipo se da de baja antes de terminar el torneo, puedes sustituirlo por otro. Los partidos ya jugados se conservan y los partidos pendientes se reasignan al nuevo equipo.</div><div class="form"><select id="rtour"></select><select id="rcat"></select><select id="roldteam"></select><select id="rnewteam"></select><input id="rnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="replaceTournamentTeam()" style="margin-top:9px">🔄 Dar de baja y sustituir equipo</button><div class="mut small" id="replacementStatus" style="margin-top:8px"></div></div><div class="card"><h3>🗑️ Dar de baja sin sustitución</h3><div class="notice">Úsalo cuando un equipo se retire <b>antes de que comience el torneo</b> y no habrá otro equipo en su lugar. La baja afecta únicamente su inscripción en ese torneo/categoría; el equipo seguirá existiendo en el catálogo general.</div><div class="form"><select id="deltour"></select><select id="delcat"></select><select id="delteam"></select><input id="delnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="deactivateTournamentTeam()" style="margin-top:9px">🗑️ Dar de baja equipo</button><div class="mut small" id="deactivateStatus" style="margin-top:8px"></div></div></section></main></div>
 <section class="view" id="equipos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>👥 Equipos</h2><div class="card"><div class="form"><input id="en" placeholder="Nombre del equipo"/><input id="eclub" placeholder="Club / Coach / Grupo (opcional)"/><button class="primary" onclick="createTeam()">+ Crear equipo</button></div><p class="mut small">La categoría se asigna al inscribir el equipo en un torneo. El Club/Coach ayuda al generador a evitar empalmes entre equipos del mismo grupo.</p></div><div id="elist"></div></section>
 <section class="view" id="rosters"><section class="card sportwey-review-panel"><h3>🔎 Revisión de antecedente de categoría</h3><p class="mut small">SOLO BUSCAR. Esta revisión no bloquea automáticamente al jugador ni sustituye la decisión de Administración.</p><div class="form"><select id="swPlayer"><option value="">Selecciona jugador</option></select><input id="swSource" placeholder="Fuente / URL de revisión (opcional)"><select id="swStatus"><option value="sin_antecedente">Sin antecedente</option><option value="posible_antecedente">Posible antecedente</option><option value="antecedente_confirmado">Antecedente confirmado</option><option value="revisado">Revisado</option></select><input id="swNotes" placeholder="Notas de revisión"><button class="primary" type="button" onclick="saveSportweyReviewFinal()">💾 Registrar revisión</button></div><div id="swList" class="mut small" style="margin-top:9px"></div></section><div class="card gof-exception-panel"><h3>⚠️ Excepciones de categoría</h3><p class="mut small">Golden → Silver y Silver → Bronce generan una advertencia. La administración decide si autoriza la participación; no se bloquea automáticamente.</p><div class="form"><select id="ceTournament"><option value="">Selecciona torneo</option></select><select id="ceCategory"><option value="">Selecciona categoría</option></select><select id="ceTeam"><option value="">Equipo</option></select><select id="cePlayer"><option value="">Jugador</option></select><input id="ceReason" placeholder="Motivo / autorización (opcional)"/><button class="primary" type="button" onclick="saveCategoryExceptionFinal('autorizado')">✅ Autorizar excepción</button><button class="danger" type="button" onclick="saveCategoryExceptionFinal('rechazado')">❌ Rechazar</button></div><div id="ceWarning" class="notice" style="display:none"></div><div id="ceList" class="mut small"></div></div><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📋 Rosters</h2><div class="notice"><b>🔐 ADMINISTRACIÓN — EDICIÓN DE ROSTER</b><br/>Administración es la versión maestra. Puedes guardar jugadores uno por uno, editar cualquier jugador y consultar los rosters completos sin mostrar 18 formularios al mismo tiempo.</div><div class="card"><h3>🔗 Enlaces de Roster para Coaches</h3><div class="form"><select id="rt"></select><select id="rc"></select><select id="re"></select><button class="gold" onclick="generateLink()">GENERAR ENLACE</button></div><p class="mut" id="linkStatus"></p><div id="linkOut"></div></div><div class="card"><h3>➕ Agregar / editar jugador</h3><div class="form"><select id="qrt"></select><select id="qrc"></select><select id="qre"></select></div><div id="quickRosterList" class="grid" style="margin-top:10px"></div><div class="card quick-player-form" style="margin-top:10px"><div class="row"><div><b id="quickRosterFormTitle">Jugador nuevo</b><div class="mut small">Guarda un jugador y el formulario se limpia para capturar al siguiente.</div></div><button type="button" onclick="clearQuickPlayerForm()">Limpiar</button></div><div class="form" style="margin-top:9px"><label class="field-label">Nombre completo<input id="qrName" placeholder="Nombre completo"></label><label class="field-label">Número de jersey<input id="qrNumber" type="number" min="0" max="99" placeholder="Número de jersey"></label><label class="field-label">Fecha de nacimiento<input id="qrDob" type="date"></label><label class="field-label">CURP <span class="mut">(solo Mom’s / +35)</span><input id="qrCurp" placeholder="CURP"></label><label class="field-label">Foto / URL<input id="qrPhoto" placeholder="URL de fotografía"></label><label class="field-label">📷 Seleccionar foto<input id="qrPhotoFile" type="file" accept="image/*" onchange="readQuickPhoto(this)"></label></div><img id="qrPhotoPreview" alt="Vista previa" style="display:none;width:76px;height:76px;object-fit:cover;border-radius:12px;margin-top:8px;border:1px solid var(--line)"><div class="toolbar" style="margin-top:10px"><button class="gold" onclick="saveQuickPlayer()">💾 GUARDAR JUGADOR</button></div></div></div><div class="card"><h3>👀 Ver Rosters</h3><div class="form"><select id="vrt"></select><select id="vrFilter"><option value="todos">Todos</option><option value="femenil">Femenil</option><option value="varonil">Varonil</option><option value="mixto">Mixto</option></select></div><div id="viewRosterList" style="margin-top:10px"></div></div><div id="adminRosterList" style="display:none"></div></section>
-<section class="view" id="calendario"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📅 Calendario</h2><div class="toolbar calendar-mode-bar"><button id="calModeGeneral" class="primary" type="button" onclick="setScheduleMode('general')">📊 General</button><button id="calModeCategory" type="button" onclick="setScheduleMode('category')">🏷️ Por categoría</button></div><div class="card"><div class="form"><label class="field-label">Liga<select id="ct"></select></label><label class="field-label">Categoría<select id="cc"></select></label><label class="field-label">Fecha<input id="cd" type="date"/></label><label class="field-label">Campo<input id="cf" placeholder="Campo 1–5"/></label><label class="field-label">Hora<input id="ch" type="time"/></label></div><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="generateSchedule()">🎲 Generar / regenerar categoría</button><button class="gold" onclick="generateFullTournamentSchedule()">🚀 GENERAR TODO EL TORNEO</button><button onclick="validateSchedule()">✅ Validar calendario completo</button><button class="primary" onclick="approvePublishFullCalendar()">✅📢 APROBAR Y PUBLICAR TODO</button><button onclick="manualMatch()">✏️ Crear juego manual</button></div><div class="notice">El flujo de programación es: <b>generar → revisar calendario completo → editar/mover lo necesario → validar → aprobar y publicar todo al final.</b><br/>Los partidos no se aprueban uno por uno. <b>Campo 5:</b> uso exclusivo de la administración.</div><div class="notice"><b>🔐 Solo Administración:</b> el estado de publicación y los cambios pendientes se muestran aquí. El portal público nunca muestra semáforos ni estados internos.</div></div><div class="card"><h3>🔁 Reponer semana de equipo sustituto</h3><div class="notice">Usa esto cuando un equipo entra después de que otro se dio de baja. El partido de reposición cuenta para el equipo que necesita completar sus semanas; el rival queda excluido de sus estadísticas.</div><div class="form"><select id="mt"></select><select id="mc"></select><select id="mmake"></select><select id="mopp"></select><input id="mround" min="1" placeholder="Semana de reposición" type="number"/><input id="mdate" type="date"/><input id="mtime" type="time"/><input id="mfield" placeholder="Cancha"/><input id="mnote" placeholder="Motivo / observación"/></div><div class="toolbar" style="margin-top:9px"><button class="gold" onclick="createMakeupMatch()">➕ Crear partido de reposición</button></div><div class="mut small" id="makeupStatus" style="margin-top:8px"></div></div><div id="scheduleList"></div></section>
-
 <section class="view" id="enfrentamientos">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
-<h2>⚔️ Enfrentamientos</h2>
-<div class="card gof-enf-card">
-  <div class="gof-enf-head">
+<div class="row"><div><h2>⚔️ Enfrentamientos</h2><p class="mut small">Matriz de enfrentamientos por equipo y jornada.</p></div></div>
+<div class="card">
+  <div class="form">
     <label class="field-label">Torneo<select id="efTournament"></select></label>
     <label class="field-label">Categoría<select id="efCategory"></select></label>
-    <button class="primary" type="button" onclick="loadEnfrentamientosMatrix()">🔄 Actualizar</button>
   </div>
-  <div class="notice" style="margin-top:10px"><b>Matriz de enfrentamientos J1–J7.</b> Cada fila es un equipo y cada columna muestra su rival. Para cambiar un rival, selecciona otro equipo en la celda. El sistema intercambia los rivales de esa jornada y valida que no se repita un partido ni se enfrente un equipo consigo mismo.</div>
-  <div id="efStatus" class="gof-enf-status mut small"></div>
-</div>
-<div class="card gof-enf-card">
-  <div class="cg-scroll" id="efMatrix"><div class="empty">Selecciona un torneo y una categoría.</div></div>
-  <div class="small mut cg-legend" style="margin-top:8px">🔒 Los partidos que ya no están en estado programado no se pueden modificar desde esta matriz. En móvil puedes desplazarte horizontalmente por J1–J7.</div>
+  <div id="efNotice" class="notice" style="display:none"></div>
+  <div class="cg-scroll ef-scroll">
+    <table class="ef-grid">
+      <thead><tr><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead>
+      <tbody id="efBody"><tr><td colspan="8" class="empty">Selecciona torneo y categoría.</td></tr></tbody>
+    </table>
+  </div>
+  <div class="small mut" style="margin-top:9px">Haz clic en un rival para intercambiarlo con otro partido de la misma jornada. Los partidos cerrados o ya jugados no se modifican.</div>
 </div>
 </section>
+<section class="view" id="calendario"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📅 Calendario</h2><div class="toolbar calendar-mode-bar"><button id="calModeGeneral" class="primary" type="button" onclick="setScheduleMode('general')">📊 General</button><button id="calModeCategory" type="button" onclick="setScheduleMode('category')">🏷️ Por categoría</button></div><div class="card"><div class="form"><label class="field-label">Liga<select id="ct"></select></label><label class="field-label">Categoría<select id="cc"></select></label><label class="field-label">Fecha<input id="cd" type="date"/></label><label class="field-label">Campo<input id="cf" placeholder="Campo 1–5"/></label><label class="field-label">Hora<input id="ch" type="time"/></label></div><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="generateSchedule()">🎲 Generar / regenerar categoría</button><button class="gold" onclick="generateFullTournamentSchedule()">🚀 GENERAR TODO EL TORNEO</button><button onclick="validateSchedule()">✅ Validar calendario completo</button><button class="primary" onclick="approvePublishFullCalendar()">✅📢 APROBAR Y PUBLICAR TODO</button><button onclick="manualMatch()">✏️ Crear juego manual</button></div><div class="notice">El flujo de programación es: <b>generar → revisar calendario completo → editar/mover lo necesario → validar → aprobar y publicar todo al final.</b><br/>Los partidos no se aprueban uno por uno. <b>Campo 5:</b> uso exclusivo de la administración.</div><div class="notice"><b>🔐 Solo Administración:</b> el estado de publicación y los cambios pendientes se muestran aquí. El portal público nunca muestra semáforos ni estados internos.</div></div><div class="card"><h3>🔁 Reponer semana de equipo sustituto</h3><div class="notice">Usa esto cuando un equipo entra después de que otro se dio de baja. El partido de reposición cuenta para el equipo que necesita completar sus semanas; el rival queda excluido de sus estadísticas.</div><div class="form"><select id="mt"></select><select id="mc"></select><select id="mmake"></select><select id="mopp"></select><input id="mround" min="1" placeholder="Semana de reposición" type="number"/><input id="mdate" type="date"/><input id="mtime" type="time"/><input id="mfield" placeholder="Cancha"/><input id="mnote" placeholder="Motivo / observación"/></div><div class="toolbar" style="margin-top:9px"><button class="gold" onclick="createMakeupMatch()">➕ Crear partido de reposición</button></div><div class="mut small" id="makeupStatus" style="margin-top:8px"></div></div><div id="scheduleList"></div></section>
 <section class="view" id="resultados"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏈 Resultados</h2><div class="notice">FORFEIT = <b>18–0</b>. Selecciona el equipo que no se presentó. El arbitraje queda manual en Contabilidad.</div><div id="resultsList"></div><div class="card gof-results-board"><div class="gof-board-head"><div><h3 style="margin:0">📋 Cuadro de marcadores</h3><p class="mut small" style="margin:3px 0 0">Vista compacta para revisar, descargar y publicar.</p></div></div><div class="form gof-board-filter"><select id="resBoardCat"><option value="">Todas las categorías</option></select></div><div id="resultsBoardStatus" class="mut small gof-board-status"></div><div id="resultsBoard" style="margin-top:8px"></div><div class="toolbar gof-board-actions"><button class="gold" type="button" onclick="downloadResultsBoardImage()">🖼️ Descargar imagen</button><button class="primary" type="button" onclick="publishResultsBoard()">📢 Publicar</button></div></div></section>
 <section class="view" id="tabla"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📊 Tabla de posiciones</h2><div class="card"><div class="form"><select id="st"></select><select id="sc"></select></div></div><div id="standings"></div></section>
 <section class="view" id="avisos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📢 Avisos oficiales</h2><div class="notice"><b>Módulo de avisos</b><br/>Crea el aviso, guárdalo como borrador, revísalo y después publícalo. Los publicados serán visibles en el portal público.</div><div class="card"><div class="form"><select id="noticeTournament"><option value="">Aviso general / todos los torneos</option></select><select id="noticeType"><option>Aviso</option><option>Sanción</option><option>Suspensión</option><option>Expulsión</option><option>Información</option></select><input id="noticeTitle" placeholder="Título"/><input id="noticeTeam" placeholder="Equipo"/><input id="noticePerson" placeholder="Persona"/><input id="noticeReason" placeholder="Motivo"/><input id="noticeSanction" placeholder="Sanción"/><input id="noticeDate" type="date"/><input id="noticeValid" placeholder="Vigencia"/><textarea class="full" id="noticeDesc" placeholder="Descripción libre" rows="5" style="width:100%;padding:11px;border-radius:9px;border:1px solid var(--line);background:#0d0c12;color:#fff"></textarea></div><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="saveNoticeDraft()">💾 Guardar borrador</button><button type="button" onclick="clearNoticeForm()">🧹 Limpiar</button></div></div><div class="card"><div class="row"><h3 style="margin:0">📋 Avisos guardados</h3><button type="button" onclick="loadNotices()">🔄 Actualizar</button></div><div id="noticeList" style="margin-top:10px"></div></div></section>
@@ -645,78 +640,75 @@ async function changeFinancePassword(){
 }
 function lockFinance(){financeUnlocked=false;sessionStorage.removeItem('gof_finance_unlocked');toast('🔒 Contabilidad bloqueada');setView('inicio')}
 
-async function loadEnfrentamientosSelectors(){
-  const tEl=document.getElementById('efTournament'), cEl=document.getElementById('efCategory');
-  if(!tEl||!cEl||!sb)return;
-  if(!gofCurrentOrganizationId){tEl.innerHTML='<option value="">Selecciona organización</option>';cEl.innerHTML='<option value="">Selecciona torneo</option>';return;}
-  const {data:t,error:te}=await sb.from('tournaments').select('id,name,status,season').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
-  if(te){tEl.innerHTML='<option value="">No se pudieron cargar torneos</option>';return;}
-  const old=tEl.value;
-  tEl.innerHTML='<option value="">Selecciona torneo</option>'+(t||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}${x.season?' · '+esc(x.season):''}</option>`).join('');
-  if(old&&[...tEl.options].some(o=>o.value===old))tEl.value=old; else if(t?.length)tEl.value=t[0].id;
-  await loadEnfrentamientosCategories();
+let efMatrixState={tournamentId:'',categoryId:'',data:null};
+async function loadEnfrentamientos(){
+  const tSel=document.getElementById('efTournament'), cSel=document.getElementById('efCategory');
+  if(!tSel||!cSel||!sb||!gofCurrentOrganizationId)return;
+  const prevT=tSel.value, prevC=cSel.value;
+  const {data:tournaments,error:te}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});
+  if(te){tSel.innerHTML='<option value="">Error</option>';return;}
+  tSel.innerHTML='<option value="">Selecciona torneo</option>'+(tournaments||[]).map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+  if(prevT && (tournaments||[]).some(t=>t.id===prevT))tSel.value=prevT;
+  else if(tournaments?.length)tSel.value=tournaments[0].id;
+  await loadEnfrentamientosCategories(prevC);
 }
-async function loadEnfrentamientosCategories(){
-  const tid=val('efTournament'),el=document.getElementById('efCategory');if(!el)return;
-  if(!tid){el.innerHTML='<option value="">Selecciona torneo</option>';document.getElementById('efMatrix').innerHTML='<div class="empty">Selecciona un torneo.</div>';return;}
+async function loadEnfrentamientosCategories(previousCategory){
+  const tSel=document.getElementById('efTournament'),cSel=document.getElementById('efCategory');
+  const tid=tSel?.value;
+  if(!cSel)return;
+  if(!tid){cSel.innerHTML='<option value="">Selecciona categoría</option>';renderEnfrentamientosEmpty('Selecciona un torneo.');return;}
   const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
-  if(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return;}
-  const cats=(data||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'})).sort((a,b)=>a.name.localeCompare(b.name,'es'));
-  const old=el.value;el.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
-  if(old&&cats.some(x=>x.id===old))el.value=old;else if(cats.length)el.value=cats[0].id;
+  if(error){renderEnfrentamientosEmpty(error.message);return;}
+  const cats=(data||[]).map(x=>x.categories).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  cSel.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  if(previousCategory && cats.some(c=>c.id===previousCategory))cSel.value=previousCategory;
+  else if(cats.length)cSel.value=cats[0].id;
   await loadEnfrentamientosMatrix();
 }
-function gofEnfSetStatus(msg,isError=false){const el=document.getElementById('efStatus');if(el){el.textContent=msg||'';el.style.color=isError?'#ff8b8b':'';}}
-async function getEnfrentamientosData(tid,cat){
-  const r=await sb.rpc('get_enfrentamientos_matrix',{p_tournament_id:tid,p_category_id:cat});
-  if(!r.error&&r.data)return r.data;
-  // Fallback directo por si el RPC aún no está disponible en un proyecto nuevo.
-  const {data:ins,error:ie}=await sb.from('tournament_teams').select('team_id,is_active,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
-  if(ie)throw ie;
-  const {data:ms,error:me}=await sb.from('matches').select('id,round_number,home_team_id,away_team_id,status,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name)').eq('tournament_id',tid).eq('category_id',cat).neq('status','cancelado');
-  if(me)throw me;
-  const by={};(ins||[]).forEach(x=>{if(x.team_id)by[x.team_id]={team_id:x.team_id,team_name:x.teams?.name||'Equipo',jornadas:{}}});
-  (ms||[]).forEach(m=>{for(const id of [m.home_team_id,m.away_team_id])if(by[id]){const opp=id===m.home_team_id?m.away_team_id:m.home_team_id;by[id].jornadas[String(m.round_number)]={match_id:m.id,opponent_id:opp,opponent_name:id===m.home_team_id?(m.away?.name||'Por definir'):(m.home?.name||'Por definir'),status:m.status}}});
-  return {category_id:cat,teams:Object.values(by).sort((a,b)=>a.team_name.localeCompare(b.team_name,'es'))};
+function renderEnfrentamientosEmpty(msg){
+  const b=document.getElementById('efBody');if(b)b.innerHTML=`<tr><td colspan="8" class="empty">${esc(msg)}</td></tr>`;
 }
 async function loadEnfrentamientosMatrix(){
-  const box=document.getElementById('efMatrix'),tid=val('efTournament'),cat=val('efCategory');if(!box)return;
-  if(!tid||!cat){box.innerHTML='<div class="empty">Selecciona torneo y categoría.</div>';return;}
-  gofEnfSetStatus('Cargando enfrentamientos…');
-  try{
-    const payload=await getEnfrentamientosData(tid,cat),teams=payload?.teams||[];
-    if(!teams.length){box.innerHTML='<div class="empty">No hay equipos inscritos en esta categoría.</div>';gofEnfSetStatus('');return;}
-    const teamIds=teams.map(t=>t.team_id);
-    let html='<table class="gof-enf-table"><thead><tr><th>EQUIPO</th>'+[1,2,3,4,5,6,7].map(r=>`<th>J${r}</th>`).join('')+'</tr></thead><tbody>';
-    for(const t of teams){
-      html+=`<tr><td class="gof-enf-team">${esc(t.team_name)}</td>`;
-      for(let r=1;r<=7;r++){
-        const g=t.jornadas?.[String(r)]||t.jornadas?.[r];
-        const locked=!!g && g.status!=='programado';
-        const current=g?.opponent_id||'';
-        const opts=['<option value="">— Sin partido —</option>'];
-        for(const id of teamIds){if(id===t.team_id)continue;const nm=teams.find(x=>x.team_id===id)?.team_name||'Equipo';opts.push(`<option value="${esc(id)}" ${id===current?'selected':''}>${esc(nm)}</option>`)}
-        if(g?.opponent_id&&!teamIds.includes(g.opponent_id))opts.push(`<option selected value="${esc(g.opponent_id)}">${esc(g.opponent_name||'Rival')}</option>`);
-        html+=`<td class="gof-enf-cell${locked?' locked':''}" title="${locked?'Partido bloqueado: '+esc(g.status):'Selecciona un rival para cambiar el enfrentamiento'}">${g?`<select ${locked?'disabled':''} data-match="${esc(g.match_id)}" data-team="${esc(t.team_id)}" data-round="${r}" onchange="gofChangeEnfOpponent(this)">${opts.join('')}</select>`:'<span class="mut">—</span>'}</td>`;
-      }
-      html+='</tr>';
-    }
-    html+='</tbody></table>';box.innerHTML=html;gofEnfSetStatus('Listo. Los cambios se guardan al seleccionar un nuevo rival.');
-  }catch(e){console.error(e);box.innerHTML=`<div class="empty">No se pudo cargar la matriz: ${esc(e?.message||e)}</div>`;gofEnfSetStatus('Error al cargar enfrentamientos.',true)}
+  const tid=val('efTournament'),cid=val('efCategory');
+  if(!tid||!cid){renderEnfrentamientosEmpty('Selecciona torneo y categoría.');return;}
+  const {data,error}=await sb.rpc('get_enfrentamientos_matrix',{p_tournament_id:tid,p_category_id:cid});
+  if(error){renderEnfrentamientosEmpty('No se pudo cargar la matriz: '+error.message);return;}
+  efMatrixState={tournamentId:tid,categoryId:cid,data:data||{teams:[]}};
+  renderEnfrentamientosMatrix(efMatrixState.data);
 }
-async function gofChangeEnfOpponent(sel){
-  const matchId=sel.dataset.match,teamId=sel.dataset.team,newOpp=sel.value;
-  if(!matchId||!teamId||!newOpp)return;
-  const previous=sel.dataset.previous||[...sel.options].find(o=>o.defaultSelected)?.value||'';
-  if(newOpp===previous)return;
-  sel.disabled=true;gofEnfSetStatus('Guardando cambio…');
-  try{
-    const {data,error}=await sb.rpc('gof_swap_match_opponent',{p_match_id:matchId,p_team_id:teamId,p_new_opponent_id:newOpp});
-    if(error)throw error;if(data?.ok!==true)throw new Error('No se pudo guardar el cambio.');
-    gofEnfSetStatus('✅ Enfrentamiento actualizado.');
-    await loadEnfrentamientosMatrix();
-  }catch(e){alert(e?.message||'No se pudo cambiar el rival.');await loadEnfrentamientosMatrix();}
+function renderEnfrentamientosMatrix(data){
+  const body=document.getElementById('efBody');if(!body)return;
+  const teams=data?.teams||[];
+  if(!teams.length){renderEnfrentamientosEmpty('No hay equipos activos en esta categoría.');return;}
+  body.innerHTML=teams.map(team=>{
+    const rounds=team.jornadas||{};
+    return `<tr><td class="ef-team">${esc(team.team_name||'Equipo')}</td>${[1,2,3,4,5,6,7].map(r=>{
+      const g=rounds[String(r)]||rounds[r], locked=g&&g.status!=='programado';
+      const label=g?.opponent_name||'Por definir';
+      return `<td class="ef-cell${g&&!g.opponent_id?' ef-warning':''}"><button type="button" class="ef-opponent${locked?' locked':''}${g?'':' empty'}" ${g&&!locked?`onclick="openEnfrentamientoSwap('${esc(g.match_id)}','${esc(team.team_id)}','${esc(team.team_name||'Equipo')}','${esc(g.opponent_id||'')}','${esc(g.opponent_name||'Por definir')}')"`:'disabled'}>${esc(label)}</button></td>`;
+    }).join('')}</tr>`;
+  }).join('');
 }
+async function openEnfrentamientoSwap(matchId,teamId,teamName,oldOpponentId,oldOpponentName){
+  const state=efMatrixState.data, row=(state?.teams||[]).find(x=>x.team_id===teamId);
+  const roundEntry=Object.entries(row?.jornadas||{}).find(([,g])=>g?.match_id===matchId)?.[1];
+  const round=roundEntry?Object.entries(row.jornadas).find(([,g])=>g?.match_id===matchId)?.[0]:null;
+  const candidates=(state?.teams||[]).map(t=>({id:t.team_id,name:t.team_name,game:t.jornadas?.[String(round)]||t.jornadas?.[round]}))
+    .filter(t=>t.id!==teamId&&t.id!==oldOpponentId&&t.game?.match_id);
+  if(!candidates.length)return alert('No hay otro partido programado en esta jornada para intercambiar el rival.');
+  const opts=candidates.map((x,i)=>`${i+1}. ${x.name}`).join('\n');
+  const answer=prompt(`Jornada ${round}\n\n${teamName} actualmente juega contra ${oldOpponentName}.\n\nSelecciona el número del nuevo rival:\n${opts}`);
+  if(answer===null)return;
+  const n=Number(answer),pick=candidates[n-1];
+  if(!pick)return alert('Selección inválida.');
+  if(!confirm(`Cambiar rival de ${teamName} de "${oldOpponentName}" a "${pick.name}" en J${round}?`))return;
+  const {error}=await sb.rpc('gof_swap_match_opponent',{p_match_id:matchId,p_team_id:teamId,p_new_opponent_id:pick.id});
+  if(error){alert(error.message);return;}
+  toast('✅ Enfrentamiento actualizado');
+  await loadEnfrentamientosMatrix();
+}
+document.getElementById('efTournament')?.addEventListener('change',()=>loadEnfrentamientosCategories(''));
+document.getElementById('efCategory')?.addEventListener('change',loadEnfrentamientosMatrix);
 
 async function setView(v){
   if(v==='contabilidad' && !(await enterFinance()))return;
@@ -724,11 +716,9 @@ async function setView(v){
   const target=document.getElementById(v); if(!target)return; target.classList.add('active');
   requestAnimationFrame(()=>{window.scrollTo({top:0,left:0,behavior:'instant'});document.documentElement.scrollTop=0;document.body.scrollTop=0;});
   document.querySelectorAll('.nav button[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
-  ({organizaciones:loadMisLigas,torneos:loadT,equipos:loadE,rosters:loadRosterSelects,calendario:loadScheduleSelectors,enfrentamientos:loadEnfrentamientosSelectors,resultados:loadResults,tabla:loadStandingsSelectors,playoffs:loadPlayoffSelectors,avisos:loadNotices,contabilidad:loadFinance,inicio:refreshDashboard}[v]||(()=>{}))();
+  ({organizaciones:loadMisLigas,torneos:loadT,equipos:loadE,rosters:loadRosterSelects,enfrentamientos:loadEnfrentamientos,resultados:loadResults,tabla:loadStandingsSelectors,playoffs:loadPlayoffSelectors,avisos:loadNotices,contabilidad:loadFinance,inicio:refreshDashboard}[v]||(()=>{}))();
 }
 document.querySelectorAll('.nav button[data-v]').forEach(b=>b.onclick=()=>setView(b.dataset.v));
-document.getElementById('efTournament')?.addEventListener('change',loadEnfrentamientosCategories);
-document.getElementById('efCategory')?.addEventListener('change',loadEnfrentamientosMatrix);
 async function refreshAllSelectors(){if(!sb)return;await loadEnrollmentSelectors();await loadRosterSelects();await loadScheduleSelectors();await loadStandingsSelectors();await loadPlayoffSelectors()}
 
 async function saveNewPassword(){

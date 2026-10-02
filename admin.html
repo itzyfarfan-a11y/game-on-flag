@@ -3788,9 +3788,9 @@ window.addEventListener('load',async function(){
     await loadSimpleEnfrentamientos();
     wire();
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,100));
-  else setTimeout(init,100);
-  window.gofInitSimpleMatchups=init;
+  // El flujo principal de Enfrentamientos lo controla la matriz V2.
+  // No ejecutar el inicializador legacy automáticamente porque reinicia la categoría y borra la matriz.
+  window.gofInitSimpleMatchups=async function(){ return true; };
 })();
 </script>
 <!-- GAME ON FLAG ENFRENTAMIENTOS J1-J7 + PUBLICACIÓN 2026-10-01 -->
@@ -4358,7 +4358,7 @@ window.addEventListener('load',async function(){
   window.gofLoadMatchups=gofLoadMatchups;window.gofGenerateMatchups=gofGenerateMatchups;window.gofSaveMatchup=gofSaveMatchup;window.gofSwapMatchup=gofSwapMatchup;window.gofApproveMatchups=gofApproveMatchups;window.gofAddCalendarBlock=gofAddCalendarBlock;window.gofRemoveCalendarBlock=gofRemoveCalendarBlock;window.gofSaveCalendarBlocks=gofSaveCalendarBlocks;window.gofLoadCalendarBlocks=gofLoadCalendarBlocks;window.gofGenerateCalendarFromMatchups=gofGenerateCalendarFromMatchups;
   window.setView=async function(v){
     const r=originalSetView?await originalSetView.apply(this,arguments):undefined;
-    if(v==='enfrentamientos'||v==='calendario')setTimeout(()=>initMatchupAndBuilder(),40);
+    if(v==='calendario')setTimeout(()=>initMatchupAndBuilder(),40);
     return r;
   };
   const oldNav=document.querySelector('.nav button[data-v="enfrentamientos"]');if(oldNav)oldNav.onclick=()=>window.setView('enfrentamientos');
@@ -4683,11 +4683,14 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const info=document.getElementById('gofMatchupInfo');if(info)info.innerHTML=`<b>${teams.length} equipos</b> · <b>${rows.length} partidos</b> · <b>7 jornadas</b>. La tabla se lee de izquierda a derecha: J1 → J7.`;
     const status=document.getElementById('gofMatchupStatus');if(status)status.textContent='Matriz lista';
   }
-  async function init(){await buildCategoryBar();
+  async function init(){
+    const previous=window.__gofMatrixSelectedCategory||val('gofMatchupCategory')||localStorage.getItem('gof_enf_category')||'';
+    await buildCategoryBar();
     const hidden=document.getElementById('gofMatchupCategory');
     const sel=document.getElementById('gofMatrixCategorySelect');
-    if(sel&&hidden&&hidden.value)sel.value=hidden.value;
-    if(sel&&sel.value){window.__gofMatrixSelectedCategory=sel.value;window.__gofMatrixSelectedTournament=await ensureTournament();}
+    if(sel&&previous&&[...sel.options].some(o=>o.value===previous))sel.value=previous;
+    if(hidden&&sel)hidden.value=sel.value||previous;
+    if(sel&&sel.value){window.__gofMatrixSelectedCategory=sel.value;window.__gofMatrixSelectedTournament=await ensureTournament();localStorage.setItem('gof_enf_category',sel.value);}
     await window.gofLoadMatchupsV2();
   }
   async function generateMatrixDirect(){
@@ -4737,9 +4740,15 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     }
     const hidden=document.getElementById('gofMatchupCategory');
     if(hidden) hidden.value=cat;
+    const visible=document.getElementById('gofMatrixCategorySelect');
+    if(visible) visible.value=cat;
     window.__gofMatrixSelectedCategory=cat;
+    window.__gofMatrixSelectedTournament=tid;
     localStorage.setItem('gof_enf_category',cat);
+    // Render directamente desde la misma categoría/torneo que acabamos de generar.
     await gofLoadMatchupsV2();
+    const matrix=document.getElementById('gofMatchupList');
+    if(matrix){matrix.style.display='block';setTimeout(()=>matrix.scrollIntoView({behavior:'smooth',block:'start'}),50);}
     const finalCount=schedule.length;
     if(typeof window.toast==='function') window.toast(toInsert.length?`✅ ${toInsert.length} enfrentamientos generados`:`✅ Los ${finalCount} enfrentamientos ya estaban generados`);
     return {inserted:toInsert.length,total:finalCount,protected:protectedRows.length};

@@ -1658,14 +1658,33 @@ async function replaceTournamentTeam(){
 
   document.getElementById('replacementStatus').textContent=`Sustitución realizada. Entró ${newTeam.name}. Sus partidos empiezan desde cero: 0/7. El historial de ${oldName} no se transfirió.`;
   document.getElementById('rnewteamName').value='';document.getElementById('rnewteamCoach').value='';document.getElementById('rnote').value='';
-  toast('Equipo sustituido. El nuevo equipo tendrá sus propios 7 partidos.');
+  toast('Equipo sustituido. El nuevo equipo aparece en Enfrentamientos para asignar sus rivales manualmente.');
+  window.__gofNewTeamId=String(newTeam.id);
   await loadEnrollmentSelectors();await loadReplacementSelectors();await loadDeactivateSelectors();await loadScheduleSelectors();
+  // La sustitución conserva el historial y deja al nuevo equipo sin rivales futuros automáticos.
+  await gofRefreshEnfrentamientosAfterTeamChange(tid,cat,newTeam.id);
 }
 
 async function loadDeactivateSelectors(){await loadLeagueContextFinal();const el=document.getElementById('deltour');if(!el)return;const {data:t,error}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).eq('status','proximo').order('created_at',{ascending:false});if(error){el.innerHTML='<option value="">No se pudieron cargar torneos</option>';return}fill('deltour',t||[],'id','name');await loadDeactivateCats()}
 async function loadDeactivateCats(){const tid=val('deltour'),el=document.getElementById('delcat');if(!el)return;if(!tid){el.innerHTML='<option value="">Selecciona categoría</option>';await loadDeactivateTeams();return}const {data,error}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);if(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}const ids=(data||[]).map(x=>x.category_id).filter(Boolean);if(!ids.length){el.innerHTML='<option value="">Sin categorías inscritas</option>';await loadDeactivateTeams();return}const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',ids).order('name');if(ce){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}fill('delcat',cats||[],'id','name');await loadDeactivateTeams()}
 async function loadDeactivateTeams(){const tid=val('deltour'),cat=val('delcat'),el=document.getElementById('delteam');if(!el)return;if(!tid||!cat){el.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:ins,error}=await sb.from('tournament_teams').select('id,team_id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(error){el.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);if(!ids.length){el.innerHTML='<option value="">No hay equipos activos en esta categoría</option>';return}const {data:teams,error:te}=await sb.from('teams').select('id,name').in('id',ids).order('name');if(te){el.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const tm=Object.fromEntries((teams||[]).map(x=>[x.id,x.name]));el.innerHTML='<option value="">Selecciona equipo</option>'+(ins||[]).filter(x=>tm[x.team_id]).map(x=>`<option value="${esc(x.id)}">${esc(tm[x.team_id])}</option>`).join('')}
-async function deactivateTournamentTeam(){const tt=val('delteam'),note=val('delnote').trim();if(!tt)return alert('Usa el torneo actual, categoría y equipo.');const selected=document.getElementById('delteam')?.selectedOptions?.[0]?.textContent||'este equipo';if(!confirm(`¿Dar de baja a "${selected}" de este torneo/categoría?\n\nEl equipo no se borrará del catálogo general.`))return;const {error}=await sb.rpc('gof_deactivate_tournament_team',{p_tournament_team_id:tt,p_note:note||null});if(error)return alert('No se pudo dar de baja el equipo: '+error.message);document.getElementById('deactivateStatus').textContent=`Equipo "${selected}" dado de baja correctamente.`;toast('Equipo dado de baja');await loadEnrollmentSelectors();await loadDeactivateSelectors();await loadReplacementSelectors();await refreshAllSelectors()}
+async function deactivateTournamentTeam(){const tt=val('delteam'),note=val('delnote').trim();if(!tt)return alert('Usa el torneo actual, categoría y equipo.');const selected=document.getElementById('delteam')?.selectedOptions?.[0]?.textContent||'este equipo';if(!confirm(`¿Dar de baja a "${selected}" de este torneo/categoría?\n\nEl equipo no se borrará del catálogo general.`))return;const {error}=await sb.rpc('gof_deactivate_tournament_team',{p_tournament_team_id:tt,p_note:note||null});if(error)return alert('No se pudo dar de baja el equipo: '+error.message);document.getElementById('deactivateStatus').textContent=`Equipo "${selected}" dado de baja correctamente.`;toast('Equipo dado de baja');await loadEnrollmentSelectors();await loadDeactivateSelectors();await loadReplacementSelectors();await refreshAllSelectors();await gofRefreshEnfrentamientosAfterTeamChange(val('deltour'),val('delcat'), '')}
+async function gofRefreshEnfrentamientosAfterTeamChange(tid,cat,newTeamId=''){
+  try{
+    window.__gofMatrixSelectedTournament=tid||window.__gofMatrixSelectedTournament||'';
+    window.__gofMatrixSelectedCategory=cat||window.__gofMatrixSelectedCategory||'';
+    if(newTeamId) window.__gofNewTeamId=String(newTeamId);
+    const hidden=document.getElementById('gofMatchupCategory');
+    if(hidden && cat) hidden.value=cat;
+    if(cat) localStorage.setItem('gof_enf_category',cat);
+    if(String(val('at')||'')===String(tid||'') && String(val('ac')||'')===String(cat||'')){
+      if(typeof window.gofLoadMatchupsV2==='function') await window.gofLoadMatchupsV2();
+    }else if(String(window.__gofMatrixSelectedTournament||'')===String(tid||'') && String(window.__gofMatrixSelectedCategory||'')===String(cat||'')){
+      if(typeof window.gofLoadMatchupsV2==='function') await window.gofLoadMatchupsV2();
+    }
+  }catch(e){console.warn('GAME ON FLAG: no se pudo actualizar la matriz de enfrentamientos',e)}
+}
+
 async function enrollTeam(){
   const tournament_id=val('at'),category_id=val('ac'),name=val('aeName').trim(),coach=val('aeCoach').trim();
   if(!tournament_id||!category_id)return alert('Selecciona primero torneo y categoría.');
@@ -1733,7 +1752,11 @@ Esto puede provocar empalmes de horario.
 
   toast(`Equipo ${team.name} inscrito`);
   clearTeamEntry();
+  window.__gofNewTeamId=String(team.id);
   await loadEnrolled();
+  // El equipo nuevo aparece inmediatamente en la matriz, al final, con sus 7 jornadas vacías.
+  // Sus rivales se asignan manualmente arrastrando; NO se regeneran automáticamente.
+  await gofRefreshEnfrentamientosAfterTeamChange(tournament_id,category_id,team.id);
 }
 
 async function loadEnrolled(){
@@ -4178,7 +4201,7 @@ window.addEventListener('load',async function(){
 
     // Déficit de partidos. Un equipo que entra tarde solo recibe automáticamente
     // un partido por jornada futura; los que falten después se agregan manualmente.
-    const deficits=new Map(teams.map(t=>[t.id,Math.max(0,7-(playedCount.get(t.id)||0))]));
+    const deficits=new Map(teams.map(t=>[t.id,Math.max(0,rounds-(playedCount.get(t.id)||0))]));
     const teamHasFuture=new Set();
     for(const r of futureExisting){teamHasFuture.add(r.home_team_id);teamHasFuture.add(r.away_team_id)}
 
@@ -4194,7 +4217,13 @@ window.addEventListener('load',async function(){
               const hx=localHist.get(pairKey(a.id,x.id))||0,hy=localHist.get(pairKey(a.id,y.id))||0;
               return hx-hy || (localDef.get(y.id)-localDef.get(x.id));
             });
-          const b=choices.find(x=>(localHist.get(pairKey(a.id,x.id))||0)===0)||choices[0];
+          // Regla de rivales: si hay suficientes equipos para cubrir todas las
+          // jornadas, cada equipo debe enfrentar rivales diferentes. Si hay menos
+          // equipos que jornadas, se permiten repeticiones porque son inevitables.
+          const uniqueOpponentsRequired=teams.length>rounds;
+          const b=uniqueOpponentsRequired
+            ? choices.find(x=>(localHist.get(pairKey(a.id,x.id))||0)===0)
+            : choices[0];
           if(!b)continue;
           matches.push([a,b]);used.add(a.id);used.add(b.id);
           localDef.set(a.id,Math.max(0,localDef.get(a.id)-1));localDef.set(b.id,Math.max(0,localDef.get(b.id)-1));
@@ -4234,7 +4263,7 @@ window.addEventListener('load',async function(){
     // Conteo informativo después de la generación automática.
     const autoCount=new Map(teams.map(t=>[t.id,playedCount.get(t.id)||0]));
     for(const list of best.rounds)for(const [a,b] of list){autoCount.set(a.id,(autoCount.get(a.id)||0)+1);autoCount.set(b.id,(autoCount.get(b.id)||0)+1)}
-    const missing=teams.map(t=>({name:t.name,count:autoCount.get(t.id)||0,missing:Math.max(0,7-(autoCount.get(t.id)||0))})).filter(x=>x.missing>0);
+    const missing=teams.map(t=>({name:t.name,count:autoCount.get(t.id)||0,missing:Math.max(0,rounds-(autoCount.get(t.id)||0))})).filter(x=>x.missing>0);
     await gofLoadMatchups();await updateRoundState();
     if(missing.length){
       const lines=missing.map(x=>`• ${x.name}: ${x.count}/7 · faltan ${x.missing} partido(s) manual(es)`);
@@ -4287,7 +4316,16 @@ window.addEventListener('load',async function(){
   async function gofApproveMatchups(){
     if(!gVal('gofMatchupTournament')){await loadMatchupSelectors();}
     const rows=await fetchMatchups();if(!rows.length)return alert('No hay enfrentamientos pendientes.');
-    const bad=[];const seen=new Set();rows.forEach(r=>{if(!r.home_team_id||!r.away_team_id||r.home_team_id===r.away_team_id)bad.push(`J${r.round_number}: equipo faltante o repetido`);const key=[r.category_id,r.round_number,[r.home_team_id,r.away_team_id].sort().join(':')].join('|');if(seen.has(key))bad.push(`J${r.round_number}: enfrentamiento repetido`);seen.add(key)});
+    const bad=[];const seen=new Set();const pairRounds=new Map();
+    rows.forEach(r=>{
+      if(!r.home_team_id||!r.away_team_id||r.home_team_id===r.away_team_id)bad.push(`J${r.round_number}: equipo faltante o repetido`);
+      const pair=[r.home_team_id,r.away_team_id].sort().join(':');
+      const key=[r.category_id,r.round_number,pair].join('|');
+      if(seen.has(key))bad.push(`J${r.round_number}: enfrentamiento repetido`);
+      seen.add(key);
+      if(r.home_team_id&&r.away_team_id){if(!pairRounds.has(pair))pairRounds.set(pair,[]);pairRounds.get(pair).push(Number(r.round_number));}
+    });
+    for(const [pair,rs] of pairRounds){const unique=[...new Set(rs)];if(unique.length>1)bad.push(`Rival repetido en J${unique.join(', J')}.`);}
     if(bad.length)return alert('Corrige antes de aprobar:\n\n'+bad.slice(0,12).join('\n'));
     localStorage.setItem('gof_matchups_approved_'+gVal('gofMatchupTournament'),'1');
     document.getElementById('gofMatchupStatus').textContent='🔒 Aprobados';toast('🔒 Enfrentamientos aprobados. Ya puedes construir el calendario.');
@@ -4610,11 +4648,14 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const hidden=document.getElementById('gofMatchupCategory');
     const old=hidden?.value||localStorage.getItem('gof_enf_category')||'';
     const selected=cats.some(c=>c.id===old)?old:'';
-    bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button></div><div class="gof-v2-help">La tabla de abajo es editable: puedes cambiar un rival con clic o arrastrar una celda hacia otro equipo de la misma jornada.</div>';
+    bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button><button type="button" class="primary" id="gofMatrixApprove">💾 Aprobar y guardar</button><button type="button" class="primary" id="gofMatrixPublish">📢 Publicar</button><button type="button" id="gofMatrixDownload">🖼️ Descargar tabla</button></div><div id="gofMatchupStatus" class="mut small" style="margin-top:8px">Sin aprobar</div><div class="gof-v2-help">La tabla de abajo es editable: puedes cambiar un rival con clic o arrastrar una celda hacia otro equipo de la misma jornada. Si entra un equipo nuevo, aparece al final con sus jornadas vacías para que tú le asignes sus rivales manualmente. La fecha, hora, campo y dobles jornadas se manejan únicamente en Calendario.</div>';
     const sel=document.getElementById('gofMatrixCategorySelect');
     const sync=async()=>{if(hidden)hidden.value=sel.value;localStorage.setItem('gof_enf_category',sel.value||'');await window.gofLoadMatchupsV2()};
     sel.onchange=sync;
     document.getElementById('gofMatrixRefresh').onclick=()=>window.gofLoadMatchupsV2();
+    document.getElementById('gofMatrixApprove')?.addEventListener('click',async()=>{try{await window.gofApproveMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}});
+    document.getElementById('gofMatrixPublish')?.addEventListener('click',async()=>{try{if(typeof window.gofPublishMatchups!=='function')return alert('La publicación no está disponible.');await window.gofPublishMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}});
+    document.getElementById('gofMatrixDownload')?.addEventListener('click',()=>{if(typeof window.gofDownloadMatchupsImage==='function')window.gofDownloadMatchupsImage();else alert('La descarga no está disponible.');});
     document.getElementById('gofMatrixGenerate').onclick=async()=>{
       const chosen=sel.value;
       if(!chosen)return alert('Primero selecciona una categoría.');
@@ -4641,11 +4682,34 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||''; if(!tid||!cat)return {rows:[],teams:[]};
     const {data:rows}=await client().from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
     const {data:tr}=await client().from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
-    return {rows:rows||[],teams:(tr||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'es'))};
+    const newId=String(window.__gofNewTeamId||'');
+    const teamList=(tr||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>{
+      const an=String(a.id)===newId, bn=String(b.id)===newId;
+      if(an&&!bn)return 1; if(!an&&bn)return -1;
+      return a.name.localeCompare(b.name,'es');
+    });
+    return {rows:rows||[],teams:teamList};
   }
   async function swap(matchId,teamId,targetTeamId,round){
     const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     if(!tid||!cat)return;
+    if(String(teamId)===String(targetTeamId))return alert('Un equipo no puede enfrentarse consigo mismo.');
+    // Antes de mover, comprobamos que el intercambio no cree un rival repetido.
+    // Se valida todo el torneo de la categoría, no solo la jornada visible.
+    const {data:all,error:qe}=await client().from('matches')
+      .select('id,round_number,home_team_id,away_team_id,status,match_date,published')
+      .eq('tournament_id',tid).eq('category_id',cat).eq('status','programado');
+    if(qe)return alert(qe.message);
+    const current=all?.find(x=>String(x.id)===String(matchId));
+    if(!current)return alert('No se encontró el enfrentamiento. Actualiza la tabla.');
+    const targetMatch=(all||[]).find(x=>Number(x.round_number)===Number(round)&&String(x.id)!==String(matchId)&&[x.home_team_id,x.away_team_id].some(t=>String(t)===String(targetTeamId)));
+    const oldOpponent=String(current.home_team_id)===String(teamId)?current.away_team_id:current.home_team_id;
+    const otherTeam=targetMatch?(String(targetMatch.home_team_id)===String(targetTeamId)?targetMatch.away_team_id:targetMatch.home_team_id):null;
+    const pairKey=(a,b)=>[String(a),String(b)].sort().join(':');
+    const protectedRows=(all||[]).filter(x=>String(x.id)!==String(matchId)&&(!targetMatch||String(x.id)!==String(targetMatch.id)));
+    const forbidden=[pairKey(teamId,targetTeamId),...(otherTeam?[pairKey(oldOpponent,otherTeam)]:[])];
+    const repeated=protectedRows.find(x=>forbidden.includes(pairKey(x.home_team_id,x.away_team_id)));
+    if(repeated)return alert('⚠️ Ese cambio repetiría un rival en otra jornada. Elige un equipo con el que todavía no haya jugado.');
     const {data,error}=await client().rpc('gof_swap_match_opponent',{p_match_id:matchId,p_team_id:teamId,p_new_opponent_id:targetTeamId});
     if(error||!data?.ok){alert(error?.message||'No se pudo cambiar el enfrentamiento.');return;}
     if(typeof window.toast==='function')window.toast('✅ Enfrentamiento cambiado');

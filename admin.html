@@ -7202,3 +7202,158 @@ if(typeof oldSet==='function'&&!oldSet.__gofFinalFixBlocks){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,900));else setTimeout(init,900);
 })();
 </script>
+
+<!-- GAME ON FLAG · FIX DEFINITIVO CALENDARIO: ACORDEÓN + DESCARGAS · 2026-10-02 -->
+<style id="gof-definitive-calendar-fix">
+#calendario #gofCalendarBlocks .gof-block-row.gof-def-accordion,
+#calendario #gofCalendarBlocks .gof-final-block.gof-def-accordion{overflow:hidden!important;padding:0!important}
+#calendario #gofCalendarBlocks .gof-def-toggle{width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;box-sizing:border-box!important;border:1px solid #49375a!important;background:#211b2b!important;color:#fff!important;border-radius:14px!important;padding:14px 16px!important;min-height:56px!important;text-align:left!important;font:inherit!important;cursor:pointer!important}
+#calendario #gofCalendarBlocks .gof-def-toggle .gof-def-arrow{font-size:20px!important;transition:transform .18s ease!important;flex:0 0 auto!important}
+#calendario #gofCalendarBlocks .gof-def-accordion.gof-def-open .gof-def-toggle .gof-def-arrow{transform:rotate(180deg)!important}
+#calendario #gofCalendarBlocks .gof-def-body{display:none!important;padding:10px!important}
+#calendario #gofCalendarBlocks .gof-def-accordion.gof-def-open .gof-def-body{display:block!important}
+#calendario #gofCalendarBlocks .gof-def-body>.gof-block-grid{display:grid!important}
+#calendario #gofCalendarBlocks .gof-def-body>.gof-final-block-grid{display:grid!important}
+#calendario #gofCalendarBlocks .gof-def-body>.gof-block-actions,
+#calendario #gofCalendarBlocks .gof-def-body>.gof-final-block-actions{display:grid!important}
+</style>
+<script id="gof-definitive-calendar-fix">
+(function(){
+'use strict';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const db=()=>window.sb||window.supabaseClient||(typeof window.client==='function'?window.client():null);
+function currentTournament(){return document.getElementById('ct')?.value||window.gofSingleTournamentId||window.__gofMatrixSelectedTournament||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||''}
+async function resolve(){
+ let id=currentTournament();
+ const d=db();
+ if(!id&&d){
+   const lid=window.gofCurrentOrganizationId||window.GOF_ACTIVE_LEAGUE_ID||localStorage.getItem('gameOnFlagActiveLeagueId')||localStorage.getItem('gof_active_league')||'';
+   let q=d.from('tournaments').select('id,name,start_date,tournament_type,league_id,created_at').order('created_at',{ascending:false}).limit(1);
+   if(lid)q=q.eq('league_id',lid);
+   const {data}=await q; id=data?.[0]?.id||'';
+ }
+ if(id){
+   window.gofSingleTournamentId=id;
+   try{localStorage.setItem('gof_home_tournament',id);localStorage.setItem('gof_active_tournament',id)}catch(_){ }
+   for(const sid of ['ct','gofMatchupTournament']){
+     const s=document.getElementById(sid);if(!s)continue;
+     if(![...s.options].some(o=>String(o.value)===String(id))){const o=document.createElement('option');o.value=id;o.textContent='Torneo actual';s.appendChild(o)}
+     s.value=id;
+   }
+ }
+ return id;
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function setupAccordion(){
+ const out=document.getElementById('gofCalendarBlocks');if(!out)return;
+ out.querySelectorAll('.gof-block-row,.gof-final-block').forEach((card,i)=>{
+   if(card.dataset.gofDefAccordion==='1')return;
+   let grid=card.querySelector(':scope > .gof-block-grid');
+   let actions=card.querySelector(':scope > .gof-block-actions');
+   let finalGrid=card.querySelector(':scope > .gof-final-block-grid');
+   let finalActions=card.querySelector(':scope > .gof-final-block-actions');
+   let existingBody=card.querySelector(':scope > .gof-def-body');
+   let oldToggle=card.querySelector(':scope > .gof-def-toggle');
+   let title='📅 Bloque '+(i+1),sub='Toca para desplegar';
+   const round=card.querySelector('select[id*="round"]')?.value;
+   const date=card.querySelector('input[type="date"]')?.value;
+   if(round)title='📅 Bloque '+(i+1)+' · Jornada '+round;
+   if(date)sub='Fecha · '+date;
+   if(!oldToggle){
+     const oldHead=card.querySelector(':scope > .gof-block-toggle,:scope > .gof-final-collapse-btn,:scope > .gof-final-block-head,:scope > .row');
+     if(oldHead){
+       const b=oldHead.querySelector('b')?.textContent?.trim();if(b)title=b;
+       const s=oldHead.querySelector('.mut.small')?.textContent?.trim();if(s)sub=s;
+       oldHead.remove();
+     }
+     oldToggle=document.createElement('button');oldToggle.type='button';oldToggle.className='gof-def-toggle';
+     oldToggle.innerHTML='<span><b>'+esc(title)+'</b><span class="mut small" style="display:block;margin-top:3px">'+esc(sub)+'</span></span><span class="gof-def-arrow">▼</span>';
+     card.insertBefore(oldToggle,card.firstChild);
+   }else{
+     oldToggle.classList.add('gof-def-toggle');
+   }
+   if(!existingBody){
+     existingBody=document.createElement('div');existingBody.className='gof-def-body';
+     const movable=[grid,actions,finalGrid,finalActions,...[...card.children].filter(x=>x.classList?.contains('mut')||x.classList?.contains('small'))];
+     movable.filter(Boolean).forEach(x=>existingBody.appendChild(x));
+     card.appendChild(existingBody);
+   }
+   card.classList.add('gof-def-accordion');
+   card.dataset.gofDefAccordion='1';
+   card.classList.remove('gof-def-open','gof-open','gof-collapsed');
+   oldToggle.onclick=(e)=>{e.preventDefault();e.stopPropagation();card.classList.toggle('gof-def-open')};
+ });
+}
+
+/* Guardar bloque: siempre resuelve el torneo actual antes de tocar la base. */
+async function saveBlocksFinal(){
+ const id=await resolve();if(!id){alert('No se pudo identificar el torneo actual.');return false}
+ const out=document.getElementById('gofCalendarBlocks');if(!out){alert('No se encontró el bloque de calendario.');return false}
+ const cards=[...out.querySelectorAll('.gof-block-row,.gof-final-block')];if(!cards.length){alert('Crea al menos un bloque.');return false}
+ const blocks=cards.map((_,i)=>({
+   date:document.getElementById('gcb_date_'+i)?.value||document.getElementById('gof_fb_date_'+i)?.value||'',
+   round:Number(document.getElementById('gcb_round_'+i)?.value||document.getElementById('gof_fb_round_'+i)?.value)||i+1,
+   start:document.getElementById('gcb_time_'+i)?.value||document.getElementById('gof_fb_time_'+i)?.value||'08:00',
+   fields:Math.max(1,Math.min(5,Number(document.getElementById('gcb_fields_'+i)?.value||document.getElementById('gof_fb_fields_'+i)?.value)||4)),
+   interval:Math.max(30,Math.min(180,Number(document.getElementById('gcb_int_'+i)?.value||document.getElementById('gof_fb_int_'+i)?.value)||60))
+ }));
+ const bad=blocks.findIndex(x=>!x.date);if(bad>=0){alert('El Bloque '+(bad+1)+' necesita una fecha.');return false}
+ const d=db();if(!d){alert('No se pudo conectar con la base de datos.');return false}
+ const {data,error:e1}=await d.from('tournaments').select('schedule_settings').eq('id',id).single();if(e1){alert(e1.message);return false}
+ const ss=data?.schedule_settings&&typeof data.schedule_settings==='object'?data.schedule_settings:{};ss.calendar_blocks=blocks;
+ const {error:e2}=await d.from('tournaments').update({schedule_settings:ss}).eq('id',id);if(e2){alert(e2.message);return false}
+ if(typeof window.toast==='function')window.toast('💾 Bloque guardado.');
+ return true;
+}
+
+/* Reemplaza el helper de imagen para evitar el fallo de descargas en Android/WebView. */
+window.gofSaveCanvasImage=async function(canvas,filename){
+ if(!canvas)throw new Error('No se pudo crear la imagen.');
+ const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('No se pudo crear el archivo PNG.')),'image/png'));
+ const safeName=String(filename||'GameOnFlag.png').replace(/[\\/:*?"<>|]+/g,'_');
+ const file=typeof File==='function'?new File([blob],safeName,{type:'image/png'}):null;
+ if(file&&navigator.share&&navigator.canShare){
+   try{if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:safeName});return true}}catch(e){if(e?.name==='AbortError')return false}
+ }
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download=safeName;a.rel='noopener';a.style.position='fixed';a.style.left='-9999px';a.style.top='-9999px';document.body.appendChild(a);
+ a.click();
+ await sleep(250);
+ if(document.body.contains(a))a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),5000);
+ return true;
+};
+
+/* Todas las aperturas de descarga usan el torneo resuelto, no #ct vacío. */
+const oldWeek=window.openWeekImageModal;
+if(typeof oldWeek==='function')window.openWeekImageModal=async function(week){const id=await resolve();if(!id){alert('No se pudo identificar el torneo actual.');return}return oldWeek(week)};
+const oldTeam=window.downloadTeamScheduleImage;
+if(typeof oldTeam==='function')window.downloadTeamScheduleImage=async function(){const id=await resolve();if(!id){alert('No se pudo identificar el torneo actual.');return}return oldTeam()};
+const oldMatrix=window.gofDownloadV2;
+if(typeof oldMatrix==='function')window.gofDownloadV2=async function(){const id=await resolve();if(!id)throw new Error('No se pudo identificar el torneo actual.');return oldMatrix()};
+
+/* Captura los botones de guardar/generar antes que los handlers antiguos. */
+document.addEventListener('click',async function(ev){
+ const b=ev.target.closest?.('#calendario button');if(!b)return;
+ const txt=(b.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+ if(!txt.includes('guardar bloque'))return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ if(b.dataset.gofBusy==='1')return;b.dataset.gofBusy='1';
+ try{
+   const ok=await saveBlocksFinal();
+   if(ok&&txt.includes('actualizar calendario')){
+     const fn=window.gofGenerateCalendarFromMatchups||window.gofGenerateCalendarFinal||window.gofGenerateCalendar;
+     if(typeof fn==='function')await fn();
+   }
+ }catch(e){alert('No se pudo guardar el bloque: '+(e?.message||e))}
+ finally{b.dataset.gofBusy='0'}
+},true);
+
+function patch(){setupAccordion()}
+const observer=new MutationObserver(()=>{clearTimeout(window.__gofDefTimer);window.__gofDefTimer=setTimeout(patch,20)});
+function init(){const out=document.getElementById('gofCalendarBlocks');if(out&&!out.__gofDefObs){observer.observe(out,{childList:true,subtree:true});out.__gofDefObs=true}patch()}
+const oldSet=window.setView;
+if(typeof oldSet==='function'&&!oldSet.__gofDefFinal){const w=async function(v){const r=await oldSet.apply(this,arguments);if(v==='calendario'){await sleep(150);await resolve();setTimeout(init,100);setTimeout(init,500);setTimeout(init,1200)}return r};w.__gofDefFinal=true;window.setView=w}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,700));else setTimeout(init,700);
+})();
+</script>

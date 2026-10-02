@@ -4224,7 +4224,12 @@ window.addEventListener('load',async function(){
     }
 
     if(futureExisting.length){
-      if(!confirm(`Se actualizarán solamente las jornadas futuras de ${catName} (J${nextRound}–J${rounds}). Las jornadas cerradas y las reposiciones manuales NO se tocarán.\n\n¿Continuar?`))return;
+      // Si todas las jornadas están abiertas, Generar debe funcionar directamente.
+      // Solo pedimos confirmación cuando existen jornadas cerradas que obligan a
+      // regenerar únicamente las jornadas posteriores a ellas.
+      if(locked.length){
+        if(!confirm(`Se actualizarán solamente las jornadas futuras de ${catName} (J${nextRound}–J${rounds}). Las jornadas cerradas y las reposiciones manuales NO se tocarán.\n\n¿Continuar?`))return;
+      }
       const ids=futureExisting.map(x=>x.id);const del=await sb.from('matches').delete().in('id',ids);if(del.error)return alert(del.error.message);
     }
 
@@ -4623,8 +4628,17 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
       if(hidden)hidden.value=chosen;
       localStorage.setItem('gof_enf_category',chosen);
       if(typeof window.gofGenerateMatchups!=='function')return alert('No se pudo cargar el generador de enfrentamientos.');
-      await window.gofGenerateMatchups();
-      await window.gofLoadMatchupsV2();
+      const btn=document.getElementById('gofMatrixGenerate');
+      const oldText=btn.textContent; btn.disabled=true; btn.textContent='⏳ Generando...';
+      try{
+        await window.gofGenerateMatchups();
+        await window.gofLoadMatchupsV2();
+      }catch(err){
+        console.error('GAME ON FLAG — generar enfrentamientos',err);
+        alert('No se pudieron generar los enfrentamientos: '+(err?.message||err));
+      }finally{
+        btn.disabled=false; btn.textContent=oldText;
+      }
     };
     if(hidden)hidden.value=selected;
   }

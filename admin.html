@@ -1143,7 +1143,7 @@ async function downloadWeekCalendarImage(){
  const roundRect=(xx,yy,w,h,r,fill,stroke)=>{x.beginPath();x.roundRect(xx,yy,w,h,r);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=3;x.stroke()}};
  roundRect(pad,pad,W-pad*2,headerH,18,'#17131f','#6b2db2');
  const logo=gofCurrentOrganization?.logo_url||'';
- if(logo){try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=logo});const scale=Math.min(1,180/img.width,82/img.height);x.drawImage(img,pad+22,pad+20,img.width*scale,img.height*scale)}catch(e){}}
+ if(logo){try{const img=await new Promise((res,rej)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=rej;im.src=logo});const scale=Math.min(1,180/img.width,82/img.height);x.drawImage(img,pad+22,pad+20,img.width*scale,img.height*scale)}catch(e){}}
  x.fillStyle='#fff';x.font='900 42px Arial';x.fillText(`CALENDARIO · SEMANA ${week}`,pad+225,pad+54);
  x.fillStyle='#d9cde5';x.font='700 24px Arial';x.fillText(title.slice(0,70),pad+225,pad+92);
  x.fillStyle='#b7a8c7';x.font='600 21px Arial';x.fillText(dateText,pad+225,pad+126);
@@ -6734,5 +6734,91 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
    touchDrag();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,900));else setTimeout(bind,900);
+})();
+</script>
+
+
+<!-- GAME ON FLAG · CALENDARIO · DESCARGA + VERIFICADOR DE EMPALMES · 2026-10-02 -->
+<style id="gof-calendar-conflict-tools-final">
+#calendario .gof-calendar-extra-tools{display:grid!important;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+#calendario .gof-calendar-extra-tools button{min-height:46px!important;margin:0!important}
+.gof-conflict-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:none;align-items:center;justify-content:center;padding:18px}
+.gof-conflict-modal.show{display:flex}
+.gof-conflict-box{width:min(620px,96vw);max-height:84vh;overflow:auto;background:#17131f;border:1px solid #6b2db2;border-radius:18px;padding:18px;box-shadow:0 20px 70px rgba(0,0,0,.55)}
+.gof-conflict-ok{padding:14px;border-radius:12px;background:#102417;border-left:5px solid #7ee35a;color:#eaffdf;font-weight:800}
+.gof-conflict-warn{padding:12px;border-radius:12px;background:#261b10;border-left:5px solid #f2c94c;margin-top:8px;color:#fff0c2}
+.gof-conflict-item{padding:10px 12px;border:1px solid #3b3344;border-radius:10px;background:#111018;margin-top:7px}
+.gof-conflict-small{font-size:12px;color:#b7a8c7;margin-top:3px}
+@media(max-width:700px){#calendario .gof-calendar-extra-tools{grid-template-columns:1fr}.gof-conflict-box{padding:14px}}
+</style>
+<script id="gof-calendar-conflict-tools-final">
+(function(){
+ 'use strict';
+ const db=()=>window.sb||window.supabaseClient||(typeof window.client==='function'?window.client():null);
+ const root=()=>document.getElementById('calendario');
+ const tid=()=>document.getElementById('ct')?.value||window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ const isMixed=n=>/\bmixto\b/i.test(String(n||''));
+ const isSilver=n=>/silver\s+(varonil|femenil)/i.test(String(n||''));
+ function ensureModal(){
+   if(document.getElementById('gofConflictModal'))return;
+   const d=document.createElement('div');d.id='gofConflictModal';d.className='gof-conflict-modal';
+   d.innerHTML='<div class="gof-conflict-box"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h3 style="margin:0">🔎 Verificar empalmes</h3><button type="button" id="gofConflictClose" style="min-width:42px">✕</button></div><div id="gofConflictBody" style="margin-top:12px"></div></div>';
+   d.addEventListener('click',e=>{if(e.target===d)d.classList.remove('show')});document.body.appendChild(d);
+   document.getElementById('gofConflictClose').onclick=()=>d.classList.remove('show');
+ }
+ function show(body){ensureModal();document.getElementById('gofConflictBody').innerHTML=body;document.getElementById('gofConflictModal').classList.add('show')}
+ async function verify(){
+   const d=db(),id=tid();if(!d||!id)return alert('No se encontró el torneo actual.');
+   const {data,error}=await d.from('matches').select('id,round_number,match_date,match_time,field_name,home_team_id,away_team_id,status,published,categories(name),home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name)').eq('tournament_id',id).not('match_date','is',null).neq('status','cancelado').order('match_date').order('match_time').order('field_name');
+   if(error)return alert('No se pudieron verificar los empalmes: '+error.message);
+   const games=data||[], issues=[];
+   const byDateTeam=new Map(), bySlotTeam=new Map(), bySlotCat=new Map(), bySlotField=new Map();
+   const add=(map,k,g)=>{if(!map.has(k))map.set(k,[]);map.get(k).push(g)};
+   for(const g of games){
+     const date=String(g.match_date||''),time=String(g.match_time||'').slice(0,5),field=String(g.field_name||''),cn=String(g.categories?.name||'Categoría');
+     const ids=[g.home_team_id,g.away_team_id].filter(Boolean);
+     ids.forEach(t=>{add(byDateTeam,date+'|'+t,g);add(bySlotTeam,date+'|'+time+'|'+t,g)});
+     add(bySlotCat,date+'|'+time+'|'+cn,g);add(bySlotField,date+'|'+time+'|'+field,g);
+   }
+   for(const [k,arr] of byDateTeam){if(arr.length>1){const [date,t]=k.split('|');const names=[...new Set(arr.map(g=>g.home_team_id===t?g.home?.name:g.away?.name))].join(' / ');issues.push({type:'double',text:`${names} tiene ${arr.length} partidos el mismo día (${date}).`,detail:arr.map(g=>`J${g.round_number} · ${String(g.match_time||'').slice(0,5)} · ${g.categories?.name||''} · ${g.home?.name||''} vs ${g.away?.name||''}`).join('<br>')})}}
+   for(const [k,arr] of bySlotTeam){if(arr.length>1){const [date,time,t]=k.split('|');const names=[...new Set(arr.map(g=>g.home_team_id===t?g.home?.name:g.away?.name))].join(' / ');issues.push({type:'team',text:`${names} tiene empalme a las ${time} del ${date}.`,detail:arr.map(g=>`J${g.round_number} · ${g.categories?.name||''} · ${g.home?.name||''} vs ${g.away?.name||''}`).join('<br>')})}}
+   for(const [k,arr] of bySlotField){if(arr.length>1){const [date,time,field]=k.split('|');issues.push({type:'field',text:`${field} tiene más de un partido a las ${time} del ${date}.`,detail:arr.map(g=>`J${g.round_number} · ${g.categories?.name||''} · ${g.home?.name||''} vs ${g.away?.name||''}`).join('<br>')})}}
+   // Regla específica: Mixto no debe compartir horario con Silver Femenil/Silver Varonil.
+   for(const [k,arr] of bySlotCat){const mixed=arr.filter(g=>isMixed(g.categories?.name));const silver=arr.filter(g=>isSilver(g.categories?.name));if(mixed.length&&silver.length){const [date,time]=k.split('|');issues.push({type:'mixed-silver',text:`Mixto coincide con Silver a las ${time} del ${date}.`,detail:[...mixed,...silver].map(g=>`${g.categories?.name||''} · ${g.home?.name||''} vs ${g.away?.name||''}`).join('<br>')})}}
+   // Regla específica: si el mismo nombre de equipo/club aparece en Mixto y otra categoría, no puede jugar simultáneamente.
+   const slotGames=[...bySlotCat.entries()];
+   for(const [k,arr] of slotGames){
+     const mx=arr.filter(g=>isMixed(g.categories?.name));
+     if(!mx.length)continue;
+     const others=arr.filter(g=>!isMixed(g.categories?.name));
+     const mxNames=new Set(mx.flatMap(g=>[g.home?.name,g.away?.name]).filter(Boolean).map(norm));
+     for(const g of others){const hit=[g.home?.name,g.away?.name].filter(Boolean).find(n=>mxNames.has(norm(n)));if(hit){const [date,time]=k.split('|');issues.push({type:'same-name',text:`El equipo/club "${hit}" de Mixto coincide con otra categoría a las ${time} del ${date}.`,detail:`Mixto: ${mx.map(x=>`${x.home?.name||''} vs ${x.away?.name||''}`).join(' · ')}<br>Otra categoría: ${g.categories?.name||''} · ${g.home?.name||''} vs ${g.away?.name||''}`})}}
+   }
+   const uniq=[];const seen=new Set();for(const x of issues){const k=x.type+'|'+x.text+'|'+x.detail;if(!seen.has(k)){seen.add(k);uniq.push(x)}}
+   const body=uniq.length?`<div class="gof-conflict-warn">⚠️ <b>${uniq.length} conflicto(s) detectado(s).</b><div class="gof-conflict-small">Corrige los horarios/campos desde el Calendario.</div></div>`+uniq.map(x=>`<div class="gof-conflict-item"><b>${x.text}</b><div class="gof-conflict-small">${x.detail}</div></div>`).join(''):`<div class="gof-conflict-ok">✅ <b>Calendario sin empalmes.</b><div class="gof-conflict-small">No hay equipos con doble partido el mismo día, ni empalmes por horario/campo. Mixto tampoco coincide con Silver ni con el mismo nombre de equipo/club en otra categoría.</div></div>`;
+   show(body);
+   return !uniq.length;
+ }
+ function addButtons(){
+   const r=root();if(!r)return;
+   const main=r.querySelector('.gof-calendar-main-actions');if(!main)return;
+   let tools=r.querySelector('.gof-calendar-extra-tools');
+   if(!tools){tools=document.createElement('div');tools.className='gof-calendar-extra-tools';main.insertAdjacentElement('afterend',tools)}
+   tools.innerHTML='<button type="button" class="gold" id="gofCalendarDownloadImage">🖼️ Descargar imagen</button><button type="button" class="primary" id="gofCalendarVerifyConflicts">🔎 Verificar empalmes</button>';
+   document.getElementById('gofCalendarVerifyConflicts').onclick=verify;
+   document.getElementById('gofCalendarDownloadImage').onclick=()=>{
+     const weeks=[...new Set([...r.querySelectorAll('.cg-day')].map(x=>String(x.textContent||'').match(/SEMANA\s+(\d+)/i)?.[1]).filter(Boolean))].map(Number).sort((a,b)=>a-b);
+     if(typeof window.openWeekImageModal==='function'){
+       const w=weeks[0]||1;window.openWeekImageModal(w);
+     }else alert('La descarga de imagen no está disponible todavía.');
+   };
+ }
+ const oldSet=window.setView;
+ if(typeof oldSet==='function'&&!oldSet.__gofConflictTools){
+   const w=async function(v){const res=await oldSet.apply(this,arguments);if(v==='calendario')setTimeout(addButtons,300);return res};w.__gofConflictTools=true;window.setView=w;
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(addButtons,1200));else setTimeout(addButtons,1200);
+ window.gofVerifyCalendarConflicts=verify;
 })();
 </script>

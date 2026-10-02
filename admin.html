@@ -2160,7 +2160,9 @@ async function saveWeekDate(){
 let scheduleMode='general';
 function setScheduleMode(mode){scheduleMode=mode==='category'?'category':'general';document.getElementById('calModeGeneral')?.classList.toggle('primary',scheduleMode==='general');document.getElementById('calModeCategory')?.classList.toggle('primary',scheduleMode==='category');loadSchedule()}
 async function loadSchedule(){
-  const tid=val('ct'),cat=scheduleMode==='category'?val('cc'):''; if(!tid)return;
+  const tid=val('ct')||window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||'';
+  const cat=scheduleMode==='category'?val('cc'):'';
+  if(!tid)return;
   let q=sb.from('matches').select('*,home:teams!matches_home_team_id_fkey(name,club_name),away:teams!matches_away_team_id_fkey(name,club_name),categories(name)').eq('tournament_id',tid);
   if(cat)q=q.eq('category_id',cat);
   const {data,error}=await q.order('match_date',{ascending:true,nullsFirst:false}).order('match_time',{ascending:true,nullsFirst:false}).order('field_name',{ascending:true,nullsFirst:false}).order('round_number');
@@ -5871,5 +5873,48 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const w=async function(v){const r=await oldSet.apply(this,arguments);if(v==='calendario')setTimeout(install,180);return r};w.__gofCalendarFlexFinal=true;window.setView=w;
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,400));else setTimeout(install,400);
+})();
+</script>
+
+
+<!-- GAME ON FLAG · CALENDARIO: RENDER FINAL GARANTIZADO · 2026-10-02 -->
+<script id="gof-calendar-render-guaranteed-2026-10-02">
+(function(){
+  'use strict';
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  function currentTournament(){
+    return document.getElementById('ct')?.value || window.gofSingleTournamentId || localStorage.getItem('gof_home_tournament') || '';
+  }
+  async function forceCalendarRender(){
+    const root=document.getElementById('calendario');
+    const list=document.getElementById('scheduleList');
+    if(!root||!list)return;
+    const tid=currentTournament();
+    if(!tid)return;
+    list.style.display='block';list.style.visibility='visible';list.style.opacity='1';
+    try{
+      if(typeof window.loadSchedule==='function') await window.loadSchedule();
+    }catch(e){console.warn('GAME ON FLAG: no se pudo cargar calendario',e)}
+    list.style.display='block';list.style.visibility='visible';list.style.opacity='1';
+    if(typeof window.wireCalendarDrag==='function') window.wireCalendarDrag();
+  }
+  const oldSet=window.setView;
+  if(typeof oldSet==='function'&&!oldSet.__gofCalendarRenderGuaranteed){
+    const wrapped=async function(v){
+      const r=await oldSet.apply(this,arguments);
+      if(v==='calendario'){
+        await wait(100);
+        await forceCalendarRender();
+        await wait(120);
+        if(typeof window.wireCalendarDrag==='function')window.wireCalendarDrag();
+      }
+      return r;
+    };
+    wrapped.__gofCalendarRenderGuaranteed=true;
+    window.setView=wrapped;
+  }
+  window.gofForceCalendarRender=forceCalendarRender;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(forceCalendarRender,700));
+  else setTimeout(forceCalendarRender,700);
 })();
 </script>

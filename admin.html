@@ -852,20 +852,22 @@ body.home-screen .admin-home-stats{display:none!important;}
 @media(max-width:560px){#gofHomeMainMenu{grid-template-columns:1fr 1fr!important;gap:8px!important;margin:9px 0 14px!important;}#gofHomeMainMenu .gof-home-main-btn{min-height:74px!important;}}
 @media(max-width:390px){#gofHomeMainMenu{gap:7px!important;}#gofHomeMainMenu .gof-home-main-btn{min-height:68px!important;padding:8px 6px!important;}}
 </style>
-</head><body><script id="gof-referee-capture-mode">
+<style id="gof-results-clean-css">
+.gof-results-simple-head{padding:12px}.gof-results-simple-head select{width:100%}.gof-results-bottom-actions{display:flex;gap:8px}.gof-results-bottom-actions button{flex:1}.gof-results-week{margin:10px 0;border:1px solid #49345c;border-radius:16px;background:#15111b;overflow:visible}.gof-results-week>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;color:#fff}.gof-results-week>summary::-webkit-details-marker{display:none}.gof-results-week>summary span:first-child{display:flex;flex-direction:column;gap:3px}.gof-results-week>summary small{color:#aaa;font-size:12px}.gof-week-chevron{font-size:18px;transition:.2s}.gof-results-week[open] .gof-week-chevron{transform:rotate(180deg)}.gof-results-week-body{padding:0 10px 12px}.gof-week-toolbar{padding:0 0 9px}.gof-ref-week-btn{width:100%;padding:10px;border-radius:9px}.gof-referee-link-result{margin-top:7px}.gof-referee-link-box{display:flex;gap:6px}.gof-referee-link-box input{flex:1;min-width:0;padding:9px;border-radius:8px;border:1px solid #4a3b57;background:#0e0c12;color:#fff}.gof-referee-link-box button{border:0;border-radius:8px;padding:8px 11px}.gof-results-table-wrap{width:100%;overflow-x:auto;border:1px solid #c9d3e8;background:#fff}.gof-results-table{width:100%;min-width:760px;border-collapse:collapse;color:#172554;background:#fff;font-size:12px}.gof-results-table th{position:relative;background:#173ea5;color:#fff;border:1px solid #d2dbeb;padding:7px 5px;text-align:left;font-weight:800;white-space:nowrap}.gof-results-table td{border:1px solid #d2dbeb;padding:7px 5px;white-space:nowrap;background:#fff}.gof-results-table th:nth-child(1),.gof-results-table td:nth-child(1){width:70px}.gof-results-table th:nth-child(2),.gof-results-table td:nth-child(2){width:65px}.gof-results-table th:nth-child(5),.gof-results-table td:nth-child(5){text-align:center;width:150px}.gof-score-view{border:0;background:transparent;color:#172554;font-weight:900;font-size:14px;cursor:pointer;white-space:nowrap}.gof-edit-mark{font-size:9px;color:#8b93a7;margin-left:5px}.gof-forfeit-dot{font-size:8px;color:#c89d00;vertical-align:middle}.gof-excel-filter{display:inline-block}.gof-excel-filter summary{cursor:pointer;list-style:none}.gof-excel-filter summary::-webkit-details-marker{display:none}.gof-excel-filter summary span{font-size:10px;margin-left:3px}.gof-filter-menu{position:absolute;z-index:50;top:100%;left:2px;min-width:145px;background:#fff;color:#172554;border:1px solid #aebbd3;box-shadow:0 5px 14px rgba(0,0,0,.25);padding:4px;border-radius:7px}.gof-filter-menu button{display:block;width:100%;border:0;background:#fff;color:#172554;text-align:left;padding:7px 8px;font-size:12px;border-radius:5px}.gof-filter-menu button:hover{background:#edf2ff}.gof-filter-active{display:block;font-size:8px;color:#ffe27a}.gof-inline-edit{display:flex;align-items:center;justify-content:center;gap:4px}.gof-inline-edit input{width:42px;padding:5px 3px;border:1px solid #aebbd3;border-radius:5px;text-align:center;font-weight:800}.gof-mini-save,.gof-mini-cancel{border:0;border-radius:5px;padding:5px 7px;font-weight:800;cursor:pointer}.gof-mini-save{background:#e9c84b;color:#17130b}.gof-mini-cancel{background:#eee;color:#333}.gof-results-empty{text-align:center;color:#667085!important;padding:18px!important}@media(max-width:600px){.gof-results-week-body{padding:0 6px 10px}.gof-results-table{font-size:11px}.gof-results-table th,.gof-results-table td{padding:6px 4px}.gof-score-view{font-size:13px}.gof-results-bottom-actions{flex-direction:column}}
+</style></head><body><script id="gof-referee-capture-mode">
 (function(){
- const p=new URLSearchParams(location.search),token=p.get('captura_resultados'),requestedRound=p.get('jornada')||''; if(!token)return;
+ const p=new URLSearchParams(location.search),token=p.get('captura_resultados'),requestedRound=p.get('jornada')||'';if(!token)return;
  const FN='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/referee-results-capture';
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- const css=document.createElement('style');css.textContent=`#gofRefereeCapture{min-height:100dvh;background:#0f0b15;color:#fff;font-family:Arial,sans-serif;padding:18px;box-sizing:border-box}#gofRefereeCapture .rc-wrap{max-width:760px;margin:auto}.rc-head{background:#21152d;border:1px solid #4b3760;border-radius:16px;padding:16px}.rc-head h1{margin:0 0 5px;font-size:25px}.rc-note{font-size:12px;color:#c7bbd0;margin-top:7px;line-height:1.4}.rc-filter{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.rc-filter select,.rc-score{width:100%;box-sizing:border-box;background:#0d0b11;color:#fff;border:1px solid #4b3760;border-radius:10px;padding:11px;font-size:15px}.rc-game{background:#191420;border:1px solid #40304f;border-radius:14px;padding:13px;margin-top:9px}.rc-game.rc-edited{border-color:#e9c84b}.rc-meta{font-size:12px;color:#bdb1c8;margin-bottom:8px}.rc-teams{font-weight:800;font-size:15px}.rc-scoreline{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.rc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.rc-btn{border:0;border-radius:10px;padding:11px;font-weight:800;font-size:14px;cursor:pointer}.rc-save{background:#e9c84b;color:#19130b}.rc-forfeit{background:#5b2140;color:#fff}.rc-status{margin-top:7px;font-size:11px;color:#a9f0b7;min-height:14px}.rc-dot{font-size:9px;color:#e1bd3d}.rc-empty{padding:20px;text-align:center;color:#aaa}@media(max-width:520px){.rc-filter{grid-template-columns:1fr}.rc-scoreline{grid-template-columns:1fr 1fr}}`;document.head.appendChild(css);
- function mount(){document.querySelector('.app')?.style.setProperty('display','none','important');document.getElementById('entryV2')?.style.setProperty('display','none','important');document.getElementById('login')?.style.setProperty('display','none','important');document.getElementById('nav')?.style.setProperty('display','none','important');let root=document.getElementById('gofRefereeCapture');if(!root){root=document.createElement('div');root.id='gofRefereeCapture';document.body.prepend(root)}root.innerHTML='<div class="rc-wrap"><div class="rc-head"><h1>🏈 Captura de resultados</h1><div id="rcTournament">Cargando torneo…</div><div class="rc-note">Puedes corregir cualquier marcador ya capturado. Cambia el número y vuelve a pulsar <b>Guardar / corregir</b>. El cambio actualiza el mismo partido.</div><div class="rc-filter"><select id="rcRound"><option value="">Todas las jornadas</option></select><select id="rcCategory"><option value="">Todas las categorías</option></select></div></div><div id="rcGames"></div></div>';load();}
+ const css=document.createElement('style');css.textContent=`#gofRefereeCapture{min-height:100dvh;background:#fff;color:#172554;font-family:Arial,sans-serif;padding:12px;box-sizing:border-box}#gofRefereeCapture .rr-wrap{max-width:980px;margin:auto}.rr-head{padding:8px 4px 12px}.rr-head h1{margin:0 0 4px;font-size:23px}.rr-head .rr-note{font-size:12px;color:#667085}.rr-filter{display:flex;gap:8px;margin:8px 0}.rr-filter select{padding:9px;border:1px solid #b8c4dd;border-radius:8px;background:#fff}.rr-table-wrap{overflow:auto;border:1px solid #c9d3e8}.rr-table{width:100%;border-collapse:collapse;min-width:700px;font-size:13px}.rr-table th{background:#173ea5;color:#fff;padding:8px 6px;border:1px solid #c9d3e8;text-align:left}.rr-table td{padding:7px 6px;border:1px solid #c9d3e8}.rr-table td:nth-child(5){text-align:center}.rr-score-input{width:46px;padding:7px;border:1px solid #aebbd3;border-radius:6px;text-align:center;font-weight:800}.rr-save{border:0;border-radius:7px;padding:7px 10px;background:#e9c84b;color:#17130b;font-weight:800;cursor:pointer}.rr-forfeit{border:0;background:transparent;color:#173ea5;font-weight:800;cursor:pointer}.rr-status{font-size:10px;color:#21863a;margin-top:3px}.rr-dot{font-size:9px;color:#c59600}.rr-empty{text-align:center;padding:20px;color:#667085}@media(max-width:720px){.rr-filter{display:grid;grid-template-columns:1fr 1fr}.rr-table{font-size:12px}.rr-table th,.rr-table td{padding:6px 5px}}`;document.head.appendChild(css);
+ function mount(){document.querySelector('.app')?.style.setProperty('display','none','important');document.getElementById('entryV2')?.style.setProperty('display','none','important');document.getElementById('login')?.style.setProperty('display','none','important');document.getElementById('nav')?.style.setProperty('display','none','important');let root=document.getElementById('gofRefereeCapture');if(!root){root=document.createElement('div');root.id='gofRefereeCapture';document.body.prepend(root)}root.innerHTML='<div class="rr-wrap"><div class="rr-head"><h1>🏈 Captura de resultados</h1><div id="rrTournament">Cargando…</div><div class="rr-note">Captura el marcador. Si te equivocas, cambia el número y vuelve a guardar.</div><div class="rr-filter"><select id="rrRound"><option value="">Todas las jornadas</option></select><select id="rrCategory"><option value="">Todas las categorías</option></select></div></div><div id="rrGames"></div></div>';load();}
  let all=[];
  async function api(body){const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,token})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'No se pudo conectar');return d}
- async function load(){const box=document.getElementById('rcGames');try{const d=await api({action:'list'});all=d.matches||[];document.getElementById('rcTournament').textContent=d.tournament?.name||'Torneo';const rounds=[...new Set(all.map(m=>m.round_number))].sort((a,b)=>a-b);const cats=[...new Map(all.map(m=>[m.category_id,m.category_name])).entries()];document.getElementById('rcRound').innerHTML='<option value="">Todas las jornadas</option>'+rounds.map(x=>`<option value="${x}">Jornada ${x}</option>`).join('');if(requestedRound&&rounds.map(String).includes(String(requestedRound)))document.getElementById('rcRound').value=String(requestedRound);document.getElementById('rcCategory').innerHTML='<option value="">Todas las categorías</option>'+cats.map(([id,n])=>`<option value="${esc(id)}">${esc(n)}</option>`).join('');document.getElementById('rcRound').onchange=render;document.getElementById('rcCategory').onchange=render;render();}catch(e){box.innerHTML='<div class="rc-game rc-empty">'+esc(e.message)+'</div>'}}
- function render(){const rr=document.getElementById('rcRound').value,cc=document.getElementById('rcCategory').value;const rows=all.filter(m=>(!rr||String(m.round_number)===rr)&&(!cc||m.category_id===cc));document.getElementById('rcGames').innerHTML=rows.length?rows.map(m=>{const ff=m.status==='incomparecencia',hasResult=m.home_score!==null&&m.away_score!==null,actionText=hasResult?'✏️ Guardar / corregir':'💾 Guardar captura';return `<div class="rc-game${hasResult?' rc-edited':''}" id="rcgame_${m.id}"><div class="rc-meta">Jornada ${m.round_number} · ${esc(m.match_time?String(m.match_time).slice(0,5):'—')} · ${esc(m.field_name||'—')} · ${esc(m.category_name)}</div><div class="rc-teams">${esc(m.home_name)} vs ${esc(m.away_name)}</div><div class="rc-scoreline"><input class="rc-score" id="rch_${m.id}" type="number" min="0" inputmode="numeric" placeholder="Local" value="${m.home_score??''}"><input class="rc-score" id="rca_${m.id}" type="number" min="0" inputmode="numeric" placeholder="Visitante" value="${m.away_score??''}"></div><div class="rc-actions"><button class="rc-btn rc-save" onclick="window.gofRcSave('${m.id}')">${actionText}</button><button class="rc-btn rc-forfeit" onclick="window.gofRcForfeit('${m.id}')">• Forfeit / corregir</button></div><div id="rcs_${m.id}" class="rc-status">${ff?'• Forfeit registrado. Puedes cambiar el marcador y guardar la corrección.':hasResult?'✓ Resultado capturado · editable':''}</div></div>`}).join(''):'<div class="rc-game rc-empty">No hay partidos para esta selección.</div>'}
- async function autoRefreshReferee(){try{const active=document.activeElement;if(active&&active.classList&&active.classList.contains('rc-score'))return;const d=await api({action:'list'}),fresh=d.matches||[];const changed=JSON.stringify(fresh.map(m=>[m.id,m.home_score,m.away_score,m.status,m.absent_team_id]))!==JSON.stringify(all.map(m=>[m.id,m.home_score,m.away_score,m.status,m.absent_team_id]));if(changed){all=fresh;render();}}catch(_){}} setInterval(autoRefreshReferee,3000);
- window.gofRcSave=async function(id){const h=document.getElementById('rch_'+id),a=document.getElementById('rca_'+id);if(!h.value||!a.value)return alert('Captura ambos marcadores.');try{const btn=document.querySelector(`#rcgame_${CSS.escape(id)} .rc-save`);if(btn){btn.disabled=true;btn.textContent='Guardando…'}await api({action:'save',match_id:id,home_score:Number(h.value),away_score:Number(a.value)});const m=all.find(x=>x.id===id);if(m){m.home_score=Number(h.value);m.away_score=Number(a.value);m.status='jugado';m.absent_team_id=null}const st=document.getElementById('rcs_'+id);if(st)st.textContent='✓ Corrección guardada. El administrador ya puede verla.';render();}catch(e){alert(e.message)} };
- window.gofRcForfeit=async function(id){const m=all.find(x=>x.id===id);if(!m)return;const choice=prompt('Escribe 1 si no se presentó '+m.home_name+' o 2 si no se presentó '+m.away_name+'. Si ya había un forfeit, aquí puedes corregir quién no se presentó.','');if(choice!=='1'&&choice!=='2')return;try{await api({action:'save',match_id:id,forfeit_team_id:choice==='1'?m.home_team_id:m.away_team_id});await load();}catch(e){alert(e.message)}};
+ async function load(){try{const d=await api({action:'list'});all=d.matches||[];document.getElementById('rrTournament').textContent=d.tournament?.name||'Torneo';const rounds=[...new Set(all.map(m=>m.round_number))].sort((a,b)=>a-b);const cats=[...new Map(all.map(m=>[m.category_id,m.category_name])).entries()];document.getElementById('rrRound').innerHTML='<option value="">Todas las jornadas</option>'+rounds.map(x=>`<option value="${x}">Jornada ${x}</option>`).join('');if(requestedRound&&rounds.map(String).includes(String(requestedRound)))document.getElementById('rrRound').value=String(requestedRound);document.getElementById('rrCategory').innerHTML='<option value="">Todas las categorías</option>'+cats.map(([id,n])=>`<option value="${esc(id)}">${esc(n)}</option>`).join('');document.getElementById('rrRound').onchange=render;document.getElementById('rrCategory').onchange=render;render();}catch(e){document.getElementById('rrGames').innerHTML='<div class="rr-empty">'+esc(e.message)+'</div>'}}
+ function render(){const rr=document.getElementById('rrRound').value,cc=document.getElementById('rrCategory').value;const rows=all.filter(m=>(!rr||String(m.round_number)===rr)&&(!cc||m.category_id===cc));document.getElementById('rrGames').innerHTML=rows.length?`<div class="rr-table-wrap"><table class="rr-table"><thead><tr><th>HORA</th><th>CAMPO</th><th>CATEGORÍA</th><th>LOCAL</th><th>MARCADOR</th><th>VISITANTE</th><th></th></tr></thead><tbody>${rows.map(m=>{const ff=m.status==='incomparecencia',dot=ff?'<span class="rr-dot">•</span>':'';return `<tr id="rr_${m.id}"><td>${esc(m.match_time?String(m.match_time).slice(0,5):'—')}</td><td>${esc((m.field_name||'—').replace(/^CAMPO\s*/i,''))}</td><td>${esc(m.category_name||'Categoría')}</td><td><b>${esc(m.home_name)}</b></td><td><input class="rr-score-input" id="rrh_${m.id}" type="number" min="0" value="${m.home_score??''}"> - <input class="rr-score-input" id="rra_${m.id}" type="number" min="0" value="${m.away_score??''}"> ${dot}<div id="rrs_${m.id}" class="rr-status"></div></td><td><b>${esc(m.away_name)}</b></td><td><button class="rr-save" onclick="window.gofRcSave('${m.id}')">Guardar</button><button class="rr-forfeit" onclick="window.gofRcForfeit('${m.id}')">•</button></td></tr>`}).join('')}</tbody></table></div>`:'<div class="rr-empty">No hay partidos para esta selección.</div>'}
+ async function autoRefresh(){try{const ae=document.activeElement;if(ae&&ae.classList.contains('rr-score-input'))return;const d=await api({action:'list'}),fresh=d.matches||[];if(JSON.stringify(fresh.map(m=>[m.id,m.home_score,m.away_score,m.status,m.absent_team_id]))!==JSON.stringify(all.map(m=>[m.id,m.home_score,m.away_score,m.status,m.absent_team_id]))){all=fresh;render();}}catch(_){} }setInterval(autoRefresh,3000);
+ window.gofRcSave=async function(id){const h=Number(document.getElementById('rrh_'+id)?.value),a=Number(document.getElementById('rra_'+id)?.value);if(!Number.isFinite(h)||!Number.isFinite(a)||h<0||a<0)return alert('Captura ambos marcadores.');try{await api({action:'save',match_id:id,home_score:h,away_score:a});const st=document.getElementById('rrs_'+id);if(st)st.textContent='✓ Guardado';await load();}catch(e){alert(e.message)}};
+ window.gofRcForfeit=async function(id){const m=all.find(x=>x.id===id);if(!m)return;const choice=prompt('Escribe 1 si no se presentó '+m.home_name+' o 2 si no se presentó '+m.away_name,'');if(choice!=='1'&&choice!=='2')return;try{await api({action:'save',match_id:id,forfeit_team_id:choice==='1'?m.home_team_id:m.away_team_id});await load();}catch(e){alert(e.message)}};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
 </script>
@@ -1087,23 +1089,15 @@ $('gofPubLeague')?.addEventListener('change',changeLeague);window.gofInitPublica
 <section class="view" id="resultados">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
 <h2>🏈 Resultados</h2>
-<div class="workflow-kicker" style="margin-top:6px">RESULTADOS · CAPTURA EN TIEMPO REAL</div>
-<div class="card gof-results-control-card">
-  <div class="form gof-results-selects">
-    <select id="resT"></select>
-    <select id="resC"></select>
-  </div>
-  <div class="mut small" id="resultsAutoStatus">Los resultados se actualizan automáticamente.</div>
+<div class="workflow-kicker" style="margin-top:6px">RESULTADOS · CAPTURA Y CORRECCIÓN</div>
+<div class="card gof-results-simple-head">
+  <select id="resT"></select>
+  <div id="resultsAutoStatus" class="mut small">Cargando partidos…</div>
 </div>
 <div id="resultsList"></div>
-
-<div class="card gof-results-board">
-  <h3 style="margin:0">📋 Cuadro de marcadores</h3>
-  <div class="mut small" style="margin:4px 0 8px">Viñetas en los encabezados para filtrar. Los partidos y marcadores se actualizan solos.</div>
-  <div class="form gof-board-filter"><select id="resBoardCat"><option value="">Todas las categorías</option></select></div>
-  <div id="resultsBoardStatus" class="mut small gof-board-status"></div>
-  <div id="resultsBoard" style="margin-top:8px"></div>
-  <div class="toolbar gof-board-actions"><button class="gold" type="button" onclick="downloadResultsBoardImage()">🖼️ Descargar imagen</button><button class="primary" type="button" onclick="publishResultsBoard()">📢 Publicar</button></div>
+<div class="card gof-results-bottom-actions">
+  <button class="gold" type="button" onclick="downloadResultsBoardImage()">🖼️ Descargar tabla</button>
+  <button class="primary" type="button" onclick="publishResultsBoard()">📢 Publicar resultados</button>
 </div>
 <div class="gof-step-nav gof-step-5"><button type="button" onclick="setView('calendario')">← Calendario</button><div class="step-current">Resultados</div><button class="primary" type="button" onclick="setView('tabla')">Siguiente: Tabla →</button></div>
 </section>
@@ -2679,6 +2673,11 @@ window.gofResultsFilterState={hora:'',campo:'',categoria:'',local:'',visitante:'
 let gofResultsRefreshBusy=false;
 function gofResultsTournamentId(){return val('resT')||window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||''}
 function gofResultEsc(v){return esc(v==null?'':String(v))}
+function gofResultValue(m,key){if(key==='hora')return m.match_time?String(m.match_time).slice(0,5):'—';if(key==='campo')return (m.field_name||'—').replace(/^CAMPO\s*/i,'');if(key==='categoria')return m.categories?.name||'Categoría';if(key==='local')return m.home?.name||'Local';if(key==='visitante')return m.away?.name||'Visitante';return ''}
+function gofFilterValues(rows,key){return [...new Set(rows.map(m=>gofResultValue(m,key)))].sort((a,b)=>a.localeCompare(b,'es'))}
+function gofApplyResultFilters(rows){const f=window.gofResultsFilterState||{};return rows.filter(m=>Object.keys(f).every(k=>!f[k]||gofResultValue(m,k)===f[k]))}
+function gofHeaderFilter(key,label,values){const current=window.gofResultsFilterState?.[key]||'';return `<th><details class="gof-excel-filter"><summary>${gofResultEsc(label)} <span>▾</span></summary><div class="gof-filter-menu"><button type="button" data-k="${key}" data-v="">Todas</button>${values.map(v=>`<button type="button" data-k="${key}" data-v="${gofResultEsc(v)}">${gofResultEsc(v)}</button>`).join('')}</div></details>${current?`<small class="gof-filter-active">• ${gofResultEsc(current)}</small>`:''}</th>`}
+function bindResultHeaderFilters(root){(root||document).querySelectorAll('.gof-excel-filter button').forEach(b=>b.onclick=()=>{window.gofResultsFilterState[b.dataset.k]=b.dataset.v||'';renderResultsWeeks(window.gofLastResultRows||[]);})}
 async function loadResults(){
  const box=document.getElementById('resultsList');if(!box)return;
  if(!gofCurrentOrganizationId){box.innerHTML='<div class="empty">Selecciona una organización.</div>';return}
@@ -2686,124 +2685,73 @@ async function loadResults(){
  if(error){box.innerHTML='<div class="empty">'+gofResultEsc(error.message)+'</div>';return}
  if(!t?.length){box.innerHTML='<div class="empty">No hay torneos activos o próximos.</div>';return}
  const wanted=window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||t[0].id;
- const rt=document.getElementById('resT');fill('resT',t,'id','name');if([...rt.options].some(o=>o.value===wanted))rt.value=wanted;
- const ref=document.getElementById('refLinkTournament');fill('refLinkTournament',t,'id','name');if([...ref.options].some(o=>o.value===rt.value))ref.value=rt.value;
- await gofLoadResultCategories();
- rt.onchange=async()=>{window.gofResultsFilterState={hora:'',campo:'',categoria:'',local:'',visitante:''};await gofLoadResultCategories();await loadResultsBoardCats()};
- document.getElementById('resC').onchange=async()=>{window.gofResultsFilterState.categoria='';await gofLoadResultRounds();await loadResultsBoard()};
- document.getElementById('resBoardCat').onchange=async()=>{window.gofResultsFilterState={hora:'',campo:'',categoria:'',local:'',visitante:''};await loadResultsBoard()};
- await loadResultsBoardCats();
-}
-async function gofLoadResultCategories(){
- const tid=gofResultsTournamentId(),el=document.getElementById('resC');if(!el)return;
- if(!tid){el.innerHTML='<option value="">Todas las categorías</option>';return}
- const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
- if(error){el.innerHTML='<option value="">Todas las categorías</option>';return}
- const cats=(data||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'}));
- el.innerHTML='<option value="">Todas las categorías</option>'+cats.map(x=>`<option value="${gofResultEsc(x.id)}">${gofResultEsc(x.name)}</option>`).join('');
- await gofLoadResultRounds();
-}
-async function gofLoadResultRounds(){await loadResultGames()}
-async function loadResultGames(){
- const out=document.getElementById('resultsList');if(!out)return;
- const tid=gofResultsTournamentId(),cat=val('resC');if(!tid)return;
- let q=sb.from('matches').select('id,round_number,match_date,match_time,field_name,home_score,away_score,status,absent_team_id,is_makeup,category_id,home_team_id,away_team_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name),categories(name)').eq('tournament_id',tid).neq('status','cancelado').order('round_number').order('match_time').order('field_name');
- if(cat)q=q.eq('category_id',cat);
- const {data,error}=await q;if(error){out.innerHTML='<div class="empty">'+gofResultEsc(error.message)+'</div>';return}
- if(!data?.length){out.innerHTML='<div class="card gof-results-empty">No hay partidos para esta selección.</div>';return}
- const openRounds=new Set([...out.querySelectorAll('.gof-results-week[open]')].map(x=>String(x.dataset.round)));
- const groups={};data.forEach(m=>{const r=Number(m.round_number)||0;(groups[r]||(groups[r]=[])).push(m)});
- const rounds=Object.keys(groups).sort((a,b)=>Number(a)-Number(b));
- out.innerHTML=rounds.map(r=>{
-   const games=groups[r];
-   const open=openRounds.has(String(r))?' open':'';
-   return `<details class="gof-results-week" data-round="${gofResultEsc(r)}"${open}><summary><span class="gof-results-week-title"><span>📋 Resultados Semana ${gofResultEsc(r)}</span><span class="gof-results-week-sub">Jornada ${gofResultEsc(r)} · ${games.length} partido(s)</span></span></summary><div class="gof-results-week-body"><div class="gof-week-ref-link"><button class="gold" type="button" onclick="generateRefereeResultsLinkForRound(${Number(r)})">🧑‍⚖️ Generar link de árbitros · Semana ${gofResultEsc(r)}</button><div id="refRound_${Number(r)}" class="gof-referee-link-result"></div></div>${games.map(gofResultCaptureCard).join('')}</div></details>`;
- }).join('');
- document.getElementById('resultsAutoStatus').textContent=`${data.length} partido(s) cargado(s) · actualización automática activa`;
-}
-function gofResultCaptureCard(m){
- const ff=m.status==='incomparecencia';
- const absent=m.absent_team_id===m.home_team_id?'home':(m.absent_team_id===m.away_team_id?'away':'');
- const hasResult=m.home_score!==null&&m.away_score!==null;
- const action=hasResult?'✏️ Corregir resultado':'💾 Guardar resultado';
- return `<div class="card gof-result-capture-card" data-match-id="${gofResultEsc(m.id)}">
-   <div class="row"><b>${gofResultEsc(m.home?.name||'Local')} <span class="mut">vs</span> ${gofResultEsc(m.away?.name||'Visitante')}</b><span class="tag">${gofResultEsc(m.match_time?String(m.match_time).slice(0,5):'—')} · ${gofResultEsc(m.field_name||'—')}</span></div>
-   <div class="gof-result-meta">${gofResultEsc(m.categories?.name||'Categoría')}${m.is_makeup?' · REPOSICIÓN':''}</div>
-   <div class="form gof-score-entry">
-     <input id="ha_${m.id}" type="number" min="0" inputmode="numeric" placeholder="Local" value="${m.home_score??''}">
-     <input id="aa_${m.id}" type="number" min="0" inputmode="numeric" placeholder="Visitante" value="${m.away_score??''}">
-     <div class="gof-forfeit-select"><label><input id="ab_${m.id}" type="checkbox" ${ff?'checked':''}> No se presentó</label>
-       <select id="abs_${m.id}" ${ff?'':'disabled'}><option value="">¿Quién?</option><option value="home" ${absent==='home'?'selected':''}>Local</option><option value="away" ${absent==='away'?'selected':''}>Visitante</option></select>
-     </div>
-     <button class="gold" type="button" onclick="saveResult('${m.id}')">${action}</button>
-   </div>
- </div>`;
-}
-async function saveResult(id){
- const ff=document.getElementById('ab_'+id)?.checked;
- let payload;
- if(ff){
-   const absent=document.getElementById('abs_'+id)?.value;
-   if(!absent)return alert('Selecciona quién no se presentó.');
-   const {data:m,error}=await sb.from('matches').select('home_team_id,away_team_id').eq('id',id).single();
-   if(error||!m)return alert(error?.message||'No se encontró el partido.');
-   payload={home_score:absent==='home'?0:18,away_score:absent==='home'?18:0,status:'incomparecencia',absent_team_id:absent==='home'?m.home_team_id:m.away_team_id,referee_fee_due:false};
- }else{
-   const a=val('ha_'+id),b=val('aa_'+id);
-   if(a===''||b==='')return alert('Captura los dos marcadores.');
-   const sa=Number(a),sbv=Number(b);
-   if(!Number.isInteger(sa)||!Number.isInteger(sbv)||sa<0||sbv<0)return alert('Los marcadores deben ser números enteros.');
-   payload={home_score:sa,away_score:sbv,status:'jugado',absent_team_id:null,referee_fee_due:false};
- }
- const {error}=await sb.from('matches').update(payload).eq('id',id);
- if(error)return alert(error.message);
- toast('✅ Resultado actualizado');
+ fill('resT',t,'id','name');const rt=document.getElementById('resT');if([...rt.options].some(o=>o.value===wanted))rt.value=wanted;
+ rt.onchange=async()=>{window.gofResultsFilterState={hora:'',campo:'',categoria:'',local:'',visitante:''};await loadResultGames();};
  await loadResultGames();
- await loadResultsBoard();
 }
-function gofFilterValues(rows,key){return [...new Set(rows.map(m=>key(m)).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'es',{numeric:true}))}
-function gofApplyResultFilters(rows){const f=window.gofResultsFilterState||{};return rows.filter(m=>{const v={hora:m.match_time?String(m.match_time).slice(0,5):'—',campo:(m.field_name||'—').replace(/^CAMPO\s*/i,''),categoria:m.categories?.name||'Categoría',local:m.home?.name||'Local',visitante:m.away?.name||'Visitante'};return (!f.hora||v.hora===f.hora)&&(!f.campo||v.campo===f.campo)&&(!f.categoria||v.categoria===f.categoria)&&(!f.local||v.local===f.local)&&(!f.visitante||v.visitante===f.visitante)})}
-function gofHeaderFilter(key,label,values){const current=window.gofResultsFilterState?.[key]||'';return `<th><details class="gof-excel-filter"><summary>${gofResultEsc(label)} <span>▾</span></summary><div class="gof-filter-menu"><button type="button" data-k="${key}" data-v="">Todas</button>${values.map(v=>`<button type="button" data-k="${key}" data-v="${gofResultEsc(v)}">${gofResultEsc(v)}</button>`).join('')}</div></details>${current?`<small class="gof-filter-active">• ${gofResultEsc(current)}</small>`:''}</th>`}
-function bindResultHeaderFilters(){document.querySelectorAll('#resultsBoard .gof-excel-filter button').forEach(b=>b.onclick=()=>{window.gofResultsFilterState[b.dataset.k]=b.dataset.v||'';loadResultsBoard()})}
-async function loadResultsBoardCats(){
- const board=document.getElementById('resBoardCat'),tid=gofResultsTournamentId();if(!board)return;if(!tid){board.innerHTML='<option value="">Todas las categorías</option>';return}
- const {data}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);const old=board.value;board.innerHTML='<option value="">Todas las categorías</option>'+(data||[]).map(x=>`<option value="${gofResultEsc(x.category_id)}">${gofResultEsc(x.categories?.name||'Categoría')}</option>`).join('');if(old&&[...board.options].some(o=>o.value===old))board.value=old;await loadResultsBoard();
+async function loadResultGames(){
+ const out=document.getElementById('resultsList'),tid=gofResultsTournamentId();if(!out||!tid)return;
+ let q=sb.from('matches').select('id,round_number,match_time,field_name,home_score,away_score,status,published,is_makeup,category_id,absent_team_id,home_team_id,away_team_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name),categories(name)').eq('tournament_id',tid).neq('status','cancelado').order('round_number').order('match_time').order('field_name');
+ const {data,error}=await q;if(error){out.innerHTML='<div class="empty">No se pudieron cargar los partidos.</div>';return}
+ window.gofLastResultRows=data||[];renderResultsWeeks(window.gofLastResultRows);
+ document.getElementById('resultsAutoStatus').textContent=`${(data||[]).length} partido(s) · actualización automática activa`;
 }
-async function loadResultsBoard(){
- const out=document.getElementById('resultsBoard'),tid=gofResultsTournamentId(),cat=val('resBoardCat');if(!out)return;if(!tid){out.innerHTML='<div class="empty">Selecciona un torneo.</div>';return}
- let q=sb.from('matches').select('id,round_number,match_time,field_name,home_score,away_score,status,published,is_makeup,category_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name),categories(name)').eq('tournament_id',tid).in('status',['jugado','incomparecencia']).order('round_number').order('match_time').order('field_name');if(cat)q=q.eq('category_id',cat);
- const {data,error}=await q;if(error){out.innerHTML='<div class="empty">No se pudieron cargar los marcadores.</div>';return}
- const source=data||[],rows=gofApplyResultFilters(source);if(!source.length){out.innerHTML='<div class="empty">No hay marcadores capturados.</div>';document.getElementById('resultsBoardStatus').textContent='';return}
- const vals={hora:gofFilterValues(source,m=>m.match_time?String(m.match_time).slice(0,5):'—'),campo:gofFilterValues(source,m=>(m.field_name||'—').replace(/^CAMPO\s*/i,'')),categoria:gofFilterValues(source,m=>m.categories?.name||'Categoría'),local:gofFilterValues(source,m=>m.home?.name||'Local'),visitante:gofFilterValues(source,m=>m.away?.name||'Visitante')};
- let html='<div class="gof-results-table-wrap"><table class="gof-results-table"><thead><tr>'+gofHeaderFilter('hora','HORA',vals.hora)+gofHeaderFilter('campo','CAMPO',vals.campo)+gofHeaderFilter('categoria','CATEGORÍA',vals.categoria)+gofHeaderFilter('local','LOCAL',vals.local)+'<th>MARCADOR</th>'+gofHeaderFilter('visitante','VISITANTE',vals.visitante)+'</tr></thead><tbody>';
- let last='';rows.forEach(m=>{const r=String(m.round_number??'—');if(r!==last){html+=`<tr class="gof-round-row"><td colspan="6">SEMANA ${gofResultEsc(r)}</td></tr>`;last=r}const dot=m.status==='incomparecencia'?'<span class="gof-forfeit-dot" title="Forfeit">•</span>':'';html+=`<tr><td>${gofResultEsc(m.match_time?String(m.match_time).slice(0,5):'—')}</td><td>${gofResultEsc((m.field_name||'—').replace(/^CAMPO\s*/i,''))}</td><td>${gofResultEsc(m.categories?.name||'Categoría')}</td><td><b>${gofResultEsc(m.home?.name||'Local')}</b></td><td class="gof-score-cell">${m.home_score??'—'} - ${m.away_score??'—'} ${dot}</td><td><b>${gofResultEsc(m.away?.name||'Visitante')}</b></td></tr>`});
- html+='</tbody></table></div>';out.innerHTML=html;bindResultHeaderFilters();document.getElementById('resultsBoardStatus').textContent=`${rows.length} partido(s) visible(s) · actualización automática activa`;
+function renderResultsWeeks(source){
+ const out=document.getElementById('resultsList');if(!out)return;
+ const groups={};(source||[]).forEach(m=>{const r=Number(m.round_number)||0;(groups[r]||(groups[r]=[])).push(m)});
+ const rounds=Object.keys(groups).sort((a,b)=>Number(a)-Number(b));
+ if(!rounds.length){out.innerHTML='<div class="card">No hay partidos en este torneo.</div>';return}
+ const openRounds=new Set([...out.querySelectorAll('.gof-results-week[open]')].map(x=>String(x.dataset.round)));
+ out.innerHTML=rounds.map(r=>{
+   const games=gofApplyResultFilters(groups[r]);
+   const allWeek=groups[r];
+   const vals={hora:gofFilterValues(allWeek,'hora'),campo:gofFilterValues(allWeek,'campo'),categoria:gofFilterValues(allWeek,'categoria'),local:gofFilterValues(allWeek,'local'),visitante:gofFilterValues(allWeek,'visitante')};
+   const open=openRounds.has(String(r))||(!openRounds.size&&String(r)==='1')?' open':'';
+   return `<details class="gof-results-week" data-round="${r}"${open}><summary><span><b>📋 Resultados Semana ${r}</b><small>Jornada ${r} · ${allWeek.length} partido(s)</small></span><span class="gof-week-chevron">▾</span></summary><div class="gof-results-week-body"><div class="gof-week-toolbar"><button class="gold gof-ref-week-btn" type="button" onclick="generateRefereeResultsLinkForRound(${Number(r)})">🧑‍⚖️ Generar link de árbitros · Semana ${r}</button><div id="refRound_${r}" class="gof-referee-link-result"></div></div><div class="gof-results-table-wrap"><table class="gof-results-table"><thead><tr>${gofHeaderFilter('hora','HORA',vals.hora)}${gofHeaderFilter('campo','CAMPO',vals.campo)}${gofHeaderFilter('categoria','CATEGORÍA',vals.categoria)}${gofHeaderFilter('local','LOCAL',vals.local)}<th>MARCADOR</th>${gofHeaderFilter('visitante','VISITANTE',vals.visitante)}</tr></thead><tbody>${games.length?games.map(gofResultRow).join(''):`<tr><td colspan="6" class="gof-results-empty">No hay partidos que coincidan con el filtro.</td></tr>`}</tbody></table></div></div></details>`;
+ }).join('');
+ bindResultHeaderFilters(out);
 }
+function gofResultRow(m){
+ const dot=m.status==='incomparecencia'?'<span class="gof-forfeit-dot" title="Partido ganado por forfeit">•</span>':'';
+ const score=(m.home_score!==null&&m.away_score!==null)?`${m.home_score} - ${m.away_score}`:'—';
+ return `<tr id="resultRow_${gofResultEsc(m.id)}"><td>${gofResultEsc(gofResultValue(m,'hora'))}</td><td>${gofResultEsc(gofResultValue(m,'campo'))}</td><td>${gofResultEsc(gofResultValue(m,'categoria'))}</td><td><b>${gofResultEsc(gofResultValue(m,'local'))}</b></td><td class="gof-score-cell"><div class="gof-score-view-wrap"><button class="gof-score-view" type="button" onclick="gofEditScore('${m.id}')">${gofResultEsc(score)} ${dot}<span class="gof-edit-mark">✎</span></button></div></td><td><b>${gofResultEsc(gofResultValue(m,'visitante'))}</b></td></tr>`;
+}
+function gofEditScore(id){
+ const m=(window.gofLastResultRows||[]).find(x=>String(x.id)===String(id));if(!m)return;
+ const cell=document.querySelector(`#resultRow_${CSS.escape(id)} .gof-score-cell`);if(!cell)return;
+ cell.innerHTML=`<div class="gof-inline-edit"><input id="editH_${id}" type="number" min="0" inputmode="numeric" value="${m.home_score??''}"><span>-</span><input id="editA_${id}" type="number" min="0" inputmode="numeric" value="${m.away_score??''}"><button type="button" class="gof-mini-save" onclick="gofSaveInlineResult('${id}')">✓</button><button type="button" class="gof-mini-cancel" onclick="renderResultsWeeks(window.gofLastResultRows||[])">×</button></div>`;
+ document.getElementById('editH_'+id)?.focus();
+}
+async function gofSaveInlineResult(id){
+ const h=Number(document.getElementById('editH_'+id)?.value),a=Number(document.getElementById('editA_'+id)?.value);if(!Number.isFinite(h)||!Number.isFinite(a)||h<0||a<0)return alert('Escribe los dos marcadores.');
+ const m=(window.gofLastResultRows||[]).find(x=>String(x.id)===String(id));if(!m)return;
+ const forfeit=(h===18&&a===0)||(h===0&&a===18);
+ const payload=forfeit?{home_score:h,away_score:a,status:'incomparecencia',absent_team_id:h===0?m.home_team_id:m.away_team_id,referee_fee_due:false}:{home_score:h,away_score:a,status:'jugado',absent_team_id:null,referee_fee_due:false};
+ const {error}=await sb.from('matches').update(payload).eq('id',id);if(error)return alert('No se pudo guardar: '+error.message);
+ await loadResultGames();toast('✅ Resultado actualizado');
+}
+async function downloadResultsBoardImage(){
+ const tid=gofResultsTournamentId();if(!tid)return alert('Selecciona el torneo.');
+ const rows=gofApplyResultFilters(window.gofLastResultRows||[]);if(!rows.length)return alert('No hay resultados para descargar.');
+ const {data:t}=await sb.from('tournaments').select('name').eq('id',tid).single();const title=t?.name||'Resultados';
+ const scale=2,w=1500,rowH=50,headerH=92;const h=headerH+(rows.length*rowH)+30,c=document.createElement('canvas');c.width=w*scale;c.height=h*scale;const ctx=c.getContext('2d');ctx.scale(scale,scale);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.fillStyle='#173ea5';ctx.fillRect(0,0,w,headerH);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='900 30px Arial';ctx.fillText('CUADRO DE MARCADORES',w/2,36);ctx.font='700 19px Arial';ctx.fillText(title,w/2,64);ctx.font='700 13px Arial';ctx.fillText('HORA · CAMPO · CATEGORÍA · LOCAL · MARCADOR · VISITANTE',w/2,84);const cols=[0,150,310,530,840,1160,1500];ctx.textAlign='left';ctx.font='700 13px Arial';ctx.fillStyle='#173ea5';ctx.fillRect(0,headerH,w,36);ctx.fillStyle='#fff';['HORA','CAMPO','CATEGORÍA','LOCAL','MARCADOR','VISITANTE'].forEach((x,i)=>ctx.fillText(x,cols[i]+8,headerH+23));let y=headerH+36;rows.forEach(m=>{ctx.strokeStyle='#cfd8ea';ctx.strokeRect(0,y,w,rowH);ctx.fillStyle='#172554';ctx.font='700 14px Arial';const dot=m.status==='incomparecencia'?' •':'';const vals=[gofResultValue(m,'hora'),gofResultValue(m,'campo'),gofResultValue(m,'categoria'),gofResultValue(m,'local'),`${m.home_score??'—'} - ${m.away_score??'—'}${dot}`,gofResultValue(m,'visitante')];vals.forEach((v,i)=>{ctx.fillText(String(v),cols[i]+8,y+31);if(i<5){ctx.beginPath();ctx.moveTo(cols[i+1],y);ctx.lineTo(cols[i+1],y+rowH);ctx.stroke()}});y+=rowH});const a=document.createElement('a');a.download=(title.replace(/[^a-z0-9áéíóúñ _-]/gi,'').trim()||'resultados')+'_marcadores.png';a.href=c.toDataURL('image/png');a.click();
+}
+async function publishResultsBoard(){const tid=gofResultsTournamentId();if(!tid)return alert('Selecciona el torneo.');if(!confirm('¿Publicar los resultados capturados?'))return;const {error}=await sb.from('matches').update({published:true}).eq('tournament_id',tid).in('status',['jugado','incomparecencia']);if(error)return alert(error.message);toast('📢 Resultados publicados');}
+async function createRefereeResultsLink(round,targetId,label){
+ const tid=gofResultsTournamentId();if(!tid)return alert('Selecciona el torneo.');
+ const {data:sd}=await sb.auth.getSession();const authToken=sd?.session?.access_token;if(!authToken)return alert('Tu sesión de administradora no está disponible.');
+ const r=await fetch('https://picivrqgmckrwutarhyw.supabase.co/functions/v1/referee-results-admin',{method:'POST',headers:{Authorization:'Bearer '+authToken,'Content-Type':'application/json'},body:JSON.stringify({tournament_id:tid,label:label||('Árbitros · Semana '+round)})});
+ const data=await r.json().catch(()=>({}));if(!r.ok)return alert(data.error||'No se pudo generar el enlace.');
+ const link=`${location.origin}${location.pathname}?captura_resultados=${encodeURIComponent(data.token)}&jornada=${encodeURIComponent(round)}`;const out=document.getElementById(targetId);
+ if(out)out.innerHTML=`<div class="gof-referee-link-box"><input id="refGeneratedLink_${round}" readonly value="${gofResultEsc(link)}"><button type="button" class="gold" onclick="navigator.clipboard?.writeText(document.getElementById('refGeneratedLink_${round}').value);toast('🔗 Link copiado')">Copiar</button></div>`;
+ try{await navigator.clipboard.writeText(link);toast('🔗 Link de árbitros copiado');}catch(_){ }
+}
+function generateRefereeResultsLinkForRound(round){return createRefereeResultsLink(round,'refRound_'+round,'Árbitros · Semana '+round)}
 async function autoRefreshResults(){
- if(gofResultsRefreshBusy)return;const section=document.getElementById('resultados');if(!section||!section.classList.contains('active'))return;const ae=document.activeElement;if(ae&&((ae.id||'').startsWith('ha_')||(ae.id||'').startsWith('aa_')))return;
- gofResultsRefreshBusy=true;try{await loadResultGames();await loadResultsBoard()}catch(_){}finally{gofResultsRefreshBusy=false;}
+ if(gofResultsRefreshBusy)return;const section=document.getElementById('resultados');if(!section||!section.classList.contains('active'))return;const ae=document.activeElement;if(ae&&(/^edit[HA]_/.test(ae.id||'')))return;
+ gofResultsRefreshBusy=true;try{await loadResultGames()}catch(_){}finally{gofResultsRefreshBusy=false;}
 }
 setInterval(autoRefreshResults,3000);
-async function downloadResultsBoardImage(){
- const board=document.getElementById('resultsBoard'),table=board?.querySelector('.gof-results-table');if(!table)return alert('No hay marcadores para descargar.');const tid=gofResultsTournamentId();const {data:t}=await sb.from('tournaments').select('name').eq('id',tid).single();const title=t?.name||'Resultados';const rows=[...table.querySelectorAll('tr')],scale=2,w=1500,rowH=54,headerH=104,sectionH=32,h=headerH+rows.length*rowH+30,c=document.createElement('canvas');c.width=w*scale;c.height=h*scale;const ctx=c.getContext('2d');ctx.scale(scale,scale);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.fillStyle='#0b3fa9';ctx.fillRect(0,0,w,headerH);ctx.fillStyle='#fff';ctx.font='900 34px Arial';ctx.textAlign='center';ctx.fillText('CUADRO DE MARCADORES',w/2,42);ctx.font='700 21px Arial';ctx.fillText(title,w/2,75);ctx.font='700 13px Arial';ctx.fillText('Hora · Campo · Categoría · Local · Marcador · Visitante',w/2,96);let y=headerH;const cols=[0,150,310,520,820,1120,1500];rows.forEach(tr=>{if(tr.classList.contains('gof-round-row')){ctx.fillStyle='#eceff8';ctx.fillRect(0,y,w,sectionH);ctx.fillStyle='#172554';ctx.textAlign='left';ctx.font='900 14px Arial';ctx.fillText(tr.cells[0].textContent.trim(),18,y+22);y+=sectionH;return}ctx.strokeStyle='#c8d2e8';ctx.strokeRect(0,y,w,rowH);ctx.font='700 14px Arial';ctx.fillStyle='#13255a';ctx.textAlign='left';[...tr.cells].forEach((cell,i)=>{ctx.fillText(cell.textContent.trim()||'—',cols[i]+8,y+33);if(i<5){ctx.beginPath();ctx.moveTo(cols[i+1],y);ctx.lineTo(cols[i+1],y+rowH);ctx.stroke()}});y+=rowH});const a=document.createElement('a');a.download=(title.replace(/[^a-z0-9áéíóúñ _-]/gi,'').trim()||'resultados')+'_marcadores.png';a.href=c.toDataURL('image/png');a.click();
-}
-async function publishResultsBoard(){const tid=gofResultsTournamentId(),cat=val('resBoardCat');if(!tid)return alert('Selecciona el torneo.');if(!confirm('¿Publicar los resultados seleccionados en el portal público?'))return;let q=sb.from('matches').update({published:true}).eq('tournament_id',tid).in('status',['jugado','incomparecencia']);if(cat)q=q.eq('category_id',cat);const {error}=await q;if(error)return alert(error.message);toast('📢 Resultados publicados');await loadResultsBoard()}
-async function createRefereeResultsLink(round,targetId,label){
- const tid=gofResultsTournamentId();
- if(!tid)return alert('Selecciona el torneo.');
- const {data:sd}=await sb.auth.getSession();
- const authToken=sd?.session?.access_token;
- if(!authToken)return alert('Tu sesión de administradora no está disponible.');
- const r=await fetch('https://picivrqgmckrwutarhyw.supabase.co/functions/v1/referee-results-admin',{method:'POST',headers:{Authorization:'Bearer '+authToken,'Content-Type':'application/json'},body:JSON.stringify({tournament_id:tid,label:label||('Árbitros · Semana '+round)})});
- const data=await r.json().catch(()=>({}));
- if(!r.ok)return alert(data.error||'No se pudo generar el enlace.');
- const link=`${location.origin}${location.pathname}?captura_resultados=${encodeURIComponent(data.token)}&jornada=${encodeURIComponent(round)}`;
- const out=document.getElementById(targetId);
- if(out)out.innerHTML=`<div class="gof-referee-link-box"><input id="refGeneratedLink_${round}" readonly value="${gofResultEsc(link)}"><button type="button" class="gold" onclick="navigator.clipboard?.writeText(document.getElementById('refGeneratedLink_${round}').value).then(()=>toast('Enlace copiado'))">📋 Copiar</button></div><div class="mut small" style="margin-top:5px">Jornada ${gofResultEsc(round)} · Vigente hasta ${new Date(data.expires_at).toLocaleString('es-MX')}</div>`;
- try{await navigator.clipboard.writeText(link);toast('🔗 Link de árbitros de la Semana '+round+' generado y copiado')}catch(_){ }
- return link;
-}
-async function generateRefereeResultsLinkForRound(round){return createRefereeResultsLink(round,'refRound_'+round,'Árbitros · Semana '+round)}
 
 async function loadStandingsSelectors(){if(!gofCurrentOrganizationId)return;const {data:t}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});fill('st',t,'id','name');await standingsCats()}
 async function standingsCats(){const tid=val('st');const {data}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);fill('sc',(data||[]).map(x=>({id:x.categories.id,name:x.categories.name})),'id','name');loadStandings()}

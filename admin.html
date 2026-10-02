@@ -1040,28 +1040,13 @@ $('gofPubLeague')?.addEventListener('change',changeLeague);window.gofInitPublica
 <section class="view" id="enfrentamientos">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
 <h2>⚔️ Enfrentamientos</h2>
-<div class="workflow-kicker" style="margin-top:6px">PASO 4 DE 8 · PRIMERO QUIÉN CONTRA QUIÉN</div>
-<div class="notice"><b>Vista por matriz.</b> Selecciona una categoría para ver cada equipo contra sus rivales de <b>J1 a J7</b>. Haz clic en una celda para cambiar el rival. El sistema intercambia los rivales de forma segura y avisa si existe un empalme o un rival repetido. Las jornadas cerradas no se modifican.</div>
-<div class="card">
-  <div class="form">
-    <label class="field-label" style="display:none!important">Torneo<select id="gofMatchupTournament"></select></label>
-    <label class="field-label">Categoría<select id="gofMatchupCategory"></select></label>
-  </div>
-  <div id="gofCategoryQuick" class="gof-category-quick" style="margin-top:10px"></div>
-  <div id="gofMatchupRoundState" class="gof-round-state" style="margin-top:9px"></div>
-  <div class="toolbar" style="margin-top:9px">
-    <button class="gold" type="button" onclick="gofGenerateMatchups()">🎲 Generar enfrentamientos</button>
-    <button type="button" onclick="gofLoadMatchups()">🔄 Actualizar</button>
-    <button type="button" onclick="gofAddManualMakeupMatch()">➕ Agregar partido manual</button>
-    <button class="primary" type="button" onclick="gofPublishMatchups()">📢 Publicar enfrentamientos</button>
-    <button type="button" onclick="gofDownloadMatchupsImage()">🖼️ Descargar foto</button>
-  </div>
+<div class="workflow-kicker" style="margin-top:6px">PASO 4 DE 8 · TABLA DE ENFRENTAMIENTOS</div>
+<div class="notice"><b>Selecciona una categoría y genera sus 7 jornadas.</b> Los enfrentamientos aparecen directamente en la tabla. Para cambiar un partido, <b>arrastra el rival de una celda hacia otro equipo de la misma jornada</b>. El intercambio se realiza automáticamente. También puedes tocar una celda para elegir otro rival.</div>
+<div class="card gof-only-matrix-card">
+  <div id="gofMatrixCategoryHost"></div>
   <div id="gofMatchupInfo" class="mut small" style="margin-top:8px"></div>
-</div>
-<div class="card">
-  <div class="row"><div><h3 style="margin:0">📋 Matriz de enfrentamientos</h3><p class="mut small" style="margin:4px 0 0">Cada fila es un equipo y cada columna es una jornada: <b>J1 contra quién, J2 contra quién, J3 contra quién…</b>. Puedes hacer clic para cambiar el rival o arrastrar un rival sobre otro equipo de la misma jornada para intercambiarlo.</p></div><span id="gofMatchupStatus" class="tag">Sin revisar</span></div>
   <div id="gofMatchupList" style="margin-top:10px"></div>
-  <div class="gof-matrix-legend"><span class="gof-matrix-pill edit">🟣 Clic = cambiar rival</span><span class="gof-matrix-pill drag">↕️ Arrastra el rival hacia otro equipo</span><span class="gof-matrix-pill lock">🔒 Jornada cerrada / protegida</span><span class="gof-matrix-pill">— Sin partido</span></div>
+  <div class="gof-matrix-legend"><span class="gof-matrix-pill drag">↕️ Arrastra el rival a otro equipo de la misma jornada</span><span class="gof-matrix-pill edit">🟣 Toca una celda para cambiar rival</span><span class="gof-matrix-pill lock">🔒 Jornada protegida</span></div>
 </div>
 <div class="gof-step-nav">
   <button type="button" onclick="setView('rosters')">← Rosters</button>
@@ -4568,6 +4553,11 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
 .gof-v2-empty{color:#655d6c!important;border-style:dashed!important;cursor:default!important}
 .gof-v2-help{margin-top:9px!important;color:#bdb4c7!important;font-size:12px!important}
 @media(max-width:700px){#gofMatrixTable{min-width:960px!important}#gofMatrixTable thead th:first-child,#gofMatrixTable td:first-child{min-width:165px!important}.gof-v2-cell{min-width:108px!important}.gof-v2-opponent{font-size:10px!important}}
+
+/* GAME ON FLAG — solo se muestra la matriz nueva; se ocultan restos de la interfaz anterior */
+#enfrentamientos .gof-legacy-matchup-list,#enfrentamientos .gof-matchup-card,#enfrentamientos .matchup-card,#enfrentamientos .gof-matchup-row{display:none!important}
+#enfrentamientos .gof-only-matrix-card{overflow:visible!important}
+#enfrentamientos #gofMatchupList{width:100%!important}
 </style>
 <script id="gof-enfrentamientos-v2-script">
 (function(){
@@ -4604,8 +4594,8 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     let bar=document.getElementById('gofMatrixCategoryBar');
     if(!bar){
       bar=document.createElement('div');bar.id='gofMatrixCategoryBar';
-      const host=section.querySelector('.card');
-      if(host)host.insertBefore(bar,host.firstElementChild);
+      const host=document.getElementById('gofMatrixCategoryHost')||section.querySelector('.card');
+      if(host)host.appendChild(bar);
     }
     const tid=await ensureTournament();
     if(!tid){bar.innerHTML='<div class="gof-v2-title">🏷️ Categoría</div><div class="mut small">No hay un torneo actual configurado.</div>';return;}

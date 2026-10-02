@@ -3757,6 +3757,11 @@ window.addEventListener('load',async function(){
     }catch(e){box.textContent='';}
   }
 
+  // Exponer el estado para los módulos posteriores de Enfrentamientos.
+  // Algunas rutinas históricas llaman esta función desde otro bloque <script>.
+  window.updateRoundState=updateRoundState;
+  window.gofUpdateRoundState=updateRoundState;
+
   async function generateOnlySelectedCategory(){
     if(!ready) await loadSimpleEnfrentamientos();
     const ce=document.getElementById('gofMatchupCategory');
@@ -4685,7 +4690,58 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     if(sel&&sel.value){window.__gofMatrixSelectedCategory=sel.value;window.__gofMatrixSelectedTournament=await ensureTournament();}
     await window.gofLoadMatchupsV2();
   }
-  window.gofLoadMatchupsV2=gofLoadMatchupsV2;window.gofLoadMatchups=gofLoadMatchupsV2;const oldGen=window.gofGenerateMatchups;if(typeof oldGen==='function'&&!oldGen.__gofV2Wrap){const genWrap=async function(){await oldGen.apply(this,arguments);await gofLoadMatchupsV2()};genWrap.__gofV2Wrap=true;window.gofGenerateMatchups=genWrap;}
+  async function generateMatrixDirect(){
+    const tid=await ensureTournament();
+    const cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||'';
+    if(!tid) throw new Error('No hay un torneo actual configurado.');
+    if(!cat) throw new Error('Primero selecciona una categoría.');
+    if(!client()) throw new Error('La conexión con la base de datos no está disponible.');
+    const {data:teamRows,error:teamError}=await client().from('tournament_teams')
+      .select('team_id,teams!tournament_teams_team_id_fkey(id,name)')
+      .eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
+    if(teamError) throw teamError;
+    const teams=(teamRows||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+    if(teams.length<2) throw new Error('La categoría necesita al menos 2 equipos activos para generar enfrentamientos.');
+    const roundsNeeded=Math.min(7,Math.max(1,teams.length-(teams.length%2?0:1)));
+    const existingRes=await client().from('matches').select('id,round_number,home_team_id,away_team_id,status,match_date,published')
+      .eq('tournament_id',tid).eq('category_id',cat);
+    if(existingRes.error) throw existingRes.error;
+    const existing=existingRes.data||[];
+    const protectedRows=existing.filter(m=>m.match_date||m.published||m.status!=='programado');
+    const open=existing.filter(m=>!m.match_date&&!m.published&&m.status==='programado');
+    const pairKey=(a,b)=>[a,b].sort().join('|');
+    const existingKeys=new Set(open.map(m=>`${m.round_number}|${pairKey(m.home_team_id,m.away_team_id)}`));
+    const n=teams.length;
+    const ring=teams.map(t=>t.id);
+    const schedule=[];
+    const work=n%2?[...ring,null]:[...ring];
+    const totalRounds=work.length-1;
+    for(let r=0;r<totalRounds&&r<7;r++){
+      const half=work.length/2;
+      for(let i=0;i<half;i++){
+        const a=work[i],b=work[work.length-1-i];
+        if(a&&b){
+          const home=(r+i)%2===0?a:b,away=home===a?b:a;
+          schedule.push({round_number:r+1,home_team_id:home,away_team_id:away});
+        }
+      }
+      work.splice(1,0,work.pop());
+    }
+    const toInsert=schedule.filter(x=>!existingKeys.has(`${x.round_number}|${pairKey(x.home_team_id,x.away_team_id)}`));
+    if(toInsert.length){
+      const {error}=await client().from('matches').insert(toInsert.map(x=>({
+        tournament_id:tid,category_id:cat,round_number:x.round_number,home_team_id:x.home_team_id,away_team_id:x.away_team_id,
+        status:'programado',published:false,is_makeup:false,referee_fee_due:false,schedule_generated_at:new Date().toISOString()
+      })));
+      if(error) throw error;
+    }
+    await gofLoadMatchupsV2();
+    const finalCount=schedule.length;
+    if(typeof window.toast==='function') window.toast(toInsert.length?`✅ ${toInsert.length} enfrentamientos generados`:`✅ Los ${finalCount} enfrentamientos ya estaban generados`);
+    return {inserted:toInsert.length,total:finalCount,protected:protectedRows.length};
+  }
+  window.gofGenerateMatchups=generateMatrixDirect;
+  window.gofLoadMatchupsV2=gofLoadMatchupsV2;window.gofLoadMatchups=gofLoadMatchupsV2;
   const oldSet=window.setView;if(typeof oldSet==='function'&&!oldSet.__gofV2){const wrap=function(v){const r=oldSet.apply(this,arguments);if(v==='enfrentamientos')setTimeout(init,120);return r};wrap.__gofV2=true;window.setView=wrap}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,500));else setTimeout(init,500);
 })();

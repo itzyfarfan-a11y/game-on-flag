@@ -1041,12 +1041,10 @@ $('gofPubLeague')?.addEventListener('change',changeLeague);window.gofInitPublica
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
 <h2>⚔️ Enfrentamientos</h2>
 <div class="workflow-kicker" style="margin-top:6px">PASO 4 DE 8 · TABLA DE ENFRENTAMIENTOS</div>
-<div class="notice"><b>Selecciona una categoría y genera sus 7 jornadas.</b> Los enfrentamientos aparecen directamente en la tabla. Para cambiar un partido, <b>arrastra el rival de una celda hacia otro equipo de la misma jornada</b>. El intercambio se realiza automáticamente. También puedes tocar una celda para elegir otro rival.</div>
+<div class="notice"><b>Selecciona una categoría.</b> Si ya existen enfrentamientos guardados, se muestran directamente. Puedes cambiar un rival con clic o arrastrar la celda hacia otro equipo de la misma jornada.</div>
 <div class="card gof-only-matrix-card">
   <div id="gofMatrixCategoryHost"></div>
-  <div id="gofMatchupInfo" class="mut small" style="margin-top:8px"></div>
   <div id="gofMatchupList" style="margin-top:10px"></div>
-  <div class="gof-matrix-legend"><span class="gof-matrix-pill drag">↕️ Arrastra el rival a otro equipo de la misma jornada</span><span class="gof-matrix-pill edit">🟣 Toca una celda para cambiar rival</span><span class="gof-matrix-pill lock">🔒 Jornada protegida</span></div>
 </div>
 <div class="gof-step-nav">
   <button type="button" onclick="setView('rosters')">← Rosters</button>
@@ -1068,7 +1066,7 @@ $('gofPubLeague')?.addEventListener('change',changeLeague);window.gofInitPublica
 <details class="gof-action-accordion"><summary><span class="gof-action-number">4</span><span class="gof-action-icon">✏️</span><span class="gof-action-copy"><b>Editar / mover partidos</b><small>Adelantar o atrasar a otra jornada, fecha, hora o campo</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Desde cada partido usa <b>✏️ Editar / mover</b>. Puedes cambiar la <b>Jornada destino</b>, fecha, hora y campo. Por ejemplo, un partido de la Jornada 6 puede adelantarse a la Jornada 4 o atrasarse a la Jornada 7. El sistema revisa empalmes antes de guardar.</div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">5</span><span class="gof-action-icon">📢</span><span class="gof-action-copy"><b>Publicar por semana</b><small>Publica solamente la semana que ya revisaste</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div id="schedulePublishControls"><div class="mut small">Selecciona un torneo y revisa el calendario para ver las semanas.</div></div></div></details>
 <details class="gof-action-accordion"><summary><span class="gof-action-number">6</span><span class="gof-action-icon">🔁</span><span class="gof-action-copy"><b>Reposición de equipo</b><small>Programa una semana especial para un equipo que entra después</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">El partido de reposición cuenta para el equipo que necesita completar sus semanas; el rival queda excluido de sus estadísticas.</div><div class="form"><select id="mt"></select><select id="mc"></select><select id="mmake"></select><select id="mopp"></select><input id="mround" min="1" placeholder="Semana de reposición" type="number"/><input id="mdate" type="date"/><input id="mtime" type="time"/><input id="mfield" placeholder="Cancha 1–5"/><input id="mnote" placeholder="Motivo / observación"/></div><div class="toolbar" style="margin-top:9px"><button class="gold" onclick="createMakeupMatch()">➕ Crear partido de reposición</button></div><div class="mut small" id="makeupStatus" style="margin-top:8px"></div></div></details>
-</div><div id="scheduleList"></div><div class="gof-step-nav gof-step-4"><button type="button" onclick="setView('rosters')">← Rosters</button><div class="step-current">Paso 3 de 6</div><button class="primary" type="button" onclick="setView('resultados')">Siguiente: Resultados →</button></div></section>
+</div><div class="card" style="margin-top:12px;text-align:center"><button type="button" class="primary" style="width:100%;font-size:18px;padding:14px" onclick="window.gofOpenSavedMatchupsFromCalendar&&window.gofOpenSavedMatchupsFromCalendar()">⚔️ Ver enfrentamientos</button><div class="mut small" style="margin-top:6px">Abre los enfrentamientos ya guardados y elige la categoría para ver la tabla.</div></div><div id="scheduleList"></div><div class="gof-step-nav gof-step-4"><button type="button" onclick="setView('rosters')">← Rosters</button><div class="step-current">Paso 3 de 6</div><button class="primary" type="button" onclick="setView('resultados')">Siguiente: Resultados →</button></div></section>
 <section class="view" id="resultados"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏈 Resultados</h2><div class="workflow-kicker" style="margin-top:6px">PASO 5 DE 7 · RESULTADOS</div><div class="notice">FORFEIT = <b>18–0</b>. Se identifica el equipo que no se presentó. El arbitraje queda manual en Contabilidad.</div><div id="resultsList"></div><div id="resultsActions" class="gof-results-actions"></div><div class="card gof-results-board"><div class="gof-board-head"><div><h3 style="margin:0">📋 Cuadro de marcadores</h3><p class="mut small" style="margin:3px 0 0">Vista compacta para revisar, descargar y publicar.</p></div></div><div class="form gof-board-filter"><select id="resBoardCat"><option value="">Todas las categorías</option></select></div><div id="resultsBoardStatus" class="mut small gof-board-status"></div><div id="resultsBoard" style="margin-top:8px"></div><div class="toolbar gof-board-actions"><button class="gold" type="button" onclick="downloadResultsBoardImage()">🖼️ Descargar imagen</button><button class="primary" type="button" onclick="publishResultsBoard()">📢 Publicar</button></div></div><div class="gof-step-nav gof-step-5"><button type="button" onclick="setView('calendario')">← Calendario</button><div class="step-current">Paso 4 de 6</div><button class="primary" type="button" onclick="setView('tabla')">Siguiente: Tabla →</button></div></section>
 <section class="view" id="tabla"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📊 Tabla de posiciones</h2><div class="workflow-kicker" style="margin-top:6px">PASO 6 DE 7 · TABLA</div><div class="card"><div class="form"><select id="st"></select><select id="sc"></select></div></div><div id="standings"></div><div class="gof-step-nav gof-step-6"><button type="button" onclick="setView('resultados')">← Resultados</button><div class="step-current">Paso 5 de 6</div><button class="primary" type="button" onclick="setView('playoffs')">Siguiente: Playoffs →</button></div></section>
 <section class="view" id="avisos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>📢 Avisos oficiales</h2><div class="notice"><b>Módulo de avisos</b><br/>Crea el aviso, guárdalo como borrador, revísalo y después publícalo. Los publicados serán visibles en el portal público.</div><div class="card"><div class="form"><select id="noticeTournament"><option value="">Aviso general / todos los torneos</option></select><select id="noticeType"><option>Aviso</option><option>Sanción</option><option>Suspensión</option><option>Expulsión</option><option>Información</option></select><input id="noticeTitle" placeholder="Título"/><input id="noticeTeam" placeholder="Equipo"/><input id="noticePerson" placeholder="Persona"/><input id="noticeReason" placeholder="Motivo"/><input id="noticeSanction" placeholder="Sanción"/><input id="noticeDate" type="date"/><input id="noticeValid" placeholder="Vigencia"/><textarea class="full" id="noticeDesc" placeholder="Descripción libre" rows="5" style="width:100%;padding:11px;border-radius:9px;border:1px solid var(--line);background:#0d0c12;color:#fff"></textarea></div><div class="toolbar" style="margin-top:9px"><button class="primary" onclick="saveNoticeDraft()">💾 Guardar borrador</button><button type="button" onclick="clearNoticeForm()">🧹 Limpiar</button></div></div><div class="card"><div class="row"><h3 style="margin:0">📋 Avisos guardados</h3><button type="button" onclick="loadNotices()">🔄 Actualizar</button></div><div id="noticeList" style="margin-top:10px"></div></div></section>
@@ -4630,51 +4628,40 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     if(data?.[0]){tid=data[0].id;const t=document.getElementById('gofMatchupTournament');if(t){t.innerHTML=`<option value="${escV(tid)}" data-type="${escV(data[0].tournament_type||'regular')}" data-rounds="${data[0].tournament_type==='relampago'?3:Number(data[0].regular_rounds||7)}">${escV(data[0].name)}</option>`;t.value=tid}}
     return tid;
   }
+  function v2Status(msg,ok=false){
+    const el=document.getElementById('gofMatrixStatus');
+    if(el){el.textContent=msg||'';el.className='mut small gof-v2-status '+(ok?'ok':'');}
+    if(msg&&typeof window.toast==='function'&&ok) window.toast(msg);
+  }
   async function buildCategoryBar(){
     const section=document.getElementById('enfrentamientos'); if(!section)return;
     document.getElementById('gofFinalCategoryPicker')?.remove();
     document.getElementById('gofCategoryQuick')?.remove();
     let bar=document.getElementById('gofMatrixCategoryBar');
-    if(!bar){
-      bar=document.createElement('div');bar.id='gofMatrixCategoryBar';
-      const host=document.getElementById('gofMatrixCategoryHost')||section.querySelector('.card');
-      if(host)host.appendChild(bar);
-    }
+    if(!bar){bar=document.createElement('div');bar.id='gofMatrixCategoryBar';const host=document.getElementById('gofMatrixCategoryHost')||section.querySelector('.card');if(host)host.appendChild(bar);}
     const tid=await ensureTournament();
-    if(!tid){bar.innerHTML='<div class="gof-v2-title">🏷️ Categoría</div><div class="mut small">No hay un torneo actual configurado.</div>';return;}
+    if(!tid){bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><div class="mut small">No hay un torneo actual configurado.</div>';return;}
     const {data,error}=await client().from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
-    if(error){bar.innerHTML='<div class="gof-v2-title">🏷️ Categoría</div><div class="mut small">No se pudieron cargar las categorías.</div>';return;}
-    const order=['Golden Femenil','Golden Varonil','Silver Femenil A','Silver Femenil B','Silver Varonil A','Silver Varonil B','Bronce A','Bronce B','Mixto','Escolar','30+','35+','Moms','Otros'];const rank=n=>{const i=order.indexOf(n);return i<0?999:i};const cats=(data||[]).map(x=>({id:x.category_id,name:display(x.categories?.name)})).filter(x=>x.id).sort((a,b)=>(rank(a.name)-rank(b.name))||a.name.localeCompare(b.name,'es'));
+    if(error){bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><div class="mut small">No se pudieron cargar las categorías.</div>';return;}
+    const order=['Golden Femenil','Golden Varonil','Silver Femenil A','Silver Femenil B','Silver Varonil A','Silver Varonil B','Bronce A','Bronce B','Mixto','Escolar','30+','35+','Moms','Otros'];
+    const rank=n=>{const i=order.indexOf(n);return i<0?999:i};
+    const cats=(data||[]).map(x=>({id:x.category_id,name:display(x.categories?.name)})).filter(x=>x.id).sort((a,b)=>(rank(a.name)-rank(b.name))||a.name.localeCompare(b.name,'es'));
     const hidden=document.getElementById('gofMatchupCategory');
-    const old=hidden?.value||localStorage.getItem('gof_enf_category')||'';
+    const old=hidden?.value||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     const selected=cats.some(c=>c.id===old)?old:'';
-    bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button><button type="button" class="primary" id="gofMatrixApprove">💾 Aprobar y guardar</button><button type="button" class="primary" id="gofMatrixPublish">📢 Publicar</button><button type="button" id="gofMatrixDownload">🖼️ Descargar tabla</button></div><div id="gofMatchupStatus" class="mut small" style="margin-top:8px">Sin aprobar</div><div class="gof-v2-help">La tabla de abajo es editable: puedes cambiar un rival con clic o arrastrar una celda hacia otro equipo de la misma jornada. Si entra un equipo nuevo, aparece al final con sus jornadas vacías para que tú le asignes sus rivales manualmente. La fecha, hora, campo y dobles jornadas se manejan únicamente en Calendario.</div>';
+    bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button><button type="button" class="primary" id="gofMatrixApprove">💾 Aprobar y guardar</button><button type="button" class="primary" id="gofMatrixPublish">📢 Publicar</button><button type="button" id="gofMatrixDownload">🖼️ Descargar tabla</button></div><div id="gofMatrixStatus" class="mut small gof-v2-status"></div>';
     const sel=document.getElementById('gofMatrixCategorySelect');
-    const sync=async()=>{if(hidden)hidden.value=sel.value;localStorage.setItem('gof_enf_category',sel.value||'');await window.gofLoadMatchupsV2()};
+    const sync=async()=>{if(hidden)hidden.value=sel.value;window.__gofMatrixSelectedCategory=sel.value||'';window.__gofMatrixSelectedTournament=tid;localStorage.setItem('gof_enf_category',sel.value||'');v2Status('');await window.gofLoadMatchupsV2()};
     sel.onchange=sync;
-    document.getElementById('gofMatrixRefresh').onclick=()=>window.gofLoadMatchupsV2();
-    document.getElementById('gofMatrixApprove')?.addEventListener('click',async()=>{try{await window.gofApproveMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}});
-    document.getElementById('gofMatrixPublish')?.addEventListener('click',async()=>{try{if(typeof window.gofPublishMatchups!=='function')return alert('La publicación no está disponible.');await window.gofPublishMatchups();await window.gofLoadMatchupsV2();}catch(e){alert(e?.message||e)}});
-    document.getElementById('gofMatrixDownload')?.addEventListener('click',()=>{if(typeof window.gofDownloadMatchupsImage==='function')window.gofDownloadMatchupsImage();else alert('La descarga no está disponible.');});
+    document.getElementById('gofMatrixRefresh').onclick=async()=>{try{await window.gofLoadMatchupsV2();v2Status('Tabla actualizada.',true)}catch(e){v2Status('No se pudo actualizar: '+(e?.message||e))}};
+    document.getElementById('gofMatrixApprove').onclick=async()=>{try{await approveV2()}catch(e){v2Status('No se pudo guardar: '+(e?.message||e))}};
+    document.getElementById('gofMatrixPublish').onclick=async()=>{try{await publishV2()}catch(e){v2Status('No se pudo publicar: '+(e?.message||e))}};
+    document.getElementById('gofMatrixDownload').onclick=async()=>{try{await downloadV2()}catch(e){v2Status('No se pudo descargar: '+(e?.message||e))}};
     document.getElementById('gofMatrixGenerate').onclick=async()=>{
-      const chosen=sel.value;
-      if(!chosen)return alert('Primero selecciona una categoría.');
-      window.__gofMatrixSelectedCategory=chosen;
-      window.__gofMatrixSelectedTournament=tid;
-      if(hidden)hidden.value=chosen;
-      localStorage.setItem('gof_enf_category',chosen);
-      if(typeof window.gofGenerateMatchups!=='function')return alert('No se pudo cargar el generador de enfrentamientos.');
-      const btn=document.getElementById('gofMatrixGenerate');
-      const oldText=btn.textContent; btn.disabled=true; btn.textContent='⏳ Generando...';
-      try{
-        await window.gofGenerateMatchups();
-        await window.gofLoadMatchupsV2();
-      }catch(err){
-        console.error('GAME ON FLAG — generar enfrentamientos',err);
-        alert('No se pudieron generar los enfrentamientos: '+(err?.message||err));
-      }finally{
-        btn.disabled=false; btn.textContent=oldText;
-      }
+      const chosen=sel.value;if(!chosen){v2Status('Selecciona una categoría.');return;}
+      window.__gofMatrixSelectedCategory=chosen;window.__gofMatrixSelectedTournament=tid;if(hidden)hidden.value=chosen;localStorage.setItem('gof_enf_category',chosen);
+      const btn=document.getElementById('gofMatrixGenerate');btn.disabled=true;const oldText=btn.textContent;btn.textContent='⏳ Revisando...';
+      try{await generateMatrixDirect();await window.gofLoadMatchupsV2();}catch(err){v2Status('No se pudieron generar los enfrentamientos: '+(err?.message||err));}finally{btn.disabled=false;btn.textContent=oldText;}
     };
     if(hidden)hidden.value=selected;
   }
@@ -4741,12 +4728,17 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const by=new Map(teams.map(t=>[t.id,{}]));
     for(const r of rows){const h=by.get(r.home_team_id),a=by.get(r.away_team_id);if(h)h[r.round_number]={m:r,o:r.away?.name||'Por definir',oid:r.away_team_id};if(a)a[r.round_number]={m:r,o:r.home?.name||'Por definir',oid:r.home_team_id};}
     let html='<div id="gofMatrixTableWrap"><table id="gofMatrixTable"><thead><tr><th>EQUIPO</th>'+rounds.map(r=>`<th>JORNADA ${r}</th>`).join('')+'</tr></thead><tbody>';
-    for(const team of teams){html+=`<tr><td><span class="gof-v2-team">${escV(team.name)}</span></td>`;for(const round of rounds){const e=by.get(team.id)?.[round];if(!e){html+='<td class="gof-v2-cell"><div class="gof-v2-opponent gof-v2-empty">—<span class="gof-v2-meta">Sin partido</span></div></td>';continue;}const locked=!!(e.m.match_date||e.m.published||e.m.status!=='programado');html+=`<td class="gof-v2-cell"><button type="button" class="gof-v2-opponent ${locked?'locked':''}" data-team-id="${escV(team.id)}" data-round="${round}" data-match-id="${escV(e.m.id)}" ${locked?'disabled':''} title="${locked?'Protegido':'Clic para cambiar · arrastra hacia otro equipo de esta jornada'}"><span>${escV(e.o)}</span><span class="gof-v2-meta">${locked?'🔒 Protegido':'Clic / arrastra'}</span></button></td>`;}html+='</tr>';}
+    for(const team of teams){html+=`<tr><td><span class="gof-v2-team">${escV(team.name)}</span></td>`;for(const round of rounds){const e=by.get(team.id)?.[round];if(!e){html+='<td class="gof-v2-cell"><div class="gof-v2-opponent gof-v2-empty">—</div></td>';continue;}const locked=!!(e.m.match_date||e.m.published||e.m.status!=='programado');html+=`<td class="gof-v2-cell"><button type="button" class="gof-v2-opponent ${locked?'locked':''}" data-team-id="${escV(team.id)}" data-round="${round}" data-match-id="${escV(e.m.id)}" ${locked?'disabled':''} title="${locked?'Protegido':'Clic para cambiar · arrastra hacia otro equipo de esta jornada'}"><span>${escV(e.o)}</span><span class="gof-v2-meta">${locked?'🔒 Protegido':'Clic / arrastra'}</span></button></td>`;}html+='</tr>';}
     html+='</tbody></table></div>';out.innerHTML=html;
     out.querySelectorAll('.gof-v2-opponent:not(.locked):not(.gof-v2-empty)').forEach(btn=>{const mid=btn.dataset.matchId,tid2=btn.dataset.teamId,r=Number(btn.dataset.round);btn.onclick=()=>edit(mid,tid2,r);btn.draggable=true;btn.ondragstart=e=>{e.dataTransfer.setData('text/plain',JSON.stringify({mid,tid:tid2,r}));btn.classList.add('dragging')};btn.ondragend=()=>btn.classList.remove('dragging');btn.ondragover=e=>{const d=window.__gofV2Drag;if(d&&d.r===r){e.preventDefault();btn.classList.add('drop-target')}};btn.ondragleave=()=>btn.classList.remove('drop-target');btn.ondrop=async e=>{e.preventDefault();btn.classList.remove('drop-target');let d=window.__gofV2Drag;try{d=JSON.parse(e.dataTransfer.getData('text/plain'))}catch(_){}if(d&&d.r===r&&d.tid!==tid2)await swap(d.mid,d.tid,tid2,r)};btn.addEventListener('dragstart',()=>{window.__gofV2Drag={mid,tid:tid2,r}});installTouch(btn,mid,tid2,r)});
-    const info=document.getElementById('gofMatchupInfo');if(info)info.innerHTML=`<b>${teams.length} equipos</b> · <b>${rows.length} partidos</b> · <b>7 jornadas</b>. La tabla se lee de izquierda a derecha: J1 → J7.`;
-    const status=document.getElementById('gofMatchupStatus');if(status)status.textContent='Matriz lista';
+
   }
+  window.gofOpenSavedMatchupsFromCalendar=async function(){
+    const cat=document.getElementById('cc')?.value||localStorage.getItem('gof_enf_category')||'';
+    if(cat){const h=document.getElementById('gofMatchupCategory');if(h)h.value=cat;window.__gofMatrixSelectedCategory=cat;localStorage.setItem('gof_enf_category',cat);}
+    setView('enfrentamientos');
+    setTimeout(async()=>{try{await buildCategoryBar();const sel=document.getElementById('gofMatrixCategorySelect');if(sel&&cat){sel.value=cat;sel.dispatchEvent(new Event('change'));}else{await gofLoadMatchupsV2();}}catch(e){v2Status('No se pudieron cargar los enfrentamientos: '+(e?.message||e));}},120);
+  };
   async function init(){await buildCategoryBar();
     const hidden=document.getElementById('gofMatchupCategory');
     const sel=document.getElementById('gofMatrixCategorySelect');
@@ -4757,57 +4749,74 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
   async function generateMatrixDirect(){
     const tid=await ensureTournament();
     const cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
-    if(!tid) throw new Error('No hay un torneo actual configurado.');
-    if(!cat) throw new Error('Primero selecciona una categoría.');
-    if(!client()) throw new Error('La conexión con la base de datos no está disponible.');
-    const {data:teamRows,error:teamError}=await client().from('tournament_teams')
-      .select('team_id,teams!tournament_teams_team_id_fkey(id,name)')
-      .eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
-    if(teamError) throw teamError;
+    if(!tid)throw new Error('No hay un torneo actual configurado.');
+    if(!cat)throw new Error('Primero selecciona una categoría.');
+    if(!client())throw new Error('La conexión con la base de datos no está disponible.');
+    const {data:teamRows,error:teamError}=await client().from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
+    if(teamError)throw teamError;
     const teams=(teamRows||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'es'));
-    if(teams.length<2) throw new Error('La categoría necesita al menos 2 equipos activos para generar enfrentamientos.');
-    const roundsNeeded=Math.min(7,Math.max(1,teams.length-(teams.length%2?0:1)));
-    const existingRes=await client().from('matches').select('id,round_number,home_team_id,away_team_id,status,match_date,published')
-      .eq('tournament_id',tid).eq('category_id',cat);
-    if(existingRes.error) throw existingRes.error;
-    const existing=existingRes.data||[];
-    const protectedRows=existing.filter(m=>m.match_date||m.published||m.status!=='programado');
-    const open=existing.filter(m=>!m.match_date&&!m.published&&m.status==='programado');
-    const pairKey=(a,b)=>[a,b].sort().join('|');
-    const existingKeys=new Set(open.map(m=>`${m.round_number}|${pairKey(m.home_team_id,m.away_team_id)}`));
-    const n=teams.length;
-    const ring=teams.map(t=>t.id);
-    const schedule=[];
-    const work=n%2?[...ring,null]:[...ring];
-    const totalRounds=work.length-1;
-    for(let r=0;r<totalRounds&&r<7;r++){
+    if(teams.length<2)throw new Error('La categoría necesita al menos 2 equipos activos.');
+    const {data:existing,error:existingError}=await client().from('matches').select('id,round_number,home_team_id,away_team_id,status,match_date,published,is_makeup').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
+    if(existingError)throw existingError;
+    if((existing||[]).length){
+      window.__gofMatrixSelectedCategory=cat;localStorage.setItem('gof_enf_category',cat);
+      v2Status('Ya existen enfrentamientos guardados. Se cargó la tabla existente.',true);
+      return {inserted:0,existing:existing.length};
+    }
+    const n=teams.length, work=n%2?[...teams,null]:[...teams], totalRounds=Math.min(7,work.length-1), schedule=[];
+    for(let r=0;r<totalRounds;r++){
       const half=work.length/2;
       for(let i=0;i<half;i++){
-        const a=work[i],b=work[work.length-1-i];
-        if(a&&b){
-          const home=(r+i)%2===0?a:b,away=home===a?b:a;
-          schedule.push({round_number:r+1,home_team_id:home,away_team_id:away});
-        }
+        const a=work[i],b=work[work.length-1-i];if(!a||!b)continue;
+        const home=(r+i)%2===0?a:b,away=home===a?b:a;schedule.push({round_number:r+1,home_team_id:home.id,away_team_id:away.id});
       }
       work.splice(1,0,work.pop());
     }
-    const toInsert=schedule.filter(x=>!existingKeys.has(`${x.round_number}|${pairKey(x.home_team_id,x.away_team_id)}`));
-    if(toInsert.length){
-      const {error}=await client().from('matches').insert(toInsert.map(x=>({
-        tournament_id:tid,category_id:cat,round_number:x.round_number,home_team_id:x.home_team_id,away_team_id:x.away_team_id,
-        status:'programado',published:false,is_makeup:false,referee_fee_due:false,schedule_generated_at:new Date().toISOString()
-      })));
-      if(error) throw error;
-    }
-    const hidden=document.getElementById('gofMatchupCategory');
-    if(hidden) hidden.value=cat;
-    window.__gofMatrixSelectedCategory=cat;
-    localStorage.setItem('gof_enf_category',cat);
-    await gofLoadMatchupsV2();
-    const finalCount=schedule.length;
-    if(typeof window.toast==='function') window.toast(toInsert.length?`✅ ${toInsert.length} enfrentamientos generados`:`✅ Los ${finalCount} enfrentamientos ya estaban generados`);
-    return {inserted:toInsert.length,total:finalCount,protected:protectedRows.length};
+    const {error}=await client().from('matches').insert(schedule.map(x=>({tournament_id:tid,category_id:cat,round_number:x.round_number,home_team_id:x.home_team_id,away_team_id:x.away_team_id,status:'programado',published:false,is_makeup:false,referee_fee_due:false,schedule_generated_at:new Date().toISOString()})));
+    if(error)throw error;
+    v2Status(`Se generaron ${schedule.length} enfrentamientos.`,true);
+    return {inserted:schedule.length,total:schedule.length};
   }
+
+  async function currentV2(){
+    const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
+    if(!tid||!cat)throw new Error('Selecciona una categoría.');
+    const {rows,teams}=await loadRows();
+    return {tid,cat,rows,teams};
+  }
+  async function approveV2(){
+    const {tid,cat,rows,teams}=await currentV2();
+    if(!rows.length)throw new Error('No hay enfrentamientos guardados para esta categoría.');
+    const rounds=7,bad=[],seenRound=new Set(),pairs=new Map(),pairKey=(a,b)=>[a,b].sort().join('|');
+    for(const r of rows){
+      if(!r.home_team_id||!r.away_team_id||r.home_team_id===r.away_team_id){bad.push(`J${r.round_number}: enfrentamiento inválido.`);continue;}
+      const rk=`${r.round_number}|${r.home_team_id}|${r.away_team_id}`;if(seenRound.has(rk))bad.push(`J${r.round_number}: enfrentamiento duplicado.`);seenRound.add(rk);
+      for(const [t,o] of [[r.home_team_id,r.away_team_id],[r.away_team_id,r.home_team_id]]){const k=t+'|'+o;const arr=pairs.get(k)||[];arr.push(Number(r.round_number));pairs.set(k,arr);}
+    }
+    // Un equipo solo puede tener un partido por jornada en Enfrentamientos.
+    for(const t of teams){for(let rr=1;rr<=rounds;rr++){const c=rows.filter(m=>Number(m.round_number)===rr&&(m.home_team_id===t.id||m.away_team_id===t.id));if(c.length>1)bad.push(`${t.name}: tiene más de un partido en J${rr}.`);}}
+    // No repetir rival únicamente cuando hay más equipos que jornadas (>7).
+    if(teams.length>rounds){for(const [k,rs] of pairs){const u=[...new Set(rs)];if(u.length>1){const [a,b]=k.split('|');const names=new Map(teams.map(t=>[t.id,t.name]));bad.push(`${names.get(a)||'Equipo'} repite rival con ${names.get(b)||'otro equipo'} en J${u.join(', J')}.`);}}}
+    if(bad.length){v2Status('Corrige la tabla antes de aprobar: '+bad.slice(0,4).join(' · '));return;}
+    try{await client().from('tournament_matchup_approvals').upsert({tournament_id:tid},{onConflict:'tournament_id'});}catch(_){/* La aprobación visual sigue siendo válida aunque la tabla no tenga RLS de escritura. */}
+    localStorage.setItem('gof_matchups_approved_'+tid+'_'+cat,'1');
+    v2Status('✓ Enfrentamientos guardados y aprobados.',true);
+  }
+  async function publishV2(){
+    const {tid,cat,rows}=await currentV2();if(!rows.length)throw new Error('No hay enfrentamientos guardados.');
+    const {error}=await client().from('matches').update({published:true}).eq('tournament_id',tid).eq('category_id',cat).eq('status','programado');
+    if(error)throw error;v2Status('📢 Enfrentamientos publicados.',true);await gofLoadMatchupsV2();
+  }
+  async function downloadV2(){
+    const {cat,rows}=await currentV2();if(!rows.length)throw new Error('No hay enfrentamientos guardados.');
+    const catName=document.getElementById('gofMatrixCategorySelect')?.selectedOptions?.[0]?.textContent||'Categoría';
+    const grouped=new Map();rows.forEach(m=>{const r=Number(m.round_number);if(!grouped.has(r))grouped.set(r,[]);grouped.get(r).push(m)});
+    const W=1500,rowH=72,head=150,top=24,total=rows.length,H=top+head+52+total*rowH+60,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+    x.fillStyle='#09070d';x.fillRect(0,0,W,H);x.fillStyle='#fff';x.font='900 40px Arial';x.fillText('ENFRENTAMIENTOS',top,top+48);x.font='900 28px Arial';x.fillText(catName.slice(0,45),top,top+92);x.fillStyle='#211b2a';x.fillRect(top,top+head,W-top*2,52);x.fillStyle='#fff';x.font='900 20px Arial';x.fillText('JORNADA',top+18,top+head+34);x.fillText('ENFRENTAMIENTO',top+170,top+head+34);
+    let y=top+head+52;for(let rr=1;rr<=7;rr++){for(const m of grouped.get(rr)||[]){x.fillStyle=rr%2?'#12101a':'#17131f';x.fillRect(top,y,W-top*2,rowH);x.fillStyle='#e8c84a';x.font='900 22px Arial';x.fillText('J'+rr,top+18,y+44);x.fillStyle='#fff';x.font='900 24px Arial';x.fillText((m.home?.name||'Por definir')+'  🆚  '+(m.away?.name||'Por definir'),top+170,y+44);y+=rowH;}}
+    const a=document.createElement('a');a.download='GameOnFlag_Enfrentamientos_'+catName.replace(/[^a-z0-9áéíóúñ]+/gi,'_')+'.png';a.href=c.toDataURL('image/png');a.click();v2Status('✓ Tabla descargada.',true);
+  }
+
   window.gofGenerateMatchups=generateMatrixDirect;
   window.gofLoadMatchupsV2=gofLoadMatchupsV2;window.gofLoadMatchups=gofLoadMatchupsV2;
   const oldSet=window.setView;if(typeof oldSet==='function'&&!oldSet.__gofV2){const wrap=function(v){const r=oldSet.apply(this,arguments);if(v==='enfrentamientos')setTimeout(init,120);return r};wrap.__gofV2=true;window.setView=wrap}

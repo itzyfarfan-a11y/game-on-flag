@@ -4099,6 +4099,20 @@ window.addEventListener('load',async function(){
     if(error||!targetMatch)return alert('No encontré el partido del equipo destino en esta jornada.');
     if(targetMatch.id===matchId)return;
     if(targetMatch.match_date||targetMatch.published)return alert('El partido del equipo destino está protegido porque ya tiene fecha o está publicado.');
+    // No permitimos crear un rival repetido cuando hay más de 7 equipos.
+    const {data:allRoundRows}=await sb.from('matches').select('id,round_number,home_team_id,away_team_id,status').eq('tournament_id',gVal('gofMatchupTournament')).eq('category_id',gVal('gofMatchupCategory')).eq('status','programado');
+    const {data:activeTeams}=await sb.from('tournament_teams').select('team_id').eq('tournament_id',gVal('gofMatchupTournament')).eq('category_id',gVal('gofMatchupCategory')).eq('is_active',true);
+    const pairKey=(a,b)=>[a,b].sort().join(':');
+    const teamCount=(activeTeams||[]).length;
+    if(teamCount>7){
+      const currentPair=pairKey(sourceTeamId,targetTeamId);
+      const targetOpponent=targetMatch.home_team_id===targetTeamId?targetMatch.away_team_id:targetMatch.home_team_id;
+      const otherPair=pairKey(targetTeamId,current?.away_team_id===targetTeamId?current.home_team_id:current.away_team_id);
+      const conflicts=(allRoundRows||[]).some(x=>x.id!==matchId&&x.id!==targetMatch.id&&Number(x.round_number)!==Number(round)&&pairKey(x.home_team_id,x.away_team_id)===currentPair);
+      if(conflicts)return alert('Ese rival ya está enfrentado en otra jornada. Con más de 7 equipos no se permite repetir rival.');
+      const conflicts2=(allRoundRows||[]).some(x=>x.id!==matchId&&x.id!==targetMatch.id&&Number(x.round_number)!==Number(round)&&pairKey(x.home_team_id,x.away_team_id)===otherPair);
+      if(conflicts2)return alert('Ese cambio también provocaría un rival repetido para el otro equipo.');
+    }
     const {data,error:rpcError}=await sb.rpc('gof_swap_match_opponent',{p_match_id:matchId,p_team_id:sourceTeamId,p_new_opponent_id:targetTeamId});
     if(!rpcError&&data?.ok){toast('Enfrentamiento intercambiado');await gofLoadMatchups();await updateRoundState();return;}
     alert(rpcError?.message||'No se pudo realizar el intercambio.');
@@ -4160,7 +4174,7 @@ window.addEventListener('load',async function(){
     holder.innerHTML='';editor.append(select,save,cancel);holder.appendChild(editor);select.focus();
   }
   async function gofGenerateMatchups(){
-    if(!gVal('gofMatchupTournament')){if(typeof window.gofInitSimpleMatchups==='function'){await window.gofInitSimpleMatchups();} else {throw new Error('No se pudo inicializar el módulo de Enfrentamientos.');}}
+    if(!gVal('gofMatchupTournament')){if(typeof window.gofInitSimpleMatchups==='function')await window.gofInitSimpleMatchups();}
     const tid=gVal('gofMatchupTournament')||window.__gofMatrixSelectedTournament||window.gofSingleTournamentId||'';
     const cat=gVal('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     if(!tid)return alert('No hay un torneo activo.');
@@ -4170,114 +4184,92 @@ window.addEventListener('load',async function(){
     const rounds=tour?.tournament_type==='relampago'?3:Number(tour?.regular_rounds||7)||7;
     const {data:catRow}=await sb.from('categories').select('name').eq('id',cat).maybeSingle();
     const catName=catRow?.name||document.getElementById('gofMatchupCategory')?.selectedOptions?.[0]?.textContent||'Categoría';
-    const {data:existing,error:ee}=await sb.from('matches').select('id,round_number,home_team_id,away_team_id,match_date,published,status,is_makeup').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
-    if(ee)return alert(ee.message);
-    const locked=[...new Set((existing||[]).filter(x=>x.match_date||x.published).map(x=>Number(x.round_number)))].sort((a,b)=>a-b);
-    const nextRound=locked.length?Math.max(...locked)+1:1;
-    if(nextRound>rounds)return alert(`Las ${rounds} jornadas de ${catName} ya están cerradas. No se modificará ninguna.`);
-
-    const {data:rows,error}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
-    if(error)return alert(error.message);
-    const teams=(rows||[]).map(x=>x.teams).filter(Boolean);
+    const {data:teamRows,error:teamError}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
+    if(teamError)return alert(teamError.message);
+    const teams=(teamRows||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>String(a.name).localeCompare(String(b.name),'es'));
     if(teams.length<2)return alert(`La categoría ${catName} necesita al menos 2 equipos activos.`);
 
-    const lockedRows=(existing||[]).filter(x=>x.match_date||x.published);
-    const futureExisting=(existing||[]).filter(x=>Number(x.round_number)>=nextRound&&!x.match_date&&!x.published&&!x.is_makeup);
-    const playedCount=new Map(teams.map(t=>[t.id,0]));
-    const history=new Map();
+    const {data:existing,error:ee}=await sb.from('matches').select('id,round_number,home_team_id,away_team_id,match_date,published,status,is_makeup').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
+    if(ee)return alert(ee.message);
+    const allExisting=existing||[];
+    const lockedRows=allExisting.filter(x=>x.match_date||x.published||x.status!=='programado');
+    const lockedRounds=[...new Set(lockedRows.map(x=>Number(x.round_number)).filter(Number.isFinite))].sort((a,b)=>a-b);
+    const nextRound=lockedRounds.length?Math.max(...lockedRounds)+1:1;
+    if(nextRound>rounds){await gofLoadMatchups();return alert(`Las ${rounds} jornadas de ${catName} ya están cerradas.`);}
+
+    // IMPORTANTE: Enfrentamientos es la fuente de verdad. Al regenerar una categoría
+    // se borran únicamente los partidos abiertos generados de las jornadas futuras y
+    // se reconstruyen desde cero: un rival por equipo y por jornada, sin dobles.
+    const openToDelete=allExisting.filter(x=>Number(x.round_number)>=nextRound&&!x.match_date&&!x.published&&!x.is_makeup);
+    if(openToDelete.length){
+      const del=await sb.from('matches').delete().in('id',openToDelete.map(x=>x.id));
+      if(del.error)return alert('No se pudieron limpiar los enfrentamientos anteriores: '+del.error.message);
+    }
+
+    const idList=teams.map(t=>t.id);
+    const uniqueOpponentsRequired=teams.length>rounds;
     const pairKey=(a,b)=>[a,b].sort().join(':');
-    const addHist=(a,b)=>{if(!a||!b)return;const k=pairKey(a,b);history.set(k,(history.get(k)||0)+1)};
+    const history=new Map();
     for(const r of lockedRows){
-      if(playedCount.has(r.home_team_id))playedCount.set(r.home_team_id,playedCount.get(r.home_team_id)+1);
-      if(playedCount.has(r.away_team_id))playedCount.set(r.away_team_id,playedCount.get(r.away_team_id)+1);
-      addHist(r.home_team_id,r.away_team_id);
-    }
-    // Los partidos futuros normales se regeneran. Las reposiciones manuales quedan intactas.
-    for(const r of futureExisting){
-      if(playedCount.has(r.home_team_id))playedCount.set(r.home_team_id,playedCount.get(r.home_team_id)+1);
-      if(playedCount.has(r.away_team_id))playedCount.set(r.away_team_id,playedCount.get(r.away_team_id)+1);
-      addHist(r.home_team_id,r.away_team_id);
+      if(r.home_team_id&&r.away_team_id){const k=pairKey(r.home_team_id,r.away_team_id);history.set(k,(history.get(k)||0)+1);}
     }
 
-    const futureRounds=Array.from({length:Math.max(0,rounds-nextRound+1)},(_,i)=>nextRound+i);
-    // Si todos los equipos ya tienen sus 7 partidos, no regeneramos nada.
-    if(!futureRounds.length){await gofLoadMatchups();return;}
-
-    // Déficit de partidos. Un equipo que entra tarde solo recibe automáticamente
-    // un partido por jornada futura; los que falten después se agregan manualmente.
-    const deficits=new Map(teams.map(t=>[t.id,Math.max(0,rounds-(playedCount.get(t.id)||0))]));
-    const teamHasFuture=new Set();
-    for(const r of futureExisting){teamHasFuture.add(r.home_team_id);teamHasFuture.add(r.away_team_id)}
-
-    function buildFuture(){
-      const localDef=new Map(deficits),localHist=new Map(history),out=[];
-      for(const r of futureRounds){
-        const used=new Set();const matches=[];
-        const candidates=teams.slice().filter(t=>(localDef.get(t.id)||0)>0).sort((a,b)=>(localDef.get(b.id)-localDef.get(a.id))||((playedCount.get(a.id)||0)-(playedCount.get(b.id)||0))||Math.random()-.5);
-        for(const a of candidates){
-          if((localDef.get(a.id)||0)<=0||used.has(a.id))continue;
-          const choices=teams.filter(b=>b.id!==a.id&&!used.has(b.id)&&(localDef.get(b.id)||0)>0)
-            .sort((x,y)=>{
-              const hx=localHist.get(pairKey(a.id,x.id))||0,hy=localHist.get(pairKey(a.id,y.id))||0;
-              return hx-hy || (localDef.get(y.id)-localDef.get(x.id));
-            });
-          // Regla de rivales: si hay suficientes equipos para cubrir todas las
-          // jornadas, cada equipo debe enfrentar rivales diferentes. Si hay menos
-          // equipos que jornadas, se permiten repeticiones porque son inevitables.
-          const uniqueOpponentsRequired=teams.length>rounds;
-          const b=uniqueOpponentsRequired
-            ? choices.find(x=>(localHist.get(pairKey(a.id,x.id))||0)===0)
-            : choices[0];
-          if(!b)continue;
-          matches.push([a,b]);used.add(a.id);used.add(b.id);
-          localDef.set(a.id,Math.max(0,localDef.get(a.id)-1));localDef.set(b.id,Math.max(0,localDef.get(b.id)-1));
-          localHist.set(pairKey(a.id,b.id),(localHist.get(pairKey(a.id,b.id))||0)+1);
+    // Busca una combinación completa de partidos para cada jornada. Cada equipo
+    // aparece como máximo una vez por jornada. Si hay >7 equipos, no se repite rival
+    // durante las 7 jornadas; con menos equipos se permiten repeticiones inevitables.
+    const byeCounts=new Map(idList.map(id=>[id,0]));
+    function findRoundPairs(roundNumber,usedRoundsHistory){
+      const ids=idList.slice();
+      const needBye=ids.length%2===1;
+      const byeOptions=needBye?ids.slice().sort((a,b)=>(byeCounts.get(a)||0)-(byeCounts.get(b)||0)||String(a).localeCompare(String(b))):[null];
+      for(const bye of byeOptions){
+        const available=ids.filter(id=>id!==bye);
+        const pairs=[];
+        function search(rem){
+          if(!rem.length)return true;
+          const a=rem[0];
+          const candidates=rem.slice(1).filter(b=>{
+            const k=pairKey(a,b);
+            if(uniqueOpponentsRequired&&(usedRoundsHistory.get(k)||0)>0)return false;
+            return true;
+          }).sort((x,y)=>{
+            const hx=usedRoundsHistory.get(pairKey(a,x))||0,hy=usedRoundsHistory.get(pairKey(a,y))||0;
+            return hx-hy||String(x).localeCompare(String(y));
+          });
+          for(const b of candidates){
+            pairs.push([a,b]);
+            if(search(rem.filter(x=>x!==a&&x!==b)))return true;
+            pairs.pop();
+          }
+          return false;
         }
-        out.push(matches);
+        if(search(available))return {pairs,bye};
       }
-      return {rounds:out,remaining:[...localDef.entries()].filter(([,v])=>v>0)};
+      return null;
     }
 
-    let best=null;
-    for(let i=0;i<250;i++){
-      const c=buildFuture();
-      const score=c.remaining.reduce((s,x)=>s+x[1],0);
-      if(!best||score<best.score){best={...c,score};}
-      if(score===0)break;
-    }
-
-    if(futureExisting.length){
-      // Si todas las jornadas están abiertas, Generar debe funcionar directamente.
-      // Solo pedimos confirmación cuando existen jornadas cerradas que obligan a
-      // regenerar únicamente las jornadas posteriores a ellas.
-      if(locked.length){
-        if(!confirm(`Se actualizarán solamente las jornadas futuras de ${catName} (J${nextRound}–J${rounds}). Las jornadas cerradas y las reposiciones manuales NO se tocarán.\n\n¿Continuar?`))return;
+    const generated=[];
+    const workingHistory=new Map(history);
+    for(let r=nextRound;r<=rounds;r++){
+      const result=findRoundPairs(r,workingHistory);
+      if(!result){
+        return alert(`No se pudo cuadrar la Jornada ${r} de ${catName} sin empalmes. No se guardó una jornada incompleta.`);
       }
-      const ids=futureExisting.map(x=>x.id);const del=await sb.from('matches').delete().in('id',ids);if(del.error)return alert(del.error.message);
-    }
-
-    const inserts=[];
-    for(let i=0;i<futureRounds.length;i++){
-      for(const [a,b] of (best.rounds[i]||[])){
-        inserts.push({tournament_id:tid,category_id:cat,round_number:futureRounds[i],home_team_id:a.id,away_team_id:b.id,status:'programado',published:false,is_makeup:false,referee_fee_due:true});
+      for(const [a,b] of result.pairs){
+        generated.push({tournament_id:tid,category_id:cat,round_number:r,home_team_id:a,away_team_id:b,status:'programado',published:false,is_makeup:false,referee_fee_due:true});
+        const k=pairKey(a,b);workingHistory.set(k,(workingHistory.get(k)||0)+1);
       }
+      if(result.bye)byeCounts.set(result.bye,(byeCounts.get(result.bye)||0)+1);
     }
-    if(inserts.length){const {error:e}=await sb.from('matches').insert(inserts);if(e)return alert('No se pudieron crear los enfrentamientos de '+catName+': '+e.message);}
 
-    // Conteo informativo después de la generación automática.
-    const autoCount=new Map(teams.map(t=>[t.id,playedCount.get(t.id)||0]));
-    for(const list of best.rounds)for(const [a,b] of list){autoCount.set(a.id,(autoCount.get(a.id)||0)+1);autoCount.set(b.id,(autoCount.get(b.id)||0)+1)}
-    const missing=teams.map(t=>({name:t.name,count:autoCount.get(t.id)||0,missing:Math.max(0,rounds-(autoCount.get(t.id)||0))})).filter(x=>x.missing>0);
-    await gofLoadMatchups();await updateRoundState();
-    if(missing.length){
-      const lines=missing.map(x=>`• ${x.name}: ${x.count}/7 · faltan ${x.missing} partido(s) manual(es)`);
-      const box=document.getElementById('gofMatchupInfo');
-      if(box)box.innerHTML='<div class="gof-matchup-alert"><b>📝 Generación automática terminada.</b><div style="margin-top:6px">Las jornadas futuras se generaron hasta donde fue posible sin tocar jornadas cerradas. Los partidos que falten se agregan con <b>➕ Agregar partido manual</b>.</div><ul style="margin:7px 0 0 18px">'+lines.map(esc2).map(x=>'<li>'+x+'</li>').join('')+'</ul></div>';
-      if(typeof window.toast==='function')window.toast(`🎲 ${catName}: generación lista. Hay partidos pendientes de reposición manual.`);
-    }else{
-      if(typeof window.toast==='function')window.toast(`🎲 ${catName}: generación completa. Todos tienen 7 partidos.`);
-      if(typeof window.gofValidateMatchups==='function')await window.gofValidateMatchups(true);
+    if(generated.length){
+      const ins=await sb.from('matches').insert(generated);
+      if(ins.error)return alert(`No se pudieron guardar los enfrentamientos de ${catName}: ${ins.error.message}`);
     }
+    await gofLoadMatchups();
+    await updateRoundState();
+    if(typeof window.gofValidateMatchups==='function')await window.gofValidateMatchups(true);
+    if(typeof window.toast==='function')window.toast(`✅ ${catName}: ${generated.length} partidos cuadrado(s), sin dobles por jornada.`);
   }
 
   async function gofAddManualMakeupMatch(){
@@ -4361,7 +4353,20 @@ window.addEventListener('load',async function(){
     readBlocksFromUI();if(!calendarBlocks.length)return alert('Agrega al menos un bloque.');
     const approved=localStorage.getItem('gof_matchups_approved_'+tid)==='1';
     const {data:tour,error:te}=await sb.from('tournaments').select('tournament_type,schedule_settings').eq('id',tid).single();if(te)return alert(te.message);
-    const {data:matches,error:me}=await sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,categories(name)').eq('tournament_id',tid).eq('status','programado').is('match_date',null).order('round_number').order('id');if(me)return alert(me.message);if(!matches?.length)return alert('No hay enfrentamientos pendientes de calendario. Primero genera/revisa Enfrentamientos.');
+    const selectedRounds=[...new Set(calendarBlocks.map(b=>Number(b.round)).filter(Number.isFinite))];
+    if(!selectedRounds.length)return alert('El bloque no tiene una jornada válida.');
+    // Generar calendario siempre parte de Enfrentamientos y reemplaza el acomodo
+    // anterior de las jornadas seleccionadas. Solo se conservan partidos publicados.
+    const {data:allScheduleRows,error:me}=await sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,schedule_manual_override,categories(name)').eq('tournament_id',tid).eq('status','programado').order('round_number').order('id');
+    if(me)return alert(me.message);
+    const protectedRows=(allScheduleRows||[]).filter(m=>selectedRounds.includes(Number(m.round_number))&&(m.published||m.status!=='programado'));
+    if(protectedRows.length)return alert('Una de las jornadas seleccionadas contiene partidos publicados/protegidos. Primero despublica esa jornada para regenerarla desde Enfrentamientos.');
+    const resetIds=(allScheduleRows||[]).filter(m=>selectedRounds.includes(Number(m.round_number))&&!m.published).map(m=>m.id);
+    if(resetIds.length){
+      const {error:re}=await sb.from('matches').update({match_date:null,match_time:null,field_name:null,schedule_manual_override:false,schedule_override_note:null,schedule_override_at:null,schedule_generated_at:null}).in('id',resetIds);if(re)return alert('No se pudo limpiar el acomodo anterior del calendario: '+re.message);
+    }
+    const matches=(allScheduleRows||[]).filter(m=>selectedRounds.includes(Number(m.round_number))&&!m.published).map(m=>({...m,match_date:null,match_time:null,field_name:null}));
+    if(!matches.length)return alert('No hay enfrentamientos pendientes de calendario. Primero genera/revisa Enfrentamientos.');
     const {data:cats}=await sb.from('tournament_categories').select('category_id,categories(name)').eq('tournament_id',tid);const catName=new Map((cats||[]).map(x=>[x.category_id,x.categories?.name||'Categoría']));
     const categoryPriority=[
       {match:n=>n==='35+',rank:10},

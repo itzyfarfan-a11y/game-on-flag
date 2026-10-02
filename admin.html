@@ -4638,13 +4638,13 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     if(hidden)hidden.value=selected;
   }
   async function loadRows(){
-    const tid=await ensureTournament(),cat=val('gofMatchupCategory'); if(!tid||!cat)return {rows:[],teams:[]};
+    const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||''; if(!tid||!cat)return {rows:[],teams:[]};
     const {data:rows}=await client().from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
     const {data:tr}=await client().from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
     return {rows:rows||[],teams:(tr||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'es'))};
   }
   async function swap(matchId,teamId,targetTeamId,round){
-    const tid=await ensureTournament(),cat=val('gofMatchupCategory');
+    const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     if(!tid||!cat)return;
     const {data,error}=await client().rpc('gof_swap_match_opponent',{p_match_id:matchId,p_team_id:teamId,p_new_opponent_id:targetTeamId});
     if(error||!data?.ok){alert(error?.message||'No se pudo cambiar el enfrentamiento.');return;}
@@ -4669,7 +4669,7 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
   }
   async function gofLoadMatchupsV2(){
     const out=document.getElementById('gofMatchupList');if(!out)return;
-    const tid=await ensureTournament(),cat=val('gofMatchupCategory');
+    const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     if(!tid||!cat){out.innerHTML='<div class="empty">Selecciona una categoría para mostrar los enfrentamientos.</div>';return;}
     const {rows,teams}=await loadRows();
     if(!teams.length){out.innerHTML='<div class="empty">Esta categoría todavía no tiene equipos activos.</div>';return;}
@@ -4692,7 +4692,7 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
   }
   async function generateMatrixDirect(){
     const tid=await ensureTournament();
-    const cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||'';
+    const cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     if(!tid) throw new Error('No hay un torneo actual configurado.');
     if(!cat) throw new Error('Primero selecciona una categoría.');
     if(!client()) throw new Error('La conexión con la base de datos no está disponible.');
@@ -4735,6 +4735,10 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
       })));
       if(error) throw error;
     }
+    const hidden=document.getElementById('gofMatchupCategory');
+    if(hidden) hidden.value=cat;
+    window.__gofMatrixSelectedCategory=cat;
+    localStorage.setItem('gof_enf_category',cat);
     await gofLoadMatchupsV2();
     const finalCount=schedule.length;
     if(typeof window.toast==='function') window.toast(toInsert.length?`✅ ${toInsert.length} enfrentamientos generados`:`✅ Los ${finalCount} enfrentamientos ya estaban generados`);

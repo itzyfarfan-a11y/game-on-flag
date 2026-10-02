@@ -6147,3 +6147,72 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
   else setTimeout(bind,700);
 })();
 </script>
+
+<!-- GAME ON FLAG · CALENDARIO · FIX DEFINITIVO DE TORNEO ACTUAL -->
+<style id="gof-calendar-no-legend-final">
+#calendario .gof-calendar-flex-note,
+#calendario .gof-calendar-priority-note,
+#calendario #gofCalendarFlexNote,
+#calendario #gofCalendarPriorityNote,
+#calendario .gof-flex-note,
+#calendario .gof-priority-note{display:none!important}
+</style>
+<script id="gof-calendar-tournament-context-final">
+(function(){
+  'use strict';
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const db=()=>window.sb||window.supabaseClient||(typeof window.client==='function'?window.client():null);
+  const val=id=>document.getElementById(id)?.value||'';
+  async function resolveTournament(){
+    const d=db(); if(!d)return '';
+    let tid=val('ct')||val('gofMatchupTournament')||window.gofSingleTournamentId||window.__gofMatrixSelectedTournament||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
+    if(!tid){
+      const lid=window.gofCurrentOrganizationId||window.GOF_ACTIVE_LEAGUE_ID||localStorage.getItem('gameOnFlagActiveLeagueId')||localStorage.getItem('gof_active_league')||'';
+      let q=d.from('tournaments').select('id,name,status,tournament_type,regular_rounds,league_id').in('status',['proximo','activo']).order('created_at',{ascending:false}).limit(1);
+      if(lid)q=q.eq('league_id',lid);
+      const {data,error}=await q;
+      if(error||!data?.[0])return '';
+      tid=data[0].id;
+    }
+    window.gofSingleTournamentId=tid;
+    window.__gofMatrixSelectedTournament=tid;
+    try{localStorage.setItem('gof_home_tournament',tid);localStorage.setItem('gof_active_tournament',tid)}catch(_){ }
+    for(const id of ['ct','gofMatchupTournament']){
+      const s=document.getElementById(id); if(!s)continue;
+      if(![...s.options].some(o=>String(o.value)===String(tid))){
+        const o=document.createElement('option');o.value=tid;o.textContent='Torneo actual';s.appendChild(o)
+      }
+      s.value=tid;
+    }
+    return tid;
+  }
+  async function refreshCalendarContext(){
+    const tid=await resolveTournament();
+    if(!tid)return '';
+    await sleep(80);
+    if(typeof window.gofLoadCalendarBlocks==='function')await window.gofLoadCalendarBlocks();
+    else if(typeof window.gofLoadCalendarBlocksFinal==='function')await window.gofLoadCalendarBlocksFinal();
+    else if(typeof window.gofLoadCalendarBlocks==='function')await window.gofLoadCalendarBlocks();
+    return tid;
+  }
+  const oldSet=window.setView;
+  if(typeof oldSet==='function'&&!oldSet.__gofCalendarTournamentContextFinal){
+    const wrapped=async function(v){
+      const r=await oldSet.apply(this,arguments);
+      if(v==='calendario'){
+        const tid=await resolveTournament();
+        if(tid){
+          await sleep(120);
+          if(typeof window.loadSchedule==='function')await window.loadSchedule();
+          if(typeof window.wireCalendarDrag==='function')window.wireCalendarDrag();
+        }
+      }
+      return r;
+    };
+    wrapped.__gofCalendarTournamentContextFinal=true;window.setView=wrapped;
+  }
+  window.gofResolveCalendarTournament=resolveTournament;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(resolveTournament,500));
+  else setTimeout(resolveTournament,500);
+})();
+</script>

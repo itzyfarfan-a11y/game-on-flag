@@ -5695,6 +5695,12 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
 
 
 <!-- GAME ON FLAG · CALENDARIO FLEXIBLE FINAL · 2026-10-02 -->
+<style id="gof-calendar-hide-priority-notes-final">
+#calendario #gofCalendarFlexNote,
+#calendario #gofCalendarPriorityNote,
+#calendario .gof-calendar-flex-note{display:none!important}
+</style>
+
 <style id="gof-calendar-flex-final">
 #calendario .gof-calendar-builder{display:block!important}
 #calendario .gof-calendar-builder .gof-calendar-main-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -5822,16 +5828,47 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
       let candidates=sortCandidates(remaining.filter(m=>Number(m.round_number)===round),type,block.date);
       if(!candidates.length)continue;
       const assigned=[];let slot=0;
+      const fieldCount=Number(block.fields||4);
       while(candidates.length&&slot<300){
-        const base=(Number(String(block.start||'08:00').slice(0,2))*60)+Number(String(block.start||'08:00').slice(3,5)); const mins=base+slot*Number(block.interval||60); const time=String(Math.floor(mins/60)%24).padStart(2,'0')+':'+String(mins%60).padStart(2,'0')+':00';
-        for(let f=1;f<=Number(block.fields||4)&&candidates.length;f++){
-          let pick=-1;
-          for(let i=0;i<candidates.length;i++){
-            if(!teamBusy(assigned,candidates[i],time)){pick=i;break}
+        const base=(Number(String(block.start||'08:00').slice(0,2))*60)+Number(String(block.start||'08:00').slice(3,5));
+        const mins=base+slot*Number(block.interval||60);
+        const time=String(Math.floor(mins/60)%24).padStart(2,'0')+':'+String(mins%60).padStart(2,'0')+':00';
+
+        // Empaquetado por horario: llenar Campo 1..N al máximo posible.
+        // Se buscan combinaciones de partidos sin equipos repetidos en la misma
+        // hora, en vez de aceptar una elección voraz que pueda dejar campos vacíos.
+        // La prioridad de categorías solo ordena candidatos; nunca reduce el número
+        // de campos utilizados cuando existe una combinación válida.
+        function pickBestPack(list, cap){
+          const ordered=list.slice();
+          let best=[];
+          const chosen=[];
+          const used=new Set();
+          function dfs(start){
+            if(chosen.length>best.length) best=chosen.slice();
+            if(best.length>=cap)return true;
+            if(chosen.length+(ordered.length-start)<=best.length)return false;
+            for(let i=start;i<ordered.length;i++){
+              const m=ordered[i];
+              if(used.has(m.home_team_id)||used.has(m.away_team_id))continue;
+              used.add(m.home_team_id);used.add(m.away_team_id);chosen.push(m);
+              if(dfs(i+1)&&best.length>=cap){
+                chosen.pop();used.delete(m.home_team_id);used.delete(m.away_team_id);return true;
+              }
+              chosen.pop();used.delete(m.home_team_id);used.delete(m.away_team_id);
+            }
+            return false;
           }
-          if(pick<0)break;
-          const m=candidates.splice(pick,1)[0];assigned.push({id:m.id,a:m.home_team_id,b:m.away_team_id,time,field:'Campo '+f});
+          dfs(0);
+          const ids=new Set(best.map(m=>m.id));
+          return list.filter(m=>ids.has(m.id));
         }
+        const chosen=pickBestPack(candidates,fieldCount);
+        if(!chosen.length)break;
+        const chosenIds=new Set(chosen.map(m=>m.id));
+        candidates=candidates.filter(m=>!chosenIds.has(m.id));
+        chosen.forEach((m,idx)=>assigned.push({id:m.id,a:m.home_team_id,b:m.away_team_id,time,field:'Campo '+(idx+1)}));
+        if(!chosen.length)break;
         slot++;
       }
       for(const x of assigned){const {error:ue}=await d.from('matches').update({match_date:block.date,match_time:x.time,field_name:x.field,schedule_generated_at:new Date().toISOString(),schedule_manual_override:false}).eq('id',x.id);if(!ue){total++;const ix=remaining.findIndex(m=>m.id===x.id);if(ix>=0)remaining.splice(ix,1)}else notes.push(ue.message)}
@@ -5857,11 +5894,6 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     b.querySelector('#gofFinalGenerate')?.addEventListener('click',generateCalendar);
     r.querySelector('.gof-accordion-list')?.remove();
     r.querySelectorAll('#gofCalendarQuickBar,.gof-calendar-matchups-card').forEach(x=>x.remove());
-    if(!document.getElementById('gofCalendarFlexNote')){
-      const n=document.createElement('div');n.id='gofCalendarFlexNote';n.className='notice gof-calendar-flex-note';
-      n.innerHTML='<b>Regla flexible:</b> se intenta acomodar sin empalmes y se da prioridad a <b>35+ → Silver Varonil → Silver Femenil → Mixto → Escolar → 30+ → Bronce → Golden → Moms → Otros</b>. Esta prioridad <b>no bloquea</b> los cambios manuales. En relámpago, viernes prioriza Mixto/35+/Moms, sábado prioriza las demás categorías y domingo recibe pendientes, pero todo se puede mover.';
-      b.appendChild(n);
-    }
     loadBlocks().then(async()=>{ensureBottomCalendar();if(typeof window.loadSchedule==='function')await window.loadSchedule();});
   }
   window.gofAddCalendarBlock=addBlock;

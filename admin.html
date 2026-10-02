@@ -6822,3 +6822,108 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
  window.gofVerifyCalendarConflicts=verify;
 })();
 </script>
+
+<!-- GAME ON FLAG · CALENDARIO VISUAL FINAL · BLOQUES COLAPSABLES + TABLA ENFRENTAMIENTOS UNIFICADA -->
+<style id="gof-calendar-visual-final">
+#calendario .gof-block-row{overflow:hidden}
+#calendario .gof-block-row>.gof-block-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;background:#211b2b;color:#fff;border-radius:14px;padding:14px 16px;min-height:54px;text-align:left;font:inherit;cursor:pointer}
+#calendario .gof-block-row>.gof-block-toggle .gof-block-arrow{font-size:20px;transition:transform .18s ease}
+#calendario .gof-block-row.gof-block-open>.gof-block-toggle .gof-block-arrow{transform:rotate(180deg)}
+#calendario .gof-block-row:not(.gof-block-open)>.gof-block-grid,#calendario .gof-block-row:not(.gof-block-open)>div.mut.small{display:none!important}
+#calendario .gof-block-row.gof-block-open>.gof-block-grid{display:grid!important}
+#calendario .gof-unified-matchups-card{margin-top:14px;border-left:4px solid #8d2cff}
+#calendario .gof-unified-matchups-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+#calendario .gof-unified-matchups-toolbar select{flex:1;min-height:46px}
+#calendario .gof-unified-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #3b3344;border-radius:14px;margin-top:12px}
+#calendario .gof-unified-table{border-collapse:separate;border-spacing:0;min-width:780px;width:100%}
+#calendario .gof-unified-table th{position:sticky;top:0;background:#211b2b;color:#fff;padding:12px 10px;border-right:1px solid #3b3344;border-bottom:1px solid #3b3344;white-space:nowrap}
+#calendario .gof-unified-table td{padding:8px;border-right:1px solid #3b3344;border-bottom:1px solid #302938;background:#100d15;white-space:nowrap}
+#calendario .gof-unified-table th:first-child,#calendario .gof-unified-table td:first-child{position:sticky;left:0;z-index:3;background:#17131f}
+#calendario .gof-unified-table th:first-child{z-index:5}
+#calendario .gof-unified-team{font-weight:900;min-width:190px;display:block}
+#calendario .gof-unified-cat{font-size:11px;font-weight:800;opacity:.8;display:block;margin-bottom:3px}
+#calendario .gof-unified-opponent{display:block;min-width:112px;padding:10px 12px;border-radius:10px;border:1px solid #4b3c5c;background:#211b2b;color:#f2edf7;text-align:center;font-weight:800}
+#calendario .gof-unified-empty{opacity:.45}
+@media(max-width:700px){
+ #calendario .gof-unified-matchups-toolbar{display:grid;grid-template-columns:1fr}
+ #calendario .gof-unified-table{min-width:720px}
+}
+</style>
+<script id="gof-calendar-visual-final">
+(function(){
+ 'use strict';
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ const root=()=>document.getElementById('calendario');
+ const db=()=>window.sb||window.supabaseClient||(typeof window.client==='function'?window.client():null);
+ const tid=()=>document.getElementById('ct')?.value||window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
+ const escv=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+ function makeBlocksCollapsible(){
+   const out=document.getElementById('gofCalendarBlocks'); if(!out)return;
+   out.querySelectorAll('.gof-block-row').forEach((card,i)=>{
+     if(card.dataset.gofCollapseBound)return;
+     card.dataset.gofCollapseBound='1';
+     const old=card.querySelector(':scope > .row');
+     if(!old)return;
+     const title=old.querySelector('b')?.textContent||('📅 Bloque '+(i+1));
+     const tag=old.querySelector('.tag')?.textContent||'';
+     const toggle=document.createElement('button');
+     toggle.type='button';toggle.className='gof-block-toggle';
+     toggle.innerHTML='<span><b>'+escv(title)+'</b>'+(tag?' <span class="tag" style="margin-left:7px">'+escv(tag)+'</span>':'')+'</span><span class="gof-block-arrow">▼</span>';
+     old.replaceWith(toggle);
+     card.classList.remove('gof-block-open');
+     toggle.onclick=()=>card.classList.toggle('gof-block-open');
+   });
+ }
+
+ async function renderUnifiedMatchups(){
+   const r=root();if(!r)return;
+   const old=r.querySelector('.team-schedule-card');if(!old)return;
+   const id=tid(),d=db();if(!id||!d)return;
+   const {data:tr,error:te}=await d.from('tournament_teams').select('team_id,category_id,is_active,teams!tournament_teams_team_id_fkey(id,name),categories(name)').eq('tournament_id',id).eq('is_active',true);
+   if(te)return;
+   const {data:matches,error:me}=await d.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name),categories(name)').eq('tournament_id',id).eq('status','programado').gte('round_number',1).lte('round_number',7).eq('is_makeup',false).order('round_number').order('id');
+   if(me)return;
+   const teams=(tr||[]).map(x=>({id:x.team_id,name:x.teams?.name||'Equipo',categoryId:x.category_id,category:x.categories?.name||'Categoría'})).filter(x=>x.id);
+   const cats=[...new Map(teams.map(t=>[String(t.categoryId),t.category])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'es'));
+   const saved=localStorage.getItem('gof_enf_category')||'';
+   const card=document.createElement('div');card.className='card gof-unified-matchups-card';
+   card.innerHTML='<div class="row"><div><h3 style="margin:0">📋 Enfrentamientos</h3><div class="mut small">La misma tabla que Enfrentamientos: un rival por equipo en cada jornada.</div></div><button type="button" class="primary" id="gofUnifiedDownload">🖼️ Descargar imagen</button></div><div class="gof-unified-matchups-toolbar"><label class="field-label" style="margin:0;flex:1">🏷️ Categoría<select id="gofUnifiedCategory"><option value="__ALL__">Todas las categorías</option>'+cats.map(([cid,n])=>'<option value="'+escv(cid)+'" '+(String(cid)===String(saved)?'selected':'')+'>'+escv(n)+'</option>').join('')+'</select></label></div><div class="gof-unified-scroll"><table class="gof-unified-table"><thead><tr id="gofUnifiedHead"></tr></thead><tbody id="gofUnifiedBody"></tbody></table></div>';
+   old.replaceWith(card);
+   const sel=card.querySelector('#gofUnifiedCategory');
+   function draw(){
+     const wanted=sel.value;
+     const rows=teams.filter(t=>wanted==='__ALL__'||String(t.categoryId)===String(wanted)).sort((a,b)=>a.category.localeCompare(b.category,'es')||a.name.localeCompare(b.name,'es'));
+     const rounds=[1,2,3,4,5,6,7];
+     const by=new Map(rows.map(t=>[String(t.id),{}]));
+     for(const m of (matches||[])){
+       if(wanted!=='__ALL__'&&String(m.category_id)!==String(wanted))continue;
+       const h=by.get(String(m.home_team_id)),a=by.get(String(m.away_team_id));
+       if(h&&!h[m.round_number])h[m.round_number]=m.away?.name||'Por definir';
+       if(a&&!a[m.round_number])a[m.round_number]=m.home?.name||'Por definir';
+     }
+     const head=card.querySelector('#gofUnifiedHead');
+     head.innerHTML=(wanted==='__ALL__'?'<th>CATEGORÍA</th>':'')+'<th>EQUIPO</th>'+rounds.map(x=>'<th>JORNADA '+x+'</th>').join('');
+     const body=card.querySelector('#gofUnifiedBody');
+     body.innerHTML=rows.map(t=>'<tr>'+(wanted==='__ALL__'?'<td><span class="gof-unified-cat">'+escv(t.category)+'</span></td>':'')+'<td><span class="gof-unified-team">'+escv(t.name)+'</span></td>'+rounds.map(x=>'<td><span class="gof-unified-opponent '+(!by.get(String(t.id))?.[x]?'gof-unified-empty':'')+'">'+escv(by.get(String(t.id))?.[x]||'—')+'</span></td>').join('')+'</tr>').join('');
+   }
+   sel.onchange=()=>{localStorage.setItem('gof_enf_category',sel.value==='__ALL__'?'':sel.value);draw()};
+   card.querySelector('#gofUnifiedDownload').onclick=()=>window.downloadTeamScheduleImage?.();
+   draw();
+ }
+
+ function patch(){makeBlocksCollapsible();renderUnifiedMatchups();}
+ const oldLoad=window.loadSchedule;
+ if(typeof oldLoad==='function'&&!oldLoad.__gofUnifiedVisual){
+   const wrapped=async function(){const result=await oldLoad.apply(this,arguments);await sleep(100);makeBlocksCollapsible();renderUnifiedMatchups();return result};
+   wrapped.__gofUnifiedVisual=true;window.loadSchedule=wrapped;
+ }
+ const oldSet=window.setView;
+ if(typeof oldSet==='function'&&!oldSet.__gofUnifiedVisual){
+   const wrapped=async function(v){const result=await oldSet.apply(this,arguments);if(v==='calendario')setTimeout(patch,350);return result};wrapped.__gofUnifiedVisual=true;window.setView=wrapped;
+ }
+ const mo=new MutationObserver(()=>makeBlocksCollapsible());
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(patch,1000);const o=document.getElementById('gofCalendarBlocks');if(o)mo.observe(o,{childList:true,subtree:true})});
+ else {setTimeout(patch,1000);const o=document.getElementById('gofCalendarBlocks');if(o)mo.observe(o,{childList:true,subtree:true})}
+})();
+</script>

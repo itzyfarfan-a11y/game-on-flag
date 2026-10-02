@@ -4714,10 +4714,34 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     if(hidden)hidden.value=selected;
   }
   async function loadRows(){
-    const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||''; if(!tid||!cat)return {rows:[],teams:[]};
-    const {data:rows}=await client().from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
-    const {data:tr}=await client().from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
-    return {rows:rows||[],teams:(tr||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'es'))};
+    const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
+    if(!tid||!cat)return {rows:[],teams:[]};
+    const [{data:rawRows,error:rowsError},{data:tr,error:teamsError}]=await Promise.all([
+      client().from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)')
+        .eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id'),
+      client().from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)')
+        .eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true)
+    ]);
+    if(rowsError)throw rowsError;if(teamsError)throw teamsError;
+    const teams=(tr||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+    const activeIds=new Set(teams.map(t=>t.id));
+    const raw=(rawRows||[]).filter(m=>activeIds.has(m.home_team_id)&&activeIds.has(m.away_team_id)&&m.home_team_id!==m.away_team_id&&Number(m.round_number)>=1&&Number(m.round_number)<=7);
+    // En Enfrentamientos cada equipo puede tener un solo rival por jornada.
+    // Si la base contiene duplicados históricos, se toma una sola pareja por jornada
+    // para que la matriz nunca vuelva a mostrar varios rivales en una misma casilla.
+    const byRound=new Map();
+    const priority=m=>(m.match_date||m.published||m.status!=='programado')?0:1;
+    raw.sort((a,b)=>Number(a.round_number)-Number(b.round_number)||priority(a)-priority(b)||String(a.id).localeCompare(String(b.id)));
+    const used=new Set();
+    const clean=[];
+    for(const m of raw){
+      const r=Number(m.round_number),h=m.home_team_id,a=m.away_team_id;
+      if(!byRound.has(r))byRound.set(r,new Set());
+      const usedRound=byRound.get(r);
+      if(usedRound.has(h)||usedRound.has(a))continue;
+      usedRound.add(h);usedRound.add(a);clean.push(m);used.add(m.id);
+    }
+    return {rows:clean,teams};
   }
   async function swap(matchId,teamId,targetTeamId,round){
     const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';

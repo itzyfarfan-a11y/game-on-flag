@@ -1577,13 +1577,22 @@ async function loadEnrollmentSelectors(){
   if(!sb||!gofCurrentOrganizationId)return;
   const tourEl=document.getElementById('at'),catEl=document.getElementById('ac');
   if(tourEl)tourEl.innerHTML='<option value="">Usa el torneo actual</option>';
-  if(catEl)catEl.innerHTML='<option value="">Primero selecciona categoría</option>';
-  const {data:t,error:te}=await sb.from('tournaments').select('id,name').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
+  if(catEl)catEl.innerHTML='<option value="">Selecciona categoría</option>';
+  const {data:t,error:te}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
   if(te){console.error('GAME ON FLAG torneos:',te);if(tourEl)tourEl.innerHTML='<option value="">Error al cargar torneos</option>';return;}
-  fill('at',t,'id','name','Usa el torneo actual');
-  if(tourEl)tourEl.onchange=async()=>{const tid=tourEl.value;if(!tid){catEl.innerHTML='<option value="">Primero selecciona categoría</option>';clearTeamEntry();renderEnrollmentEmpty();syncOtrosRenameButton();return;}await loadEnrollmentCategories(tid);};
-  if(catEl)catEl.onchange=async()=>{syncOtrosRenameButton();clearTeamEntry();await loadEnrolled();};
-  renderEnrollmentEmpty();
+  const tournaments=t||[];
+  if(!tournaments.length){
+    if(tourEl)tourEl.innerHTML='<option value="">Primero crea un torneo</option>';
+    if(catEl)catEl.innerHTML='<option value="">Sin categorías disponibles</option>';
+    renderEnrollmentEmpty(); return;
+  }
+  fill('at',tournaments,'id','name','Usa el torneo actual');
+  if(tourEl)tourEl.onchange=async()=>{const tid=tourEl.value;if(!tid){catEl.innerHTML='<option value="">Selecciona categoría</option>';clearTeamEntry();renderEnrollmentEmpty();syncOtrosRenameButton();return;}localStorage.setItem('gof_home_tournament',tid);await loadEnrollmentCategories(tid);};
+  if(catEl)catEl.onchange=async()=>{localStorage.setItem('gof_enrollment_category',catEl.value||'');syncOtrosRenameButton();clearTeamEntry();await loadEnrolled();};
+  const saved=localStorage.getItem('gof_home_tournament');
+  const tid=(saved&&tournaments.some(x=>x.id===saved))?saved:tournaments[0].id;
+  if(tourEl)tourEl.value=tid;
+  await loadEnrollmentCategories(tid);
 }
 function clearTeamEntry(){const n=document.getElementById('aeName'),c=document.getElementById('aeCoach');if(n)n.value='';if(c)c.value='';}
 function renderEnrollmentEmpty(){const out=document.getElementById('enrolled');if(out)out.innerHTML='<div class="mut">📋 Selecciona un torneo y una categoría para ver los equipos inscritos.</div>';}
@@ -1591,19 +1600,22 @@ async function loadEnrollmentCategories(tournamentId){
   await gofEnsureDefaultCategories(gofCurrentOrganizationId);
   const catEl=document.getElementById('ac');
   if(!catEl||!sb)return;
-  const {data,error}=await sb.from('categories').select('id,name').eq('league_id',gofCurrentOrganizationId).order('name');
+  const {data,error}=await sb.from('categories').select('id,name').eq('league_id',gofCurrentOrganizationId);
   if(error){
     console.error('GAME ON FLAG categorías de la liga:',error);
     catEl.innerHTML='<option value="">No se pudieron cargar las categorías</option>';
     renderEnrollmentEmpty(); syncOtrosRenameButton(); return;
   }
-  const cats=(data||[]).map(x=>({id:x.id,name:x.name})).filter(x=>x.id&&x.name);
-  if(!cats.length){
-    catEl.innerHTML='<option value="">No hay categorías creadas</option>';
-    renderEnrollmentEmpty(); syncOtrosRenameButton(); return;
-  }
+  const order=['Golden Femenil','Golden Varonil','Silver Femenil A','Silver Femenil B','Silver Varonil A','Silver Varonil B','Bronce A','Bronce B','Mixto','Escolar','30+','35+','Moms','Otros'];
+  const rank=n=>{const i=order.indexOf(n);return i<0?999:i};
+  const cats=(data||[]).map(x=>({id:x.id,name:x.name})).filter(x=>x.id&&x.name).sort((a,b)=>(rank(a.name)-rank(b.name))||a.name.localeCompare(b.name,'es'));
+  if(!cats.length){catEl.innerHTML='<option value="">No hay categorías creadas</option>';renderEnrollmentEmpty();syncOtrosRenameButton();return;}
   catEl.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
-  catEl.value=''; clearTeamEntry(); renderEnrollmentEmpty(); syncOtrosRenameButton();
+  const saved=localStorage.getItem('gof_enrollment_category');
+  catEl.value=saved&&cats.some(x=>x.id===saved)?saved:'';
+  catEl.onchange=async()=>{localStorage.setItem('gof_enrollment_category',catEl.value||'');syncOtrosRenameButton();clearTeamEntry();await loadEnrolled();};
+  if(catEl.value)await loadEnrolled();else renderEnrollmentEmpty();
+  syncOtrosRenameButton();
 }
 function syncOtrosRenameButton(){const sel=document.getElementById('ac'),btn=document.getElementById('btnRenameOtros');if(!sel||!btn)return;const opt=sel.options[sel.selectedIndex];const isOtros=String(opt?.textContent||'').trim().toUpperCase()==='OTROS';btn.style.display=isOtros?'inline-block':'none';btn.textContent=isOtros?'✏️ Renombrar OTROS':'✏️';}
 async function renameOtrosCategory(){const sel=document.getElementById('ac');if(!sel?.value)return;const opt=sel.options[sel.selectedIndex];const current=String(opt?.textContent||'').trim();if(current.toUpperCase()!=='OTROS')return alert('El lápiz solo está disponible para la categoría OTROS.');const next=prompt('Nuevo nombre para la categoría OTROS:', '');if(next===null)return;const name=next.trim();if(!name)return alert('El nombre no puede quedar vacío.');if(name.toUpperCase()==='OTROS')return alert('Escribe un nombre diferente de OTROS.');const {error}=await sb.from('categories').update({name}).eq('id',sel.value).eq('league_id',gofCurrentOrganizationId);if(error)return alert(error.message);toast('Categoría renombrada correctamente');await loadEnrollmentSelectors();await refreshAllSelectors();}
@@ -2795,7 +2807,7 @@ function gofSetOrganizationHomeVisibility(){
 }
 async function gofEnsureDefaultCategories(leagueId){
  if(!leagueId||!sb)return [];
- const defaults=['Golden Varonil','Golden Femenil','Silver Varonil','Silver Varonil B','Silver Femenil','Silver Femenil B','Bronce','Bronce B','+35','Moms','Mixto','Escolar','Otros'];
+ const defaults=['Golden Femenil','Golden Varonil','Silver Femenil A','Silver Femenil B','Silver Varonil A','Silver Varonil B','Bronce A','Bronce B','Mixto','Escolar','30+','35+','Moms','Otros'];
  const {data:existing,error}=await sb.from('categories').select('id,name').eq('league_id',leagueId);
  if(error){console.warn('No se pudieron revisar categorías base:',error.message);return existing||[];}
  const have=new Set((existing||[]).map(x=>String(x.name||'').trim().toLowerCase()));
@@ -2810,9 +2822,31 @@ async function gofEnsureDefaultCategories(leagueId){
 }
 function renderGofCategoryCatalog(cats){
  const box=document.getElementById('gofCategoryCatalog'); if(!box)return;
- const defaults=['Golden Varonil','Golden Femenil','Silver Varonil','Silver Varonil B','Silver Femenil','Silver Femenil B','Bronce','Bronce B','+35','Moms','Mixto','Escolar','Otros'];
+ const order=['Golden Femenil','Golden Varonil','Silver Femenil A','Silver Femenil B','Silver Varonil A','Silver Varonil B','Bronce A','Bronce B','Mixto','Escolar','30+','35+','Moms','Otros'];
  const map=new Map((cats||[]).map(c=>[String(c.name||'').trim().toLowerCase(),c]));
- box.innerHTML=defaults.map(name=>{const c=map.get(name.toLowerCase());if(name==='Otros'&&c)return `<span class="gof-cat-chip other">${esc(c.name)} <button type="button" title="Renombrar Otros" onclick="renameGofOtros('${esc(c.id)}')">✏️</button></span>`;return `<span class="gof-cat-chip">${esc(c?.name||name)}</span>`}).join('');
+ box.innerHTML=order.map(name=>{
+   const c=map.get(name.toLowerCase());
+   if(!c)return '';
+   if(name==='Otros')return `<button type="button" class="gof-cat-chip other" onclick="selectEnrollmentCategory('${esc(c.id)}')">${esc(c.name)} ✏️</button>`;
+   return `<button type="button" class="gof-cat-chip" onclick="selectEnrollmentCategory('${esc(c.id)}')">${esc(c.name)}</button>`;
+ }).join('');
+}
+async function selectEnrollmentCategory(categoryId){
+ const catEl=document.getElementById('ac'), tourEl=document.getElementById('at');
+ if(!catEl||!categoryId)return;
+ // Asegura que exista un torneo actual; si ya hay uno seleccionado, se conserva.
+ let tid=tourEl?.value||localStorage.getItem('gof_home_tournament')||'';
+ if(!tid && tourEl?.options?.length>1){tid=tourEl.options[1].value;tourEl.value=tid;}
+ if(tid && catEl.options.length<=1) await loadEnrollmentCategories(tid);
+ catEl.value=categoryId;
+ if(catEl.value!==categoryId){
+   await loadEnrollmentCategories(tid);
+   catEl.value=categoryId;
+ }
+ syncOtrosRenameButton();
+ clearTeamEntry();
+ await loadEnrolled();
+ catEl.scrollIntoView({behavior:'smooth',block:'center'});
 }
 async function renameGofOtros(id){
  const row=await sb.from('categories').select('id,name').eq('id',id).eq('league_id',gofCurrentOrganizationId).maybeSingle();
@@ -4110,7 +4144,8 @@ window.addEventListener('load',async function(){
   }
   async function gofGenerateMatchups(){
     if(!gVal('gofMatchupTournament')){await loadSimpleEnfrentamientos();}
-    const tid=gVal('gofMatchupTournament'),cat=gVal('gofMatchupCategory');
+    const tid=gVal('gofMatchupTournament')||window.__gofMatrixSelectedTournament||window.gofSingleTournamentId||'';
+    const cat=gVal('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     if(!tid)return alert('No hay un torneo activo.');
     if(!cat)return alert('Primero selecciona una categoría.');
     const {data:tour,error:te}=await sb.from('tournaments').select('name,tournament_type,regular_rounds').eq('id',tid).single();
@@ -4580,7 +4615,17 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const sync=async()=>{if(hidden)hidden.value=sel.value;localStorage.setItem('gof_enf_category',sel.value||'');await window.gofLoadMatchupsV2()};
     sel.onchange=sync;
     document.getElementById('gofMatrixRefresh').onclick=()=>window.gofLoadMatchupsV2();
-    document.getElementById('gofMatrixGenerate').onclick=async()=>{if(hidden)hidden.value=sel.value;if(!sel.value)return alert('Primero selecciona una categoría.');if(typeof window.gofGenerateMatchups==='function')await window.gofGenerateMatchups()};
+    document.getElementById('gofMatrixGenerate').onclick=async()=>{
+      const chosen=sel.value;
+      if(!chosen)return alert('Primero selecciona una categoría.');
+      window.__gofMatrixSelectedCategory=chosen;
+      window.__gofMatrixSelectedTournament=tid;
+      if(hidden)hidden.value=chosen;
+      localStorage.setItem('gof_enf_category',chosen);
+      if(typeof window.gofGenerateMatchups!=='function')return alert('No se pudo cargar el generador de enfrentamientos.');
+      await window.gofGenerateMatchups();
+      await window.gofLoadMatchupsV2();
+    };
     if(hidden)hidden.value=selected;
   }
   async function loadRows(){
@@ -4629,7 +4674,13 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const info=document.getElementById('gofMatchupInfo');if(info)info.innerHTML=`<b>${teams.length} equipos</b> · <b>${rows.length} partidos</b> · <b>7 jornadas</b>. La tabla se lee de izquierda a derecha: J1 → J7.`;
     const status=document.getElementById('gofMatchupStatus');if(status)status.textContent='Matriz lista';
   }
-  async function init(){await buildCategoryBar();await window.gofLoadMatchupsV2()}
+  async function init(){await buildCategoryBar();
+    const hidden=document.getElementById('gofMatchupCategory');
+    const sel=document.getElementById('gofMatrixCategorySelect');
+    if(sel&&hidden&&hidden.value)sel.value=hidden.value;
+    if(sel&&sel.value){window.__gofMatrixSelectedCategory=sel.value;window.__gofMatrixSelectedTournament=await ensureTournament();}
+    await window.gofLoadMatchupsV2();
+  }
   window.gofLoadMatchupsV2=gofLoadMatchupsV2;window.gofLoadMatchups=gofLoadMatchupsV2;const oldGen=window.gofGenerateMatchups;if(typeof oldGen==='function'&&!oldGen.__gofV2Wrap){const genWrap=async function(){await oldGen.apply(this,arguments);await gofLoadMatchupsV2()};genWrap.__gofV2Wrap=true;window.gofGenerateMatchups=genWrap;}
   const oldSet=window.setView;if(typeof oldSet==='function'&&!oldSet.__gofV2){const wrap=function(v){const r=oldSet.apply(this,arguments);if(v==='enfrentamientos')setTimeout(init,120);return r};wrap.__gofV2=true;window.setView=wrap}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,500));else setTimeout(init,500);

@@ -856,6 +856,16 @@ body.home-screen #inicio{height:auto!important;max-height:none!important;min-hei
 <section class="view" id="inicio"><div class="gof-identity gof-admin-identity">
 <div class="gof-league-card gof-admin-league-card"><div class="gof-league-upload" id="homeLeagueLogoBox"><input id="homeLeagueLogoUpload" accept="image/png,image/jpeg,image/webp" type="file" onchange="saveHomeLeagueLogo(this)"/><img id="homeLeagueLogoPreview" alt="Logo de la organización" data-default-src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="/><span>＋<small>Subir logo<br/>de la organización</small></span></div><div class="gof-league-copy"><b data-current-league-name>Sin organización seleccionada</b><span>Administradora</span><button type="button" class="gof-public-link-btn" onclick="copyCurrentPublicLink()">🔗 Copiar enlace público</button></div></div>
 </div>
+<div class="gof-home-main-menu" id="gofHomeMainMenu">
+  <button type="button" class="gof-home-main-btn" onclick="setView('inscripciones')"><span class="num">1</span><span class="ico">🏷️</span><span class="copy"><b>Categorías</b><small>Administra categorías y equipos inscritos.</small></span><span class="arrow">›</span></button>
+  <button type="button" class="gof-home-main-btn" onclick="setView('rosters')"><span class="num">2</span><span class="ico">📋</span><span class="copy"><b>Roster</b><small>Registra y valida jugadores.</small></span><span class="arrow">›</span></button>
+  <button type="button" class="gof-home-main-btn" onclick="setView('enfrentamientos')"><span class="num">3</span><span class="ico">⚔️</span><span class="copy"><b>Enfrentamientos</b><small>Define quién juega contra quién.</small></span><span class="arrow">›</span></button>
+  <button type="button" class="gof-home-main-btn" onclick="setView('calendario')"><span class="num">4</span><span class="ico">📅</span><span class="copy"><b>Calendario</b><small>Asigna fecha, hora y campo.</small></span><span class="arrow">›</span></button>
+  <button type="button" class="gof-home-main-btn" onclick="setView('resultados')"><span class="num">5</span><span class="ico">🏈</span><span class="copy"><b>Resultados</b><small>Captura los marcadores.</small></span><span class="arrow">›</span></button>
+  <button type="button" class="gof-home-main-btn" onclick="setView('tabla')"><span class="num">6</span><span class="ico">📊</span><span class="copy"><b>Tabla</b><small>Clasificación automática.</small></span><span class="arrow">›</span></button>
+  <button type="button" class="gof-home-main-btn" onclick="setView('playoffs')"><span class="num">7</span><span class="ico">🏆</span><span class="copy"><b>Playoff</b><small>Fase final y campeonato.</small></span><span class="arrow">›</span></button>
+  <button type="button" class="gof-home-main-btn" onclick="setView('publicacion')"><span class="num">8</span><span class="ico">📤</span><span class="copy"><b>Publicación</b><small>Publica calendario, enfrentamientos, resultados y tabla.</small></span><span class="arrow">›</span></button>
+</div>
 <div class="admin-home-stats"><div class="admin-home-stat"><div class="mut">🏆 Torneo actual</div><div class="stat" id="cT">1</div></div><div class="admin-home-stat"><div class="mut">👥 Equipos</div><div class="stat" id="cE">0</div></div><div class="admin-home-stat"><div class="mut">🧑‍🤝‍🧑 Jugadores</div><div class="stat" id="cP">0</div></div><div class="admin-home-stat"><div class="mut">🏈 Partidos</div><div class="stat" id="cM">0</div></div></div>
 
 
@@ -4862,6 +4872,37 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
  #gofMatrixCategoryBar .gof-v2-actions{display:grid!important;grid-template-columns:1fr 1fr!important}
  #gofMatrixCategoryBar .gof-v2-actions button{width:100%!important}
  .gof-calendar-matchups-card .toolbar{display:grid!important;grid-template-columns:1fr!important}
+}
+</style>
+<style id="gof-home-menu-final-2026-10-02">
+/* HOME FINAL: flujo principal visible y sin contexto de torneo/categoría arriba. */
+.gof-single-context,.gof-tournament-picker,.gof-home-context,.admin-home-stats{display:none!important}
+.gof-admin-identity{margin-bottom:10px!important}
+.gof-admin-league-card{height:auto!important;min-height:82px!important;padding:10px 12px!important}
+.gof-admin-league-card .gof-league-copy{min-width:0!important}
+.gof-admin-league-card .gof-public-link-btn{margin-top:7px!important;align-self:flex-start!important}
+.gof-home-main-menu{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0 14px}
+.gof-home-main-btn{display:flex;align-items:center;gap:9px;min-height:82px;padding:10px 11px;border:1px solid #3d304b;border-radius:15px;background:linear-gradient(145deg,#191521,#0f0c14);color:#fff;text-align:left;cursor:pointer;box-sizing:border-box}
+.gof-home-main-btn:hover{border-color:#8d2cff;background:#21152d}
+.gof-home-main-btn .num{width:30px;height:30px;min-width:30px;border-radius:50%;display:grid;place-items:center;background:#6d28d9;color:#fff;font-weight:900;font-size:14px}
+.gof-home-main-btn .ico{font-size:24px;line-height:1}
+.gof-home-main-btn .copy{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.gof-home-main-btn .copy b{font-size:15px;line-height:1.1}
+.gof-home-main-btn .copy small{font-size:10px;line-height:1.25;color:#b9afc4}
+.gof-home-main-btn .arrow{font-size:27px;color:#b15cff;line-height:1}
+@media(max-width:560px){
+ .gof-home-main-menu{grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+ .gof-home-main-btn{min-height:72px;padding:8px 7px;gap:6px;border-radius:13px}
+ .gof-home-main-btn .num{width:27px;height:27px;min-width:27px;font-size:13px}
+ .gof-home-main-btn .ico{font-size:21px}
+ .gof-home-main-btn .copy b{font-size:13px}
+ .gof-home-main-btn .copy small{font-size:8.5px}
+ .gof-home-main-btn .arrow{font-size:23px}
+ .gof-admin-league-card .gof-public-link-btn{width:auto!important;min-width:180px!important}
+}
+@media(max-width:390px){
+ .gof-home-main-btn .copy small{display:none}
+ .gof-home-main-btn{min-height:66px}
 }
 </style>
 <script id="gof-final-cleanup-2026-10-02">

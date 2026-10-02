@@ -4128,7 +4128,7 @@ window.addEventListener('load',async function(){
     holder.innerHTML='';editor.append(select,save,cancel);holder.appendChild(editor);select.focus();
   }
   async function gofGenerateMatchups(){
-    if(!gVal('gofMatchupTournament')){await loadSimpleEnfrentamientos();}
+    if(!gVal('gofMatchupTournament')){if(typeof window.gofInitSimpleMatchups==='function'){await window.gofInitSimpleMatchups();} else {throw new Error('No se pudo inicializar el módulo de Enfrentamientos.');}}
     const tid=gVal('gofMatchupTournament')||window.__gofMatrixSelectedTournament||window.gofSingleTournamentId||'';
     const cat=gVal('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     if(!tid)return alert('No hay un torneo activo.');

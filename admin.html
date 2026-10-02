@@ -6354,3 +6354,380 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,500));else setTimeout(bind,500);
 })();
 </script>
+
+<!-- GAME ON FLAG · CALENDARIO: FUENTE ÚNICA ENFRENTAMIENTOS · FIX REAL 2026-10-02 -->
+<script id="gof-calendar-single-source-final">
+(function(){
+  'use strict';
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const db=()=>window.sb||window.supabaseClient||(typeof window.client==='function'?window.client():null);
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const root=()=>document.getElementById('calendario');
+  const tournamentId=()=>document.getElementById('ct')?.value||window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
+  let blocks=[];
+
+  function readBlock(i){
+    const old=blocks[i]||{};
+    return {
+      date:document.getElementById('gof_fb_date_'+i)?.value||document.getElementById('gcb_date_'+i)?.value||old.date||'',
+      round:Number(document.getElementById('gof_fb_round_'+i)?.value||document.getElementById('gcb_round_'+i)?.value||old.round||1),
+      start:document.getElementById('gof_fb_time_'+i)?.value||document.getElementById('gcb_time_'+i)?.value||old.start||'08:00',
+      fields:Math.max(1,Math.min(5,Number(document.getElementById('gof_fb_fields_'+i)?.value||document.getElementById('gcb_fields_'+i)?.value||old.fields||4))),
+      interval:Math.max(30,Math.min(180,Number(document.getElementById('gof_fb_int_'+i)?.value||document.getElementById('gcb_int_'+i)?.value||old.interval||60)))
+    };
+  }
+  function readBlocks(){blocks=blocks.map((b,i)=>readBlock(i));return blocks;}
+  function render(){
+    const out=document.getElementById('gofCalendarBlocks');if(!out)return;
+    if(!blocks.length){out.innerHTML='<div class="empty">No hay bloques. Crea el bloque de la Jornada 1 para comenzar.</div>';return;}
+    out.innerHTML=blocks.map((b,i)=>`<div class="card gof-final-source-block" data-block="${i}">
+      <div class="row"><b>📅 Bloque ${i+1} · Jornada ${Number(b.round)||1}</b><span class="tag">Todos los enfrentamientos de J${Number(b.round)||1}</span></div>
+      <div class="gof-block-grid" style="margin-top:9px">
+        <label class="field-label">Fecha<input id="gof_fb_date_${i}" type="date" value="${esc(b.date||'')}"></label>
+        <label class="field-label">Jornada<select id="gof_fb_round_${i}">${Array.from({length:7},(_,n)=>`<option value="${n+1}" ${Number(b.round||1)===n+1?'selected':''}>Jornada ${n+1}</option>`).join('')}</select></label>
+        <label class="field-label">Inicio<input id="gof_fb_time_${i}" type="time" value="${esc(b.start||'08:00')}"></label>
+        <label class="field-label">Campos a utilizar<input id="gof_fb_fields_${i}" type="number" min="1" max="5" value="${Math.max(1,Math.min(5,Number(b.fields)||4))}"></label>
+        <label class="field-label">Intervalo<input id="gof_fb_int_${i}" type="number" min="30" max="180" step="5" value="${Math.max(30,Math.min(180,Number(b.interval)||60))}"></label>
+      </div>
+      <div class="gof-block-actions" style="margin-top:8px">
+        <button type="button" class="primary" data-save="${i}">💾 Guardar bloque y actualizar calendario</button>
+        <button type="button" class="danger" data-remove="${i}">✕</button>
+      </div>
+      <div class="mut small" style="margin-top:6px">La fuente es Enfrentamientos: J${Number(b.round)||1} → calendario J${Number(b.round)||1}. Nunca se cambian los rivales aquí.</div>
+    </div>`).join('');
+    out.querySelectorAll('[data-save]').forEach(x=>x.onclick=async()=>{await saveBlocksAndGenerate();});
+    out.querySelectorAll('[data-remove]').forEach(x=>x.onclick=()=>{readBlocks();blocks.splice(Number(x.dataset.remove),1);render();});
+  }
+  async function loadBlocks(){
+    const d=db(),tid=tournamentId();if(!d||!tid){blocks=[];render();return false;}
+    const {data,error}=await d.from('tournaments').select('schedule_settings,start_date').eq('id',tid).single();
+    if(error){console.warn(error);blocks=[];render();return false;}
+    const raw=data?.schedule_settings?.calendar_blocks;
+    blocks=Array.isArray(raw)?raw.map((b,i)=>({date:b.date||data.start_date||'',round:Number(b.round)||i+1,start:b.start||'08:00',fields:Math.max(1,Math.min(5,Number(b.fields)||4)),interval:Math.max(30,Math.min(180,Number(b.interval)||60))})):[];
+    render();return true;
+  }
+  function addBlock(){
+    readBlocks();
+    const last=blocks[blocks.length-1];
+    const next=Math.min(7,(Number(last?.round)||0)+1)||1;
+    blocks.push({date:last?.date||document.getElementById('cd')?.value||'',round:next,start:last?.start||'08:00',fields:last?.fields||4,interval:last?.interval||60});
+    render();
+  }
+  async function saveBlocks(){
+    const d=db(),tid=tournamentId();if(!d||!tid){alert('No se encontró el torneo actual.');return false;}
+    readBlocks();if(!blocks.length){alert('Crea primero el bloque de la Jornada 1.');return false;}
+    const bad=blocks.findIndex(b=>!b.date||!b.round);if(bad>=0){alert('El Bloque '+(bad+1)+' necesita fecha y jornada.');return false;}
+    const {data,error:e1}=await d.from('tournaments').select('schedule_settings').eq('id',tid).single();if(e1){alert(e1.message);return false;}
+    const ss=data?.schedule_settings&&typeof data.schedule_settings==='object'?data.schedule_settings:{};ss.calendar_blocks=blocks;
+    const {error:e2}=await d.from('tournaments').update({schedule_settings:ss}).eq('id',tid);if(e2){alert('No se pudo guardar el bloque: '+e2.message);return false;}
+    return true;
+  }
+  function minutes(t){const p=String(t||'08:00').split(':').map(Number);return (p[0]||0)*60+(p[1]||0);}
+  function time(v){return String(Math.floor(v/60)%24).padStart(2,'0')+':'+String(v%60).padStart(2,'0')+':00';}
+  function compatible(selected,m){return !selected.some(x=>String(x.home_team_id)===String(m.home_team_id)||String(x.away_team_id)===String(m.home_team_id)||String(x.home_team_id)===String(m.away_team_id)||String(x.away_team_id)===String(m.away_team_id));}
+
+  async function generateFromMatchups(){
+    const d=db(),tid=tournamentId();if(!d||!tid){alert('No se encontró el torneo actual.');return false;}
+    readBlocks();if(!blocks.length){alert('Crea primero el bloque de la Jornada 1.');return false;}
+    // 1) Guardar el bloque.
+    if(!(await saveBlocks()))return false;
+
+    // 2) Leer SOLO los enfrentamientos existentes. El calendario jamás genera rivales.
+    const rounds=[...new Set(blocks.map(b=>Number(b.round)).filter(Boolean))];
+    const {data:all,error:ae}=await d.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,published,categories(name)').eq('tournament_id',tid).eq('status','programado').in('round_number',rounds).order('round_number').order('id');
+    if(ae){alert('No se pudieron leer los enfrentamientos: '+ae.message);return false;}
+    if(!all?.length){alert('No hay enfrentamientos guardados para la jornada seleccionada. Ve a Enfrentamientos y revisa esa jornada.');return false;}
+
+    // 3) BORRAR Y ACTUALIZAR: limpiar por completo la programación anterior
+    // de las jornadas del bloque. NO borrar ni modificar home/away.
+    const ids=all.map(m=>m.id);
+    if(ids.length){
+      const {error:ce}=await d.from('matches').update({match_date:null,match_time:null,field_name:null,schedule_generated_at:null,schedule_manual_override:false}).in('id',ids);
+      if(ce){alert('No se pudo limpiar el calendario anterior: '+ce.message);return false;}
+    }
+
+    // 4) Volver a leer la misma fuente después de limpiar.
+    const {data:rows,error:re}=await d.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,published,categories(name)').eq('tournament_id',tid).eq('status','programado').in('round_number',rounds).order('round_number').order('id');
+    if(re){alert('No se pudieron cargar los enfrentamientos: '+re.message);return false;}
+
+    let total=0, pending=0;
+    for(const block of blocks){
+      const round=Number(block.round)||1;
+      let pool=(rows||[]).filter(m=>Number(m.round_number)===round&&m.home_team_id&&m.away_team_id).slice();
+      if(!pool.length)continue;
+      // Quitar únicamente duplicados exactos; nunca inventar ni mezclar rivales.
+      const seen=new Set();pool=pool.filter(m=>{const k=[m.category_id,m.home_team_id,m.away_team_id].sort().join('|');if(seen.has(k))return false;seen.add(k);return true;});
+      let slot=0;
+      while(pool.length&&slot<500){
+        const current=time(minutes(block.start)+slot*Number(block.interval||60));
+        const chosen=[];
+        for(const m of pool){
+          if(chosen.length>=Number(block.fields||4))break;
+          if(compatible(chosen,m))chosen.push(m);
+        }
+        if(!chosen.length){pending+=pool.length;break;}
+        for(let i=0;i<chosen.length;i++){
+          const m=chosen[i];
+          const {error:e}=await d.from('matches').update({match_date:block.date,match_time:current,field_name:'Campo '+(i+1),schedule_generated_at:new Date().toISOString(),schedule_manual_override:false}).eq('id',m.id);
+          if(e){alert('No se pudo guardar '+(m.categories?.name||'partido')+': '+e.message);return false;}
+          total++;
+        }
+        const used=new Set(chosen.map(m=>m.id));pool=pool.filter(m=>!used.has(m.id));slot++;
+      }
+      pending+=pool.length;
+    }
+
+    if(typeof window.toast==='function')window.toast('🚀 Calendario actualizado desde Enfrentamientos: '+total+' partidos.');
+    const st=document.getElementById('gofCalendarBuilderStatus');if(st)st.innerHTML='<div class="gof-ok">✅ <b>'+total+' partidos acomodados.</b>'+(pending?' ⚠️ '+pending+' quedaron pendientes.':'')+'</div>';
+    if(typeof window.loadSchedule==='function')await window.loadSchedule();
+    await sleep(250);
+    const list=document.getElementById('scheduleList');if(list){list.style.display='block';list.style.visibility='visible';list.style.opacity='1';}
+    if(typeof window.wireCalendarDrag==='function')window.wireCalendarDrag();
+    return true;
+  }
+  async function saveBlocksAndGenerate(){
+    const ok=await saveBlocks();if(!ok)return false;
+    return generateFromMatchups();
+  }
+  function install(){
+    const r=root();if(!r)return;
+    // Este bloque final es la única interfaz activa para construir el calendario.
+    const b=document.getElementById('gofCalendarBuilder');if(!b)return;
+    const intro=document.getElementById('gofCalendarBuilderIntro');if(intro)intro.textContent='Crea un bloque por jornada. El calendario toma exactamente los enfrentamientos de esa jornada y los reparte en horarios y campos.';
+    const note=document.getElementById('gofCalendarModeNotice');if(note)note.innerHTML='<b>⚔️ Fuente única: Enfrentamientos.</b> J1 toma los partidos de J1, J2 toma los de J2, etc. Aquí solamente se asignan fecha, hora y campo.';
+    const actions=b.querySelector('.gof-calendar-main-actions');
+    if(actions){actions.innerHTML='<button class="gold" type="button" id="gofSingleAdd">＋ Crear bloque</button><button class="primary" type="button" id="gofSingleSave">💾 Guardar bloque y actualizar calendario</button>';
+      document.getElementById('gofSingleAdd').onclick=addBlock;
+      document.getElementById('gofSingleSave').onclick=saveBlocksAndGenerate;
+    }
+    r.querySelector('.gof-accordion-list')?.remove();
+    r.querySelectorAll('#gofCalendarQuickBar,.gof-calendar-matchups-card').forEach(x=>x.remove());
+    loadBlocks();
+  }
+  window.gofAddCalendarBlock=addBlock;
+  window.gofSaveCalendarBlocks=saveBlocks;
+  window.gofLoadCalendarBlocks=loadBlocks;
+  window.gofGenerateCalendarFromMatchups=generateFromMatchups;
+  const oldSet=window.setView;
+  if(typeof oldSet==='function'&&!oldSet.__gofCalendarSingleSourceFinal){
+    const w=async function(v){const result=await oldSet.apply(this,arguments);if(v==='calendario')setTimeout(install,250);return result;};
+    w.__gofCalendarSingleSourceFinal=true;window.setView=w;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,700));else setTimeout(install,700);
+})();
+</script>
+
+<!-- GAME ON FLAG · CALENDARIO ÚLTIMO FIX VERIFICADO · 2026-10-02 -->
+<style id="gof-calendar-last-fix-2026-10-02">
+#calendario .gof-calendar-flex-note,#calendario .gof-calendar-priority-note,#calendario #gofCalendarFlexNote,#calendario #gofCalendarPriorityNote,#calendario .gof-flex-note,#calendario .gof-priority-note{display:none!important}
+#calendario .gof-calendar-drag-help{display:flex!important}
+#calendario .calendar-grid .cg-game{touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab}
+#calendario .calendar-grid .cg-game.gof-touch-dragging{position:relative;z-index:9999;opacity:.72;transform:scale(.98)}
+</style>
+<script id="gof-calendar-last-fix-2026-10-02">
+(function(){
+ 'use strict';
+ const db=()=>window.sb||window.supabaseClient||(typeof window.client==='function'?window.client():null);
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ const tid=()=>document.getElementById('ct')?.value||window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const minutes=t=>{const p=String(t||'08:00').split(':').map(Number);return (p[0]||0)*60+(p[1]||0)};
+ const hhmm=v=>String(Math.floor(v/60)%24).padStart(2,'0')+':'+String(v%60).padStart(2,'0')+':00';
+ function catPriority(name,relampago){
+   const n=String(name||'').toLowerCase();
+   if(relampago && n.includes('35'))return 0;
+   if(relampago && n.includes('mixto'))return 0;
+   if(relampago && n.includes('moms'))return 0;
+   if(n.includes('35'))return 1;
+   if(n.includes('silver varonil'))return 2;
+   if(n.includes('silver femenil'))return 3;
+   if(n.includes('escolar'))return 4;
+   if(n.includes('mixto'))return 5;
+   if(n.includes('30+'))return 6;
+   if(n.includes('bronce'))return 7;
+   if(n.includes('golden'))return 8;
+   if(n.includes('moms'))return 9;
+   return 10;
+ }
+ function typeOfTournament(raw){const n=String(raw||'').toLowerCase();return n.includes('relamp')||n.includes('relámp')?'relampago':'regular'}
+ async function getTournament(){
+   const d=db(),id=tid();if(!d||!id)throw new Error('No se encontró el torneo actual.');
+   const {data,error}=await d.from('tournaments').select('id,tournament_type,schedule_settings,start_date').eq('id',id).single();
+   if(error)throw error;return data;
+ }
+ async function getBlocks(tour){
+   const raw=tour?.schedule_settings?.calendar_blocks;
+   return Array.isArray(raw)?raw.map((b,i)=>({
+     date:b.date||tour.start_date||'',round:Number(b.round)||i+1,start:b.start||'08:00',
+     fields:Math.max(1,Math.min(5,Number(b.fields)||4)),interval:Math.max(30,Math.min(180,Number(b.interval)||60))
+   })).filter(b=>b.date&&b.round):[];
+ }
+ function pairKey(m){return [m.home_team_id,m.away_team_id].map(String).sort().join('|')}
+ function validMatching(pool,strictRound){
+   // Fuente única: los partidos ya existentes en Enfrentamientos. Para calendario regular,
+   // una jornada solo puede usar una vez a cada equipo. Si la fuente tiene duplicados/corrupción,
+   // aquí se selecciona un conjunto máximo de enfrentamientos sin inventar rivales.
+   const used=new Set(),chosen=[];
+   for(const m of pool){
+     if(!m.home_team_id||!m.away_team_id||String(m.home_team_id)===String(m.away_team_id))continue;
+     if(strictRound && (used.has(String(m.home_team_id))||used.has(String(m.away_team_id))))continue;
+     chosen.push(m);used.add(String(m.home_team_id));used.add(String(m.away_team_id));
+   }
+   return chosen;
+ }
+ async function generateFinal(){
+   const d=db();if(!d)return alert('No se pudo conectar con la base de datos.');
+   let tour;try{tour=await getTournament()}catch(e){return alert('No se pudo cargar el torneo actual: '+(e.message||e))}
+   let blocks=await getBlocks(tour);
+   if(!blocks.length)return alert('Primero crea y guarda al menos un bloque.');
+   const rounds=[...new Set(blocks.map(b=>Number(b.round)))];
+   // El calendario se reconstruye SOLO para las jornadas que tienen bloque.
+   // Nunca modifica home_team_id/away_team_id.
+   const {data:source,error:se}=await d.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,published,created_at,categories(name)').eq('tournament_id',tour.id).eq('status','programado').in('round_number',rounds).order('round_number').order('created_at',{ascending:false}).order('id');
+   if(se)return alert('No se pudieron leer los enfrentamientos: '+se.message);
+   if(!source?.length)return alert('No hay enfrentamientos guardados para las jornadas de los bloques. Revisa Enfrentamientos.');
+
+   // Limpiar únicamente la programación anterior de esas jornadas. No toca enfrentamientos.
+   const clearIds=source.map(m=>m.id);
+   const {error:ce}=await d.from('matches').update({match_date:null,match_time:null,field_name:null,schedule_generated_at:null,schedule_manual_override:false,schedule_override_note:null,schedule_override_at:null}).in('id',clearIds);
+   if(ce)return alert('No se pudo limpiar la programación anterior: '+ce.message);
+
+   const relampago=typeOfTournament(tour.tournament_type)==='relampago';
+   const allScheduled=[];let total=0;const pendingByRound=[];
+   for(const block of blocks){
+     const round=Number(block.round);
+     let pool=(source||[]).filter(m=>Number(m.round_number)===round&&m.home_team_id&&m.away_team_id);
+     // Elimina solamente registros idénticos; no crea ni cambia rivales.
+     const seenPairs=new Set();pool=pool.filter(m=>{const k=String(m.category_id)+'|'+pairKey(m);if(seenPairs.has(k))return false;seenPairs.add(k);return true;});
+     // Para torneo regular: exactamente una participación por equipo en la jornada.
+     // Para relámpago se permiten múltiples partidos del mismo equipo en el día.
+     if(!relampago){
+       // Enfrentamientos es la fuente única. Si existen registros viejos duplicados,
+       // se toma el bloque más reciente de cada categoría y se conserva solo una
+       // pareja por equipo en la jornada. Así una ejecución anterior nunca vuelve
+       // a meter partidos viejos al calendario.
+       const batches=new Map();
+       for(const m of pool){
+         const k=String(m.category_id);
+         const ts=m.created_at?new Date(m.created_at).getTime():0;
+         if(!batches.has(k))batches.set(k,[]);
+         batches.get(k).push({...m,__ts:ts});
+       }
+       const clean=[];
+       for(const [cat,arr] of batches){
+         const sorted=arr.slice().sort((a,b)=>b.__ts-a.__ts||String(b.id).localeCompare(String(a.id)));
+         // Se intenta primero con el lote más reciente, que corresponde a la
+         // última versión guardada de Enfrentamientos.
+         const byTs=new Map();
+         sorted.forEach(m=>{const key=m.__ts;if(!byTs.has(key))byTs.set(key,[]);byTs.get(key).push(m)});
+         let picked=[];
+         for(const arrTs of byTs.values()){
+           const candidate=validMatching(arrTs,true);
+           if(candidate.length>picked.length)picked=candidate;
+           if(candidate.length*2>=new Set(arr.map(x=>[x.home_team_id,x.away_team_id]).flat()).size)break;
+         }
+         clean.push(...picked);
+       }
+       pool=clean.sort((a,b)=>catPriority(a.categories?.name)-catPriority(b.categories?.name)||String(b.created_at||'').localeCompare(String(a.created_at||''))||String(a.id).localeCompare(String(b.id)));
+     }
+     if(!pool.length){pendingByRound.push({round,count:0});continue;}
+     let remaining=pool.slice(),slot=0;
+     while(remaining.length && slot<300){
+       const current=hhmm(minutes(block.start)+slot*block.interval);
+       const candidates=remaining.slice().sort((a,b)=>catPriority(a.categories?.name,relampago)-catPriority(b.categories?.name,relampago)||String(a.id).localeCompare(String(b.id)));
+       const chosen=[];const used=new Set();
+       for(const m of candidates){
+         if(chosen.length>=block.fields)break;
+         if(!relampago && (used.has(String(m.home_team_id))||used.has(String(m.away_team_id))))continue;
+         // En un mismo horario no se cruza ningún equipo.
+         if(allScheduled.some(x=>x.round===round&&x.time===current&&(x.home_team_id===m.home_team_id||x.home_team_id===m.away_team_id||x.away_team_id===m.home_team_id||x.away_team_id===m.away_team_id)))continue;
+         chosen.push(m);used.add(String(m.home_team_id));used.add(String(m.away_team_id));
+       }
+       if(!chosen.length){slot++;continue;}
+       for(let i=0;i<chosen.length;i++){
+         const m=chosen[i];
+         const {error:ue}=await d.from('matches').update({match_date:block.date,match_time:current,field_name:'Campo '+(i+1),schedule_generated_at:new Date().toISOString(),schedule_manual_override:false,schedule_override_note:null,schedule_override_at:null}).eq('id',m.id);
+         if(ue)return alert('No se pudo guardar un partido del calendario: '+ue.message);
+         allScheduled.push({id:m.id,round,time:current,home_team_id:m.home_team_id,away_team_id:m.away_team_id});total++;
+       }
+       const done=new Set(chosen.map(m=>m.id));remaining=remaining.filter(m=>!done.has(m.id));slot++;
+       // En regular ya no debe quedar otro partido: el conjunto válido ya tiene una sola aparición por equipo.
+     }
+     if(remaining.length)pendingByRound.push({round,count:remaining.length});
+   }
+   const st=document.getElementById('gofCalendarBuilderStatus');
+   if(st)st.innerHTML='<div class="gof-ok">✅ <b>'+total+' partidos acomodados.</b>'+(pendingByRound.length?' ⚠️ '+pendingByRound.map(x=>'J'+x.round+': '+x.count+' pendientes').join(' · '):'')+'</div>';
+   if(typeof window.loadSchedule==='function')await window.loadSchedule();
+   await sleep(150);
+   if(typeof window.wireCalendarDrag==='function')window.wireCalendarDrag();
+   document.getElementById('scheduleList')?.scrollIntoView({behavior:'smooth',block:'start'});
+   return true;
+ }
+ window.gofGenerateCalendarFromMatchups=generateFinal;
+ window.generateSchedule=generateFinal;
+ window.generateFullTournamentSchedule=generateFinal;
+ window.gofCalendarGenerateFinal=generateFinal;
+
+ // Soporte táctil real: en Android el drag HTML5 no siempre dispara drop. Se conserva
+ // también el drag nativo para escritorio.
+ function touchDrag(){
+   const root=document.getElementById('calendario');if(!root)return;
+   root.querySelectorAll('.calendar-grid .cg-game').forEach(game=>{
+     if(game.dataset.gofTouchBound)return;game.dataset.gofTouchBound='1';
+     const btn=game.querySelector('.cg-actions button');
+     const id=(btn?.getAttribute('onclick')||'').match(/editMatch\('([^']+)'\)/)?.[1];if(!id)return;
+     let active=false,lastTarget=null;
+     const findTarget=(x,y)=>{const el=document.elementFromPoint(x,y);return el?.closest?.('.calendar-grid td')||null};
+     const clear=()=>root.querySelectorAll('.gof-touch-target').forEach(x=>x.classList.remove('gof-touch-target'));
+     game.addEventListener('pointerdown',e=>{
+       if(e.pointerType!=='touch'&&e.pointerType!=='pen')return;
+       active=true;lastTarget=null;game.classList.add('gof-touch-dragging');game.setPointerCapture?.(e.pointerId);e.preventDefault();
+     },{passive:false});
+     game.addEventListener('pointermove',e=>{
+       if(!active)return;e.preventDefault();clear();lastTarget=findTarget(e.clientX,e.clientY);if(lastTarget)lastTarget.classList.add('gof-touch-target');
+     },{passive:false});
+     game.addEventListener('pointerup',async e=>{
+       if(!active)return;active=false;game.classList.remove('gof-touch-dragging');clear();
+       if(!lastTarget)return;
+       const tr=lastTarget.parentElement;const tm=(tr?.querySelector('.cg-time')?.textContent||'').trim();
+       const th=lastTarget.closest('table')?.querySelector(`thead th:nth-child(${lastTarget.cellIndex+1})`)?.textContent||'';
+       const fm=String(th).match(/(?:CAMPO|CANCHA)\s*(\d+)/i);const field=fm?Number(fm[1]):null;
+       if(!/^\d{1,2}:\d{2}$/.test(tm)||!field)return;
+       const {data:m,error}=await db().from('matches').select('match_date').eq('id',id).single();if(error)return alert(error.message);
+       if(typeof window.__gofMoveCalendarMatch==='function')await window.__gofMoveCalendarMatch(id,m.match_date,tm,field);
+     },{passive:false});
+     game.addEventListener('pointercancel',()=>{active=false;game.classList.remove('gof-touch-dragging');clear()});
+   });
+ }
+ // Expone el movimiento ya existente para el soporte táctil.
+ const oldMove=window.__gofMoveCalendarMatch;
+ if(!oldMove){
+   // La función original es interna; reproducimos aquí la misma operación con aviso de empalme.
+   window.__gofMoveCalendarMatch=async function(id,date,time,field){
+     const d=db();if(!d)return;
+     const {data:m,error:me}=await d.from('matches').select('id,tournament_id,home_team_id,away_team_id').eq('id',id).single();if(me)return alert(me.message);
+     const f='Campo '+Number(field),tm=String(time).slice(0,5)+':00';
+     const {data:cl,error:ce}=await d.from('matches').select('id,home_team_id,away_team_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name)').eq('tournament_id',m.tournament_id).eq('match_date',date).eq('match_time',tm).eq('field_name',f).neq('id',id).neq('status','cancelado');
+     if(ce)return alert(ce.message);
+     if((cl||[]).length){const msg=(cl||[]).map(x=>`• ${x.home?.name||'Equipo'} vs ${x.away?.name||'Equipo'} ya ocupa ${f} a las ${String(time).slice(0,5)}.`).join('\n');if(!confirm('⚠️ AVISO DE EMPALME\n\n'+msg+'\n\nPuedes moverlo de todos modos.\n\n¿Continuar?'))return;}
+     const {error}=await d.from('matches').update({match_time:tm,field_name:f,schedule_manual_override:true,schedule_override_note:'Movimiento manual desde calendario',schedule_override_at:new Date().toISOString()}).eq('id',id);if(error)return alert(error.message);
+     if(typeof window.toast==='function')window.toast('✏️ Partido movido.');
+     if(typeof window.loadSchedule==='function')await window.loadSchedule();
+   };
+ }
+ const oldLoad=window.loadSchedule;
+ if(typeof oldLoad==='function'&&!oldLoad.__gofCalendarLastFix){
+   const w=async function(){const r=await oldLoad.apply(this,arguments);setTimeout(touchDrag,80);return r};w.__gofCalendarLastFix=true;window.loadSchedule=w;
+ }
+ function bind(){
+   const b=document.getElementById('gofSingleSave');if(b)b.onclick=async()=>{
+     if(typeof window.gofSaveCalendarBlocks==='function'){const ok=await window.gofSaveCalendarBlocks();if(!ok)return;}
+     await generateFinal();
+   };
+   const g=document.getElementById('gofFinalGenerate');if(g)g.onclick=generateFinal;
+   document.querySelectorAll('#gofCalendarBuilder button').forEach(x=>{if((x.textContent||'').includes('Generar calendario desde enfrentamientos'))x.onclick=generateFinal});
+   touchDrag();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(bind,900));else setTimeout(bind,900);
+})();
+</script>

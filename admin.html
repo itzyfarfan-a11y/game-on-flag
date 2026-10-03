@@ -1360,7 +1360,7 @@ async function renderFinance(){
   if(!charges?.length&&!expenses.length){list.innerHTML='<div class="empty">No hay cargos, pagos ni gastos registrados para este torneo todavía.</div>';return;}
   list.innerHTML=`<div class="card"><h3>📋 Cargos y pagos</h3>${charges?.length?`<div class="cg-scroll"><table><thead><tr><th>Equipo</th><th>Concepto</th><th>Semana/etapa</th><th>Debe</th><th>Pagado</th><th>Pendiente</th><th>Estado</th></tr></thead><tbody>${charges.map(c=>{const d=Number(c.amount_due||0),p=Number(paid.get(c.id)||0),r=Math.max(0,d-p),st=r===0?'🟢 Pagado':p>0?'🟡 Parcial':'🔴 Pendiente';const part=c.round_number?`J${c.round_number}`:(c.playoff_stage||'—');return `<tr><td>${esc(teamMap[c.tournament_team_id]||'Equipo')}</td><td>${esc(c.description||c.concept_type||'Cargo')}</td><td>${esc(part)}</td><td>$${d.toFixed(2)}</td><td>$${p.toFixed(2)}</td><td>$${r.toFixed(2)}</td><td>${st}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="mut">No hay cargos registrados.</div>'}</div><div class="card"><h3>💸 Gastos registrados · $${totalExp.toFixed(2)}</h3>${expenses.length?`<div class="cg-scroll"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Ámbito</th><th>Monto</th><th>Nota</th></tr></thead><tbody>${expenses.map(e=>`<tr><td>${esc(e.expense_date||'—')}</td><td>${esc(e.concept||'—')}</td><td>${esc(e.scope==='playoff'?(e.playoff_stage||'Playoffs'):'Fase regular')}</td><td>$${Number(e.amount||0).toFixed(2)}</td><td>${esc(e.note||'')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="mut">No hay gastos registrados.</div>'}</div>`;
 }
-async function saveFinancePayment(){const charge=val('finCharge'),amount=Number(val('finPaymentAmount')),note=val('finPaymentNote').trim();if(!charge||!(amount>0))return alert('Selecciona un cargo y captura un monto válido.');const {error}=await sb.from('finance_payments').insert({charge_id:charge,amount,paid_at:new Date().toISOString(),note:note||null,created_by:(await sb.auth.getUser()).data.user?.id||null});if(error)return alert('No se pudo registrar el pago: '+error.message);toast('💵 Pago registrado');document.getElementById('finPaymentAmount').value='';document.getElementById('finPaymentNote').value='';await renderFinance()}
+async function saveFinancePayment(){const charge=val('finCharge'),amount=Number(val('finPaymentAmount')),note=val('finPaymentNote').trim();if(!charge||!(amount>0))return alert('Selecciona un cargo y captura un monto válido.');const {data:c,error:ce}=await sb.from('finance_charges').select('id,amount_due').eq('id',charge).single();if(ce||!c)return alert('No se pudo consultar el cargo seleccionado.');const {data:ps,error:pe}=await sb.from('finance_payments').select('amount').eq('charge_id',charge);if(pe)return alert('No se pudo consultar el historial de pagos: '+pe.message);const paid=(ps||[]).reduce((a,x)=>a+Number(x.amount||0),0),pending=Math.max(0,Number(c.amount_due||0)-paid);if(pending<=0)return alert('Este cargo ya está liquidado.');if(amount>pending)return alert('El pago no puede ser mayor al saldo pendiente de $'+pending.toFixed(2)+'.');const {error}=await sb.from('finance_payments').insert({charge_id:charge,amount,paid_at:new Date().toISOString(),note:note||null,created_by:(await sb.auth.getUser()).data.user?.id||null});if(error)return alert('No se pudo registrar el pago: '+error.message);toast('💵 Pago registrado');document.getElementById('finPaymentAmount').value='';document.getElementById('finPaymentNote').value='';await renderFinance()}
 async function saveFinanceExpense(){const tid=val('finT'),concept=val('finExpenseConcept').trim(),amount=Number(val('finExpenseAmount')),date=val('finExpenseDate')||new Date().toISOString().slice(0,10),note=val('finExpenseNote').trim(),scope=val('finScope')||'regular';if(!tid||!concept||!(amount>0))return alert('Usa el torneo actual y captura concepto y monto.');const {error}=await sb.from('finance_other_expenses').insert({tournament_id:tid,scope,concept,amount,expense_date:date,note:note||null,created_by:(await sb.auth.getUser()).data.user?.id||null});if(error)return alert('No se pudo registrar el gasto: '+error.message);toast('💸 Gasto registrado');document.getElementById('finExpenseConcept').value='';document.getElementById('finExpenseAmount').value='';document.getElementById('finExpenseNote').value='';await renderFinance()}
 let financeUnlocked = sessionStorage.getItem('gof_finance_unlocked') === '1';
 async function enterFinance(){
@@ -1924,7 +1924,15 @@ async function loadE(){
   });
 }
 async function loadRosterSelects(){const {data:t}=await sb.from('tournaments').select('id,name,start_date,status').in('status',['proximo','activo']).order('created_at',{ascending:false});fill('rt',t,'id','name');await updateRosterCatsTeams();fill('art',t,'id','name');fill('rt',t,'id','name');await updateAdminRosterCatsTeams();await loadRosterClosureState(val('rt'));await loadQuickRosterSelectors()}
-async function updateRosterCatsTeams(){const tid=val('rt'),previousCat=val('rc');const catEl=document.getElementById('rc'),teamEl=document.getElementById('re');if(!tid){catEl.innerHTML='<option value="">Selecciona categoría</option>';teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:tc,error:te}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);if(te){catEl.innerHTML='<option value="">No se pudieron cargar categorías</option>';teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const catIds=(tc||[]).map(x=>x.category_id).filter(Boolean);if(!catIds.length){catEl.innerHTML='<option value="">Sin categorías inscritas</option>';teamEl.innerHTML='<option value="">Sin equipos disponibles</option>';return}const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',catIds).order('name');if(ce){catEl.innerHTML='<option value="">No se pudieron cargar categorías</option>';teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}fill('rc',(cats||[]).map(x=>({id:x.id,name:x.name})),'id','name');const keep=previousCat&&catIds.includes(previousCat)?previousCat:(cats||[])[0]?.id||'';catEl.value=keep;if(!keep){teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:ins,error:ie}=await sb.from('tournament_teams').select('team_id').eq('tournament_id',tid).eq('category_id',keep).eq('is_active',true);if(ie){teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);if(!ids.length){teamEl.innerHTML='<option value="">No hay equipos inscritos en esta categoría</option>';return}const {data:teams,error:xe}=await sb.from('teams').select('id,name').in('id',ids).order('name');if(xe){teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}fill('re',(teams||[]).map(x=>({id:x.id,name:x.name})),'id','name')}
+
+async function gofActiveCategoryIds(tid){
+ if(!tid)return [];
+ const {data,error}=await sb.from('tournament_teams').select('category_id').eq('tournament_id',tid).eq('is_active',true);
+ if(error) throw error;
+ return [...new Set((data||[]).map(x=>x.category_id).filter(Boolean))];
+}
+
+async function updateRosterCatsTeams(){const tid=val('rt'),previousCat=val('rc');const catEl=document.getElementById('rc'),teamEl=document.getElementById('re');if(!tid){catEl.innerHTML='<option value="">Selecciona categoría</option>';teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const catIds=await gofActiveCategoryIds(tid);if(!catIds.length){catEl.innerHTML='<option value="">Sin categorías activas</option>';teamEl.innerHTML='<option value="">Sin equipos activos</option>';return}const tc=(catIds||[]).map(category_id=>({category_id}));const te=null;if(te){catEl.innerHTML='<option value="">No se pudieron cargar categorías</option>';teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}if(!catIds.length){catEl.innerHTML='<option value="">Sin categorías activas</option>';teamEl.innerHTML='<option value="">Sin equipos activos</option>';return}const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',catIds).order('name');if(ce){catEl.innerHTML='<option value="">No se pudieron cargar categorías</option>';teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}fill('rc',(cats||[]).map(x=>({id:x.id,name:x.name})),'id','name');const keep=previousCat&&catIds.includes(previousCat)?previousCat:(cats||[])[0]?.id||'';catEl.value=keep;if(!keep){teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:ins,error:ie}=await sb.from('tournament_teams').select('team_id').eq('tournament_id',tid).eq('category_id',keep).eq('is_active',true);if(ie){teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);if(!ids.length){teamEl.innerHTML='<option value="">No hay equipos inscritos en esta categoría</option>';return}const {data:teams,error:xe}=await sb.from('teams').select('id,name').in('id',ids).order('name');if(xe){teamEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}fill('re',(teams||[]).map(x=>({id:x.id,name:x.name})),'id','name')}
 document.getElementById('rt').onchange=async()=>{await updateRosterCatsTeams();await loadRosterClosureState(val('rt'));};document.getElementById('rc').onchange=updateRosterCatsTeams;
 document.getElementById('qrt').onchange=updateQuickRosterCats;document.getElementById('qrc').onchange=updateQuickRosterTeams;document.getElementById('qre').onchange=loadQuickRoster;document.getElementById('vrt').onchange=loadViewRosters;document.getElementById('vrFilter').onchange=loadViewRosters;
 async function updateAdminRosterCatsTeams(){const tid=val('art');const catEl=document.getElementById('arc'),teamEl=document.getElementById('are');if(!tid){catEl.innerHTML='<option value="">Selecciona categoría</option>';teamEl.innerHTML='<option value="">Todos los equipos</option>';document.getElementById('adminRosterList').innerHTML='';return}const {data:tc,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);if(error)return alert(error.message);const cats=(tc||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'}));fill('arc',cats,'id','name');if(cats.length)catEl.value=cats[0].id;await updateAdminRosterTeams()}
@@ -2166,9 +2174,10 @@ async function loadScheduleSelectors(){
 async function scheduleCats(){
  const tid=val('ct'),el=document.getElementById('cc'); if(!el)return;
  if(!tid){el.innerHTML='<option value="">Usa el torneo actual</option>';await loadScheduleSettings();await loadSchedule();return;}
- const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
+ let catIds=[];try{catIds=await gofActiveCategoryIds(tid)}catch(error){return alert('No se pudieron cargar las categorías: '+error.message)}
+ const {data,error}=catIds.length?await sb.from('categories').select('id,name').in('id',catIds).order('name'):{data:[],error:null};
  if(error)return alert('No se pudieron cargar las categorías: '+error.message);
- const cats=(data||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'})).filter(x=>x.id);
+ const cats=(data||[]).map(x=>({id:x.id,name:x.name})).filter(x=>x.id);
  const keep=el.value; el.innerHTML='<option value="">📅 Todas las categorías</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
  if(keep&&cats.some(x=>x.id===keep))el.value=keep; else el.value='';
  await loadScheduleSettings(); await loadSchedule();
@@ -2849,12 +2858,12 @@ async function autoRefreshResults(){
 setInterval(autoRefreshResults,3000);
 
 async function loadStandingsSelectors(){if(!gofCurrentOrganizationId)return;const {data:t}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});fill('st',t,'id','name');await standingsCats()}
-async function standingsCats(){const tid=val('st');const {data}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);fill('sc',(data||[]).map(x=>({id:x.categories.id,name:x.categories.name})),'id','name');loadStandings()}
+async function standingsCats(){const tid=val('st');let catIds=[];try{catIds=await gofActiveCategoryIds(tid)}catch(_){catIds=[]}const {data}=catIds.length?await sb.from('categories').select('id,name').in('id',catIds).order('name'):{data:[]};fill('sc',(data||[]).map(x=>({id:x.id,name:x.name})),'id','name');loadStandings()}
 document.getElementById('st').onchange=standingsCats;document.getElementById('sc').onchange=loadStandings;
-async function loadStandings(){const tid=val('st'),cat=val('sc');if(!gofCurrentOrganizationId){const box=document.getElementById('standings');if(box)box.innerHTML='<div class="empty">Selecciona una organización para consultar la tabla.</div>';return;}if(!tid||!cat)return;const {data:teams}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);const {data:ms}=await sb.from('matches').select('*').eq('tournament_id',tid).eq('category_id',cat).in('status',['jugado','incomparecencia']);const map={};(teams||[]).forEach(x=>map[x.team_id]={name:x.teams.name,jj:0,jg:0,pa:0,pc:0});(ms||[]).forEach(m=>{if(!map[m.home_team_id]||!map[m.away_team_id])return;const excluded=m.stats_exclude_team_id||null;const hs=Number(m.home_score)||0,as=Number(m.away_score)||0;if(m.home_team_id!==excluded){map[m.home_team_id].jj++;map[m.home_team_id].pa+=hs;map[m.home_team_id].pc+=as;if(hs>as)map[m.home_team_id].jg++;}if(m.away_team_id!==excluded){map[m.away_team_id].jj++;map[m.away_team_id].pa+=as;map[m.away_team_id].pc+=hs;if(as>hs)map[m.away_team_id].jg++;}});const r=Object.values(map).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.pa-a.pa||b.dif-a.dif||a.pc-b.pc||a.name.localeCompare(b.name));document.getElementById('standings').innerHTML=`<div class="card"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>${r.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.name)}</b></td><td>${x.jj}</td><td>${x.jg}</td><td>${x.pa}</td><td>${x.pc}</td><td>${x.dif}</td></tr>`).join('')}</tbody></table></div>`}
+async function loadStandings(){const tid=val('st'),cat=val('sc');if(!gofCurrentOrganizationId){const box=document.getElementById('standings');if(box)box.innerHTML='<div class="empty">Selecciona una organización para consultar la tabla.</div>';return;}if(!tid||!cat)return;const {data:teams}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);const {data:ms}=await sb.from('matches').select('*').eq('tournament_id',tid).eq('category_id',cat).in('status',['jugado','incomparecencia']);const map={};(teams||[]).forEach(x=>map[x.team_id]={name:x.teams.name,jj:0,jg:0,pa:0,pc:0});(ms||[]).forEach(m=>{if(!map[m.home_team_id]||!map[m.away_team_id])return;const excluded=m.stats_exclude_team_id||null;const hs=Number(m.home_score)||0,as=Number(m.away_score)||0;if(m.home_team_id!==excluded){map[m.home_team_id].jj++;map[m.home_team_id].pa+=hs;map[m.home_team_id].pc+=as;if(hs>as)map[m.home_team_id].jg++;}if(m.away_team_id!==excluded){map[m.away_team_id].jj++;map[m.away_team_id].pa+=as;map[m.away_team_id].pc+=hs;if(as>hs)map[m.away_team_id].jg++;}});const r=Object.values(map).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.dif-a.dif||b.pa-a.pa||a.pc-b.pc||a.name.localeCompare(b.name));document.getElementById('standings').innerHTML=`<div class="card"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>${r.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.name)}</b></td><td>${x.jj}</td><td>${x.jg}</td><td>${x.pa}</td><td>${x.pc}</td><td>${x.dif}</td></tr>`).join('')}</tbody></table></div>`}
 
 async function loadPlayoffSelectors(){const {data:t}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});fill('pt',t,'id','name');await playoffCats()}
-async function playoffCats(){const tid=val('pt'),el=document.getElementById('pc');if(!el)return;if(!gofCurrentOrganizationId){el.innerHTML='<option value="">Selecciona una organización</option>';return}if(!tid){el.innerHTML='<option value="">Usa el torneo actual</option>';return}const {data,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);if(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}const cats=(data||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'}));fill('pc',cats,'id','name');if(!el.value&&cats.length)el.value=cats[0].id;await buildPlayoffsView()}
+async function playoffCats(){const tid=val('pt'),el=document.getElementById('pc');if(!el)return;if(!gofCurrentOrganizationId){el.innerHTML='<option value="">Selecciona una organización</option>';return}if(!tid){el.innerHTML='<option value="">Usa el torneo actual</option>';return}let catIds=[];try{catIds=await gofActiveCategoryIds(tid)}catch(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}const {data,error}=catIds.length?await sb.from('categories').select('id,name').in('id',catIds).order('name'):{data:[],error:null};if(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}const cats=(data||[]).map(x=>({id:x.id,name:x.name}));fill('pc',cats,'id','name');if(!el.value&&cats.length)el.value=cats[0].id;await buildPlayoffsView()}
 async function playoffBaseData(tid,cat){
  const {data:teams,error:te}=await sb.from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
  if(te)throw new Error(te.message); if(!teams?.length)throw new Error('No hay equipos inscritos en esta categoría.');
@@ -3472,7 +3481,7 @@ window.downloadCredentialImage=async function(){
 window.printCredentialCard=function(){
  const card=document.getElementById('credentialPrintCard');if(!card)return alert('Primero genera una credencial.');
  const clean=card.cloneNode(true);clean.querySelectorAll('.gof-credential-export-actions').forEach(x=>x.remove());
- const html='<!doctype html><html><head><meta charset="utf-8"><title>Credencial</title><style>@page{size:50mm 80mm;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;width:50mm;height:80mm;background:#fff;font-family:Arial,sans-serif}.gof-final-doc-card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;position:relative;color:#102a43;background:#fff}.gof-cred-head{height:13mm;padding:2.2mm 2.5mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.6mm solid #1769c2}.gof-cred-brand{font-size:3.2mm;font-weight:900}.gof-cred-brand small{display:block;font-size:1.4mm;color:#52677e}.gof-cred-logo{height:6mm;max-width:10mm;object-fit:contain}.gof-cred-title{font-size:2.3mm;font-weight:900;color:#1769c2}.gof-cred-photo-wrap{padding:2.2mm 2.5mm 0}.gof-cred-photo-wrap img,.gof-cred-photo-empty{width:46mm;height:41mm;border:.6mm solid #1769c2;border-radius:2mm;object-fit:contain;background:#eef2f6}.gof-cred-name{margin:.8mm 2.5mm 0;padding:1.1mm 1mm;background:#1769c2;color:#fff;text-align:center;font-size:3.8mm;line-height:1.05;font-weight:900;text-transform:uppercase}.gof-cred-info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.gof-cred-number{border:.3mm solid #d6dde5;border-radius:1.5mm;text-align:center;background:#f7f9fc;grid-row:span 3}.gof-cred-number span{display:block;font-size:1.6mm;font-weight:900;color:#52677e;padding-top:1mm}.gof-cred-number b{display:block;font-size:10mm;color:#1769c2}.gof-cred-row{display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1.1mm;overflow:hidden}.gof-cred-row span{background:#eef2f6;padding:1.2mm;font-size:1.6mm;font-weight:900;color:#52677e}.gof-cred-row b{padding:1.2mm;font-size:2.2mm;white-space:nowrap;overflow:hidden}.gof-cred-foot{text-align:center;padding:2mm;color:#1769c2;font-size:2.1mm;font-weight:900}</style></head><body>'+clean.outerHTML+'</body></html>';
+ const html='<!doctype html><html><head><meta charset="utf-8"><title>Credencial</title><style>@page{size:50mm 80mm;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;width:50mm;height:80mm;background:#fff;font-family:Arial,sans-serif}.gof-final-doc-card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;position:relative;color:#102a43;background:#fff}.gof-cred-head{height:13mm;padding:2.2mm 2.5mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.6mm solid #1769c2}.gof-cred-brand{font-size:3.2mm;font-weight:900}.gof-cred-brand small{display:block;font-size:1.4mm;color:#52677e}.gof-cred-logo{height:6mm;max-width:10mm;object-fit:contain}.gof-cred-title{font-size:2.3mm;font-weight:900;color:#1769c2}.gof-cred-photo-wrap{padding:2.2mm 2.5mm 0}.gof-cred-photo-wrap img,.gof-cred-photo-empty{width:46mm;height:41mm;border:.6mm solid #1769c2;border-radius:2mm;object-fit:contain;background:#eef2f6}.gof-cred-name{margin:.8mm 2.5mm 0;padding:1.1mm 1mm;background:#1769c2;color:#fff;text-align:center;font-size:3.8mm;line-height:1.05;font-weight:900;text-transform:uppercase}.gof-cred-info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.gof-cred-number{border:.3mm solid #d6dde5;border-radius:1.5mm;text-align:center;background:#f7f9fc;grid-row:span 3}.gof-cred-number span{display:block;font-size:1.6mm;font-weight:900;color:#52677e;padding-top:1mm}.gof-cred-number b{display:block;font-size:10mm;color:#1769c2}.gof-cred-row{display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1.1mm;overflow:hidden}.gof-cred-row span{background:#eef2f6;padding:1.2mm;font-size:1.6mm;font-weight:900;color:#52677e}.gof-cred-row b{padding:1.2mm;font-size:2.2mm;white-space:nowrap;overflow:hidden}.gof-cred-foot{text-align:center;padding:2mm;color:#1769c2;font-size:2.1mm;font-weight:900}</style></head><body>'+clean.outerHTML+'\n</body></html>';
  const w=window.open('','_blank');
  if(w){try{w.document.open();w.document.write(html);w.document.close();setTimeout(function(){try{w.focus();w.print()}catch(e){}},350);return;}catch(e){try{w.close()}catch(_){}}}
  const old=document.body.innerHTML;const overlay=document.createElement('div');overlay.id='gofPrintFallback';overlay.innerHTML=clean.outerHTML;document.body.appendChild(overlay);const st=document.createElement('style');st.id='gofPrintFallbackStyle';st.textContent='@page{size:50mm 80mm;margin:0}@media print{body>*:not(#gofPrintFallback){display:none!important}#gofPrintFallback{display:block!important;width:50mm;height:80mm;margin:0;padding:0}}@media screen{#gofPrintFallback{position:fixed;inset:0;background:#fff;z-index:999999;padding:10px;overflow:auto}}';document.head.appendChild(st);window.addEventListener('afterprint',function restore(){st.remove();overlay.remove();window.removeEventListener('afterprint',restore)});setTimeout(function(){window.print()},150);
@@ -3593,8 +3602,11 @@ async function loadApproveRoster(){
   if(detail)detail.innerHTML='';
   const {data:tc,error:ce}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
   if(ce)return alert(ce.message);
-  const cats=(tc||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'}));
-  if(!cats.length){out.innerHTML='<div class="empty">Este torneo todavía no tiene categorías.</div>';return}
+  const activeRows=await sb.from('tournament_teams').select('category_id').eq('tournament_id',tid).eq('is_active',true);
+  if(activeRows.error)return alert(activeRows.error.message);
+  const activeIds=new Set((activeRows.data||[]).map(x=>x.category_id).filter(Boolean));
+  const cats=(tc||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'})).filter(x=>activeIds.has(x.id));
+  if(!cats.length){out.innerHTML='<div class="empty">Este torneo todavía no tiene categorías activas.</div>';return}
   const {data:rr,error:re}=await sb.from('roster_registrations').select('id,team_id,category_id,status,teams(name)').eq('tournament_id',tid);
   if(re)return alert(re.message);
   const pending=(rr||[]).filter(x=>x.status==='pendiente'), byCat={};
@@ -5585,4 +5597,115 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(addDownloadButton,500));else setTimeout(addDownloadButton,500);
 })();
 </script>
+<script id="gof-active-category-filter-final">
+/* INTERESCOLAR · Solo categorías con al menos un equipo activo aparecen en los módulos operativos.
+   EXCEPCIÓN: #ac = Categoría usada para INSCRIBIR un equipo; ahí se conservan todas las categorías. */
+(function(){
+  const OP_IDS=new Set(['cc','mc','rc','rcat','arc','ceCategory','crCategory','delcat','rrCategory','gofCalendarMatchupCategory','gofMatrixCategorySelect','weekImageCategory','qrc','vrFilter']);
+  const cache=new Map();
+  const exempt=new Set(['ac']);
+  async function activeIds(tid){
+    if(!tid||!window.sb)return new Set();
+    if(cache.has(tid))return cache.get(tid);
+    const p=sb.from('tournament_teams').select('category_id').eq('tournament_id',tid).eq('is_active',true);
+    const r=await p; const ids=new Set((r.data||[]).map(x=>String(x.category_id)).filter(Boolean)); cache.set(tid,ids); return ids;
+  }
+  function tidFor(id){
+    const map={cc:'ct',mc:'mt',rc:'rt',rcat:'rtour',arc:'art',ceCategory:'ceTournament',crCategory:'crTournament',delcat:'deltour',rrCategory:null,gofCalendarMatchupCategory:'gofCalendarMatchupTournament',gofMatrixCategorySelect:'gofMatrixTournament',weekImageCategory:'weekImageTournament',qrc:'qrt',vrFilter:'vrt'};
+    const x=map[id]; return x?document.getElementById(x)?.value||'':'';
+  }
+  async function filterOne(el){
+    if(!el||exempt.has(el.id)||!OP_IDS.has(el.id))return;
+    const tid=tidFor(el.id);
+    if(!tid)return;
+    const ids=await activeIds(tid);
+    if(!ids.size)return;
+    const current=el.value;
+    [...el.options].forEach(o=>{
+      if(!o.value)return;
+      // Only remove UUID-looking category options that are not active.
+      if(/^[0-9a-f-]{36}$/i.test(o.value) && !ids.has(String(o.value)))o.remove();
+    });
+    if(current && [...el.options].some(o=>o.value===current))el.value=current;
+  }
+  async function run(){for(const id of OP_IDS){const el=document.getElementById(id);if(el)await filterOne(el)}}
+  const oldSet=window.setView;
+  if(typeof oldSet==='function'&&!oldSet.__gofActiveCatFilter){
+    const wrapped=async function(){const r=await oldSet.apply(this,arguments);setTimeout(run,120);setTimeout(run,500);return r};
+    wrapped.__gofActiveCatFilter=true;window.setView=wrapped;
+  }
+  const mo=new MutationObserver(()=>setTimeout(run,80));
+  mo.observe(document.body,{subtree:true,childList:true});
+  window.gofRefreshActiveCategoryFilter=()=>{cache.clear();run()};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,800));else setTimeout(run,800);
+})();
+</script>
 </body></html>
+
+<!-- GAME ON FLAG FINAL ACTIVE-CATEGORY RULE INTERESCOLAR -->
+<script>
+(function(){
+  // Regla: todos los módulos operativos usan únicamente categorías con equipos activos.
+  // La pantalla de inscripción/asignación de equipos NO se toca y conserva todas las categorías.
+  async function activeCats(tid){
+    if(!tid||!window.sb)return [];
+    const {data,error}=await sb.from('tournament_teams').select('category_id').eq('tournament_id',tid).eq('is_active',true);
+    if(error) throw error;
+    const ids=[...new Set((data||[]).map(x=>x.category_id).filter(Boolean))];
+    if(!ids.length)return [];
+    const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',ids).order('name');
+    if(ce)throw ce;
+    return cats||[];
+  }
+  window.gofActiveCategoryIds=window.gofActiveCategoryIds||async function(tid){return (await activeCats(tid)).map(x=>x.id)};
+
+  window.loadHomeCategories=async function(tid){
+    const el=document.getElementById('homeCategorySelect');if(!el||!sb)return;
+    if(!tid){el.innerHTML='<option value="">Usa el torneo actual primero</option>';return;}
+    try{const cats=await activeCats(tid);el.innerHTML='<option value="">Todas las categorías activas</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');const saved=localStorage.getItem('gof_home_category');if(saved&&cats.some(x=>String(x.id)===String(saved)))el.value=saved;else if(saved)localStorage.removeItem('gof_home_category');el.onchange=()=>localStorage.setItem('gof_home_category',el.value||'');}
+    catch(e){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';}
+  };
+
+  window.loadMatchupCategories=async function(){
+    const tid=gVal('gofMatchupTournament'),el=document.getElementById('gofMatchupCategory');if(!el)return;
+    if(!tid){el.innerHTML='<option value="">Usa el torneo actual</option>';return;}
+    try{const cats=await activeCats(tid),old=el.value;el.innerHTML='<option value="">Selecciona categoría / Todas</option>'+cats.map(x=>`<option value="${gEsc(x.id)}">${gEsc(x.name)}</option>`).join('');if(old&&[...el.options].some(o=>o.value===old))el.value=old;el.onchange=gofLoadMatchups;}
+    catch(e){el.innerHTML='<option value="">❌ Error al cargar categorías</option>';}
+  };
+
+  window.calendarCats=async function(){
+    const db=await getSb(),tid=activeTid();if(!db||!tid)return [];
+    try{return await activeCats(tid)}catch(e){return []}
+  };
+
+  window.loadViewRosterCategories=async function(){
+    const tid=val('vrt'),f=document.getElementById('vrFilter');if(!f)return;
+    if(!tid){f.innerHTML='<option value="todos">Todas las categorías activas</option>';return loadViewRosters();}
+    try{const cats=await activeCats(tid),old=f.value;f.innerHTML='<option value="todos">Todas las categorías activas</option>'+cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(old&&[...f.options].some(o=>o.value===old))f.value=old;if(!f.dataset.gofBound){f.dataset.gofBound='1';f.addEventListener('change',loadViewRosters)}await loadViewRosters();}
+    catch(e){f.innerHTML='<option value="todos">No se pudieron cargar categorías</option>';}
+  };
+
+
+  window.loadCredentialCategoriesFinal=async function(){
+    const tid=val('crTournament'),c=document.getElementById('crCategory'),tm=document.getElementById('crTeam'),pl=document.getElementById('crPlayer');if(!c||!sb)return;
+    c.innerHTML='<option value="">Selecciona categoría</option>';if(tm)tm.innerHTML='<option value="">Selecciona equipo</option>';if(pl)pl.innerHTML='<option value="">Selecciona jugador</option>';if(!tid)return;
+    try{const cats=await activeCats(tid);c.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');}
+    catch(e){c.innerHTML='<option value="">No se pudieron cargar categorías</option>';}
+  };
+
+  window.loadExceptionCategoriesFinal=async function(){
+    const tid=document.getElementById('ceTournament')?.value||'',ec=document.getElementById('ceCategory');if(!ec)return;if(!tid){ec.innerHTML='<option value="">Selecciona categoría</option>';return;}
+    try{const cats=await activeCats(tid);ec.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');}
+    catch(e){ec.innerHTML='<option value="">No se pudieron cargar categorías</option>';}
+  };
+
+  // Resultados: oculta partidos de categorías sin equipos activos.
+  const oldLoadResultGames=window.loadResultGames;
+  window.loadResultGames=async function(){
+    if(typeof oldLoadResultGames!=='function')return;
+    const tid=typeof gofResultsTournamentId==='function'?gofResultsTournamentId():'';
+    if(!tid){return oldLoadResultGames.apply(this,arguments)}
+    try{const ids=new Set((await activeCats(tid)).map(x=>String(x.id)));const out=document.getElementById('resultsList');if(!out)return;const {data,error}=await sb.from('matches').select('id,round_number,match_time,field_name,home_score,away_score,status,published,is_makeup,category_id,absent_team_id,home_team_id,away_team_id,home:teams!matches_home_team_id_fkey(name),away:teams!matches_away_team_id_fkey(name),categories(name)').eq('tournament_id',tid).neq('status','cancelado').order('round_number').order('match_time').order('field_name');if(error){out.innerHTML='<div class="empty">No se pudieron cargar los partidos.</div>';return}const rows=(data||[]).filter(m=>ids.has(String(m.category_id)));window.gofLastResultRows=rows;renderResultsWeeks(rows);const st=document.getElementById('resultsAutoStatus');if(st)st.textContent=`${rows.length} partido(s) · actualización automática activa`;}catch(e){return oldLoadResultGames.apply(this,arguments)}
+  };
+})();
+</script>

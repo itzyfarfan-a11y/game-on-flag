@@ -709,6 +709,214 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   #nav button small{font-size:6px!important}
 }
 </style>
+
+<style id="gof-mobile-tables-final-2026-10-03">
+/* Ajuste final móvil: calendario, enfrentamientos y resultados más compactos */
+@media (max-width:700px){
+  /* CALENDARIO: campos 1-4 visibles en una sola tabla, con scroll solo para lo que sobre */
+  #calendario .cg-scroll{
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  #calendario .calendar-grid{
+    width:440px!important;
+    min-width:440px!important;
+    max-width:none!important;
+    table-layout:fixed!important;
+    font-size:9px!important;
+  }
+  #calendario .calendar-grid th,
+  #calendario .calendar-grid td{
+    padding:3px 2px!important;
+    line-height:1.05!important;
+  }
+  #calendario .calendar-grid th:first-child,
+  #calendario .calendar-grid td:first-child{
+    width:38px!important;
+    min-width:38px!important;
+    max-width:38px!important;
+    position:sticky!important;
+    left:0!important;
+    z-index:4!important;
+    box-shadow:2px 0 5px rgba(18,53,91,.10)!important;
+  }
+  #calendario .calendar-grid th:not(:first-child),
+  #calendario .calendar-grid td:not(:first-child){
+    width:100px!important;
+    min-width:100px!important;
+    max-width:100px!important;
+  }
+  #calendario .calendar-grid thead th{
+    font-size:8px!important;
+    padding:4px 2px!important;
+    white-space:nowrap!important;
+  }
+  #calendario .calendar-grid .cg-day td{
+    font-size:8px!important;
+    padding:4px 3px!important;
+  }
+  #calendario .calendar-grid .cg-time{
+    width:38px!important;
+    min-width:38px!important;
+    max-width:38px!important;
+    font-size:8px!important;
+    white-space:nowrap!important;
+  }
+  #calendario .cg-game{
+    min-height:46px!important;
+    padding:3px!important;
+    border-radius:6px!important;
+    border-left-width:2px!important;
+  }
+  #calendario .cg-cat{
+    font-size:6.5px!important;
+    line-height:1!important;
+    margin:0!important;
+  }
+  #calendario .cg-teams{
+    font-size:8px!important;
+    line-height:1.05!important;
+    margin-top:2px!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
+  }
+  #calendario .cg-teams span{padding:0 1px!important}
+  #calendario .cg-meta{
+    font-size:6.5px!important;
+    line-height:1!important;
+    margin-top:2px!important;
+  }
+
+  /* ENFRENTAMIENTOS: las 7 jornadas están siempre en la tabla; se desplaza solo lo que no quepa */
+  #enfrentamientos .gof-matrix-wrap{
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    width:100%!important;
+  }
+  #enfrentamientos .gof-matrix{
+    width:670px!important;
+    min-width:670px!important;
+    table-layout:fixed!important;
+    font-size:9px!important;
+  }
+  #enfrentamientos .gof-matrix th,
+  #enfrentamientos .gof-matrix td{
+    padding:4px 3px!important;
+    line-height:1.05!important;
+  }
+  #enfrentamientos .gof-matrix th:first-child,
+  #enfrentamientos .gof-matrix td:first-child{
+    width:110px!important;
+    min-width:110px!important;
+    max-width:110px!important;
+    position:sticky!important;
+    left:0!important;
+    z-index:4!important;
+    box-shadow:2px 0 5px rgba(18,53,91,.10)!important;
+  }
+  #enfrentamientos .gof-matrix th:not(:first-child),
+  #enfrentamientos .gof-matrix td:not(:first-child){
+    width:80px!important;
+    min-width:80px!important;
+    max-width:80px!important;
+  }
+  #enfrentamientos .gof-matrix thead th{
+    font-size:7px!important;
+    white-space:normal!important;
+  }
+  #enfrentamientos .gof-matrix .gof-matrix-team{
+    font-size:9px!important;
+    line-height:1.05!important;
+  }
+  #enfrentamientos .gof-matrix .gof-cell-opponent{
+    font-size:8px!important;
+    line-height:1.05!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
+  }
+  #enfrentamientos .gof-matrix-wrap:after{
+    font-size:9px!important;
+    padding:5px!important;
+  }
+
+  /* RESULTADOS: columnas ajustadas al contenido, sin espacios blancos enormes */
+  #resultados .gof-results-table-wrap{
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    width:100%!important;
+  }
+  #resultados .gof-results-table{
+    width:390px!important;
+    min-width:390px!important;
+    max-width:none!important;
+    table-layout:fixed!important;
+    font-size:9px!important;
+  }
+  #resultados .gof-results-table th,
+  #resultados .gof-results-table td{
+    padding:4px 3px!important;
+    line-height:1.05!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
+    vertical-align:middle!important;
+  }
+  #resultados .gof-results-table th:nth-child(1),
+  #resultados .gof-results-table td:nth-child(1){
+    width:38px!important;min-width:38px!important;max-width:38px!important;
+    white-space:nowrap!important;
+  }
+  #resultados .gof-results-table th:nth-child(2),
+  #resultados .gof-results-table td:nth-child(2){
+    width:48px!important;min-width:48px!important;max-width:48px!important;
+  }
+  #resultados .gof-results-table th:nth-child(3),
+  #resultados .gof-results-table td:nth-child(3){
+    width:62px!important;min-width:62px!important;max-width:62px!important;
+  }
+  #resultados .gof-results-table th:nth-child(4),
+  #resultados .gof-results-table td:nth-child(4){
+    width:91px!important;min-width:91px!important;max-width:91px!important;
+  }
+  #resultados .gof-results-table th:nth-child(5),
+  #resultados .gof-results-table td:nth-child(5){
+    width:49px!important;min-width:49px!important;max-width:49px!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+  }
+  #resultados .gof-results-table th:nth-child(6),
+  #resultados .gof-results-table td:nth-child(6){
+    width:102px!important;min-width:102px!important;max-width:102px!important;
+  }
+  #resultados .gof-results-table th{
+    font-size:8px!important;
+    white-space:normal!important;
+  }
+  #resultados .gof-results-table td{
+    font-size:9px!important;
+  }
+  #resultados .gof-score-cell{
+    font-size:10px!important;
+    font-weight:900!important;
+  }
+}
+@media(max-width:430px){
+  #calendario .calendar-grid{width:420px!important;min-width:420px!important}
+  #calendario .calendar-grid th:not(:first-child),
+  #calendario .calendar-grid td:not(:first-child){width:95px!important;min-width:95px!important;max-width:95px!important}
+  #enfrentamientos .gof-matrix{width:642px!important;min-width:642px!important}
+  #enfrentamientos .gof-matrix th:not(:first-child),
+  #enfrentamientos .gof-matrix td:not(:first-child){width:76px!important;min-width:76px!important;max-width:76px!important}
+  #resultados .gof-results-table{width:380px!important;min-width:380px!important}
+  #resultados .gof-results-table th:nth-child(4),
+  #resultados .gof-results-table td:nth-child(4){width:87px!important;min-width:87px!important;max-width:87px!important}
+  #resultados .gof-results-table th:nth-child(6),
+  #resultados .gof-results-table td:nth-child(6){width:98px!important;min-width:98px!important;max-width:98px!important}
+}
+</style>
 </head>
 <body>
 <header class="gof-public-top">

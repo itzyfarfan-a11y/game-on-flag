@@ -364,12 +364,9 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
       <div class="gof-public-sub">PORTAL PÚBLICO</div>
     </div>
     <div class="gof-public-head-buttons">
-      <a class="gof-head-btn" href="./admin.html" aria-label="Administrador">
-        <span>👤</span><span class="head-copy"><strong>Administrador</strong><small>Acceso restringido</small></span><span aria-hidden="true">›</span>
+      <a class="gof-head-btn gof-admin-icon-only" href="./admin.html" aria-label="Administrador" title="Administrador">
+        <span aria-hidden="true">👤</span>
       </a>
-      <button class="gof-head-btn announce-btn" type="button" onclick="togglePublicAnnouncements()" aria-label="Anuncios">
-        <span>📣</span><span class="head-copy"><strong>Anuncios</strong><small>Novedades y avisos</small></span><b class="gof-badge">3</b><span aria-hidden="true">›</span>
-      </button>
     </div>
   </div>
 </header>
@@ -412,6 +409,7 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   <section id="playoffs"></section>
   <section id="campeones"></section>
   <section id="avisos"></section>
+  <section id="anuncios"></section>
 </main>
 
 <footer>
@@ -420,7 +418,7 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   📷 Game On Flag &nbsp;|&nbsp; 🔵 Game On Flag
 </footer>
 <script>
-const U='https://picivrqgmckrwutarhyw.supabase.co',K='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl',H={apikey:K,'Content-Type':'application/json',Accept:'application/json'},t=document.getElementById('t'),c=document.getElementById('c'),status=document.getElementById('status'),nav=document.getElementById('nav');const GOF_PUBLIC_LEAGUE_SLUG=(new URLSearchParams(location.search).get('liga')||new URLSearchParams(location.search).get('league')||'').trim();let league={},data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]},matchupMatches=[],notices=[],tab='calendario';const sec=['inicio','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones','avisos'];function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}async function rpc(n,b={}){const r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b),cache:'no-store'}),x=await r.text();if(!r.ok)throw Error('HTTP '+r.status);return JSON.parse(x)}function team(id){return data.teams.find(x=>x.id===id)||{name:'Por definir'}}function cat(id){return data.categories.find(x=>x.id===id)?.name||'Categoría'}
+const U='https://picivrqgmckrwutarhyw.supabase.co',K='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl',H={apikey:K,'Content-Type':'application/json',Accept:'application/json'},t=document.getElementById('t'),c=document.getElementById('c'),status=document.getElementById('status'),nav=document.getElementById('nav');const GOF_PUBLIC_LEAGUE_SLUG=(new URLSearchParams(location.search).get('liga')||new URLSearchParams(location.search).get('league')||'').trim();let league={},data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]},matchupMatches=[],notices=[],tab='calendario';const sec=['inicio','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones','avisos','anuncios'];function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}async function rpc(n,b={}){const r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b),cache:'no-store'}),x=await r.text();if(!r.ok)throw Error('HTTP '+r.status);return JSON.parse(x)}function team(id){return data.teams.find(x=>x.id===id)||{name:'Por definir'}}function cat(id){return data.categories.find(x=>x.id===id)?.name||'Categoría'}
 function visibleCategories(){const ids=new Set();(data.teams||[]).forEach(tm=>(tm.category_ids||[]).forEach(id=>ids.add(id)));return (data.categories||[]).filter(x=>ids.has(x.id))}
 function isPublicActiveCategory(id){return visibleCategories().some(x=>String(x.id)===String(id))}function field(v){const m=String(v||'').match(/(?:campo|cancha)\s*(\d+)/i);return m?+m[1]:99}function cclass(n){n=String(n||'').toLowerCase();return n.includes('mixto')?'mixto':n.includes('bronce')?'bronce':n.includes('silver femenil')?'sf':n.includes('silver varonil')?'sv':n.includes('35')?'g35':n.includes('golden')?'golden':''}
 function savePublicAppLogo(input){const f=input?.files?.[0];if(!f)return;if(!/^image\/(png|jpeg|webp)$/.test(f.type))return alert('Selecciona una imagen PNG, JPG o WEBP.');const r=new FileReader();r.onload=()=>{try{localStorage.setItem('gof_app_logo',r.result)}catch(e){}applyPublicAppLogo(r.result)};r.readAsDataURL(f)}
@@ -445,10 +443,10 @@ document.addEventListener('click',function(ev){
 });
 function render(){
   document.body.classList.toggle('home-screen',tab==='inicio');
-  nav.innerHTML=[['calendario','📅','Calendario|Jornadas y campos'],['enfrentamientos','🏈','Enfrentamientos|Todos los partidos'],['equipos','👥','Equipos|Conoce los equipos'],['jugadores','👕','Jugadores|Plantillas y rosters'],['resultados','📊','Resultados|Marcadores y estadísticas'],['tabla','📈','Tabla|Clasificaciones'],['playoffs','🏆','Playoffs|Fase final'],['campeones','🥇','Campeones|Campeones'],['avisos','📣','Avisos|Información oficial']].map(x=>{const q=x[2].split('|');return '<button type="button" data-tab="'+x[0]+'" class="'+(tab===x[0]?'active':'')+'"><span aria-hidden="true">'+x[1]+'</span><span><b>'+q[0]+'</b><small>'+q[1]+'</small></span></button>'}).join('');
+  nav.innerHTML=[['calendario','📅','Calendario|Jornadas y campos'],['enfrentamientos','🏈','Enfrentamientos|Todos los partidos'],['equipos','👥','Equipos|Conoce los equipos'],['jugadores','👕','Jugadores|Plantillas y rosters'],['resultados','📊','Resultados|Marcadores y estadísticas'],['tabla','📈','Tabla|Clasificaciones'],['playoffs','🏆','Playoffs|Fase final'],['campeones','🥇','Campeones|Campeones'],['avisos','📣','Avisos|Información oficial'],['anuncios','📢','Anuncios|Novedades']].map(x=>{const q=x[2].split('|');return '<button type="button" data-tab="'+x[0]+'" class="'+(tab===x[0]?'active':'')+'"><span aria-hidden="true">'+x[1]+'</span><span><b>'+q[0]+'</b><small>'+q[1]+'</small></span></button>'}).join('');
   sec.forEach(x=>{const el=document.getElementById(x);el.classList.toggle('public-open',x===tab);el.style.display=x===tab?'block':'none'});
   if(tab==='inicio')home();
-  if(tab==='equipos')teams();if(tab==='jugadores')players();if(tab==='calendario')calendar();if(tab==='enfrentamientos')matchups();if(tab==='resultados')results();if(tab==='tabla')table();if(tab==='playoffs')playoffs();if(tab==='campeones')champions();if(tab==='avisos')publicNotices();
+  if(tab==='equipos')teams();if(tab==='jugadores')players();if(tab==='calendario')calendar();if(tab==='enfrentamientos')matchups();if(tab==='resultados')results();if(tab==='tabla')table();if(tab==='playoffs')playoffs();if(tab==='campeones')champions();if(tab==='avisos')publicNotices();if(tab==='anuncios')publicAnnouncementsSection();
 }
 function home(){document.getElementById('inicio').innerHTML='';}
 {const n=data.matches.filter(m=>m.status==='jugado'||m.status==='incomparecencia').length;document.getElementById('inicio').innerHTML='<div class="card"><h2>'+esc(data.tournament?.name||'Torneo')+'</h2><p class="muted">Temporada '+esc(data.tournament?.season||'')+'</p><div class="grid"><div class="stat"><b>'+data.teams.length+'</b><br>Equipos</div><div class="stat"><b>'+n+'</b><br>Juegos registrados</div><div class="stat"><b>'+data.playoffs.length+'</b><br>Playoffs</div></div></div>'}async function teams(){const list=c.value?data.teams.filter(tm=>(tm.category_ids||[]).includes(c.value)):data.teams;document.getElementById('equipos').innerHTML='<h2>👥 Equipos'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><div id="publicTeamList">'+(list.length?list.map(x=>'<div class="card"><div class="row"><div style="display:flex;align-items:center;gap:12px">'+(x.logo_url?'<img src="'+esc(x.logo_url)+'" alt="" style="width:58px;height:58px;object-fit:contain;border-radius:10px;background:#222">':'')+'<div><b>'+esc(x.name)+'</b><span class="tag">'+(x.club_name?'Club/Coach: '+esc(x.club_name):'Club/Coach pendiente')+'</span></div></div></div></div>').join(''):'<div class="empty">Sin equipos.</div>')+'</div>'}async function players(){
@@ -496,115 +494,50 @@ async function downloadPublicRosterImage(teamId){
 function champions(){const s=document.getElementById('campeones');s.innerHTML='<h2>🏆 Campeones</h2><div class="empty">Los campeones publicados por la administración aparecerán aquí.</div>'}function cell(m){if(!m)return'<div class="empty">—</div>';const p=m.kind==='playoff',cn=p?(m.stage||'Playoff'):cat(m.category_id),a=p?team(m.team_a_id).name:team(m.home_team_id).name,b=p?team(m.team_b_id).name:team(m.away_team_id).name;return'<div class="game '+cclass(cn)+'"><div class="cat">'+esc(cn)+(m.round_number?' · Semana '+m.round_number:'')+'</div><div class="teams">'+esc(a)+' <span>vs</span> '+esc(b)+'</div><div class="meta">'+(p?'🏆':'🏈')+' '+esc(m.match_time?String(m.match_time).slice(0,5):'Hora por definir')+' · '+esc(m.field_name||'Campo por definir')+'</div></div>'}
 
 function matchups(){
- const s=document.getElementById('enfrentamientos');
- const sel=c.value||'';
- if(!sel){
-   s.innerHTML='<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">⚔️ Enfrentamientos</h2><div class="mut small">Selecciona una categoría para consultar los rivales de Jornada 1 a Jornada 7.</div></div></div></div>';
-   return;
- }
- const activeIds=new Set(visibleCategories().map(x=>String(x.id)));
- const matchupSource=matchupMatches.length?matchupMatches:data.matches;
- const ms=matchupSource.filter(m=>activeIds.has(String(m.category_id))&&String(m.category_id)===String(sel)&&Number(m.round_number)>=1&&Number(m.round_number)<=7&&!m.is_makeup);
+  const s=document.getElementById('enfrentamientos');
+  const sel=c.value||'';
+  if(!sel){
+    s.innerHTML='<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">⚔️ Enfrentamientos</h2><div class="mut small">Selecciona una categoría para consultar los rivales de Jornada 1 a Jornada 7.</div></div></div></div>';
+    return;
+  }
 
- // Respaldo de enfrentamientos de InterEscolar: si la función pública solo entrega
- // partidos ya publicados, completamos las jornadas programadas para que J2-J7
- // no aparezcan vacías en el portal público.
- const fallback={
-   'Escolar':{
-     'Cbtis Leones':['LOBOs CETis 21 B','Lobos CTis 21 A','DGTI','ECCA','Conalep II','Conalep III','Sabes'],
-     'Conalep II':['Lobos CTis 21 A','Conalep III','Sabes','LOBOs CETis 21 B','Cbtis Leones','DGTI','ECCA'],
-     'Conalep III':['ECCA','Conalep II','Lobos CTis 21 A','Sabes','LOBOs CETis 21 B','Cbtis Leones','DGTI'],
-     'DGTI':['Sabes','LOBOs CETis 21 B','Cbtis Leones','Lobos CTis 21 A','ECCA','Conalep II','Conalep III'],
-     'ECCA':['Conalep III','Sabes','LOBOs CETis 21 B','Cbtis Leones','DGTI','Lobos CTis 21 A','Conalep II'],
-     'LOBOs CETis 21 B':['Cbtis Leones','DGTI','ECCA','Conalep II','Conalep III','Sabes','Lobos CTis 21 A'],
-     'Lobos CTis 21 A':['Conalep II','Cbtis Leones','Conalep III','DGTI','Sabes','ECCA','LOBOs CETis 21 B'],
-     'Sabes':['DGTI','ECCA','Conalep II','Conalep III','Lobos CTis 21 A','LOBOs CETis 21 B','Cbtis Leones']
-   },
-   'Mixto':{
-     'Druidas':['Jaguares B','Lobos CTis 21','Jaguares','ECCA','Fire Wings','Jaguares B','Lobos CTis 21'],
-     'ECCA':['Jaguares','Fire Wings','Lobos CTis 21','Druidas','Jaguares B','Jaguares','Fire Wings'],
-     'Fire Wings':['Lobos CTis 21','ECCA','Jaguares B','Jaguares','Druidas','Lobos CTis 21','ECCA'],
-     'Jaguares':['ECCA','Jaguares B','Druidas','Fire Wings','Lobos CTis 21','ECCA','Jaguares B'],
-     'Jaguares B':['Druidas','Jaguares','Fire Wings','Lobos CTis 21','ECCA','Druidas','Jaguares'],
-     'Lobos CTis 21':['Fire Wings','Druidas','ECCA','Jaguares B','Jaguares','Fire Wings','Druidas']
-   }
- };
- const norm=v=>String(v||'').toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g,' ').replace(/\s+/g,' ').trim();
- const catName=cat(sel);
- const fallbackCat=fallback[catName]||{};
- const findTeamByName=name=>{
-   const n=norm(name);
-   return data.teams.find(tm=>norm(tm.name)===n && (tm.category_ids||[]).map(String).includes(String(sel))) || data.teams.find(tm=>norm(tm.name)===n);
- };
- const selectedTeams=data.teams.filter(tm=>(tm.category_ids||[]).map(String).includes(String(sel)));
- const teamIds=[...new Set(selectedTeams.map(x=>x.id))];
- // También conserva cualquier equipo que venga directamente del RPC de enfrentamientos.
- ms.flatMap(m=>[m.home_team_id,m.away_team_id]).filter(Boolean).forEach(id=>{if(!teamIds.includes(id))teamIds.push(id)});
- const rows=teamIds.map(id=>{
-   const tm=team(id);
-   const rounds={};
-   ms.forEach(m=>{
-     const r=Number(m.round_number);
-     if(m.home_team_id===id) rounds[r]=team(m.away_team_id).name;
-     else if(m.away_team_id===id) rounds[r]=team(m.home_team_id).name;
-   });
-   const fb=fallbackCat[tm.name]||fallbackCat[Object.keys(fallbackCat).find(k=>norm(k)===norm(tm.name))];
-   if(fb){
-     [1,2,3,4,5,6,7].forEach(r=>{
-       if(!rounds[r] && fb[r-1]){
-         const opp=findTeamByName(fb[r-1]);
-         rounds[r]=opp?.name||fb[r-1];
-       }
-     });
-   }
-   return {id,name:tm.name,rounds};
- }).sort((a,b)=>a.name.localeCompare(b.name,'es'));
- let h='<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">⚔️ Enfrentamientos · '+esc(cat(sel))+'</h2><div class="mut small">Rivales por jornada · solo consulta.</div></div><button type="button" class="primary" onclick="downloadPublicMatchupsImage()">🖼️ Descargar tabla</button></div><div class="gof-matrix-wrap"><table class="gof-matrix"><thead><tr><th>EQUIPO</th>';
- [1,2,3,4,5,6,7].forEach(r=>h+='<th>JORNADA '+r+'</th>');
- h+='</tr></thead><tbody>';
- rows.forEach(t=>{
-   h+='<tr><td><span class="gof-matrix-team">'+esc(t.name)+'</span></td>';
-   [1,2,3,4,5,6,7].forEach(r=>{
-     h+='<td class="gof-matrix-cell">'+(t.rounds[r]?'<div class="gof-cell-opponent">'+esc(t.rounds[r])+'</div>':'<span class="mut">—</span>')+'</td>';
-   });
-   h+='</tr>';
- });
- h+='</tbody></table></div></div>';
- s.innerHTML=h;
-}
+  /* FUENTE OFICIAL: public_get_tournament_matchups lee directamente los partidos de Administración (tabla matches), incluyendo J1-J7 aunque todavía no estén publicados en el calendario. */
+  const activeIds=new Set(visibleCategories().map(x=>String(x.id)));
+  const source=Array.isArray(matchupMatches)&&matchupMatches.length?matchupMatches:(Array.isArray(data.matches)?data.matches:[]);
+  const ms=source.filter(m=>activeIds.has(String(m.category_id))&&String(m.category_id)===String(sel)&&Number(m.round_number)>=1&&Number(m.round_number)<=7&&!m.is_makeup);
+  const selectedTeams=data.teams.filter(tm=>(tm.category_ids||[]).map(String).includes(String(sel)));
+  const ids=[...new Set([...selectedTeams.map(x=>x.id),...ms.flatMap(m=>[m.home_team_id,m.away_team_id]).filter(Boolean)])];
+  const rows=ids.map(id=>{
+    const tm=team(id);
+    const rounds={};
+    ms.forEach(m=>{const r=Number(m.round_number);if(m.home_team_id===id) rounds[r]=team(m.away_team_id).name;else if(m.away_team_id===id) rounds[r]=team(m.home_team_id).name;});
+    return {id,name:tm.name,rounds};
+  }).sort((a,b)=>a.name.localeCompare(b.name,'es'));
 
-function calendar(){
- const s=document.getElementById('calendario');
- const mode=window.publicCalendarMode||'all';
- const selectedCat=c.value||'';
- const activeIds=new Set(visibleCategories().map(x=>String(x.id)));
- const regular=data.matches.filter(m=>activeIds.has(String(m.category_id))&&(!selectedCat||m.category_id===selectedCat)).map(m=>({...m,_kind:'regular',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
- const po=data.playoffs.filter(m=>!m.category_id||activeIds.has(String(m.category_id))).filter(m=>!selectedCat||m.category_id===selectedCat).map(m=>({...m,_kind:'playoff',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
- const all=[...regular,...po];
- const fieldNo=f=>{const z=String(f||'').match(/(?:campo|cancha)\s*[-#:]?\s*(\d+)/i);return z?Number(z[1]):99};
- const weekKey=m=>m._kind==='playoff'?'PLAYOFFS':(m.round_number?String(m.round_number):'SIN SEMANA');
- const weekLabel=k=>k==='PLAYOFFS'?'🏆 PLAYOFFS':k==='SIN SEMANA'?'📅 Semana pendiente':`📅 SEMANA ${k}`;
- const dateLabel=arr=>{const ds=[...new Set(arr.map(m=>m._date).filter(Boolean))].sort();if(!ds.length)return 'Fecha pendiente';if(ds.length===1)return new Date(ds[0]+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}).replace(/^./,x=>x.toUpperCase());return 'Fechas: '+ds.map(d=>new Date(d+'T12:00:00Z').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'})).join(' · ')};
- const catClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'cg-mixto';if(x.includes('bronze')||x.includes('bronce'))return 'cg-bronce';if(x.includes('silver femenil'))return 'cg-silverf';if(x.includes('silver varonil'))return 'cg-silverv';if(x.includes('35'))return 'cg-35';if(x.includes('golden'))return 'cg-golden';return 'cg-other'};
- const renderCell=m=>{if(!m)return '<div class="cg-empty">—</div>';const isPo=m._kind==='playoff';const cname=isPo?(cat(m.category_id)||'Playoffs'):(cat(m.category_id)||'Categoría');const a=isPo?team(m.team_a_id).name:team(m.home_team_id).name;const b=isPo?team(m.team_b_id).name:team(m.away_team_id).name;return `<div class="cg-game ${catClass(cname)}"><div class="cg-cat">${esc(cname)}${isPo?' · '+esc(m.stage||''):''}</div><div class="cg-teams">${esc(a)} <span>vs</span> ${esc(b)}</div><div class="cg-meta">${isPo?'🏆':'🏈'} ${m.round_number?'Semana '+esc(m.round_number):''}</div></div>`};
- let h=`<div class="calendar-panel-head"><div><h2>📅 Calendario</h2><p>Vista pública · misma estructura visual de Administración</p></div><div class="calendar-filter"><span>Mostrar calendario de:</span><div class="calendar-filter-buttons"><button type="button" class="${mode==='category'?'active':''}" onclick="setCalendarMode('category')">Solo esta categoría</button><button type="button" class="${mode==='all'?'active':''}" onclick="setCalendarMode('all')">Todas las categorías activas</button></div></div></div><div class="calendar-current"><b>${esc(selectedCat?cat(selectedCat):'Todas las categorías')}</b><button type="button" class="primary" onclick="downloadPublicCalendarPNG()">🖼️ Descargar calendario</button></div>`;
- if(!all.length){s.innerHTML=h+'<div class="empty">No hay partidos publicados para esta selección.</div>';return}
- const groups={};all.forEach(m=>(groups[weekKey(m)]??=[]).push(m));
- const weekOrder=Object.keys(groups).sort((a,b)=>{const na=a==='PLAYOFFS'?999:a==='SIN SEMANA'?998:Number(a),nb=b==='PLAYOFFS'?999:b==='SIN SEMANA'?998:Number(b);return na-nb});
- h+=`<div class="card"><h3>📊 Calendario General</h3><div class="notice"><b>${all.length} partidos</b> · ${regular.length} fase regular · ${po.length} playoffs · ${selectedCat?'Filtro: '+esc(cat(selectedCat)):'Todas las categorías'}</div><div class="cg-scroll"><table class="calendar-grid"><thead><tr><th>HORARIO</th><th>CAMPO 1</th><th>CAMPO 2</th><th>CAMPO 3</th><th>CAMPO 4</th>${all.some(m=>fieldNo(m._field)===5)?'<th>CAMPO 5</th>':''}</tr></thead><tbody>`;
- const fields=[1,2,3,4,...(all.some(m=>fieldNo(m._field)===5)?[5]:[])];
- for(const wk of weekOrder){const games=groups[wk];h+=`<tr class="cg-day"><td colspan="${fields.length+1}"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><b>${esc(weekLabel(wk))}</b><span class="small mut">${esc(dateLabel(games))}</span></div></td></tr>`;const times=[...new Set(games.map(m=>m._time?String(m._time).slice(0,5):'SIN HORA'))].sort();for(const tm of times){h+=`<tr><th class="cg-time">${esc(tm==='SIN HORA'?'Pendiente':tm)}</th>`;for(const f of fields){const cell=games.find(m=>fieldNo(m._field)===f&&(m._time?String(m._time).slice(0,5):'SIN HORA')===tm);h+=`<td>${renderCell(cell)}</td>`}h+='</tr>'}}
- h+='</tbody></table></div><div class="small mut cg-legend">Vista por semana · hora · campo. Solo consulta pública.</div></div>';
- // Espejo de la segunda tabla del calendario administrativo: enfrentamientos por equipo.
- const regularOnly=data.matches.filter(m=>activeIds.has(String(m.category_id))&&Number(m.round_number)>=1&&Number(m.round_number)<=7&&!m.is_makeup&&(!selectedCat||m.category_id===selectedCat));
- const teamMap=new Map();regularOnly.forEach(m=>{const cname=cat(m.category_id)||'Categoría';[['home_team_id','away_team_id'],['away_team_id','home_team_id']].forEach(([idKey,oppKey])=>{const id=m[idKey];if(!id)return;if(!teamMap.has(id))teamMap.set(id,{id,name:team(id).name,category:cname,rounds:{}});teamMap.get(id).rounds[Number(m.round_number)]=team( m[oppKey]).name})});
- const teamRows=[...teamMap.values()].sort((a,b)=>a.category.localeCompare(b.category,'es')||a.name.localeCompare(b.name,'es'));
- const catClass2=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'cat-mixto';if(x.includes('silver femenil'))return 'cat-silverf';if(x.includes('silver varonil'))return 'cat-silverv';if(x.includes('bronce')||x.includes('bronze'))return 'cat-bronce';if(x.includes('35'))return 'cat-35';if(x.includes('moms'))return 'cat-moms';if(x.includes('golden'))return 'cat-golden';return 'cat-other'};
- const dots={ 'cat-mixto':'#8bd23e','cat-silverf':'#e28b9e','cat-silverv':'#6eb7ce','cat-bronce':'#d28a3f','cat-35':'#e04b52','cat-moms':'#a56be0','cat-golden':'#d9b54a','cat-other':'#8f7aaa'};
- h+=`<div class="card team-schedule-card"><div class="team-schedule-head"><h3 style="margin:0">📋 Enfrentamientos por equipo</h3></div><div class="notice">Misma tabla de Administración · solo consulta pública. En teléfono puedes deslizar horizontalmente.</div><div class="team-schedule-scroll-wrap"><div class="cg-scroll"><table class="team-schedule-grid"><thead><tr><th>CATEGORÍA</th><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>`;
- teamRows.forEach(t=>{const cc=catClass2(t.category);h+=`<tr class="cat-row" data-team-category="${esc(t.category)}"><td class="ts-cat ${cc}"><span class="ts-cat-badge"><span class="ts-cat-dot" style="background:${dots[cc]||dots['cat-other']}"></span>${esc(t.category)}</span></td><td class="ts-team">${esc(t.name)}</td>${[1,2,3,4,5,6,7].map(r=>`<td class="ts-j ${cc}">${esc(t.rounds[r]||'—')}</td>`).join('')}</tr>`});
- h+='</tbody></table></div></div><div class="team-schedule-scroll-note">Cada fila corresponde a un equipo y muestra su rival de cada jornada.</div></div>';
- s.innerHTML=h;
+  let h='<div class="card gof-matchups-card">';
+  h+='<div class="row gof-matchups-head" style="justify-content:space-between;align-items:center">';
+  h+='<div><h2 style="margin:0">⚔️ Enfrentamientos · '+esc(cat(sel))+'</h2><div class="mut small">Rivales por jornada · información tomada directamente de Administración.</div></div>';
+  h+='<button type="button" class="primary" onclick="downloadPublicMatchupsImage()">🖼️ Descargar tabla</button></div>';
+
+  h+='<div class="gof-matrix-wrap gof-matchups-desktop"><table class="gof-matrix"><thead><tr><th>EQUIPO</th>';
+  [1,2,3,4,5,6,7].forEach(r=>h+='<th>JORNADA '+r+'</th>');
+  h+='</tr></thead><tbody>';
+  rows.forEach(t=>{
+    h+='<tr><td><span class="gof-matrix-team">'+esc(t.name)+'</span></td>';
+    [1,2,3,4,5,6,7].forEach(r=>{h+='<td class="gof-matrix-cell">'+(t.rounds[r]?'<div class="gof-cell-opponent">'+esc(t.rounds[r])+'</div>':'<span class="mut">—</span>')+'</td>';});
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+
+  /* En móvil se muestran las 7 jornadas completas, una debajo de otra, para que nunca queden ocultas J3-J7. */
+  h+='<div class="gof-matchups-mobile">';
+  rows.forEach(t=>{
+    h+='<div class="gof-matchup-team-card"><div class="gof-matchup-team-name">'+esc(t.name)+'</div><div class="gof-matchup-rounds">';
+    [1,2,3,4,5,6,7].forEach(r=>{h+='<div class="gof-matchup-round"><b>JORNADA '+r+'</b><span>'+(t.rounds[r]?esc(t.rounds[r]):'—')+'</span></div>';});
+    h+='</div></div>';
+  });
+  h+='</div></div>';
+  s.innerHTML=h;
 }
 
 function publicResultValue(m,key){
@@ -657,6 +590,7 @@ async function playoffs(){
  h+='<div class="card"><h3>Bracket · '+(list.some(p=>p.playoff_mode==='manual')?'✋ Manual':'🤖 Automático')+'</h3><div class="mut">Consulta pública · mismo formato de bracket de Administración.</div><div class="bracket">'+stageHtml+'</div></div>';
  s.innerHTML=h;
 }
+function publicAnnouncementsSection(){const s=document.getElementById('anuncios');s.innerHTML='<h2>📢 Anuncios</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Las novedades y anuncios publicados por la administración aparecerán aquí.</div></div>'}
 function publicNotices(){const s=document.getElementById('avisos');s.innerHTML='<h2>📣 Avisos</h2>'+(notices.length?notices.map(n=>'<div class="card"><span class="badge">'+esc(n.type||'Aviso')+'</span><h3 style="margin:8px 0 5px">'+esc(n.title||'Aviso')+'</h3>'+(n.team?'<div class="muted">Equipo: '+esc(n.team)+'</div>':'')+(n.person?'<div class="muted">Persona: '+esc(n.person)+'</div>':'')+(n.notice_date?'<div class="muted">Fecha: '+esc(n.notice_date)+'</div>':'')+(n.valid_until?'<div class="muted">Vigencia: '+esc(n.valid_until)+'</div>':'')+(n.description?'<p>'+esc(n.description)+'</p>':'')+'</div>').join(''):'<div class="empty">No hay avisos publicados.</div>')}
 async function loadPublicLeague(){const x=await rpc('public_get_league_by_slug',{p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});league=x||{};const name=document.getElementById('publicLeagueName');if(name)name.textContent=league.name||'Liga';const identity=document.getElementById('publicLeagueIdentityName');if(identity)identity.textContent='Liga: '+(league.name||'Liga');const foot=document.getElementById('publicFooterLeague');if(foot)foot.textContent=(league.name?league.name+' · ':'')+'Portal público';const img=document.getElementById('publicLeagueLogoPreview'),tx=document.getElementById('publicLeagueLogoText');if(league.logo_url&&img){img.src=league.logo_url;img.style.display='block';if(tx)tx.style.display='none'}}
 
@@ -1076,6 +1010,94 @@ window.setCalendarMode=function(mode){
   #enfrentamientos .gof-matrix th,#enfrentamientos .gof-matrix td{padding:6px 4px!important;font-size:9px!important;line-height:1.08!important}
   #enfrentamientos .gof-matrix .gof-cell-opponent{font-size:9px!important;line-height:1.08!important;white-space:normal!important;overflow-wrap:anywhere!important}
   #enfrentamientos .gof-matrix-team{font-size:10px!important;line-height:1.08!important;overflow-wrap:anywhere!important}
+}
+</style>
+
+<style id="gof-final-request-top-matchups-calendar-2026-10-03">
+@media(max-width:700px){
+  .gof-public-top{height:78px!important}
+  .gof-public-head{height:76px!important;grid-template-columns:38px minmax(0,1fr) 100px!important;padding:4px 6px!important;gap:4px!important;align-items:center!important}
+  .gof-header-logo-upload{width:32px!important;height:24px!important;min-width:32px!important;min-height:24px!important;border:0!important;background:transparent!important}
+  .gof-header-logo-upload img{width:32px!important;height:24px!important;object-fit:contain!important}
+  .gof-public-brand{text-align:center!important;min-width:0!important}
+  .gof-public-title{font-size:20px!important;line-height:1!important;letter-spacing:0!important;white-space:nowrap!important}
+  .gof-public-app{font-size:8px!important;line-height:1!important;letter-spacing:2.5px!important;margin-top:2px!important}
+  .gof-public-sub{font-size:5px!important;line-height:1!important;letter-spacing:1.8px!important;margin-top:2px!important}
+  .gof-public-head-buttons{width:100px!important;gap:3px!important}
+  .gof-head-btn{width:100px!important;height:27px!important;min-height:27px!important;padding:0 5px!important;gap:3px!important;border-radius:8px!important}
+  .gof-head-btn span{font-size:12px!important}.gof-head-btn strong{font-size:8px!important;line-height:1!important}.gof-head-btn small{font-size:6px!important;line-height:1!important}.gof-head-btn>span:last-child{font-size:13px!important}
+  .gof-badge{min-width:15px!important;height:15px!important;font-size:8px!important;right:-3px!important;top:-4px!important}
+  main{padding:8px 10px 18px!important}
+  .gof-public-identity{grid-template-columns:minmax(0,1fr) 82px!important;gap:6px!important;margin-bottom:7px!important}
+  .gof-public-league{min-height:92px!important;height:92px!important;padding:10px 11px!important;border-radius:14px!important;display:flex!important;align-items:center!important}
+  .gof-public-league b{font-size:20px!important;line-height:1.02!important}.gof-public-league span{font-size:11px!important;margin-top:4px!important}.gof-public-league small{font-size:9px!important;margin-top:4px!important}
+  .gof-public-logo-card{height:92px!important;min-height:92px!important;padding:5px!important;border-radius:14px!important}.gof-public-logo-upload{border-radius:9px!important}.gof-public-logo-upload img{padding:3px!important}
+  .gof-public-selectors{gap:6px!important;margin-bottom:7px!important}.gof-public-select-card{padding:7px 8px!important;border-radius:12px!important}.gof-public-select-card span{font-size:12px!important;margin-bottom:4px!important}.gof-category-picker{gap:5px!important}.gof-category-btn{min-height:36px!important;height:36px!important;font-size:11px!important;line-height:1!important;padding:5px 6px!important;border-radius:9px!important}
+  #calendario .calendar-current{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:6px!important}
+  #calendario .calendar-current .primary{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:auto!important;min-width:0!important;font-size:11px!important;line-height:1!important;padding:7px 8px!important;white-space:nowrap!important}
+  .gof-matchups-desktop{display:none!important}.gof-matchups-mobile{display:block!important}.gof-matchups-card{padding:9px!important}.gof-matchups-head{align-items:flex-start!important;gap:7px!important}.gof-matchups-head h2{font-size:21px!important;line-height:1.05!important}.gof-matchups-head .mut{font-size:11px!important;line-height:1.15!important}.gof-matchups-head .primary{flex:0 0 auto!important;font-size:10px!important;padding:7px 8px!important;white-space:nowrap!important}
+  .gof-matchup-team-card{border:1px solid #c7d5e5!important;border-radius:10px!important;overflow:hidden!important;margin-top:7px!important;background:#fff!important}.gof-matchup-team-name{background:#1769c2!important;color:#fff!important;font-size:12px!important;font-weight:900!important;padding:7px 8px!important}.gof-matchup-rounds{display:grid!important;grid-template-columns:1fr 1fr!important}.gof-matchup-round{display:grid!important;grid-template-columns:62px minmax(0,1fr)!important;align-items:center!important;min-height:31px!important;padding:4px 6px!important;border-bottom:1px solid #d5deea!important;font-size:10px!important;line-height:1.08!important}.gof-matchup-round:nth-child(odd){border-right:1px solid #d5deea!important}.gof-matchup-round:nth-last-child(-n+2){border-bottom:0!important}.gof-matchup-round b{color:#1769c2!important;font-size:9px!important;white-space:nowrap!important}.gof-matchup-round span{color:#12355b!important;font-weight:800!important;overflow-wrap:anywhere!important}
+}
+.gof-matchups-mobile{display:none}
+</style>
+
+
+<style id="gof-user-final-2026-10-03">
+/* Ajustes finales solicitados: encabezado compacto, administrador solo icono, Anuncios junto a Avisos y enfrentamientos completos. */
+@media(max-width:700px){
+  .gof-public-top{height:70px!important}
+  .gof-public-head{height:68px!important;grid-template-columns:34px minmax(0,1fr) 34px!important;padding:3px 6px!important;gap:4px!important;align-items:center!important}
+  .gof-header-logo-upload{width:28px!important;height:20px!important;min-width:28px!important;min-height:20px!important;background:transparent!important;border:0!important}
+  .gof-header-logo-upload img{width:28px!important;height:20px!important;object-fit:contain!important}
+  .gof-public-brand{min-width:0!important;text-align:center!important;align-items:center!important;justify-content:center!important}
+  .gof-public-title{font-size:18px!important;line-height:1!important;letter-spacing:0!important;white-space:nowrap!important}
+  .gof-public-app{font-size:7px!important;line-height:1!important;letter-spacing:2px!important;margin-top:2px!important}
+  .gof-public-sub{font-size:4.5px!important;line-height:1!important;letter-spacing:1.3px!important;margin-top:2px!important}
+  .gof-public-head-buttons{width:34px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  .gof-head-btn.gof-admin-icon-only{width:30px!important;height:30px!important;min-height:30px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:50%!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  .gof-head-btn.gof-admin-icon-only span{font-size:22px!important;line-height:1!important}
+  .gof-head-btn.gof-admin-icon-only .head-copy,.gof-head-btn.gof-admin-icon-only>b,.gof-head-btn.gof-admin-icon-only>span:last-child{display:none!important}
+
+  /* Liga + logo de liga mucho más compactos */
+  .gof-public-identity{grid-template-columns:minmax(0,1fr) 68px!important;gap:5px!important;margin:0 0 5px!important}
+  .gof-public-league{min-height:72px!important;height:72px!important;padding:7px 9px!important;border-radius:12px!important;border-width:1px!important}
+  .gof-public-league b{font-size:18px!important;line-height:1.02!important;letter-spacing:-.3px!important}
+  .gof-public-league span{font-size:9px!important;margin-top:3px!important}
+  .gof-public-league small{font-size:7px!important;margin-top:3px!important}
+  .gof-public-logo-card{height:72px!important;min-height:72px!important;padding:4px!important;border-radius:12px!important;border-width:1px!important}
+  .gof-public-logo-upload{border-radius:7px!important}
+  .gof-public-logo-upload img{padding:2px!important}
+
+  /* Categorías abiertas compactas */
+  .gof-public-selectors{gap:4px!important;margin-bottom:5px!important}
+  .gof-public-select-card{padding:5px 6px!important;border-radius:10px!important}
+  .gof-public-select-card span{font-size:10px!important;margin-bottom:3px!important}
+  .gof-category-picker{gap:4px!important}
+  .gof-category-btn{min-height:31px!important;height:31px!important;font-size:10px!important;line-height:1!important;padding:4px 5px!important;border-radius:8px!important}
+
+  /* Avisos y Anuncios como botones del mismo menú, consecutivos */
+  #nav{gap:6px!important;margin-bottom:8px!important}
+  #nav button{height:58px!important;padding:5px 24px 5px 7px!important;gap:6px!important;border-radius:11px!important}
+  #nav button b{font-size:11px!important}
+  #nav button small{font-size:7px!important}
+
+  /* Enfrentamientos: en móvil se muestran las 7 jornadas completas */
+  .gof-matchups-desktop{display:none!important}
+  .gof-matchups-mobile{display:block!important}
+  .gof-matchups-card{padding:8px!important}
+  .gof-matchups-head{align-items:flex-start!important}
+  .gof-matchups-head h2{font-size:20px!important;line-height:1.04!important}
+  .gof-matchups-head .mut{font-size:10px!important}
+  .gof-matchups-head .primary{font-size:9px!important;padding:6px 7px!important}
+  .gof-matchup-team-card{margin-top:6px!important}
+  .gof-matchup-team-name{font-size:11px!important;padding:6px 7px!important}
+  .gof-matchup-rounds{grid-template-columns:1fr 1fr!important}
+  .gof-matchup-round{grid-template-columns:57px minmax(0,1fr)!important;min-height:29px!important;padding:4px 5px!important;font-size:9px!important}
+  .gof-matchup-round b{font-size:8px!important}
+  .gof-matchup-round span{font-size:9px!important}
+
+  /* Descargar calendario siempre visible */
+  #calendario .calendar-current .primary{display:inline-flex!important}
 }
 </style>
 </body>

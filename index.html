@@ -657,6 +657,34 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
 }
 </style>
 
+
+<style id="gof-small-section-icons">
+@media(max-width:700px){
+  .gof-public-logo-upload img{
+    width:86%!important;
+    height:86%!important;
+    max-width:86%!important;
+    max-height:86%!important;
+    margin:auto!important;
+    object-fit:contain!important;
+  }
+  .gof-public-select-card span.gof-cat-icon{
+    font-size:18px!important;
+    line-height:1!important;
+    margin-right:3px!important;
+    vertical-align:middle!important;
+  }
+  .gof-public-select-card > span:first-child{
+    display:flex!important;
+    align-items:center!important;
+    gap:3px!important;
+  }
+}
+@media(max-width:430px){
+  .gof-public-logo-upload img{width:82%!important;height:82%!important;max-width:82%!important;max-height:82%!important}
+  .gof-public-select-card span.gof-cat-icon{font-size:16px!important}
+}
+</style>
 </head>
 <body>
 <header class="gof-public-top">
@@ -1133,7 +1161,7 @@ window.setCalendarMode=function(mode){
     const host=document.querySelectorAll('.gof-public-select-card')[1];
     if(!host)return;
     let title=host.querySelector('span');
-    if(title)title.textContent='🏷️ CATEGORÍAS ABIERTAS';
+    if(title)title.innerHTML='<span class="gof-cat-icon">🏷️</span><span>CATEGORÍAS ABIERTAS</span>';
     let picker=host.querySelector('#gofCategoryPicker');
     if(!picker){picker=catPicker.cloneNode(false);picker.id='gofCategoryPicker';host.appendChild(picker)}
     const cats=activeCats();

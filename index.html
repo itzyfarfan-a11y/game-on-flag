@@ -685,6 +685,30 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   .gof-public-select-card span.gof-cat-icon{font-size:16px!important}
 }
 </style>
+
+<style id="gof-nav-buttons-smaller-final">
+/* Solo botones del menú principal: un poco más pequeños y proporcionales */
+@media (max-width:700px){
+  #nav{gap:5px!important;margin-bottom:7px!important}
+  #nav button{
+    height:43px!important;min-height:43px!important;
+    padding:3px 4px!important;gap:3px!important;border-radius:8px!important;
+    grid-template-columns:17px minmax(0,1fr) 8px!important;
+  }
+  #nav button>span:first-child{
+    width:16px!important;min-width:16px!important;font-size:14px!important;
+  }
+  #nav button b{font-size:9px!important;line-height:1.05!important}
+  #nav button small{font-size:6.3px!important;line-height:1.05!important;margin-top:1px!important}
+  #nav button:after{font-size:10px!important}
+}
+@media (max-width:430px){
+  #nav button{height:41px!important;min-height:41px!important}
+  #nav button>span:first-child{width:15px!important;min-width:15px!important;font-size:13px!important}
+  #nav button b{font-size:8.7px!important}
+  #nav button small{font-size:6px!important}
+}
+</style>
 </head>
 <body>
 <header class="gof-public-top">

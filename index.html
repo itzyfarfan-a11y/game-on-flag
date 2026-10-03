@@ -499,6 +499,92 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   .gof-category-btn{font-size:8.8px!important}
 }
 </style>
+
+<style id="gof-phone-proportional-final">
+/* Diseño móvil proporcional: no recortar logo, iconos pequeños y botones compactos */
+@media (max-width:700px){
+  .gof-public-top{height:76px!important;min-height:76px!important;background:#fff!important;border-bottom:1px solid #d8e2ed!important}
+  .gof-public-head{
+    width:100%!important;height:75px!important;box-sizing:border-box!important;
+    grid-template-columns:42px minmax(0,1fr) 42px!important;
+    gap:4px!important;padding:5px 8px!important;align-items:center!important
+  }
+  .gof-header-logo-upload{
+    width:34px!important;height:34px!important;min-width:34px!important;max-width:34px!important;
+    background:transparent!important;border:0!important;overflow:visible!important;
+    display:flex!important;align-items:center!important;justify-content:center!important
+  }
+  .gof-header-logo-upload img{
+    width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;
+    object-fit:contain!important;object-position:center!important;display:block!important
+  }
+  .gof-public-brand{width:100%!important;min-width:0!important;overflow:visible!important;text-align:center!important}
+  .gof-public-title{font-size:20px!important;line-height:1!important;letter-spacing:0!important;white-space:nowrap!important;overflow:visible!important;text-align:center!important}
+  .gof-public-app{font-size:7.5px!important;letter-spacing:2.8px!important;margin-top:4px!important;line-height:1!important}
+  .gof-public-sub{font-size:5px!important;letter-spacing:1.7px!important;margin-top:3px!important;line-height:1!important}
+  .gof-admin-mini{width:28px!important;height:28px!important;min-width:28px!important;flex:0 0 28px!important;font-size:14px!important;margin-left:auto!important}
+
+  main{padding:8px 9px 18px!important}
+  .gof-public-identity{grid-template-columns:minmax(0,1fr) 82px!important;gap:6px!important;margin-bottom:7px!important}
+  .gof-public-league{min-height:96px!important;padding:10px 11px!important;border-radius:14px!important}
+  .gof-public-league b{font-size:20px!important;line-height:1.02!important}
+  .gof-public-league span{font-size:11px!important;margin-top:5px!important}
+  .gof-public-league small{font-size:10px!important;margin-top:4px!important}
+  .gof-public-logo-card{height:96px!important;padding:5px!important;border-radius:14px!important}
+  .gof-public-logo-upload img{padding:3px!important;object-fit:contain!important}
+
+  .gof-public-selectors{gap:5px!important;margin-bottom:7px!important}
+  .gof-public-select-card{padding:7px 8px!important;border-radius:11px!important}
+  .gof-public-select-card span{font-size:10px!important;line-height:1.05!important;margin-bottom:4px!important;white-space:normal!important}
+  .gof-public-select-card select{font-size:10px!important;height:28px!important}
+  .gof-category-picker{gap:5px!important}
+  .gof-category-btn{min-height:35px!important;height:35px!important;padding:5px 6px!important;border-radius:8px!important;font-size:10px!important;line-height:1!important}
+
+  #nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;margin:0 0 7px!important}
+  #nav button{
+    display:grid!important;grid-template-columns:19px minmax(0,1fr) 9px!important;
+    align-items:center!important;min-width:0!important;width:100%!important;
+    height:48px!important;min-height:48px!important;box-sizing:border-box!important;
+    padding:3px 4px!important;gap:4px!important;border-radius:9px!important;overflow:hidden!important;position:relative!important
+  }
+  #nav button>span:first-child{
+    grid-column:1!important;grid-row:1!important;width:19px!important;min-width:19px!important;
+    flex:none!important;font-size:15px!important;line-height:1!important;text-align:center!important
+  }
+  #nav button>span:nth-child(2){
+    grid-column:2!important;grid-row:1!important;min-width:0!important;width:100%!important;
+    display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;overflow:visible!important
+  }
+  #nav button b{
+    display:block!important;width:100%!important;font-size:10px!important;line-height:1.05!important;
+    white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important
+  }
+  #nav button small{
+    display:block!important;width:100%!important;font-size:6.8px!important;line-height:1.05!important;
+    margin-top:1px!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important
+  }
+  #nav button:after{position:static!important;grid-column:3!important;grid-row:1!important;font-size:11px!important;line-height:1!important;justify-self:end!important;align-self:center!important}
+  h2{font-size:21px!important;line-height:1.1!important}
+}
+@media(max-width:430px){
+  .gof-public-top{height:72px!important;min-height:72px!important}
+  .gof-public-head{height:71px!important;grid-template-columns:38px minmax(0,1fr) 38px!important;padding:4px 7px!important}
+  .gof-header-logo-upload,.gof-header-logo-upload img{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important}
+  .gof-public-title{font-size:19px!important}
+  .gof-public-app{font-size:7px!important;letter-spacing:2.5px!important}
+  .gof-public-sub{font-size:4.8px!important;letter-spacing:1.5px!important}
+  .gof-admin-mini{width:26px!important;height:26px!important;min-width:26px!important;flex-basis:26px!important;font-size:13px!important}
+  .gof-public-identity{grid-template-columns:minmax(0,1fr) 76px!important}
+  .gof-public-league{min-height:90px!important}
+  .gof-public-logo-card{height:90px!important}
+  #nav button{height:46px!important;min-height:46px!important}
+  #nav button>span:first-child{font-size:14px!important;width:18px!important;min-width:18px!important}
+  #nav button b{font-size:9.5px!important}
+  #nav button small{font-size:6.5px!important}
+  .gof-category-btn{font-size:9.5px!important;min-height:33px!important;height:33px!important}
+}
+</style>
+
 </head>
 <body>
 <header class="gof-public-top">

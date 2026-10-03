@@ -3314,37 +3314,72 @@ async function loadExceptionTeamsFinal(){const tid=val('ceTournament'),cid=val('
 
 <script id="gof-credentials-sportwey-final">
 async function loadCredentialSelectorsFinal(){
- const t=document.getElementById('crTournament'); if(!t||!sb)return;
- await loadLeagueContextFinal();
- if(window.gofSingleTournamentId)t.value=window.gofSingleTournamentId;
- else if(window.gofSingleTournament?.id)t.value=window.gofSingleTournament.id;
- if(!gofCurrentOrganizationId){
-   t.innerHTML='<option value="">Selecciona una liga</option>';
-   document.getElementById('crCategory').innerHTML='<option value="">Selecciona categoría</option>';
-   document.getElementById('crTeam').innerHTML='<option value="">Selecciona equipo</option>';
-   document.getElementById('crPlayer').innerHTML='<option value="">Selecciona jugador</option>';
-   return;
+ const t=document.getElementById('crTournament'),c=document.getElementById('crCategory'),tm=document.getElementById('crTeam'),pl=document.getElementById('crPlayer');
+ if(!t||!c||!tm||!pl||!sb)return;
+ try{
+   // Credenciales debe funcionar con el torneo activo aunque el contexto de liga aún no esté cargado.
+   let tid=window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
+   let tour=null;
+   if(tid){
+     const q=await sb.from('tournaments').select('id,name,league_id,created_at').eq('id',tid).maybeSingle();
+     tour=q.data||null;
+   }
+   if(!tour){
+     let q=sb.from('tournaments').select('id,name,league_id,created_at').order('created_at',{ascending:false}).limit(1);
+     if(gofCurrentOrganizationId)q=q.eq('league_id',gofCurrentOrganizationId);
+     const r=await q;
+     tour=r.data?.[0]||null;
+   }
+   if(!tour){
+     t.innerHTML='<option value="">No hay torneo disponible</option>';
+     c.innerHTML='<option value="">Selecciona categoría</option>';
+     tm.innerHTML='<option value="">Selecciona equipo</option>';
+     pl.innerHTML='<option value="">Selecciona jugador</option>';
+     return;
+   }
+   tid=tour.id;
+   t.innerHTML=`<option value="${esc(tour.id)}">${esc(tour.name||'Torneo actual')}</option>`;
+   t.value=tour.id;
+   window.gofSingleTournamentId=tour.id;
+   try{localStorage.setItem('gof_home_tournament',tour.id)}catch(_){ }
+   // El torneo es la fuente de verdad para la liga en este módulo.
+   if(tour.league_id)gofCurrentOrganizationId=tour.league_id;
+   await loadCredentialCategoriesFinal();
+ }catch(err){
+   console.error('Credenciales inicialización:',err);
+   c.innerHTML='<option value="">No se pudieron cargar categorías</option>';
+   alert('Credenciales: '+(err?.message||err));
  }
- const {data:ts,error:te}=await sb.from('tournaments').select('id,name,league_id,created_at').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});
- if(te){t.innerHTML='<option value="">No se pudieron cargar torneos</option>';return alert('Credenciales: '+te.message);}
- const old=t.value;
- t.innerHTML='<option value="">Selecciona torneo</option>'+(ts||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
- if(old&&[...t.options].some(o=>o.value===old))t.value=old; else if(ts?.length)t.value=ts[0].id;
- await loadCredentialCategoriesFinal();
- const p=document.getElementById('swPlayer');
- if(p){const {data:ps}=await sb.from('players').select('id,full_name,jersey_number,photo_url').eq('league_id',gofCurrentOrganizationId).order('full_name');p.innerHTML='<option value="">Selecciona jugador</option>'+(ps||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.full_name)}</option>`).join('');}
- await loadSportweyReviewsFinal();
 }
 async function loadCredentialCategoriesFinal(){
- const tid=val('crTournament'),c=document.getElementById('crCategory'),tm=document.getElementById('crTeam'),pl=document.getElementById('crPlayer'); if(!c)return;
- c.innerHTML='<option value="">Selecciona categoría</option>'; if(tm)tm.innerHTML='<option value="">Selecciona equipo</option>'; if(pl)pl.innerHTML='<option value="">Selecciona jugador</option>';
+ const tid=val('crTournament'),c=document.getElementById('crCategory'),tm=document.getElementById('crTeam'),pl=document.getElementById('crPlayer');
+ if(!c||!sb)return;
+ c.innerHTML='<option value="">Selecciona categoría</option>';
+ if(tm)tm.innerHTML='<option value="">Selecciona equipo</option>';
+ if(pl)pl.innerHTML='<option value="">Selecciona jugador</option>';
  if(!tid)return;
- const {data:links,error}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);
- if(error){c.innerHTML='<option value="">No se pudieron cargar categorías</option>';return alert('Credenciales: '+error.message);}
- const ids=[...(links||[])].map(x=>x.category_id).filter(Boolean); if(!ids.length)return;
- const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',ids).eq('league_id',gofCurrentOrganizationId).order('name');
- if(ce){c.innerHTML='<option value="">No se pudieron cargar categorías</option>';return alert('Credenciales: '+ce.message);}
- c.innerHTML='<option value="">Selecciona categoría</option>'+(cats||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+ try{
+   // Primero usamos la relación real torneo-categoría.
+   const rel=await sb.from('tournament_categories').select('category_id,categories(id,name,league_id)').eq('tournament_id',tid);
+   if(rel.error)throw rel.error;
+   let cats=(rel.data||[]).map(x=>x.categories).filter(x=>x?.id);
+   // Respaldo: si la relación no devuelve filas, usamos las categorías de la liga del torneo.
+   if(!cats.length){
+     const tq=await sb.from('tournaments').select('league_id').eq('id',tid).maybeSingle();
+     const lid=tq.data?.league_id||gofCurrentOrganizationId;
+     if(lid){
+       const q=await sb.from('categories').select('id,name,league_id').eq('league_id',lid).order('name');
+       if(q.error)throw q.error;
+       cats=q.data||[];
+     }
+   }
+   cats.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es'));
+   c.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+ }catch(err){
+   console.error('Credenciales categorías:',err);
+   c.innerHTML='<option value="">No se pudieron cargar categorías</option>';
+   alert('Credenciales: '+(err?.message||err));
+ }
 }
 async function loadCredentialTeamsFinal(){
  const tid=val('crTournament'),cid=val('crCategory'),e=document.getElementById('crTeam'),pl=document.getElementById('crPlayer');
@@ -3353,18 +3388,16 @@ async function loadCredentialTeamsFinal(){
  if(pl)pl.innerHTML='<option value="">Selecciona jugador</option>';
  if(!tid||!cid)return;
  try{
-   let q=await sb.from('tournament_teams').select('team_id,category_id,is_active').eq('tournament_id',tid).eq('category_id',cid);
-   if(q.error)throw q.error;
-   let links=(q.data||[]).filter(x=>x.is_active!==false);
+   let links=(await sb.from('tournament_teams').select('team_id,category_id,is_active,teams(id,name,league_id)').eq('tournament_id',tid).eq('category_id',cid)).data||[];
+   links=links.filter(x=>x.is_active!==false&&x.teams?.id);
+   // Respaldo por roster: permite seleccionar equipos aunque aún no tengan registro en tournament_teams.
    if(!links.length){
-     const all=await sb.from('tournament_teams').select('team_id,category_id,is_active').eq('tournament_id',tid);
-     if(!all.error)links=(all.data||[]).filter(x=>(x.category_id==null||String(x.category_id)===String(cid))&&x.is_active!==false);
+     const rr=await sb.from('roster_registrations').select('team_id,teams(id,name,league_id)').eq('tournament_id',tid).eq('category_id',cid);
+     links=(rr.data||[]).filter(x=>x.teams?.id).map(x=>({team_id:x.team_id,teams:x.teams}));
    }
-   const ids=[...new Set(links.map(x=>x.team_id).filter(Boolean))];
-   if(!ids.length)return;
-   const tq=await sb.from('teams').select('id,name').in('id',ids).eq('league_id',gofCurrentOrganizationId).order('name');
-   if(tq.error)throw tq.error;
-   e.innerHTML='<option value="">Selecciona equipo</option>'+(tq.data||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
+   const map=new Map();links.forEach(x=>map.set(x.team_id,x.teams));
+   const teams=[...map.values()].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es'));
+   e.innerHTML='<option value="">Selecciona equipo</option>'+teams.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
  }catch(err){console.error('Credenciales equipos:',err);alert('Credenciales: '+(err?.message||err));}
 }
 async function loadCredentialPlayersFinal(){
@@ -3373,18 +3406,16 @@ async function loadCredentialPlayersFinal(){
  e.innerHTML='<option value="">Selecciona jugador</option>';
  if(!tid||!cid||!team)return;
  try{
-   let q=await sb.from('roster_registrations').select('player_id,status,players(id,full_name,jersey_number,photo_url)').eq('tournament_id',tid).eq('category_id',cid).eq('team_id',team).eq('status','aprobado');
-   if(q.error)throw q.error;
-   let rows=q.data||[];
+   let rows=(await sb.from('roster_registrations').select('player_id,status,players(id,full_name,jersey_number,photo_url,league_id)').eq('tournament_id',tid).eq('category_id',cid).eq('team_id',team)).data||[];
+   rows=rows.filter(x=>x.status==='aprobado'||x.status==='approved');
+   // Si la categoría del registro no coincide, el equipo/torneo sigue siendo suficiente para recuperar su roster aprobado.
    if(!rows.length){
-     const fallback=await sb.from('roster_registrations').select('player_id,status,players(id,full_name,jersey_number,photo_url)').eq('tournament_id',tid).eq('team_id',team);
-     if(!fallback.error)rows=(fallback.data||[]).filter(x=>x.status==='aprobado'||x.status==='approved');
+     const fb=await sb.from('roster_registrations').select('player_id,status,players(id,full_name,jersey_number,photo_url,league_id)').eq('tournament_id',tid).eq('team_id',team);
+     rows=(fb.data||[]).filter(x=>x.status==='aprobado'||x.status==='approved');
    }
-   const ids=[...new Set(rows.map(x=>x.player_id||x.players?.id).filter(Boolean))];
-   if(!ids.length)return;
-   const pq=await sb.from('players').select('id,full_name,jersey_number,photo_url').in('id',ids).eq('league_id',gofCurrentOrganizationId).order('full_name');
-   if(pq.error)throw pq.error;
-   e.innerHTML='<option value="">Selecciona jugador</option>'+(pq.data||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.full_name)}</option>`).join('');
+   const map=new Map();rows.forEach(x=>{if(x.players?.id)map.set(x.players.id,x.players)});
+   const players=[...map.values()].sort((a,b)=>String(a.full_name||'').localeCompare(String(b.full_name||''),'es'));
+   e.innerHTML='<option value="">Selecciona jugador</option>'+players.map(x=>`<option value="${esc(x.id)}">${esc(x.full_name)}</option>`).join('');
  }catch(err){console.error('Credenciales jugadores:',err);alert('Credenciales: '+(err?.message||err));}
 }
 window.renderCredentialFinal=async function(){

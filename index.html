@@ -875,5 +875,44 @@ window.setCalendarMode=function(mode){
   };
 })();
 </script>
+
+<style id="gof-mobile-final-compact">
+/* Ajuste final solicitado: conservar el diseño anterior, pero ligeramente más compacto en celular */
+@media(max-width:700px){
+  .gof-public-top{height:96px!important}
+  .gof-public-head{height:93px!important;grid-template-columns:72px minmax(0,1fr) 144px!important;padding:5px 7px!important;gap:6px!important}
+  .gof-header-logo-upload{width:66px!important;height:52px!important}
+  .gof-header-logo-upload img{width:66px!important;height:52px!important}
+  .gof-public-title{font-size:25px!important;letter-spacing:0!important}
+  .gof-public-app{font-size:11px!important;letter-spacing:4px!important;margin-top:4px!important}
+  .gof-public-sub{font-size:7px!important;letter-spacing:2.5px!important;margin-top:4px!important}
+  .gof-public-head-buttons{width:144px!important;gap:4px!important}
+  .gof-head-btn{width:144px!important;height:34px!important;border-radius:9px!important;padding:0 7px!important;gap:5px!important;border-width:1px!important}
+  .gof-head-btn span{font-size:14px!important}
+  .gof-head-btn strong{font-size:10px!important}
+  .gof-head-btn small{font-size:8px!important}
+  .gof-head-btn>span:last-child{font-size:16px!important}
+  .gof-badge{right:-4px!important;top:-6px!important;min-width:18px!important;height:18px!important;font-size:10px!important}
+  main{padding:10px 14px 22px!important}
+  .gof-public-identity{grid-template-columns:minmax(0,1fr) 105px!important;gap:8px!important;margin-bottom:12px!important}
+  .gof-public-league{min-height:120px!important;padding:15px 16px!important;border-radius:18px!important}
+  .gof-public-league b{font-size:25px!important;line-height:1.04!important}
+  .gof-public-league span{font-size:14px!important;margin-top:7px!important}
+  .gof-public-league small{font-size:12px!important;margin-top:6px!important}
+  .gof-public-logo-card{height:120px!important;padding:6px!important;border-radius:18px!important}
+  .gof-public-logo-upload img{padding:4px!important}
+  .gof-public-selectors{gap:8px!important;margin-bottom:10px!important}
+  .gof-public-select-card{padding:9px 10px!important;border-radius:16px!important}
+  .gof-public-select-card span{font-size:14px!important;margin-bottom:6px!important}
+  .gof-category-picker{gap:6px!important}
+  .gof-category-btn{min-height:46px!important;font-size:13px!important;padding:7px 8px!important;border-radius:11px!important}
+  #nav{gap:9px!important;margin-bottom:10px!important}
+  #nav button{height:72px!important;padding:8px 32px 8px 13px!important;gap:9px!important;border-radius:16px!important}
+  #nav button>span:first-child{font-size:33px!important;flex-basis:37px!important}
+  #nav button b{font-size:18px!important}
+  #nav button small{font-size:12px!important;margin-top:3px!important}
+  h2{font-size:24px!important}
+}
+</style>
 </body>
 </html>

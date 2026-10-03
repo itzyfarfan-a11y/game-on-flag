@@ -390,6 +390,10 @@ footer b{font-size:16px;color:#ddd5e5}
 #resultados .wide td:nth-child(4),#resultados .wide td:nth-child(6){text-align:left}
 #resultados .wide .badge{display:inline-block;white-space:normal}
 </style>
+/* Ajustes finales: resultados y enfrentamientos públicos */
+.gof-matrix th,.gof-matrix td{white-space:nowrap;text-align:center}.gof-matrix th:first-child,.gof-matrix td:first-child{text-align:left}.gof-matrix th{font-size:12px}.gof-matrix td{font-size:13px;color:#111}.results-controls{padding:10px}.result-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result-filter-grid label{font-weight:800;font-size:12px;color:#111}.result-filter-grid select{display:block;width:100%;margin-top:5px;height:40px;border:1px solid #bbb;border-radius:9px;padding:0 9px;background:#fff;color:#111}.results-table td{color:#111}.results-table .result-score{font-size:18px;color:#111}
+@media(max-width:650px){.result-filter-grid{grid-template-columns:1fr}.gof-matrix{min-width:900px}}
+
 </head>
 <body>
 <header class="gof-public-top">
@@ -646,7 +650,7 @@ async function players(){
   rosterCategory=c.value||rosterCategory||categories[0]?.id||'';
   const teamOptions=teams.map(tm=>'<option value="'+esc(tm.id)+'">'+esc(tm.name)+'</option>').join('');
   s.innerHTML='<div class="gof-section-toolbar"><h2>👕 Roster</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+
-    '<div class="card"><p class="muted">Aquí cualquier visitante puede consultar el roster directamente desde Administración, con foto, número y nombre. Los jugadores pendientes también se muestran; la aprobación administrativa no es requisito para su visualización pública.</p>'+
+    '<div class="card"><p class="muted">Aquí cualquier visitante puede consultar únicamente los jugadores que ya fueron aprobados y publicados desde Administración, con foto, número y nombre.</p>'+
     '<div class="roster-tools"><label>Categoría<select id="rosterCat">'+categories.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===rosterCategory?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label>'+
     '<label>Equipo<select id="rosterTeam"><option value="">Selecciona un equipo</option>'+teamOptions+'</select></label></div></div>'+
     '<div id="rosterBody"><div class="empty">Selecciona un equipo para ver su roster.</div></div>';
@@ -661,7 +665,8 @@ async function loadRoster(){
   s.innerHTML='<div class="loading">Cargando roster…</div>';
   try{
     const tm=team(rosterTeam);
-    const ps=await rpc('public_get_roster',{p_tournament_id:t.value,p_category_id:rosterCategory,p_team_id:rosterTeam,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});
+    const rawPs=await rpc('public_get_roster',{p_tournament_id:t.value,p_category_id:rosterCategory,p_team_id:rosterTeam,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});
+    const ps=(rawPs||[]).filter(x=>String(x.status||'').toLowerCase()==='aprobado');
     if(!ps.length){s.innerHTML='<div class="empty">Este equipo todavía no tiene jugadores publicados.</div>';return}
     s.innerHTML='<div class="roster-team"><div class="roster-team-head">'+(tm.logo_url?'<img src="'+esc(tm.logo_url)+'">':'')+'<div><h3 style="margin:0">'+esc(tm.name)+'</h3><span class="category-chip">'+esc(cat(rosterCategory))+'</span></div></div>'+
       '<div class="roster-player-grid">'+ps.map(x=>'<div class="roster-player">'+(x.photo_url?'<img src="'+esc(x.photo_url)+'" alt="'+esc(x.full_name)+'">':'<div style="width:55px;height:55px;border-radius:10px;background:#25222b;display:grid;place-items:center">👤</div>')+'<div><div class="roster-number">#'+esc(x.jersey_number??'—')+'</div><b>'+esc(x.full_name)+'</b></div></div>').join('')+'</div></div>';
@@ -697,25 +702,39 @@ function setCalendarMode(mode){window.__calendarMode=mode;calendar();document.ge
 function matchups(){
   const s=document.getElementById('enfrentamientos');
   if(!c.value){s.innerHTML='<div class="gof-section-toolbar"><h2>⚔️ Enfrentamientos</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div><div class="empty">Selecciona una categoría para ver los rivales Jornada 1–7.</div>';return}
+  const teams=data.teams.filter(tm=>data.matches.some(m=>m.category_id===c.value&&(m.home_team_id===tm.id||m.away_team_id===tm.id)));
   let h='<div class="gof-section-toolbar"><h2>⚔️ Enfrentamientos · '+esc(cat(c.value))+'</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('enfrentamientos','Enfrentamientos publicados')+
-  '<div class="card"><div class="scroll"><table class="wide"><thead><tr><th>EQUIPO</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th></tr></thead><tbody>';
-  data.teams.filter(tm=>data.matches.some(m=>m.category_id===c.value&&(m.home_team_id===tm.id||m.away_team_id===tm.id))).forEach(tm=>{
+  '<div class="card"><div class="scroll"><table class="wide gof-matrix"><thead><tr><th>EQUIPO</th><th>JORNADA 1</th><th>JORNADA 2</th><th>JORNADA 3</th><th>JORNADA 4</th><th>JORNADA 5</th><th>JORNADA 6</th><th>JORNADA 7</th></tr></thead><tbody>';
+  teams.forEach(tm=>{
     h+='<tr><td><b>'+esc(tm.name)+'</b></td>';
-    for(let r=1;r<=7;r++){const m=data.matches.find(x=>x.category_id===c.value&&+x.round_number===r&&(x.home_team_id===tm.id||x.away_team_id===tm.id));h+='<td>'+esc(m?(m.home_team_id===tm.id?team(m.away_team_id).name:team(m.home_team_id).name):'—')+'</td>'}
+    for(let r=1;r<=7;r++){
+      const m=data.matches.find(x=>x.category_id===c.value&&+x.round_number===r&&(x.home_team_id===tm.id||x.away_team_id===tm.id));
+      const opp=m?(m.home_team_id===tm.id?team(m.away_team_id).name:team(m.home_team_id).name):'—';
+      h+='<td>'+esc(opp)+'</td>';
+    }
     h+='</tr>';
   });
-  s.innerHTML=h+'</tbody></table></div></div>';
+  h+='</tbody></table></div><div style="display:flex;justify-content:flex-end;margin-top:10px"><button type="button" class="calendar-full-btn" onclick="downloadPublicMatchupsImage()">🖼️ Descargar imagen</button></div></div>';
+  s.innerHTML=h;
 }
 
 function results(){
-  const s=document.getElementById('resultados'),a=data.matches.filter(m=>(!c.value||m.category_id===c.value)&&(m.status==='jugado'||m.status==='incomparecencia')).sort((x,y)=>String(x.match_date||'').localeCompare(String(y.match_date||''))||String(x.match_time||'').localeCompare(String(y.match_time||'')));
+  const s=document.getElementById('resultados');
+  const all=data.matches.filter(m=>m.status==='jugado'||m.status==='incomparecencia').sort((x,y)=>String(x.match_date||'').localeCompare(String(y.match_date||''))||String(x.match_time||'').localeCompare(String(y.match_time||'')));
   let h='<div class="gof-section-toolbar"><h2>🏈 Resultados</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div>'+publicationCard('resultados','Resultados publicados');
-  if(!a.length){s.innerHTML=h+'<div class="empty">Aún no hay resultados publicados.</div>';return;}
-  h+='<div class="card"><div class="scroll"><table class="wide"><thead><tr><th>HORA</th><th>CAMPO</th><th>CATEGORÍA</th><th>EQUIPO 1</th><th>MARCADOR</th><th>EQUIPO 2</th><th>ESTADO</th></tr></thead><tbody>';
-  a.forEach(m=>{const absent=m.status==='incomparecencia'?team(m.absent_team_id)?.name:'';h+='<tr><td>'+esc(m.match_time?String(m.match_time).slice(0,5):'—')+'</td><td>'+esc(m.field_name||'—')+'</td><td>'+esc(cat(m.category_id))+'</td><td><b>'+esc(team(m.home_team_id).name)+'</b></td><td><b style="font-size:18px">'+(m.home_score??0)+' - '+(m.away_score??0)+'</b></td><td><b>'+esc(team(m.away_team_id).name)+'</b></td><td>'+(absent?'<span class="badge">FORFEIT · Equipo que no se presentó: '+esc(absent)+'</span>':'<span class="badge">JUGADO</span>')+'</td></tr>';});
-  h+='</tbody></table></div></div>';
+  if(!all.length){s.innerHTML=h+'<div class="empty">Aún no hay resultados publicados.</div>';return;}
+  const cats=[...new Set(all.map(m=>m.category_id))].map(id=>({id,name:cat(id)}));
+  const teams=[...new Set(all.flatMap(m=>[m.home_team_id,m.away_team_id]))].map(id=>({id,name:team(id).name})).sort((a,b)=>a.name.localeCompare(b.name));
+  h+='<div class="card results-controls"><div class="result-filter-grid"><label>Categoría<select id="resultFilterCat"><option value="">Todas</option>'+cats.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('')+'</select></label><label>Equipo<select id="resultFilterTeam"><option value="">Todos</option>'+teams.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('')+'</select></label></div></div>';
+  h+='<div class="card"><div class="scroll"><table class="wide results-table"><thead><tr><th>HORA</th><th>CAMPO</th><th>CATEGORÍA</th><th>LOCAL</th><th>MARCADOR</th><th>VISITANTE</th></tr></thead><tbody id="publicResultsBody">';
+  all.forEach(m=>{h+='<tr data-cat="'+esc(m.category_id)+'" data-home="'+esc(m.home_team_id)+'" data-away="'+esc(m.away_team_id)+'"><td>'+esc(m.match_time?String(m.match_time).slice(0,5):'—')+'</td><td>'+esc(m.field_name||'—')+'</td><td>'+esc(cat(m.category_id))+'</td><td><b>'+esc(team(m.home_team_id).name)+'</b></td><td><b class="result-score">'+(m.home_score??0)+' - '+(m.away_score??0)+'</b></td><td><b>'+esc(team(m.away_team_id).name)+'</b></td></tr>';});
+  h+='</tbody></table></div><div style="display:flex;justify-content:flex-end;margin-top:10px"><button type="button" class="calendar-full-btn" onclick="downloadPublicResultsImage()">🖼️ Descargar imagen</button></div></div>';
   s.innerHTML=h;
+  const fc=document.getElementById('resultFilterCat'),ft=document.getElementById('resultFilterTeam');
+  const apply=()=>{document.querySelectorAll('#publicResultsBody tr').forEach(r=>{const okc=!fc.value||r.dataset.cat===fc.value;const okt=!ft.value||r.dataset.home===ft.value||r.dataset.away===ft.value;r.style.display=okc&&okt?'':'none'})};
+  fc.onchange=apply;ft.onchange=apply;
 }
+
 function table(){
   const s=document.getElementById('tabla');
   if(!c.value){s.innerHTML='<div class="gof-section-toolbar"><h2>📊 Tabla General</h2><button class="gof-back" onclick="goHome()">← Inicio</button></div><div class="empty">Selecciona una categoría para mostrar su tabla.</div>';return}
@@ -881,6 +900,28 @@ function downloadPublicCalendarPNG(){
   img.onerror=()=>{URL.revokeObjectURL(url);alert('No se pudo generar la imagen en este navegador.')};
   img.src=url;
 }
+
+function publicTableImage(rows,title,filename,widths){
+  const rowH=46,pad=24,titleH=70,w=widths.reduce((a,b)=>a+b,0)+pad*2,h=titleH+rows.length*rowH+pad;
+  let svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'"><rect width="100%" height="100%" fill="#ffffff"/><text x="'+pad+'" y="34" font-family="Arial" font-size="24" font-weight="700" fill="#111111">'+esc(title)+'</text>';
+  let y=titleH;
+  rows.forEach((row,ri)=>{let x=pad;row.forEach((val,j)=>{const ww=widths[j]||150;svg+='<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="'+rowH+'" fill="'+(ri===0?'#eeeeee':'#ffffff')+'" stroke="#aaaaaa"/><text x="'+(x+8)+'" y="'+(y+29)+'" font-family="Arial" font-size="'+(ri===0?'13':'13')+'" font-weight="'+(ri===0?'700':'600')+'" fill="#111111">'+esc(String(val||'').slice(0,38))+'</text>';x+=ww});y+=rowH});
+  svg+='<text x="'+pad+'" y="'+(h-10)+'" font-family="Arial" font-size="12" font-weight="700" fill="#555555">GAME ON FLAG · PORTAL PÚBLICO</text></svg>';
+  const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();
+  img.onload=()=>{const cn=document.createElement('canvas');cn.width=w*2;cn.height=h*2;const x=cn.getContext('2d');x.scale(2,2);x.drawImage(img,0,0);URL.revokeObjectURL(url);cn.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)},'image/png')};
+  img.onerror=()=>{URL.revokeObjectURL(url);alert('No se pudo generar la imagen en este navegador.')};img.src=url;
+}
+function downloadPublicMatchupsImage(){
+  const table=document.querySelector('#enfrentamientos .gof-matrix');if(!table)return alert('No hay enfrentamientos visibles para descargar.');
+  const rows=[...table.querySelectorAll('tr')].map(r=>[...r.children].map(c=>(c.innerText||'').trim()));
+  publicTableImage(rows,(league.name||'GAME ON FLAG')+' · Enfrentamientos · '+(cat(c.value)||'Categoría'),'GAME-ON-FLAG_Enfrentamientos.png',[190,125,125,125,125,125,125,125]);
+}
+function downloadPublicResultsImage(){
+  const table=document.querySelector('#resultados .results-table');if(!table)return alert('No hay resultados visibles para descargar.');
+  const rows=[...table.querySelectorAll('tr')].filter(r=>r.style.display!=='none').map(r=>[...r.children].map(c=>(c.innerText||'').trim()));
+  publicTableImage(rows,(league.name||'GAME ON FLAG')+' · Resultados · '+(cat(c.value)||'Todas las categorías'),'GAME-ON-FLAG_Resultados.png',[80,100,145,220,105,220]);
+}
+
 </script>
 
 </body>

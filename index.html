@@ -345,6 +345,125 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
  #nav button small{font-size:6.5px!important}
 }
 </style>
+
+<style id="gof-user-mobile-final-v3">
+/* V3: cabecera centrada y navegación realmente compacta en móvil */
+@media (max-width:700px){
+  .gof-public-top{height:62px!important;min-height:62px!important;border-bottom-width:1px!important}
+  .gof-public-head{
+    width:100%!important;height:61px!important;
+    grid-template-columns:24px minmax(0,1fr) 24px!important;
+    gap:3px!important;padding:3px 6px!important;
+    align-items:center!important
+  }
+  .gof-header-logo-upload{
+    width:20px!important;height:16px!important;
+    min-width:20px!important;max-width:20px!important;
+    background:transparent!important;border:0!important
+  }
+  .gof-header-logo-upload img{
+    width:20px!important;height:16px!important;
+    object-fit:contain!important
+  }
+  .gof-public-brand{
+    width:100%!important;min-width:0!important;
+    text-align:center!important;align-items:center!important;
+    justify-content:center!important;overflow:visible!important
+  }
+  .gof-public-title{
+    width:100%!important;font-size:18px!important;
+    line-height:1!important;letter-spacing:0!important;
+    white-space:nowrap!important;overflow:visible!important;
+    text-align:center!important
+  }
+  .gof-public-app{
+    font-size:7px!important;letter-spacing:2.4px!important;
+    margin-top:2px!important;line-height:1!important
+  }
+  .gof-public-sub{
+    font-size:5px!important;letter-spacing:1.5px!important;
+    margin-top:2px!important;line-height:1!important
+  }
+  .gof-admin-mini{
+    width:24px!important;height:24px!important;
+    min-width:24px!important;flex:0 0 24px!important;
+    font-size:13px!important;border-radius:50%!important;
+    margin-left:auto!important
+  }
+
+  main{padding:7px 9px 18px!important}
+  .gof-public-selectors{gap:5px!important;margin-bottom:7px!important}
+  .gof-public-select-card{
+    padding:6px 7px!important;border-radius:11px!important;
+    border-width:1px!important
+  }
+  .gof-public-select-card span{
+    font-size:10px!important;line-height:1.05!important;
+    margin-bottom:4px!important;white-space:normal!important
+  }
+  .gof-category-picker{gap:4px!important}
+  .gof-category-btn{
+    min-height:34px!important;height:auto!important;
+    padding:5px 6px!important;border-radius:8px!important;
+    font-size:10px!important;line-height:1.05!important;
+    white-space:normal!important;overflow:visible!important
+  }
+
+  #nav{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px!important;margin-bottom:7px!important
+  }
+  #nav button{
+    display:grid!important;
+    grid-template-columns:18px minmax(0,1fr)!important;
+    align-items:center!important;
+    min-width:0!important;width:100%!important;
+    min-height:40px!important;height:40px!important;
+    padding:3px 13px 3px 5px!important;
+    gap:4px!important;border-radius:8px!important;
+    overflow:hidden!important
+  }
+  #nav button>span:first-child{
+    min-width:18px!important;width:18px!important;
+    flex:0 0 18px!important;font-size:15px!important;
+    line-height:1!important;text-align:center!important
+  }
+  #nav button>span:nth-child(2){
+    min-width:0!important;width:100%!important;
+    display:flex!important;flex-direction:column!important;
+    align-items:flex-start!important;justify-content:center!important;
+    overflow:visible!important
+  }
+  #nav button b{
+    display:block!important;width:100%!important;
+    font-size:9px!important;line-height:1.05!important;
+    white-space:normal!important;overflow:visible!important;
+    text-overflow:clip!important;word-break:normal!important
+  }
+  #nav button small{
+    display:block!important;width:100%!important;
+    font-size:6.5px!important;line-height:1.05!important;
+    margin-top:1px!important;white-space:normal!important;
+    overflow:visible!important;text-overflow:clip!important;
+    word-break:normal!important
+  }
+  #nav button:after{
+    font-size:11px!important;right:3px!important
+  }
+}
+@media(max-width:430px){
+  .gof-public-title{font-size:17px!important}
+  .gof-public-app{font-size:6.5px!important;letter-spacing:2px!important}
+  .gof-public-sub{font-size:4.5px!important;letter-spacing:1.3px!important}
+  #nav button{min-height:38px!important;height:38px!important}
+  #nav button>span:first-child{font-size:14px!important}
+  #nav button b{font-size:8.5px!important}
+  #nav button small{font-size:6px!important}
+  .gof-category-btn{font-size:9.5px!important;min-height:32px!important}
+  .gof-public-select-card span{font-size:9.5px!important}
+}
+</style>
+
 </head>
 <body>
 <header class="gof-public-top">

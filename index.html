@@ -917,6 +917,54 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   #resultados .gof-results-table td:nth-child(6){width:98px!important;min-width:98px!important;max-width:98px!important}
 }
 </style>
+
+<style id="gof-mobile-tables-real-fix">
+@media (max-width:700px){
+  /* CALENDARIO: cuatro campos visibles de forma compacta; solo el sobrante se desplaza */
+  #calendario .cg-scroll{overflow-x:auto!important;width:100%!important;max-width:100%!important;-webkit-overflow-scrolling:touch!important}
+  #calendario .calendar-grid{width:430px!important;min-width:430px!important;table-layout:fixed!important;font-size:9px!important}
+  #calendario .calendar-grid th,#calendario .calendar-grid td{padding:3px 2px!important;line-height:1.05!important}
+  #calendario .calendar-grid th:first-child,#calendario .calendar-grid td:first-child{width:38px!important;min-width:38px!important;max-width:38px!important;position:sticky!important;left:0!important;z-index:5!important}
+  #calendario .calendar-grid th:not(:first-child),#calendario .calendar-grid td:not(:first-child){width:98px!important;min-width:98px!important;max-width:98px!important}
+  #calendario .calendar-grid thead th{font-size:8px!important;padding:4px 2px!important;white-space:nowrap!important}
+  #calendario .calendar-grid .cg-day td{font-size:8px!important;padding:4px 3px!important}
+  #calendario .cg-time{font-size:8px!important}
+  #calendario .cg-game{min-height:42px!important;padding:3px!important;border-radius:6px!important}
+  #calendario .cg-cat{font-size:6px!important}
+  #calendario .cg-teams{font-size:7.5px!important;line-height:1.05!important;margin-top:2px!important;overflow-wrap:anywhere!important}
+  #calendario .cg-meta{font-size:6px!important;margin-top:1px!important}
+
+  /* ENFRENTAMIENTOS: J1-J7 siempre se generan; se muestran compactos y con scroll horizontal */
+  #enfrentamientos .gof-matrix-wrap{overflow-x:auto!important;width:100%!important;-webkit-overflow-scrolling:touch!important}
+  #enfrentamientos .gof-matrix{width:615px!important;min-width:615px!important;table-layout:fixed!important;font-size:8px!important}
+  #enfrentamientos .gof-matrix th,#enfrentamientos .gof-matrix td{padding:3px 2px!important;line-height:1.05!important}
+  #enfrentamientos .gof-matrix th:first-child,#enfrentamientos .gof-matrix td:first-child{width:105px!important;min-width:105px!important;max-width:105px!important;position:sticky!important;left:0!important;z-index:5!important}
+  #enfrentamientos .gof-matrix th:not(:first-child),#enfrentamientos .gof-matrix td:not(:first-child){width:72px!important;min-width:72px!important;max-width:72px!important}
+  #enfrentamientos .gof-matrix thead th{font-size:7px!important;white-space:normal!important}
+  #enfrentamientos .gof-matrix .gof-matrix-team{font-size:8px!important;line-height:1.05!important}
+  #enfrentamientos .gof-matrix .gof-cell-opponent{font-size:7.5px!important;line-height:1.05!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
+
+  /* RESULTADOS: ancho realista por contenido; marcador pequeño */
+  #resultados .gof-results-table-wrap{overflow-x:auto!important;width:100%!important;-webkit-overflow-scrolling:touch!important}
+  #resultados .gof-results-table{width:385px!important;min-width:385px!important;table-layout:fixed!important;font-size:8.5px!important}
+  #resultados .gof-results-table th,#resultados .gof-results-table td{padding:3px 2px!important;line-height:1.05!important;overflow-wrap:anywhere!important;word-break:normal!important}
+  #resultados .gof-results-table th:nth-child(1),#resultados .gof-results-table td:nth-child(1){width:35px!important;min-width:35px!important}
+  #resultados .gof-results-table th:nth-child(2),#resultados .gof-results-table td:nth-child(2){width:45px!important;min-width:45px!important}
+  #resultados .gof-results-table th:nth-child(3),#resultados .gof-results-table td:nth-child(3){width:60px!important;min-width:60px!important}
+  #resultados .gof-results-table th:nth-child(4),#resultados .gof-results-table td:nth-child(4){width:90px!important;min-width:90px!important}
+  #resultados .gof-results-table th:nth-child(5),#resultados .gof-results-table td:nth-child(5){width:45px!important;min-width:45px!important;text-align:center!important}
+  #resultados .gof-results-table th:nth-child(6),#resultados .gof-results-table td:nth-child(6){width:110px!important;min-width:110px!important}
+  #resultados .gof-results-table th{font-size:7.5px!important;white-space:normal!important}
+  #resultados .gof-results-table td{font-size:8.5px!important}
+  #resultados .gof-score-cell{font-size:9px!important;white-space:nowrap!important}
+}
+@media(max-width:430px){
+  #calendario .calendar-grid{width:430px!important;min-width:430px!important}
+  #enfrentamientos .gof-matrix{width:615px!important;min-width:615px!important}
+  #resultados .gof-results-table{width:385px!important;min-width:385px!important}
+}
+</style>
+
 </head>
 <body>
 <header class="gof-public-top">

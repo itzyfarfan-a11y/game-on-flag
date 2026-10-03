@@ -350,34 +350,6 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
 }
 </style>
 
-<style id="gof-public-final-table-compact-2026-10-03">
-@media(max-width:700px){
-  /* Enfrentamientos: matriz completa de 7 jornadas, compacta y horizontalmente desplazable. */
-  #enfrentamientos .gof-matrix-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  #enfrentamientos .gof-matrix{min-width:690px!important;width:690px!important;table-layout:fixed!important}
-  #enfrentamientos .gof-matrix th,#enfrentamientos .gof-matrix td{padding:6px 4px!important;font-size:9px!important;line-height:1.08!important}
-  #enfrentamientos .gof-matrix th:first-child,#enfrentamientos .gof-matrix td:first-child{width:118px!important;min-width:118px!important;max-width:118px!important;position:sticky!important;left:0!important;z-index:5!important}
-  #enfrentamientos .gof-matrix th:not(:first-child),#enfrentamientos .gof-matrix td:not(:first-child){width:81.7px!important;min-width:81.7px!important;max-width:81.7px!important}
-  #enfrentamientos .gof-matrix .gof-cell-opponent{font-size:9px!important;line-height:1.08!important;white-space:normal!important;overflow-wrap:anywhere!important}
-  #enfrentamientos .gof-matrix-team{font-size:9px!important;line-height:1.08!important;overflow-wrap:anywhere!important}
-  /* Resultados: columnas ajustadas al contenido, sin espacios blancos grandes. */
-  #resultados .gof-results-table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  #resultados .gof-results-table{min-width:0!important;width:max-content!important;table-layout:auto!important;font-size:10px!important}
-  #resultados .gof-results-table th,#resultados .gof-results-table td{padding:4px 5px!important;white-space:nowrap!important}
-  #resultados .gof-results-table th:nth-child(1),#resultados .gof-results-table td:nth-child(1){width:44px!important;min-width:44px!important}
-  #resultados .gof-results-table th:nth-child(2),#resultados .gof-results-table td:nth-child(2){width:48px!important;min-width:48px!important}
-  #resultados .gof-results-table th:nth-child(3),#resultados .gof-results-table td:nth-child(3){width:62px!important;min-width:62px!important;max-width:62px!important}
-  #resultados .gof-results-table th:nth-child(4),#resultados .gof-results-table td:nth-child(4){width:112px!important;min-width:112px!important;max-width:112px!important}
-  #resultados .gof-results-table th:nth-child(5),#resultados .gof-results-table td:nth-child(5){width:58px!important;min-width:58px!important;max-width:58px!important;text-align:center!important}
-  #resultados .gof-results-table th:nth-child(6),#resultados .gof-results-table td:nth-child(6){width:112px!important;min-width:112px!important;max-width:112px!important}
-  /* Calendario: hora muy angosta; el resto puede desplazarse horizontalmente. */
-  #calendario .cg-scroll{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  #calendario .calendar-grid{min-width:700px!important;width:700px!important;table-layout:fixed!important}
-  #calendario .calendar-grid th:first-child,#calendario .calendar-grid td:first-child{width:46px!important;min-width:46px!important;max-width:46px!important}
-  #calendario .calendar-grid th:not(:first-child),#calendario .calendar-grid td:not(:first-child){width:163.5px!important;min-width:163.5px!important;max-width:163.5px!important}
-  #calendario .calendar-grid .cg-time{font-size:10px!important;padding:4px 3px!important;white-space:nowrap!important}
-}
-</style>
 </head>
 <body>
 <header class="gof-public-top">
@@ -525,68 +497,36 @@ function champions(){const s=document.getElementById('campeones');s.innerHTML='<
 
 function matchups(){
  const s=document.getElementById('enfrentamientos');
- const sel=String(c.value||'');
- if(!sel){s.innerHTML='<div class="card"><h2 style="margin:0">⚔️ Enfrentamientos</h2><div class="mut small">Selecciona una categoría para consultar los rivales de Jornada 1 a Jornada 7.</div></div>';return;}
- // La tabla pública de enfrentamientos es fija: muestra las 7 jornadas completas,
- // independientemente de que los partidos futuros todavía no estén publicados como resultados.
- const fixed={
-  '6218910a-adea-4203-bee9-24bc610cfa62':[
-   ['Cbtis Leones','LOBOS CETis 21 B','Conalep II','DGTI','Conalep II','DGTI','Sabes'],
-   ['Conalep II','Lobos CTis 21 A','Conalep III','LOBOS CETis 21 B','Cbtis Leones','DGTI','ECCA'],
-   ['Conalep III','ECCA','Lobos CTis 21 A','Sabes','LOBOS CETis 21 B','Cbtis Leones','DGTI'],
-   ['DGTI','Cbtis Leones','Cbtis Leones','Lobos CTis 21 A','ECCA','Conalep II','Conalep III'],
-   ['ECCA','Fire Wings','Sabes','ECCA','DGTI','Lobos CTis 21 A','Conalep II'],
-   ['LOBOS CETis 21 B','DGTI','ECCA','Jaguares B','Jaguares B','Sabes','Lobos CTis 21 A'],
-   ['Lobos CTis 21 A','Cbtis Leones','Conalep III','DGTI','Sabes','ECCA','LOBOS CETis 21 B'],
-   ['Sabes','DGTI','Conalep II','Conalep III','Lobos CTis 21 A','LOBOS CETis 21 B','Cbtis Leones']
-  ],
-  '4b2b3ac4-5889-42cc-b568-41398d864df1':[
-   ['Druidas','Lobos CTis 21','Jaguares','Fire Wings','Fire Wings','Lobos CTis 21','Jaguares B'],
-   ['Fire Wings','ECCA','Jaguares B','Jaguares B','Druidas','Druidas','ECCA'],
-   ['Jaguares','Jaguares B','Druidas','Lobos CTis 21','Lobos CTis 21','ECCA','Jaguares B'],
-   ['Jaguares B','Jaguares','Fire Wings','Fire Wings','ECCA','Jaguares','Jaguares'],
-   ['ECCA','Jaguares B','Fire Wings','Druidas','Jaguares B','Jaguares','Fire Wings'],
-   ['Lobos CTis 21','Druidas','Lobos CTis 21','Jaguares B','Jaguares','Fire Wings','Druidas']
-  ]
- };
- // Fallback/normalización desde los partidos disponibles, para conservar nombres actuales.
- const ms=data.matches.filter(m=>String(m.category_id)===sel&&Number(m.round_number)>=1&&Number(m.round_number)<=7&&!m.is_makeup);
- const teamMap=new Map();
- ms.forEach(m=>{
-   [m.home_team_id,m.away_team_id].forEach(id=>{if(id&&!teamMap.has(id))teamMap.set(id,team(id).name)});
- });
- const teams=[...teamMap.values()];
- const byName={}; teams.forEach(n=>byName[n]=n);
- const source=fixed[sel]||[];
- // Construye una matriz Equipo x Jornada a partir de la tabla fija del calendario del torneo.
- // Para Escolar y Mixto se usan los cruces completos de las 7 jornadas almacenados arriba.
- let rows=[];
- if(sel==='6218910a-adea-4203-bee9-24bc610cfa62'){
-   rows=[
-    ['Cbtis Leones',['LOBOS CETis 21 B','Lobos CTis 21 A','DGTI','ECCA','Conalep II','Conalep III','Sabes']],
-    ['Conalep II',['Lobos CTis 21 A','Conalep III','Sabes','LOBOS CETis 21 B','Cbtis Leones','DGTI','ECCA']],
-    ['Conalep III',['ECCA','Conalep II','Lobos CTis 21 A','Sabes','LOBOS CETis 21 B','Cbtis Leones','DGTI']],
-    ['DGTI',['Sabes','LOBOS CETis 21 B','Cbtis Leones','Lobos CTis 21 A','ECCA','Conalep II','Conalep III']],
-    ['ECCA',['Conalep III','Sabes','LOBOS CETis 21 B','Cbtis Leones','DGTI','Lobos CTis 21 A','Conalep II']],
-    ['LOBOS CETis 21 B',['Cbtis Leones','DGTI','ECCA','Conalep II','Conalep III','Sabes','Lobos CTis 21 A']],
-    ['Lobos CTis 21 A',['Conalep II','Cbtis Leones','Conalep III','DGTI','Sabes','ECCA','LOBOS CETis 21 B']],
-    ['Sabes',['DGTI','ECCA','Conalep II','Conalep III','Lobos CTis 21 A','LOBOS CETis 21 B','Cbtis Leones']]
-   ];
- } else if(sel==='4b2b3ac4-5889-42cc-b568-41398d864df1'){
-   rows=[
-    ['Druidas',['Jaguares B','Lobos CTis 21','Jaguares','ECCA','Fire Wings','Jaguares B','Lobos CTis 21']],
-    ['Fire Wings',['Lobos CTis 21','ECCA','Jaguares B','Jaguares','Druidas','Lobos CTis 21','ECCA']],
-    ['Jaguares',['ECCA','Jaguares B','Druidas','Fire Wings','Lobos CTis 21','ECCA','Jaguares B']],
-    ['Jaguares B',['Druidas','Jaguares','Fire Wings','Lobos CTis 21','ECCA','Druidas','Jaguares']],
-    ['Lobos CTis 21',['Fire Wings','Druidas','ECCA','Jaguares B','Jaguares','Fire Wings','Druidas']],
-    ['ECCA',['Jaguares','Fire Wings','Lobos CTis 21','Druidas','Jaguares B','Jaguares','Fire Wings']]
-   ];
+ const sel=c.value||'';
+ if(!sel){
+   s.innerHTML='<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">⚔️ Enfrentamientos</h2><div class="mut small">Selecciona una categoría para consultar los rivales de Jornada 1 a Jornada 7.</div></div></div></div>';
+   return;
  }
+ const activeIds=new Set(visibleCategories().map(x=>String(x.id)));
+ const ms=data.matches.filter(m=>activeIds.has(String(m.category_id))&&String(m.category_id)===String(sel)&&Number(m.round_number)>=1&&Number(m.round_number)<=7&&!m.is_makeup);
+ const teamIds=[...new Set(ms.flatMap(m=>[m.home_team_id,m.away_team_id]).filter(Boolean))];
+ const rows=teamIds.map(id=>{
+   const tm=team(id);
+   const rounds={};
+   ms.forEach(m=>{
+     const r=Number(m.round_number);
+     if(m.home_team_id===id) rounds[r]=team(m.away_team_id).name;
+     else if(m.away_team_id===id) rounds[r]=team(m.home_team_id).name;
+   });
+   return {id,name:tm.name,rounds};
+ }).sort((a,b)=>a.name.localeCompare(b.name,'es'));
  let h='<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">⚔️ Enfrentamientos · '+esc(cat(sel))+'</h2><div class="mut small">Rivales por jornada · solo consulta.</div></div><button type="button" class="primary" onclick="downloadPublicMatchupsImage()">🖼️ Descargar tabla</button></div><div class="gof-matrix-wrap"><table class="gof-matrix"><thead><tr><th>EQUIPO</th>';
  [1,2,3,4,5,6,7].forEach(r=>h+='<th>JORNADA '+r+'</th>');
  h+='</tr></thead><tbody>';
- rows.forEach(t=>{h+='<tr><td><span class="gof-matrix-team">'+esc(t[0])+'</span></td>'+t[1].map(v=>'<td class="gof-matrix-cell"><div class="gof-cell-opponent">'+esc(v)+'</div></td>').join('')+'</tr>'});
- h+='</tbody></table></div></div>'; s.innerHTML=h;
+ rows.forEach(t=>{
+   h+='<tr><td><span class="gof-matrix-team">'+esc(t.name)+'</span></td>';
+   [1,2,3,4,5,6,7].forEach(r=>{
+     h+='<td class="gof-matrix-cell">'+(t.rounds[r]?'<div class="gof-cell-opponent">'+esc(t.rounds[r])+'</div>':'<span class="mut">—</span>')+'</td>';
+   });
+   h+='</tr>';
+ });
+ h+='</tbody></table></div></div>';
+ s.innerHTML=h;
 }
 
 function calendar(){
@@ -1014,5 +954,67 @@ window.setCalendarMode=function(mode){
   h2{font-size:24px!important}
 }
 </style>
+
+<style id="gof-user-final-mobile-compact-2026-10-03">
+/* ÚLTIMO AJUSTE: conservar el archivo recibido y solo compactar la vista móvil. */
+.gof-header-logo-upload{width:58px!important;height:42px!important;background:transparent!important}
+.gof-header-logo-upload img{width:58px!important;height:42px!important;object-fit:contain!important;display:block!important}
+@media(max-width:900px){
+  .gof-header-logo-upload{width:54px!important;height:40px!important}
+  .gof-header-logo-upload img{width:54px!important;height:40px!important}
+}
+@media(max-width:700px){
+  .gof-public-head{grid-template-columns:60px minmax(0,1fr) 150px!important;gap:5px!important}
+  .gof-header-logo-upload{width:50px!important;height:36px!important}
+  .gof-header-logo-upload img{width:50px!important;height:36px!important}
+  #nav{gap:6px!important}
+  #nav button{height:58px!important;padding:5px 27px 5px 7px!important;gap:6px!important;border-radius:11px!important}
+  #nav button>span:first-child{font-size:23px!important;flex:0 0 26px!important}
+  #nav button b{font-size:12px!important;line-height:1.05!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere!important}
+  #nav button small{font-size:8px!important;line-height:1.05!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;margin-top:2px!important}
+  #nav button:after{font-size:21px!important;right:6px!important}
+  .gof-public-select-card span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+  /* Enfrentamientos: EQUIPO + J1-J7, compacto y desplazable. */
+  #enfrentamientos .gof-matrix-wrap{overflow-x:auto!important;width:100%!important}
+  #enfrentamientos .gof-matrix{min-width:650px!important;width:650px!important;table-layout:fixed!important}
+  #enfrentamientos .gof-matrix th:first-child,#enfrentamientos .gof-matrix td:first-child{width:120px!important;min-width:120px!important;max-width:120px!important}
+  #enfrentamientos .gof-matrix th:not(:first-child),#enfrentamientos .gof-matrix td:not(:first-child){width:75.7px!important;min-width:75.7px!important;max-width:75.7px!important}
+  #enfrentamientos .gof-matrix th,#enfrentamientos .gof-matrix td{padding:6px 4px!important;font-size:9px!important;line-height:1.08!important}
+  #enfrentamientos .gof-matrix .gof-cell-opponent{font-size:9px!important;line-height:1.08!important;white-space:normal!important;overflow-wrap:anywhere!important}
+  #enfrentamientos .gof-matrix-team{font-size:10px!important;line-height:1.08!important;overflow-wrap:anywhere!important}
+  /* Resultados: CATEGORÍA más angosta, sin espacios blancos grandes. */
+  #resultados .gof-results-table-wrap{overflow-x:auto!important;width:100%!important}
+  #resultados .gof-results-table{min-width:520px!important;width:520px!important;table-layout:fixed!important}
+  #resultados .gof-results-table th,#resultados .gof-results-table td{padding:5px 3px!important;font-size:9px!important;line-height:1.1!important}
+  #resultados .gof-results-table th:nth-child(1),#resultados .gof-results-table td:nth-child(1){width:42px!important}
+  #resultados .gof-results-table th:nth-child(2),#resultados .gof-results-table td:nth-child(2){width:48px!important}
+  #resultados .gof-results-table th:nth-child(3),#resultados .gof-results-table td:nth-child(3){width:62px!important}
+  #resultados .gof-results-table th:nth-child(4),#resultados .gof-results-table td:nth-child(4){width:135px!important}
+  #resultados .gof-results-table th:nth-child(5),#resultados .gof-results-table td:nth-child(5){width:58px!important}
+  #resultados .gof-results-table th:nth-child(6),#resultados .gof-results-table td:nth-child(6){width:135px!important}
+  #resultados .gof-results-table td b{font-size:9px!important;line-height:1.08!important;white-space:normal!important;overflow-wrap:anywhere!important}
+  #resultados .gof-score-cell{font-size:10px!important;white-space:nowrap!important;text-align:center!important}
+  /* Calendario: hora angosta; campos compactos y legibles. */
+  #calendario .calendar-grid{min-width:590px!important;width:590px!important;table-layout:fixed!important}
+  #calendario .calendar-grid th:first-child,#calendario .calendar-grid td:first-child{width:40px!important;min-width:40px!important;max-width:40px!important;padding:3px 2px!important}
+  #calendario .calendar-grid th:not(:first-child),#calendario .calendar-grid td:not(:first-child){width:137px!important;min-width:137px!important;max-width:137px!important}
+  #calendario .calendar-grid thead th{font-size:9px!important;padding:5px 2px!important;white-space:nowrap!important}
+  #calendario .calendar-grid .cg-time{width:40px!important;min-width:40px!important;font-size:10px!important;font-weight:900!important;white-space:nowrap!important}
+  #calendario .cg-game{min-height:54px!important;padding:4px!important;border-left-width:3px!important;border-radius:8px!important}
+  #calendario .cg-cat{font-size:8px!important;line-height:1!important}
+  #calendario .cg-teams{font-size:9px!important;line-height:1.08!important;overflow-wrap:anywhere!important}
+  #calendario .cg-meta{font-size:7px!important;line-height:1!important}
+  #calendario .calendar-grid .cg-day td{font-size:9px!important;padding:4px!important}
+}
+@media(max-width:430px){
+  .gof-public-head{grid-template-columns:46px minmax(0,1fr) 116px!important;gap:4px!important}
+  .gof-header-logo-upload{width:40px!important;height:30px!important}
+  .gof-header-logo-upload img{width:40px!important;height:30px!important}
+  #nav button{height:54px!important;padding:5px 24px 5px 6px!important}
+  #nav button b{font-size:11px!important}
+  #nav button small{font-size:7px!important}
+}
+</style>
+
 </body>
 </html>

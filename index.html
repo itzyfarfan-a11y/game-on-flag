@@ -464,6 +464,41 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
 }
 </style>
 
+
+<style id="gof-v4-mobile-fix-2026-10-03">
+@media (max-width:700px){
+  .gof-public-top{height:58px!important;min-height:58px!important}
+  .gof-public-head{height:57px!important;width:100%!important;box-sizing:border-box!important;grid-template-columns:22px minmax(0,1fr) 22px!important;gap:2px!important;padding:3px 5px!important;align-items:center!important}
+  .gof-header-logo-upload{width:18px!important;height:14px!important;min-width:18px!important;max-width:18px!important;background:transparent!important;border:0!important;padding:0!important}
+  .gof-header-logo-upload img{width:18px!important;height:14px!important;object-fit:contain!important}
+  .gof-public-brand{width:100%!important;min-width:0!important;text-align:center!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;overflow:visible!important}
+  .gof-public-title{width:100%!important;font-size:18px!important;line-height:1!important;letter-spacing:0!important;text-align:center!important;white-space:nowrap!important;overflow:visible!important}
+  .gof-public-app{font-size:6.5px!important;line-height:1!important;letter-spacing:2.2px!important;margin-top:2px!important}
+  .gof-public-sub{font-size:4.5px!important;line-height:1!important;letter-spacing:1.3px!important;margin-top:2px!important}
+  .gof-admin-mini{width:22px!important;height:22px!important;min-width:22px!important;flex:0 0 22px!important;font-size:12px!important;margin:0 0 0 auto!important}
+  main{padding:6px 8px 16px!important}
+  .gof-public-selectors{gap:5px!important;margin-bottom:6px!important}
+  .gof-public-select-card{padding:6px 7px!important;border-radius:10px!important}
+  .gof-public-select-card span{font-size:10px!important;line-height:1.05!important;margin-bottom:3px!important;white-space:normal!important}
+  .gof-category-picker{gap:4px!important}
+  .gof-category-btn{min-height:31px!important;height:31px!important;padding:4px 6px!important;border-radius:8px!important;font-size:9px!important;line-height:1!important;white-space:normal!important;overflow:visible!important}
+  #nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important;margin:0 0 6px!important}
+  #nav button{display:grid!important;grid-template-columns:20px minmax(0,1fr) 9px!important;align-items:center!important;min-width:0!important;width:100%!important;height:46px!important;min-height:46px!important;box-sizing:border-box!important;padding:3px 4px!important;gap:4px!important;border-radius:8px!important;overflow:hidden!important;position:relative!important}
+  #nav button>span:first-child{grid-column:1!important;grid-row:1!important;width:20px!important;min-width:20px!important;flex:none!important;font-size:15px!important;line-height:1!important;text-align:center!important}
+  #nav button>span:nth-child(2){grid-column:2!important;grid-row:1!important;min-width:0!important;width:100%!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;overflow:visible!important}
+  #nav button b{display:block!important;width:100%!important;font-size:9.5px!important;line-height:1.05!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important}
+  #nav button small{display:block!important;width:100%!important;font-size:6.5px!important;line-height:1.05!important;margin-top:1px!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important}
+  #nav button:after{position:static!important;grid-column:3!important;grid-row:1!important;font-size:13px!important;line-height:1!important;justify-self:end!important;align-self:center!important}
+  h2{font-size:22px!important;line-height:1.1!important}
+}
+@media (max-width:430px){
+  .gof-public-title{font-size:17px!important}
+  #nav button{height:44px!important;min-height:44px!important}
+  #nav button b{font-size:9px!important}
+  #nav button small{font-size:6.2px!important}
+  .gof-category-btn{font-size:8.8px!important}
+}
+</style>
 </head>
 <body>
 <header class="gof-public-top">
@@ -1060,6 +1095,22 @@ window.setCalendarMode=function(mode){
   #nav button b{font-size:18px!important}
   #nav button small{font-size:12px!important;margin-top:3px!important}
   h2{font-size:24px!important}
+}
+</style>
+
+<style id="gof-emoji-logo-mini-v5">
+/* Solo ajuste visual solicitado: logo pequeño sin recortarlo + emojis proporcionales */
+@media(max-width:700px){
+  .gof-public-head{grid-template-columns:52px minmax(0,1fr) 52px!important}
+  .gof-header-logo-upload{width:42px!important;height:34px!important;overflow:visible!important;display:flex!important;align-items:center!important;justify-content:flex-start!important}
+  .gof-header-logo-upload img{width:42px!important;height:34px!important;max-width:42px!important;max-height:34px!important;object-fit:contain!important;object-position:left center!important}
+  #nav button>span:first-child{font-size:23px!important;flex:0 0 27px!important;width:27px!important;line-height:1!important}
+}
+@media(max-width:430px){
+  .gof-public-head{grid-template-columns:46px minmax(0,1fr) 46px!important}
+  .gof-header-logo-upload{width:36px!important;height:29px!important}
+  .gof-header-logo-upload img{width:36px!important;height:29px!important;max-width:36px!important;max-height:29px!important}
+  #nav button>span:first-child{font-size:21px!important;flex-basis:24px!important;width:24px!important}
 }
 </style>
 </body>

@@ -1373,10 +1373,21 @@ async function loadFinanceCategoryPrices(){
     sb.from('tournament_teams').select('id,category_id,team_id,teams(name)').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id'),
     sb.from('finance_charges').select('tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid)
   ]);
-  const catList=(cats||[]).map(c=>({id:c.category_id,name:c.categories?.name||'Categoría'}));window.__financeCats=catList;
   const chargeMap=new Map((charges||[]).map(c=>[`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`,Number(c.amount_due||0)]));
   const groups={};(teams||[]).forEach(t=>(groups[t.category_id]??=[]).push(t));
-  body.innerHTML=catList.map(c=>{const ts=groups[c.id]||[];let ins=0,arb=0;if(ts.length){const vals=ts.map(t=>chargeMap.get(`${t.id}|inscripcion|`)||0).filter(v=>v>0);const av=ts.flatMap(t=>[1]).map((_,i)=>chargeMap.get(`${ts[i]?.id}|arbitraje|1`)||0).filter(v=>v>0);ins=vals[0]||0;arb=av[0]||0;}return `<tr data-category-id="${esc(c.id)}"><td><b>${esc(c.name)}</b></td><td class="finance-category-count">${ts.length}</td><td><input class="cat-ins" type="number" min="0" step="1" value="${ins||''}" placeholder="$1,500"></td><td><input class="cat-arb" type="number" min="0" step="1" value="${arb||''}" placeholder="$550"></td><td><button class="gold finance-save-price" type="button" onclick="applyFinanceCategoryPrice(this.closest('tr'))">Aplicar a ${ts.length} equipos</button></td></tr>`}).join('')||'<tr><td colspan="5" class="mut">No hay categorías/equipos inscritos.</td></tr>';
+  // Solo mostrar categorías que realmente tienen equipos activos inscritos.
+  // La categoría se obtiene del registro de cada equipo, así Contabilidad nunca pide capturar manualmente la cantidad.
+  const catNames=new Map((cats||[]).map(c=>[c.category_id,c.categories?.name||'Categoría']));
+  const catList=Object.keys(groups).filter(id=>(groups[id]||[]).length>0).map(id=>({id,name:catNames.get(id)||'Categoría'}));
+  window.__financeCats=catList;
+  body.innerHTML=catList.map(c=>{const ts=groups[c.id]||[];let ins=0,arb=0;
+    const insVals=ts.map(t=>chargeMap.get(`${t.id}|inscripcion|`)||0).filter(v=>v>0);
+    const arbVals=ts.map(t=>chargeMap.get(`${t.id}|arbitraje|1`)||0).filter(v=>v>0);
+    if(insVals.length)ins=insVals[0]; if(arbVals.length)arb=arbVals[0];
+    const sameIns=insVals.length>0 && insVals.every(v=>v===ins);
+    const sameArb=arbVals.length>0 && arbVals.every(v=>v===arb);
+    return `<tr data-category-id="${esc(c.id)}"><td><b>${esc(c.name)}</b></td><td class="finance-category-count">${ts.length}</td><td><input class="cat-ins" type="number" min="0" step="1" value="${sameIns&&ins?ins:''}" placeholder="$1,500"></td><td><input class="cat-arb" type="number" min="0" step="1" value="${sameArb&&arb?arb:''}" placeholder="$550"></td><td><button class="gold finance-save-price" type="button" onclick="applyFinanceCategoryPrice(this.closest('tr'))">💾 Aplicar a ${ts.length}</button></td></tr>`
+  }).join('')||'<tr><td colspan="5" class="mut">No hay equipos activos inscritos en este torneo.</td></tr>';
   if(exSel){exSel.innerHTML='<option value="">Selecciona equipo</option>'+(teams||[]).map(t=>`<option value="${esc(t.id)}">${esc(t.teams?.name||'Equipo')} · ${esc(catList.find(c=>c.id===t.category_id)?.name||'Categoría')}</option>`).join('');}
 }
 function toggleFinanceExceptions(){const p=document.getElementById('financeExceptionsPanel');if(p)p.style.display=p.style.display==='none'?'block':'none'}
@@ -1401,6 +1412,39 @@ async function saveFinanceMatrixAmount(input){
   if(rows?.length){const {error:delErr}=await sb.from('finance_payments').delete().eq('charge_id',chargeId);if(delErr)return alert('No se pudo actualizar el pago: '+delErr.message)}
   if(newTotal>0){const {error:insErr}=await sb.from('finance_payments').insert({charge_id:chargeId,amount:newTotal,paid_at:new Date().toISOString(),created_by:(await sb.auth.getUser()).data.user?.id||null});if(insErr)return alert('No se pudo guardar el pago: '+insErr.message)}
   toast(newTotal>=due?'🟢 Pagado completo':'🟡 Pago actualizado');await renderFinanceTeamMatrix();await renderFinance();
+}
+async function downloadFinanceTeamMatrixImage(){
+  const box=document.getElementById('financeTeamMatrixBox');
+  if(!box)return;
+  const tables=[...box.querySelectorAll('table.finance-team-matrix')];
+  if(!tables.length)return alert('Primero carga los equipos y sus cargos.');
+  const rows=[]; tables.forEach(table=>{
+    const cat=table.closest('.finance-category-block')?.querySelector('.finance-category-label')?.textContent?.trim()||'Categoría';
+    rows.push({cat,table});
+  });
+  const W=1500, rowH=48, headH=82, catH=58, pad=28;
+  let totalH=pad+headH;
+  rows.forEach(({table})=>{ totalH+=catH+Math.max(1,table.tBodies[0]?.rows.length||0)*rowH+18; });
+  const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=totalH;
+  const ctx=canvas.getContext('2d'); ctx.fillStyle='#08070c'; ctx.fillRect(0,0,W,totalH);
+  ctx.fillStyle='#f0c94a'; ctx.font='900 30px Arial'; ctx.textAlign='center';
+  ctx.fillText('GAME ON FLAG · CONTABILIDAD',W/2,42);
+  ctx.fillStyle='#fff'; ctx.font='700 18px Arial'; ctx.fillText('Cobros por equipo',W/2,70);
+  let y=pad+headH;
+  const cellText=(txt,x,yy,w,align='center',font='700 15px Arial',fill='#fff')=>{ctx.fillStyle=fill;ctx.font=font;ctx.textAlign=align;ctx.fillText(String(txt??''),align==='left'?x+8:x+w/2,yy+29)};
+  for(const {cat,table} of rows){
+    ctx.fillStyle='#211b2b';ctx.fillRect(pad,y,W-pad*2,catH);cellText(cat,pad,y,W-pad*2,'left','900 19px Arial','#f0c94a');y+=catH;
+    const trs=[...table.querySelectorAll('thead tr:first-child,tbody tr')];
+    const headers=[...table.querySelectorAll('thead tr:first-child th')].map(th=>th.textContent.trim());
+    const cols=headers.length; const cw=Math.max(105,(W-pad*2)/cols);
+    headers.forEach((h,i)=>{ctx.fillStyle='#2a2233';ctx.fillRect(pad+i*cw,y,cw,rowH);cellText(h,pad+i*cw,y,cw,'center','800 13px Arial','#f0c94a')}); y+=rowH;
+    for(const tr of [...table.tBodies[0].rows]){
+      const cells=[...tr.children]; cells.forEach((td,i)=>{ctx.fillStyle='#17131f';ctx.fillRect(pad+i*cw,y,cw,rowH);let v=td.querySelector('input')?.value||td.textContent.trim();if(td.querySelector('input')?.classList.contains('finance-paid'))v='✓ '+(td.querySelector('input').dataset.due||'');cellText(v,pad+i*cw,y,cw,i===0?'left':'center','700 13px Arial',i===0?'#fff':'#ddd')});y+=rowH;
+    }
+    y+=18;
+  }
+  const a=document.createElement('a');a.download='GameOnFlag_Contabilidad_Equipos.png';a.href=canvas.toDataURL('image/png');a.click();
+  toast('🖼️ Tabla de contabilidad descargada');
 }
 async function renderFinanceTeamMatrix(){
   const tid=val('finT'),box=document.getElementById('financeTeamMatrixBox');if(!box||!tid||!sb){if(box)box.innerHTML='';return;}

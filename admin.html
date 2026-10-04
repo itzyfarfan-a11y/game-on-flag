@@ -1367,7 +1367,7 @@ let financeUnlocked = sessionStorage.getItem('gof_finance_unlocked') === '1';
 async function enterFinance(){
   if(!sb)return false;
   let has=false;
-  const {data,error}=await sb.rpc('finance_password_is_set');
+  const {data,error}=await sb.rpc('finance_password_is_set',{p_league_id:gofCurrentOrganizationId});
   if(error){alert('No se pudo comprobar la contraseña de Contabilidad: '+error.message);return false;}
   has=!!data;
   if(!has){
@@ -1376,7 +1376,7 @@ async function enterFinance(){
     const p2=window.prompt('🔐 Confirma la contraseña de Contabilidad');
     if(p2===null)return false;
     if(p1!==p2)return alert('Las contraseñas no coinciden.'),false;
-    const {error:se}=await sb.rpc('finance_set_password',{p_password:p1});
+    const {error:se}=await sb.rpc('finance_set_password',{p_league_id:gofCurrentOrganizationId,p_password:p1});
     if(se){alert('No se pudo configurar la contraseña: '+se.message);return false;}
     financeUnlocked=true;sessionStorage.setItem('gof_finance_unlocked','1');
     toast('🔐 Contraseña de Contabilidad configurada');
@@ -1385,7 +1385,7 @@ async function enterFinance(){
   if(financeUnlocked)return true;
   const p=window.prompt('🔐 Contraseña de Contabilidad');
   if(p===null)return false;
-  const {data:ok,error:ve}=await sb.rpc('finance_verify_password',{p_password:p});
+  const {data:ok,error:ve}=await sb.rpc('finance_verify_password',{p_league_id:gofCurrentOrganizationId,p_password:p});
   if(ve){alert('No se pudo verificar la contraseña: '+ve.message);return false;}
   if(!ok){alert('Contraseña incorrecta.');return false;}
   financeUnlocked=true;sessionStorage.setItem('gof_finance_unlocked','1');
@@ -1396,7 +1396,7 @@ async function changeFinancePassword(){
   if(!financeUnlocked && !(await enterFinance()))return;
   const current=window.prompt('🔐 Contraseña actual de Contabilidad');
   if(current===null)return;
-  const {data:ok,error:ve}=await sb.rpc('finance_verify_password',{p_password:current});
+  const {data:ok,error:ve}=await sb.rpc('finance_verify_password',{p_league_id:gofCurrentOrganizationId,p_password:current});
   if(ve)return alert('No se pudo verificar la contraseña: '+ve.message);
   if(!ok)return alert('La contraseña actual no es correcta.');
   const p1=window.prompt('Nueva contraseña de Contabilidad (mínimo 6 caracteres)');
@@ -1404,7 +1404,7 @@ async function changeFinancePassword(){
   const p2=window.prompt('Confirma la nueva contraseña');
   if(p2===null)return;
   if(p1!==p2)return alert('Las contraseñas no coinciden.');
-  const {error}=await sb.rpc('finance_set_password',{p_password:p1});
+  const {error}=await sb.rpc('finance_set_password',{p_league_id:gofCurrentOrganizationId,p_password:p1});
   if(error)return alert('No se pudo cambiar la contraseña: '+error.message);
   toast('🔐 Contraseña de Contabilidad cambiada');
 }

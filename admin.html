@@ -5201,7 +5201,7 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
   }
   async function loadRows(){
     const tid=await ensureTournament(),cat=val('gofMatchupCategory')||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||''; if(!tid||!cat)return {rows:[],teams:[]};
-    const {data:rows}=await client().from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
+    const {data:rows}=await client().from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').eq('is_makeup',false).order('round_number').order('id');
     const {data:tr}=await client().from('tournament_teams').select('team_id,teams!tournament_teams_team_id_fkey(id,name)').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);
     const newId=String(window.__gofNewTeamId||'');
     const teamList=(tr||[]).map(x=>x.teams).filter(Boolean).sort((a,b)=>{

@@ -648,8 +648,8 @@ async function downloadPublicPlayoffsImage(){
 
   window.calendar=function(){
     const s=document.getElementById('calendario'),selectedCat=c.value||'';
-    const regular=data.matches.filter(m=>!selectedCat||m.category_id===selectedCat).map(m=>({...m,_kind:'regular',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
-    const po=data.playoffs.filter(m=>!selectedCat||m.category_id===selectedCat).map(m=>({...m,_kind:'playoff',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
+    const regular=data.matches.map(m=>({...m,_kind:'regular',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
+    const po=data.playoffs.map(m=>({...m,_kind:'playoff',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
     const all=[...regular,...po];
     const fieldNo=f=>{const z=String(f||'').match(/(?:campo|cancha)\s*[-#:]?\s*(\d+)/i);return z?Number(z[1]):99};
     const weekKey=m=>m._kind==='playoff'?'PLAYOFFS':(m.round_number?String(m.round_number):'SIN SEMANA');
@@ -657,14 +657,20 @@ async function downloadPublicPlayoffsImage(){
     const dateLabel=arr=>{const ds=[...new Set(arr.map(m=>m._date).filter(Boolean))].sort();if(!ds.length)return 'Fecha pendiente';if(ds.length===1)return new Date(ds[0]+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}).replace(/^./,x=>x.toUpperCase());return 'Fechas: '+ds.map(d=>new Date(d+'T12:00:00Z').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'})).join(' · ')};
     const catClass=n=>{const x=String(n||'').toLowerCase();if(x.includes('mixto'))return 'cg-mixto';if(x.includes('bronze')||x.includes('bronce'))return 'cg-bronce';if(x.includes('silver femenil'))return 'cg-silverf';if(x.includes('silver varonil'))return 'cg-silverv';if(x.includes('35'))return 'cg-35';if(x.includes('golden'))return 'cg-golden';return 'cg-other'};
     const renderCell=m=>{if(!m)return '<div class="cg-empty">—</div>';const isPo=m._kind==='playoff',cname=cat(m.category_id)||'Categoría',a=isPo?team(m.team_a_id).name:team(m.home_team_id).name,b=isPo?team(m.team_b_id).name:team(m.away_team_id).name;return `<div class="cg-game ${catClass(cname)}"><div class="cg-cat">${esc(cname)}${isPo?' · '+esc(m.stage||''):''}</div><div class="cg-teams">${esc(a)} <span>vs</span> ${esc(b)}</div><div class="cg-meta">${isPo?'🏆':'🏈'} ${m.round_number?'Semana '+esc(m.round_number):''}</div></div>`};
-    let h=`<div class="calendar-panel-head"><div><h2>📅 Calendario</h2><p>Vista pública · misma estructura visual de Administración</p></div><div class="calendar-filter"><span>Mostrar calendario de:</span><div class="calendar-filter-buttons"><button type="button" class="${selectedCat?'active':''}" onclick="setCalendarMode('category')">Solo esta categoría</button><button type="button" class="${!selectedCat?'active':''}" onclick="setCalendarMode('all')">Todas las categorías activas</button></div></div></div><div class="calendar-current"><b>${esc(selectedCat?cat(selectedCat):'Todas las categorías activas')}</b><button type="button" class="primary" onclick="downloadPublicCalendarPNG()">🖼️ Descargar calendario</button></div>`;
-    if(!all.length){s.innerHTML=h+'<div class="empty">No hay partidos publicados para esta selección.</div>';return}
-    const groups={};all.forEach(m=>(groups[weekKey(m)]??=[]).push(m));
-    const weekOrder=Object.keys(groups).sort((a,b)=>{const na=a==='PLAYOFFS'?999:a==='SIN SEMANA'?998:Number(a),nb=b==='PLAYOFFS'?999:b==='SIN SEMANA'?998:Number(b);return na-nb});
-    const fields=[1,2,3,4,...(all.some(m=>fieldNo(m._field)===5)?[5]:[])];
-    h+=`<div class="card"><h3>📊 Calendario General</h3><div class="notice"><b>${all.length} partidos</b> · ${regular.length} fase regular · ${po.length} playoffs · ${selectedCat?'Filtro: '+esc(cat(selectedCat)):'Todas las categorías activas'}</div><div class="cg-scroll"><table class="calendar-grid"><thead><tr><th>HORARIO</th>${fields.map(f=>`<th>CAMPO ${f}</th>`).join('')}</tr></thead><tbody>`;
-    for(const wk of weekOrder){const games=groups[wk];h+=`<tr class="cg-day"><td colspan="${fields.length+1}"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><b>${esc(weekLabel(wk))}</b><span class="small mut">${esc(dateLabel(games))}</span></div></td></tr>`;const times=[...new Set(games.map(m=>m._time?String(m._time).slice(0,5):'SIN HORA'))].sort();for(const tm of times){h+=`<tr><th class="cg-time">${esc(tm==='SIN HORA'?'Pendiente':tm)}</th>`;for(const f of fields){const cell=games.find(m=>fieldNo(m._field)===f&&(m._time?String(m._time).slice(0,5):'SIN HORA')===tm);h+=`<td>${renderCell(cell)}</td>`}h+='</tr>'}}
-    h+='</tbody></table></div><div class="small mut cg-legend">Vista por semana · hora · campo. Solo consulta pública.</div></div>';
+    const renderBlock=(games,title,subtitle)=>{
+      if(!games.length)return `<div class="card calendar-block"><h3>📅 ${esc(title)}</h3><div class="empty">No hay partidos publicados para esta categoría.</div></div>`;
+      const groups={};games.forEach(m=>(groups[weekKey(m)]??=[]).push(m));
+      const weekOrder=Object.keys(groups).sort((a,b)=>{const na=a==='PLAYOFFS'?999:a==='SIN SEMANA'?998:Number(a),nb=b==='PLAYOFFS'?999:b==='SIN SEMANA'?998:Number(b);return na-nb});
+      const fields=[1,2,3,4,...(games.some(m=>fieldNo(m._field)===5)?[5]:[])];
+      let h=`<div class="card calendar-block"><div class="calendar-block-title"><div><h3>📅 ${esc(title)}</h3><div class="small mut">${esc(subtitle)}</div></div><span class="tag">${games.length} partidos</span></div><div class="cg-scroll"><table class="calendar-grid"><thead><tr><th>HORARIO</th>${fields.map(f=>`<th>CAMPO ${f}</th>`).join('')}</tr></thead><tbody>`;
+      for(const wk of weekOrder){const wg=groups[wk];h+=`<tr class="cg-day"><td colspan="${fields.length+1}"><div class="cg-day-inner"><b>${esc(weekLabel(wk))}</b><span class="small mut">${esc(dateLabel(wg))}</span></div></td></tr>`;const times=[...new Set(wg.map(m=>m._time?String(m._time).slice(0,5):'SIN HORA'))].sort();for(const tm of times){h+=`<tr><th class="cg-time">${esc(tm==='SIN HORA'?'Pendiente':tm)}</th>`;for(const f of fields){const cell=wg.find(m=>fieldNo(m._field)===f&&(m._time?String(m._time).slice(0,5):'SIN HORA')===tm);h+=`<td>${renderCell(cell)}</td>`}h+='</tr>'}}
+      h+='</tbody></table></div></div>';return h;
+    };
+    const selectedGames=selectedCat?all.filter(m=>String(m.category_id)===String(selectedCat)):[];
+    let h=`<div class="calendar-panel-head"><div><h2>📅 Calendario</h2><p>Primero la categoría seleccionada y después el calendario completo de la jornada.</p></div></div>`;
+    if(selectedCat)h+=renderBlock(selectedGames,cat(selectedCat)||'Categoría seleccionada','Horarios y partidos únicamente de esta categoría');else h+=`<div class="card"><div class="empty">Selecciona una categoría para mostrar su calendario.</div></div>`;
+    h+=renderBlock(all,'Calendario General','Todos los partidos de todas las categorías activas');
+    h+=`<div class="calendar-download-row"><button type="button" class="primary" onclick="downloadPublicCalendarPNG()">🖼️ Descargar calendario</button></div>`;
     s.innerHTML=h;
   };
 
@@ -679,10 +685,24 @@ async function downloadPublicPlayoffsImage(){
   };
 
   window.downloadPublicCalendarPNG=async function(){
-    const table=document.querySelector('#calendario .calendar-grid');
-    if(!table)return alert('No hay calendario visible para descargar.');
-    const trs=[...table.querySelectorAll('tr')],W=1700,rowH=70,H=260+trs.length*rowH+70,cv=await gofPublicBrandCanvas('CALENDARIO','Calendario oficial',W,H),x= cv.getContext('2d');let y=225;
-    trs.forEach((tr,ri)=>{const cells=[...tr.children];x.fillStyle=ri===0?'#1769c2':ri%2?'#f4f7fb':'#ffffff';x.fillRect(35,y,W-70,rowH);x.strokeStyle='#d5deea';x.strokeRect(35,y,W-70,rowH);let xx=48;cells.forEach(td=>{const ww=(W-96)/Math.max(1,cells.length);x.fillStyle='#fff';x.font=ri===0?'900 16px Arial':'700 15px Arial';x.fillText((td.innerText||'').replace(/\s+/g,' ').trim().slice(0,32),xx,y+42);xx+=ww});y+=rowH});x.fillStyle='#7b8794';x.font='800 15px Arial';x.fillText('GAME ON FLAG · PORTAL PÚBLICO',45,H-25);gofPublicSaveCanvas(cv,'Calendario_'+String(league?.name||'Liga').replace(/[^a-z0-9áéíóúñ]+/gi,'_')+'.png');
+    const regular=data.matches.map(m=>({...m,_kind:'regular',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
+    const po=data.playoffs.map(m=>({...m,_kind:'playoff',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
+    const all=[...regular,...po],selectedCat=c.value||'';
+    const selected=selectedCat?all.filter(m=>String(m.category_id)===String(selectedCat)):[];
+    if(!all.length){alert('No hay calendario para descargar.');return}
+    const fieldNo=f=>{const z=String(f||'').match(/(?:campo|cancha)\s*[-#:]?\s*(\d+)/i);return z?Number(z[1]):99};
+    const weekKey=m=>m._kind==='playoff'?'PLAYOFFS':(m.round_number?String(m.round_number):'SIN SEMANA');
+    const weekLabel=k=>k==='PLAYOFFS'?'PLAYOFFS':k==='SIN SEMANA'?'Semana pendiente':`SEMANA ${k}`;
+    const dateLabel=arr=>{const ds=[...new Set(arr.map(m=>m._date).filter(Boolean))].sort();if(!ds.length)return 'Fecha pendiente';if(ds.length===1)return new Date(ds[0]+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}).replace(/^./,x=>x.toUpperCase());return ds.map(d=>new Date(d+'T12:00:00Z').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'})).join(' · ')};
+    const teamName=m=>m._kind==='playoff'?team(m.team_a_id).name+' vs '+team(m.team_b_id).name:team(m.home_team_id).name+' vs '+team(m.away_team_id).name;
+    const wrap=(ctx,text,maxWidth)=>{const words=String(text||'').split(/\s+/),lines=[];let line='';words.forEach(w=>{const test=line?line+' '+w:w;if(ctx.measureText(test).width<=maxWidth)line=test;else{if(line)lines.push(line);line=w}});if(line)lines.push(line);return lines.length?lines:['']};
+    const sections=[];if(selectedCat)sections.push({title:cat(selectedCat)||'Categoría',subtitle:'Calendario de esta categoría',games:selected});sections.push({title:'CALENDARIO GENERAL',subtitle:'Todas las categorías activas',games:all});
+    const rowData=games=>{const groups={};games.forEach(m=>(groups[weekKey(m)]??=[]).push(m));const order=Object.keys(groups).sort((a,b)=>{const na=a==='PLAYOFFS'?999:a==='SIN SEMANA'?998:Number(a),nb=b==='PLAYOFFS'?999:b==='SIN SEMANA'?998:Number(b);return na-nb});const rows=[];order.forEach(wk=>{const wg=groups[wk],fields=[1,2,3,4,...(wg.some(m=>fieldNo(m._field)===5)?[5]:[])];rows.push({type:'day',text:weekLabel(wk)+' · '+dateLabel(wg)});const times=[...new Set(wg.map(m=>m._time?String(m._time).slice(0,5):'SIN HORA'))].sort();times.forEach(tm=>rows.push({type:'time',time:tm,fields:fields.map(f=>wg.find(m=>fieldNo(m._field)===f&&(m._time?String(m._time).slice(0,5):'SIN HORA')===tm)||null)}))});return rows};
+    const W=1900,pad=45,headerH=205,sectionGap=38;let estimated=headerH+80;
+    sections.forEach(sec=>{estimated+=100;rowData(sec.games).forEach(r=>{if(r.type==='day')estimated+=48;else estimated+=82});estimated+=sectionGap});estimated+=70;
+    const cv=await gofPublicBrandCanvas('CALENDARIO','Calendario oficial',W,Math.max(900,estimated)),x=cv.getContext('2d');let y=225;
+    sections.forEach(sec=>{x.fillStyle='#12355b';x.font='900 25px Arial';x.fillText(sec.title,55,y);x.fillStyle='#5d6877';x.font='700 15px Arial';x.fillText(sec.subtitle,55,y+25);y+=48;const left=pad,right=W-pad,colW=(right-left-115)/4;x.fillStyle='#1769c2';x.fillRect(left,y,right-left,48);x.fillStyle='#fff';x.font='900 15px Arial';x.fillText('HORARIO',left+16,y+31);for(let i=0;i<4;i++)x.fillText('CAMPO '+(i+1),left+115+i*colW+16,y+31);y+=48;
+      rowData(sec.games).forEach((r,ri)=>{if(r.type==='day'){x.fillStyle='#e8f0f8';x.fillRect(left,y,right-left,42);x.fillStyle='#12355b';x.font='900 15px Arial';x.fillText(r.text,left+16,y+27);y+=42;return}const lines=r.fields.map(m=>m?wrap(x,teamName(m),colW-20):['—']);const cats=r.fields.map(m=>m?String(cat(m.category_id)||'Categoría'):'');const maxLines=Math.max(1,...lines.map((a,i)=>a.length+(cats[i]?1:0)));const rh=Math.max(66,maxLines*19+28);x.fillStyle=ri%2?'#f7f9fc':'#fff';x.fillRect(left,y,right-left,rh);x.strokeStyle='#d5deea';x.strokeRect(left,y,right-left,rh);x.fillStyle='#12355b';x.font='900 15px Arial';x.fillText(r.time==='SIN HORA'?'Pendiente':r.time,left+16,y+28);r.fields.forEach((m,i)=>{const xx=left+115+i*colW;x.strokeStyle='#d5deea';x.beginPath();x.moveTo(xx,y);x.lineTo(xx,y+rh);x.stroke();if(!m){x.fillStyle='#9aa7b5';x.font='700 14px Arial';x.fillText('—',xx+16,y+30);return}x.fillStyle='#1769c2';x.font='900 12px Arial';x.fillText(cats[i],xx+12,y+20);x.fillStyle='#12355b';x.font='700 13px Arial';lines[i].forEach((ln,j)=>x.fillText(ln,xx+12,y+39+j*17))});y+=rh});y+=sectionGap});x.fillStyle='#7b8794';x.font='800 14px Arial';x.fillText('GAME ON FLAG · PORTAL PÚBLICO',pad,cv.height-25);gofPublicSaveCanvas(cv,'Calendario_'+String(league?.name||'Liga').replace(/[^a-z0-9áéíóúñ]+/gi,'_')+'.png');
   };
 
   /* Fix the remaining public label inherited from an older build. */
@@ -694,12 +714,8 @@ async function downloadPublicPlayoffsImage(){
 </script>
 <script id="gof-public-calendar-mode-final">
 window.setCalendarMode=function(mode){
-  const cats=(typeof visibleCategories==='function'?visibleCategories():[]);
-  if(mode==='category'){
-    if(!c.value && cats.length) c.value=cats[0].id;
-  }else{
-    c.value='';
-  }
+  /* El calendario público siempre es GENERAL. La categoría seleccionada
+     permanece arriba como referencia y no filtra la tabla del calendario. */
   if(typeof calendar==='function') calendar();
 };
 </script>
@@ -874,11 +890,30 @@ window.setCalendarMode=function(mode){
     trs.forEach((tr,ri)=>{const cells=[...tr.children];const widths=[54,360,108,108,108,108,108];let xx=margin; x.fillStyle=ri===0?'#1769c2':ri%2?'#f7fafd':'#ffffff';x.fillRect(margin,y,W-margin*2,rowH);x.strokeStyle='#c7d5e5';x.strokeRect(margin,y,W-margin*2,rowH);cells.forEach((td,i)=>{const ww=widths[i]||108;x.fillStyle=ri===0?'#ffffff':'#12355b';x.font=ri===0?'900 15px Arial':'800 15px Arial';x.textAlign=i===1?'left':'center';let s=text(td.innerText);if(s.length>27)s=s.slice(0,26)+'…';x.fillText(s,i===1?xx+8:xx+ww/2,y+36);xx+=ww});y+=rowH});x.textAlign='left';x.fillStyle='#667085';x.font='800 13px Arial';x.fillText('GAME ON FLAG · PORTAL PÚBLICO',margin,H-25);gofPublicSaveCanvas(cv,'Tabla_'+String(cat(c.value)||'Categoria').replace(/[^a-z0-9áéíóúñ]+/gi,'_')+'.png');
   };
   window.downloadPublicCalendarPNG=async function(){
-    const table=document.querySelector('#calendario .calendar-grid'); if(!table)return alert('No hay calendario visible para descargar.');
-    const trs=[...table.querySelectorAll('tr')],W=1200,margin=30,head=220,rowH=60,H=head+trs.length*rowH+70;
-    const cv=await gofPublicBrandCanvas('CALENDARIO','Calendario oficial',W,H),x=cv.getContext('2d');let y=head;
-    trs.forEach((tr,ri)=>{const cells=[...tr.children];const ww=(W-margin*2)/Math.max(1,cells.length);x.fillStyle=ri===0?'#1769c2':ri%2?'#f7fafd':'#fff';x.fillRect(margin,y,W-margin*2,rowH);x.strokeStyle='#c7d5e5';x.strokeRect(margin,y,W-margin*2,rowH);cells.forEach((td,i)=>{x.fillStyle=ri===0?'#fff':'#12355b';x.font=ri===0?'900 13px Arial':'800 12px Arial';x.textAlign=i===0?'center':'left';let s=text(td.innerText);if(s.length>38)s=s.slice(0,37)+'…';x.fillText(s,i===0?margin+ww/2:margin+i*ww+7,y+37)});y+=rowH});x.textAlign='left';x.fillStyle='#667085';x.font='800 12px Arial';x.fillText('GAME ON FLAG · PORTAL PÚBLICO',margin,H-25);gofPublicSaveCanvas(cv,'Calendario_'+String(league?.name||'Liga').replace(/[^a-z0-9áéíóúñ]+/gi,'_')+'.png');
+    /* La descarga SIEMPRE representa el calendario general completo, aunque
+       arriba esté seleccionada una categoría. */
+    const regular=data.matches.map(m=>({...m,_kind:'regular',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
+    const po=data.playoffs.map(m=>({...m,_kind:'playoff',_date:m.match_date,_time:m.match_time,_field:m.field_name}));
+    const all=[...regular,...po];
+    if(!all.length)return alert('No hay calendario visible para descargar.');
+    const textValue=v=>String(v??'').replace(/\s+/g,' ').trim();
+    const fieldNo=f=>{const z=String(f||'').match(/(?:campo|cancha)\s*[-#:]?\s*(\d+)/i);return z?Number(z[1]):99};
+    const weekKey=m=>m._kind==='playoff'?'PLAYOFFS':(m.round_number?String(m.round_number):'SIN SEMANA');
+    const weekLabel=k=>k==='PLAYOFFS'?'🏆 PLAYOFFS':k==='SIN SEMANA'?'📅 Semana pendiente':`📅 SEMANA ${k}`;
+    const dateLabel=arr=>{const ds=[...new Set(arr.map(m=>m._date).filter(Boolean))].sort();if(!ds.length)return 'Fecha pendiente';if(ds.length===1)return new Date(ds[0]+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}).replace(/^./,x=>x.toUpperCase());return 'Fechas: '+ds.map(d=>new Date(d+'T12:00:00Z').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'})).join(' · ')};
+    const fields=[1,2,3,4,...(all.some(m=>fieldNo(m._field)===5)?[5]:[])];
+    const groups={};all.forEach(m=>(groups[weekKey(m)]??=[]).push(m));
+    const weekOrder=Object.keys(groups).sort((a,b)=>{const na=a==='PLAYOFFS'?999:a==='SIN SEMANA'?998:Number(a),nb=b==='PLAYOFFS'?999:b==='SIN SEMANA'?998:Number(b);return na-nb});
+    const W=1500,margin=34,top=235,headerH=58,dayH=50,gameH=108,footer=55,timeW=105,fieldW=(W-margin*2-timeW)/Math.max(1,fields.length);
+    let totalH=top+headerH+footer;weekOrder.forEach(wk=>{totalH+=dayH;const times=[...new Set(groups[wk].map(m=>m._time?String(m._time).slice(0,5):'SIN HORA'))].sort();totalH+=times.length*gameH});
+    const H=Math.max(700,totalH),cv=await gofPublicBrandCanvas('CALENDARIO',String(cat(c.value)||'Todas las categorías'),W,H),x=cv.getContext('2d');let y=top;
+    x.fillStyle='#1769c2';x.fillRect(margin,y,W-margin*2,headerH);x.strokeStyle='#c7d5e5';x.strokeRect(margin,y,W-margin*2,headerH);
+    const header=['HORARIO',...fields.map(f=>'CAMPO '+f)];header.forEach((label,i)=>{const xx=i===0?margin:margin+timeW+(i-1)*fieldW,ww=i===0?timeW:fieldW;x.fillStyle='#fff';x.font='900 15px Arial';x.textAlign='center';x.fillText(label,xx+ww/2,y+36);x.strokeStyle='rgba(255,255,255,.35)';x.beginPath();x.moveTo(xx,y);x.lineTo(xx,y+headerH);x.stroke()});y+=headerH;
+    const wrap=(ctx,str,maxWidth,font,maxLines=3)=>{ctx.font=font;const words=textValue(str).split(' ').filter(Boolean),lines=[];let line='';for(const w of words){const test=line?line+' '+w:w;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=w}else line=test}if(line)lines.push(line);return lines.slice(0,maxLines)};
+    for(const wk of weekOrder){const games=groups[wk];x.fillStyle='#e7edf5';x.fillRect(margin,y,W-margin*2,dayH);x.strokeStyle='#c7d5e5';x.strokeRect(margin,y,W-margin*2,dayH);x.fillStyle='#12355b';x.font='900 15px Arial';x.textAlign='left';x.fillText(weekLabel(wk)+' · '+dateLabel(games),margin+12,y+31);y+=dayH;const times=[...new Set(games.map(m=>m._time?String(m._time).slice(0,5):'SIN HORA'))].sort();for(const tm of times){x.fillStyle='#f4f7fb';x.fillRect(margin,y,timeW,gameH);x.strokeStyle='#d5deea';x.strokeRect(margin,y,timeW,gameH);x.fillStyle='#12355b';x.font='900 16px Arial';x.textAlign='center';x.fillText(tm==='SIN HORA'?'Pendiente':tm,margin+timeW/2,y+58);for(let i=0;i<fields.length;i++){const f=fields[i],xx=margin+timeW+i*fieldW,cell=games.find(m=>fieldNo(m._field)===f&&(m._time?String(m._time).slice(0,5):'SIN HORA')===tm);x.fillStyle='#fff';x.fillRect(xx,y,fieldW,gameH);x.strokeStyle='#d5deea';x.strokeRect(xx,y,fieldW,gameH);if(!cell){x.fillStyle='#98a2b3';x.font='700 14px Arial';x.textAlign='center';x.fillText('—',xx+fieldW/2,y+58);continue}const isPo=cell._kind==='playoff',cname=textValue(cell.category_id?cat(cell.category_id):'Categoría'),a=isPo?team(cell.team_a_id).name:team(cell.home_team_id).name,b=isPo?team(cell.team_b_id).name:team(cell.away_team_id).name;x.fillStyle='#1769c2';x.font='900 11px Arial';x.textAlign='left';wrap(x,cname,fieldW-18,'900 11px Arial',1).forEach((ln,j)=>x.fillText(ln,xx+9,y+18+j*13));x.fillStyle='#12355b';wrap(x,textValue(a)+' vs '+textValue(b),fieldW-18,'800 14px Arial',3).forEach((ln,j)=>x.fillText(ln,xx+9,y+43+j*17));x.fillStyle='#667085';x.font='700 10px Arial';x.fillText(isPo?'🏆 Playoff':(cell.round_number?'🏈 Semana '+cell.round_number:'🏈'),xx+9,y+gameH-10)}y+=gameH}}
+    x.textAlign='left';x.fillStyle='#667085';x.font='800 12px Arial';x.fillText('GAME ON FLAG · PORTAL PÚBLICO',margin,H-22);gofPublicSaveCanvas(cv,'Calendario_General_'+String(league?.name||'Liga').replace(/[^a-z0-9áéíóúñ]+/gi,'_')+'.png');
   };
+
   window.downloadPublicMatchupsImage=async function(){
     const table=document.querySelector('#enfrentamientos .gof-matrix');if(!table)return alert('No hay enfrentamientos visibles para descargar.');
     const trs=[...table.querySelectorAll('tr')],W=1080,margin=18,head=178,rowH=44,H=head+trs.length*rowH+48;
@@ -1099,6 +1134,12 @@ window.setCalendarMode=function(mode){
   /* Descargar calendario siempre visible */
   #calendario .calendar-current .primary{display:inline-flex!important}
 }
+  .calendar-block{margin-top:10px!important}
+  .calendar-block-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+  .calendar-block-title h3{margin:0!important}
+  .cg-day-inner{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .calendar-download-row{text-align:center;margin:10px 0 16px}
+  .calendar-download-row .primary{font-size:12px!important;padding:8px 12px!important}
 </style>
 </body>
 </html>

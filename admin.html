@@ -1719,7 +1719,7 @@ async function loadReplacementCats(){const tid=val('rtour'),el=document.getEleme
 async function loadReplacementTeams(){const tid=val('rtour'),cat=val('rcat'),oldEl=document.getElementById('roldteam');if(!oldEl)return;if(!tid||!cat){oldEl.innerHTML='<option value="">Selecciona equipo que sale</option>';return}const {data:ins,error:ie}=await sb.from('tournament_teams').select('id,team_id,is_active').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(ie){oldEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const rows=(ins||[]).filter(x=>x.team_id),teamIds=rows.map(x=>x.team_id);const {data:teams,error:te}=teamIds.length?await sb.from('teams').select('id,name').in('id',teamIds).order('name'):{data:[],error:null};if(te){oldEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const teamMap=Object.fromEntries((teams||[]).map(x=>[x.id,x]));const active=rows.filter(x=>teamMap[x.team_id]);oldEl.innerHTML='<option value="">Selecciona equipo que sale</option>'+active.map(x=>`<option value="${esc(x.id)}">${esc(teamMap[x.team_id].name)}</option>`).join('');if(!active.length)oldEl.innerHTML='<option value="">No hay equipos activos en esta categoría</option>'}
 
 async function replaceTournamentTeam(){
-  const tt=val('roldteam'),name=val('rnewteamName').trim(),coach=val('rnewteamCoach').trim();
+  const tt=val('roldteam'),name=val('rnewteamName').trim(),coach=val('rnewteamCoach').trim(),note=val('rnote').trim();
   if(!tt)return alert('Selecciona el equipo que sale.');
   if(!name)return alert('Escribe el nombre del equipo que entra.');
   if(!coach)return alert('Escribe el nombre del Coach del equipo que entra.');
@@ -1729,11 +1729,12 @@ async function replaceTournamentTeam(){
   const {data:oldIns,error:oldErr}=await sb.from('tournament_teams').select('id,tournament_id,category_id,team_id,is_active').eq('id',tt).single();
   if(oldErr||!oldIns)return alert('No se pudo identificar el equipo que sale.');
   const tid=oldIns.tournament_id,cat=oldIns.category_id,oldTeam=oldIns.team_id;
-
   const {data:oldTeamRow}=await sb.from('teams').select('name').eq('id',oldTeam).maybeSingle();
   const oldName=oldTeamRow?.name||'equipo actual';
-  if(!confirm(`¿Confirmas la sustitución?\n\nSale: ${oldName}\nEntra: ${name}\nCoach: ${coach}\n\nIMPORTANTE:\n• Los partidos ya jugados del equipo que sale se conservan en su historial.\n• NO se pasarán esos partidos al equipo nuevo.\n• El equipo nuevo empezará con 0 partidos y el sistema le generará sus propios 7 partidos.\n• Las jornadas futuras se podrán regenerar sin tocar las jornadas cerradas.`))return;
 
+  if(!confirm(`¿Confirmas la sustitución?\n\nSale: ${oldName}\nEntra: ${name}\nCoach: ${coach}\n\nIMPORTANTE:\n• Los partidos ya jugados del equipo que sale se conservan como historial.\n• Los enfrentamientos originales de las jornadas NO se regeneran.\n• El equipo nuevo toma el lugar del equipo que sale en las jornadas futuras.\n• Si perdió jornadas anteriores, se crean reposiciones para el nuevo equipo cuando corresponda.\n• La jornada original de cada enfrentamiento se conserva.`))return;
+
+  // Buscar el equipo existente; si no existe, crearlo dentro de la liga actual.
   let newTeam=null;
   const {data:existing,error:findError}=await sb.from('teams').select('id,name,club_name').eq('league_id',gofCurrentOrganizationId).ilike('name',name).ilike('club_name',coach).limit(1);
   if(findError)return alert('No se pudo buscar el equipo nuevo: '+findError.message);
@@ -1744,36 +1745,34 @@ async function replaceTournamentTeam(){
     newTeam=created;
   }
 
-  // La sustitución NO reasigna el historial del equipo que sale.
-  // Primero se da de baja su inscripción y después se crea una inscripción nueva para el reemplazo.
-  const {error:de}=await sb.rpc('gof_deactivate_tournament_team',{p_tournament_team_id:tt,p_note:val('rnote').trim()||`Sustitución de ${oldName} por ${name}`});
-  if(de)return alert('No se pudo dar de baja el equipo que sale: '+de.message);
+  // La sustitución real se ejecuta en una sola función segura de Supabase.
+  // Esa función conserva el historial, mantiene round_number y reasigna solo lo futuro.
+  const {data:result,error:rpcError}=await sb.rpc('gof_replace_team_in_category',{
+    p_tournament_id:tid,
+    p_category_id:cat,
+    p_team_id:oldTeam,
+    p_replacement_team_id:newTeam.id,
+    p_replacement_note:note||`Sustitución de ${oldName} por ${newTeam.name}`
+  });
+  if(rpcError)return alert('No se pudo realizar la sustitución: '+rpcError.message);
+  if(!result?.ok)return alert('Supabase no confirmó la sustitución.');
 
-  const {error:tc}=await sb.from('tournament_categories').upsert({tournament_id:tid,category_id:cat},{onConflict:'tournament_id,category_id'});
-  if(tc)return alert('El equipo salió correctamente, pero no se pudo preparar la categoría para el reemplazo: '+tc.message);
-
-  const {data:newIns,error:ni}=await sb.from('tournament_teams').insert({tournament_id:tid,category_id:cat,team_id:newTeam.id,is_active:true}).select('id').single();
-  if(ni)return alert('El equipo anterior quedó dado de baja, pero no se pudo inscribir al reemplazo: '+ni.message);
-
-  // Los partidos futuros del equipo que salió NO se transfieren al nuevo.
-  // Los que ya tienen resultado/fecha de jornada cerrada se conservan.
-  const {data:future,error:fe}=await sb.from('matches').select('id,round_number,match_date,published,status').eq('tournament_id',tid).eq('category_id',cat).or(`home_team_id.eq.${oldTeam},away_team_id.eq.${oldTeam}`);
-  if(fe)return alert('La sustitución se realizó, pero no se pudieron revisar los partidos pendientes: '+fe.message);
-  const futureIds=(future||[]).filter(m=>!m.published && !m.match_date).map(m=>m.id);
-  if(futureIds.length){
-    const {error:del}=await sb.from('matches').delete().in('id',futureIds);
-    if(del)return alert('La sustitución se realizó, pero no se pudieron limpiar todos los enfrentamientos futuros: '+del.message);
-  }
-
-  document.getElementById('replacementStatus').textContent=`Sustitución realizada. Entró ${newTeam.name}. Sus partidos empiezan desde cero: 0/7. El historial de ${oldName} no se transfirió.`;
-  document.getElementById('rnewteamName').value='';document.getElementById('rnewteamCoach').value='';document.getElementById('rnote').value='';
-  toast('Equipo sustituido. El nuevo equipo aparece en Enfrentamientos para asignar sus rivales manualmente.');
+  const updated=Number(result.future_matches_updated||0);
+  const makeups=Number(result.makeup_matches_created||0);
+  const startRound=result.start_round?`Jornada ${result.start_round}`:'las jornadas pendientes';
+  document.getElementById('replacementStatus').textContent=`✅ Sustitución realizada. ${oldName} sale y ${newTeam.name} entra desde ${startRound}. ${updated} enfrentamiento(s) futuro(s) reasignado(s) y ${makeups} reposición(es) creada(s). El historial anterior se conserva.`;
+  document.getElementById('rnewteamName').value='';
+  document.getElementById('rnewteamCoach').value='';
+  document.getElementById('rnote').value='';
+  toast('Sustitución realizada y sincronizada con Supabase');
   window.__gofNewTeamId=String(newTeam.id);
-  await loadEnrollmentSelectors();await loadReplacementSelectors();await loadDeactivateSelectors();await loadScheduleSelectors();
-  // La sustitución conserva el historial y deja al nuevo equipo sin rivales futuros automáticos.
+  await loadEnrollmentSelectors();
+  await loadReplacementSelectors();
+  await loadDeactivateSelectors();
+  await refreshAllSelectors();
+  await loadScheduleSelectors();
   await gofRefreshEnfrentamientosAfterTeamChange(tid,cat,newTeam.id);
 }
-
 async function loadDeactivateSelectors(){await loadLeagueContextFinal();const el=document.getElementById('deltour');if(!el)return;const {data:t,error}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).eq('status','proximo').order('created_at',{ascending:false});if(error){el.innerHTML='<option value="">No se pudieron cargar torneos</option>';return}fill('deltour',t||[],'id','name');await loadDeactivateCats()}
 async function loadDeactivateCats(){const tid=val('deltour'),el=document.getElementById('delcat');if(!el)return;if(!tid){el.innerHTML='<option value="">Selecciona categoría</option>';await loadDeactivateTeams();return}const {data,error}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);if(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}const ids=(data||[]).map(x=>x.category_id).filter(Boolean);if(!ids.length){el.innerHTML='<option value="">Sin categorías inscritas</option>';await loadDeactivateTeams();return}const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',ids).order('name');if(ce){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}fill('delcat',cats||[],'id','name');await loadDeactivateTeams()}
 async function loadDeactivateTeams(){const tid=val('deltour'),cat=val('delcat'),el=document.getElementById('delteam');if(!el)return;if(!tid||!cat){el.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:ins,error}=await sb.from('tournament_teams').select('id,team_id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(error){el.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);if(!ids.length){el.innerHTML='<option value="">No hay equipos activos en esta categoría</option>';return}const {data:teams,error:te}=await sb.from('teams').select('id,name').in('id',ids).order('name');if(te){el.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const tm=Object.fromEntries((teams||[]).map(x=>[x.id,x.name]));el.innerHTML='<option value="">Selecciona equipo</option>'+(ins||[]).filter(x=>tm[x.team_id]).map(x=>`<option value="${esc(x.id)}">${esc(tm[x.team_id])}</option>`).join('')}

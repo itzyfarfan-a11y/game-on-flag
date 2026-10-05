@@ -931,7 +931,7 @@ async function getToken(){
    try{const r=await sb.auth.refreshSession();if(r.data?.session)session=r.data.session;else if(r.error)authError=authError||r.error}catch(e){authError=authError||e}
  }
  if(!session?.access_token){
-   try{await new Promise(r=>setTimeout(r,300));session=(await sb.auth.getSession()).data?.session||null}catch(e){authError=authError||e}
+   try{await new Promise(r=>setTimeout(r,1000));session=(await sb.auth.getSession()).data?.session||null}catch(e){authError=authError||e}
  }
  st.token=session?.access_token||'';
  if(!st.token)throw new Error(authError?.message||'Sesión de administración no disponible. Vuelve a entrar a tu liga y prueba nuevamente.');
@@ -961,7 +961,7 @@ async function resolveContext(){
  const cur=$('gofPubCurrent');if(cur)cur.innerHTML='<b>Liga:</b> '+esc(st.leagueName)+' &nbsp;·&nbsp; <b>Torneo actual:</b> '+esc(st.tournamentName);
 }
 window.gofPubPublish=async function(key){const input=$('gofPubFile-'+key),f=input?.files?.[0];if(!st.leagueId||!st.tournamentId){try{await resolveContext()}catch(e){return status(key,e.message||'No se pudo identificar la liga o torneo actual.','err')}}if(!st.leagueId||!st.tournamentId)return status(key,'No se pudo identificar la liga o torneo actual.','err');if(!f)return status(key,'Primero selecciona la imagen.','err');if(!/^image\/(png|jpeg|webp)$/.test(f.type))return status(key,'Solo PNG, JPG o WEBP.','err');if(f.size>15*1024*1024)return status(key,'La imagen no puede superar 15 MB.','err');const fd=new FormData();fd.append('league_id',st.leagueId);fd.append('tournament_id',st.tournamentId);fd.append('section',key);fd.append('title',sections.find(x=>x[0]===key)?.[1]||key);fd.append('file',f);status(key,'Publicando...');try{await api('/?action=publish',{method:'POST',body:fd});status(key,'✅ Publicada correctamente en su sección del Portal Público.','ok');input.value='';const p=$('gofPubPreview-'+key);if(p){p.style.display='none';p.removeAttribute('src')}}catch(e){status(key,e.message||'No se pudo publicar.','err')}};
-window.gofInitPublicacionDirecta=async function(){render();try{await resolveContext()}catch(e){const box=$('gofPubSections');if(box)box.innerHTML='<div class="card"><div class="gof-pub-status err">⚠️ '+esc(e.message||'No se pudo cargar la liga actual.')+'</div></div>'}};
+window.gofInitPublicacionDirecta=async function(){render();try{await getToken();await resolveContext()}catch(e){const box=$('gofPubSections');if(box)box.innerHTML='<div class="card"><div class="gof-pub-status err">⚠️ '+esc(e.message||'No se pudo validar la sesión de administración.')+'</div></div>'}};
 const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?oldSetView.apply(this,arguments):undefined;if(v==='publicacion')setTimeout(()=>gofInitPublicacionDirecta(),50);return r};render();
 })();
 </script>

@@ -3323,7 +3323,7 @@ async function loadStandings(){
  }catch(e){document.getElementById('standings').innerHTML='<div class="empty">No se pudo generar la clasificación: '+esc(e.message||String(e))+'</div>';}
 }
 async function gofShowReclassification(tid,catId){
- try{const recon=await gofReclassificationData(tid,catId);if(!recon)return;const base=recon.pairInfo.pair.base;const render=(title,rows)=>`<div style="margin-top:10px"><h4 style="margin:0 0 6px">${esc(title)}</h4><table><thead><tr><th>#</th><th>Equipo</th><th>Origen</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.category_id===recon.pairInfo.pair.selected.id?recon.pairInfo.pair.selected.name:recon.pairInfo.pair.other.name)}</td><td>${x.jj}</td><td>${x.jg}</td><td>${x.pa}</td><td>${x.pc}</td><td>${x.dif}</td></tr>`).join('')}</tbody></table></div>`;document.getElementById('standings').innerHTML=`<div class="card"><h3>🔄 Reclasificación general · ${esc(base)}</h3><div class="small mut">Los 16 (o el total disponible) se ordenan con todos sus resultados acumulados.</div>${render(base+' A · lugares 1–'+recon.splitAt,recon.groupA)}${render(base+' B · lugares '+(recon.splitAt+1)+'–'+recon.ranked.length,recon.groupB)}</div><div class="notice"><b>Playoffs:</b> los primeros 4 de la nueva A forman sus semifinales y final; los primeros 4 de la nueva B forman sus semifinales y final.</div>`}catch(e){alert(e.message||String(e))}
+ try{const recon=await gofReclassificationData(tid,catId);if(!recon)return;const base=recon.pairInfo.pair.base;const render=(title,rows)=>`<div style="margin-top:10px"><h4 style="margin:0 0 6px">${esc(title)}</h4><table><thead><tr><th>#</th><th>Equipo</th><th>Origen</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.category_id===recon.pairInfo.pair.selected.id?recon.pairInfo.pair.selected.name:recon.pairInfo.pair.other.name)}</td><td>${x.jj}</td><td>${x.jg}</td><td>${x.pa}</td><td>${x.pc}</td><td>${x.dif}</td></tr>`).join('')}</tbody></table></div>`;document.getElementById('standings').innerHTML=`<div class="card"><h3>🔄 Reclasificación general · ${esc(base)}</h3><div class="small mut">Los 16 (o el total disponible) se ordenan con todos sus resultados acumulados.</div>${render(base+' A · lugares 1–'+recon.splitAt,recon.groupA)}${render(base+' B · lugares '+(recon.splitAt+1)+'–'+recon.ranked.length,recon.groupB)}</div><div class="notice"><b>Playoffs:</b> la administración elige manualmente si la nueva A o B juega Cuartos → Semifinal → Final o Semifinal → Final, y después puede ajustar las llaves manualmente.</div>`}catch(e){alert(e.message||String(e))}
 }
 
 
@@ -4718,7 +4718,7 @@ window.addEventListener('load',async function(){
   }
 
   // Exponer el estado para los módulos posteriores de Enfrentamientos.
-  // Algunas rutinas históricas llaman esta función desde otro bloque <script>.
+  // Algunas rutinas históricas llaman esta función desde otro bloque de JavaScript.
   window.updateRoundState=updateRoundState;
   window.gofUpdateRoundState=updateRoundState;
 

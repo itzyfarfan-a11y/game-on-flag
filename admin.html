@@ -1156,8 +1156,8 @@ const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?ol
 </div></details>
 
 <details><summary>💸 <b>3. GASTOS</b><span>›</span></summary><div class="finance-panel">
-<div class="notice">Solo abre esta sección cuando quieras capturar lo que paga la organización por jornada.</div>
-<div class="finance-table-scroll"><table class="finance-fixed-simple"><thead><tr><th>Jornada</th><th>Campos</th><th>Horas</th><th>Renta/campo/h</th><th>Árbitros/campo</th><th>$/árbitro</th><th>Fotógrafo</th><th>Paramédico</th><th>Vigilante</th><th>Otros</th><th>Total</th></tr></thead><tbody id="financeQuickExpenseRows"></tbody></table></div>
+<div class="notice">Captura los gastos de cada jornada. La renta es por hora del campo completo; el campo completo se divide en 4 campitos. Los campitos solo sirven para calcular árbitros.</div>
+<div class="finance-table-scroll"><table class="finance-fixed-simple"><thead><tr><th>Jornada</th><th>Campitos para arbitraje</th><th>Horas de renta</th><th>Renta del campo completo / hora</th><th>Árbitros/campo</th><th>$/árbitro</th><th>Fotógrafo</th><th>Paramédico</th><th>Vigilante</th><th>Otros</th><th>Total</th></tr></thead><tbody id="financeQuickExpenseRows"></tbody></table></div>
 <button class="gold" type="button" onclick="saveQuickFinanceExpenses()" style="margin-top:10px">💾 Guardar gastos</button>
 </div></details>
 
@@ -1349,7 +1349,7 @@ function recalcQuickFinance(){
   let income=0,expenses=0;
   document.querySelectorAll('#financeQuickExpenseRows [data-round]').forEach(row=>{
     const fields=Number(row.querySelector('.q-exp-fields')?.value||0),hours=Number(row.querySelector('.q-exp-hours')?.value||0),fieldRate=Number(row.querySelector('.q-exp-field-rate')?.value||0),refs=Number(row.querySelector('.q-exp-refs')?.value||2),refRate=Number(row.querySelector('.q-exp-ref-rate')?.value||0),photo=Number(row.querySelector('.q-exp-photo')?.value||0),param=Number(row.querySelector('.q-exp-param')?.value||0),watch=Number(row.querySelector('.q-exp-watch')?.value||0),other=Number(row.querySelector('.q-exp-other')?.value||0);
-    const total=(fields*hours*fieldRate)+(fields*refs*refRate)+photo+param+watch+other; expenses+=total;
+    const total=(hours*fieldRate)+(fields*refs*refRate)+photo+param+watch+other; expenses+=total;
     const cell=row.querySelector('.q-exp-total');if(cell)cell.textContent='$'+total.toFixed(2);
   });
   const live=document.getElementById('financeQuickLive');if(live)live.innerHTML=`<b>Gastos capturados:</b> $${expenses.toFixed(2)}`;
@@ -1368,31 +1368,43 @@ async function loadFinanceQuickRows(){
 }
 async function loadFinanceCategoryPrices(){
   const tid=val('finT'),body=document.getElementById('financeCategoryPriceRows'),exSel=document.getElementById('financeExceptionTeam');
-  if(!tid||!body)return;
+  if(!tid||!body||!sb)return;
   body.innerHTML='<tr><td colspan="5" class="mut">Cargando equipos…</td></tr>';
-  const catQ=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
-  const teamQ=await sb.from('tournament_teams').select('id,category_id,team_id,teams(id,name)').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id');
-  if(teamQ.error){
-    body.innerHTML=`<tr><td colspan="5" class="mut">No se pudieron cargar los equipos: ${esc(teamQ.error.message)}</td></tr>`;
+  try{
+    const [{data:tc,error:tcErr},{data:tt,error:ttErr},{data:chargeRows,error:chErr}]=await Promise.all([
+      sb.from('tournament_categories').select('category_id').eq('tournament_id',tid),
+      sb.from('tournament_teams').select('id,category_id,team_id').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id'),
+      sb.from('finance_charges').select('tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid)
+    ]);
+    if(tcErr)throw tcErr;if(ttErr)throw ttErr;if(chErr)throw chErr;
+    const teams=tt||[],charges=chargeRows||[];
+    const catIds=[...new Set((tc||[]).map(x=>x.category_id).concat(teams.map(x=>x.category_id)))].filter(Boolean);
+    const teamIds=[...new Set(teams.map(t=>t.team_id).filter(Boolean))];
+    const [catQ,teamNameQ]=await Promise.all([
+      catIds.length?sb.from('categories').select('id,name').in('id',catIds):Promise.resolve({data:[],error:null}),
+      teamIds.length?sb.from('teams').select('id,name').in('id',teamIds):Promise.resolve({data:[],error:null})
+    ]);
+    if(catQ.error)throw catQ.error;if(teamNameQ.error)throw teamNameQ.error;
+    const catNames=new Map((catQ.data||[]).map(x=>[x.id,x.name]));
+    const teamNames=new Map((teamNameQ.data||[]).map(x=>[x.id,x.name]));
+    const chargeMap=new Map(charges.map(c=>[`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`,Number(c.amount_due||0)]));
+    const groups={};teams.forEach(t=>(groups[t.category_id]??=[]).push(t));
+    const catList=Object.keys(groups).filter(id=>(groups[id]||[]).length>0).map(id=>({id,name:catNames.get(id)||'Categoría'}));
+    window.__financeCats=catList;
+    body.innerHTML=catList.map(c=>{
+      const ts=groups[c.id]||[];
+      const insVals=ts.map(t=>chargeMap.get(`${t.id}|inscripcion|`)||0).filter(v=>v>0);
+      const arbVals=ts.map(t=>chargeMap.get(`${t.id}|arbitraje|1`)||0).filter(v=>v>0);
+      const ins=insVals[0]||0,arb=arbVals[0]||0;
+      const sameIns=insVals.length>0&&insVals.every(v=>v===ins),sameArb=arbVals.length>0&&arbVals.every(v=>v===arb);
+      return `<tr data-category-id="${esc(c.id)}"><td><b>${esc(c.name)}</b></td><td class="finance-category-count">${ts.length}</td><td><input class="cat-ins" type="number" min="0" step="1" value="${sameIns&&ins?ins:''}" placeholder="$1,500"></td><td><input class="cat-arb" type="number" min="0" step="1" value="${sameArb&&arb?arb:''}" placeholder="$550"></td><td><button class="gold finance-save-price" type="button" onclick="applyFinanceCategoryPrice(this.closest('tr'))">💾 Aplicar a ${ts.length}</button></td></tr>`;
+    }).join('')||'<tr><td colspan="5" class="mut">No hay equipos activos inscritos en este torneo.</td></tr>';
+    if(exSel)exSel.innerHTML='<option value="">Selecciona equipo</option>'+teams.map(t=>`<option value="${esc(t.id)}">${esc(teamNames.get(t.team_id)||'Equipo')} · ${esc(catNames.get(t.category_id)||'Categoría')}</option>`).join('');
+  }catch(e){
+    console.error('loadFinanceCategoryPrices',e);
+    body.innerHTML=`<tr><td colspan="5" class="mut">No se pudieron cargar los equipos: ${esc(e?.message||e)}</td></tr>`;
     if(exSel)exSel.innerHTML='<option value="">No se pudieron cargar equipos</option>';
-    return;
   }
-  const chargeQ=await sb.from('finance_charges').select('tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid);
-  const cats=catQ.data||[],teams=teamQ.data||[],charges=chargeQ.data||[];
-  const chargeMap=new Map(charges.map(c=>[`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`,Number(c.amount_due||0)]));
-  const groups={};teams.forEach(t=>(groups[t.category_id]??=[]).push(t));
-  const catNames=new Map(cats.map(c=>[c.category_id,c.categories?.name||'Categoría']));
-  const catList=Object.keys(groups).filter(id=>(groups[id]||[]).length>0).map(id=>({id,name:catNames.get(id)||'Categoría'}));
-  window.__financeCats=catList;
-  body.innerHTML=catList.map(c=>{
-    const ts=groups[c.id]||[];
-    const insVals=ts.map(t=>chargeMap.get(`${t.id}|inscripcion|`)||0).filter(v=>v>0);
-    const arbVals=ts.map(t=>chargeMap.get(`${t.id}|arbitraje|1`)||0).filter(v=>v>0);
-    const ins=insVals[0]||0,arb=arbVals[0]||0;
-    const sameIns=insVals.length>0&&insVals.every(v=>v===ins),sameArb=arbVals.length>0&&arbVals.every(v=>v===arb);
-    return `<tr data-category-id="${esc(c.id)}"><td><b>${esc(c.name)}</b></td><td class="finance-category-count">${ts.length}</td><td><input class="cat-ins" type="number" min="0" step="1" value="${sameIns&&ins?ins:''}" placeholder="$1,500"></td><td><input class="cat-arb" type="number" min="0" step="1" value="${sameArb&&arb?arb:''}" placeholder="$550"></td><td><button class="gold finance-save-price" type="button" onclick="applyFinanceCategoryPrice(this.closest('tr'))">💾 Aplicar a ${ts.length}</button></td></tr>`;
-  }).join('')||'<tr><td colspan="5" class="mut">No hay equipos activos inscritos en este torneo.</td></tr>';
-  if(exSel)exSel.innerHTML='<option value="">Selecciona equipo</option>'+teams.map(t=>`<option value="${esc(t.id)}">${esc(t.teams?.name||'Equipo')} · ${esc(catList.find(c=>c.id===t.category_id)?.name||'Categoría')}</option>`).join('');
 }
 function toggleFinanceExceptions(){const p=document.getElementById('financeExceptionsPanel');if(p)p.style.display=p.style.display==='none'?'block':'none'}
 async function applyFinanceCategoryPrice(tr){
@@ -1452,8 +1464,18 @@ async function downloadFinanceTeamMatrixImage(){
 }
 async function renderFinanceTeamMatrix(){
   const tid=val('finT'),box=document.getElementById('financeTeamMatrixBox');if(!box||!tid||!sb){if(box)box.innerHTML='';return;}
-  const [{data:teams,error:te},{data:charges,error:ce}]=await Promise.all([sb.from('tournament_teams').select('id,category_id,team_id,teams(name),categories(name)').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id'),sb.from('finance_charges').select('id,tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid)]);
+  const [{data:teams,error:te},{data:charges,error:ce}]=await Promise.all([sb.from('tournament_teams').select('id,category_id,team_id').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id'),sb.from('finance_charges').select('id,tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid)]);
   if(te||ce){box.innerHTML='<div class="empty">No se pudo cargar la cuenta de equipos.</div>';return;}
+  const teamIds=[...new Set((teams||[]).map(t=>t.team_id).filter(Boolean))];
+  const catIds=[...new Set((teams||[]).map(t=>t.category_id).filter(Boolean))];
+  const [tn,cn]=await Promise.all([
+    teamIds.length?sb.from('teams').select('id,name').in('id',teamIds):Promise.resolve({data:[],error:null}),
+    catIds.length?sb.from('categories').select('id,name').in('id',catIds):Promise.resolve({data:[],error:null})
+  ]);
+  if(tn.error||cn.error){box.innerHTML='<div class="empty">No se pudieron cargar los nombres de equipos o categorías.</div>';return;}
+  const teamNames=new Map((tn.data||[]).map(x=>[x.id,x.name]));
+  const catNames=new Map((cn.data||[]).map(x=>[x.id,x.name]));
+  (teams||[]).forEach(t=>{t.teams={name:teamNames.get(t.team_id)||'Equipo'};t.categories={name:catNames.get(t.category_id)||'Categoría'};});
   const ids=(charges||[]).map(c=>c.id);let pays=[];if(ids.length){const q=await sb.from('finance_payments').select('charge_id,amount').in('charge_id',ids);if(q.error){box.innerHTML='<div class="empty">No se pudieron consultar los pagos.</div>';return;}pays=q.data||[];}
   const paid={};(pays||[]).forEach(x=>paid[x.charge_id]=(paid[x.charge_id]||0)+Number(x.amount||0));const byKey=new Map((charges||[]).map(c=>[`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`,c]));const groups={};(teams||[]).forEach(t=>(groups[t.categories?.name||'Categoría']??=[]).push(t));
   const cell=(tt,key,round)=>{const c=byKey.get(`${tt.id}|${key}|${round??''}`),due=Number(c?.amount_due||0),p=Number(c?paid[c.id]||0:0);if(!c||due<=0)return '<span class="finance-blank-cell">—</span>';const pending=Math.max(0,due-p),full=p>=due,cls=full?'finance-paid':p>0?'finance-partial':'finance-pending',value=full?'':String(p);return `<input class="finance-payment-input ${cls}" type="number" min="0" max="${due}" step="1" value="${value}" placeholder="${full?'✓':'$0'}" data-charge-id="${c.id}" data-due="${due}" data-paid="${p}" onchange="saveFinanceMatrixAmount(this)" onfocus="this.select()" title="Debe $${due.toFixed(0)} · Pagado $${p.toFixed(0)} · Falta $${pending.toFixed(0)}">`};
@@ -1464,10 +1486,17 @@ async function saveQuickFinanceExpenses(){
   const tid=val('finT');if(!tid)return;const user=(await sb.auth.getUser()).data.user?.id||null;
   for(const tr of document.querySelectorAll('#financeQuickExpenseRows tr[data-round]')){
     const r=Number(tr.dataset.round),fields=Number(tr.querySelector('.q-exp-fields')?.value||0),hours=Number(tr.querySelector('.q-exp-hours')?.value||0),fieldRate=Number(tr.querySelector('.q-exp-field-rate')?.value||0),refs=Number(tr.querySelector('.q-exp-refs')?.value||2),refRate=Number(tr.querySelector('.q-exp-ref-rate')?.value||0),photo=Number(tr.querySelector('.q-exp-photo')?.value||0),param=Number(tr.querySelector('.q-exp-param')?.value||0),watch=Number(tr.querySelector('.q-exp-watch')?.value||0),other=Number(tr.querySelector('.q-exp-other')?.value||0);
-    const values={renta_campo:fields*hours*fieldRate,arbitros:fields*refs*refRate,fotografo:photo,paramedico:param,vigilante:watch,otros:other};
+    const values={renta_campo:hours*fieldRate,arbitros:fields*refs*refRate,fotografo:photo,paramedico:param,vigilante:watch,otros:other};
     const labels={renta_campo:'Renta de campos',arbitros:'Pago de árbitros',fotografo:'Pago de fotógrafo',paramedico:'Pago de paramédico',vigilante:'Pago de vigilante',otros:'Otros'};
     for(const [type,amount] of Object.entries(values)){
-      const {error}=await sb.from('finance_other_expenses').upsert({tournament_id:tid,round_number:r,scope:'regular',expense_type:type,concept:labels[type],amount,expense_date:new Date().toISOString().slice(0,10),created_by:user,expense_key:`fixed_j${r}_${type}`,note:type==='renta_campo'?JSON.stringify({fields,hours,rate:fieldRate}):type==='arbitros'?JSON.stringify({fields,refs,rate:refRate}):null},{onConflict:'tournament_id,expense_key'});if(error)return alert('No se pudo guardar '+labels[type]+': '+error.message);
+      const expenseKey=`fixed_j${r}_${type}`;
+      const payload={tournament_id:tid,round_number:r,scope:'regular',expense_type:type,concept:labels[type],amount,expense_date:new Date().toISOString().slice(0,10),created_by:user,expense_key:expenseKey,note:type==='renta_campo'?JSON.stringify({hours,rate:fieldRate}):type==='arbitros'?JSON.stringify({fields,refs,rate:refRate}):null};
+      const existing=await sb.from('finance_other_expenses').select('id').eq('tournament_id',tid).eq('expense_key',expenseKey).maybeSingle();
+      if(existing.error)return alert('No se pudo consultar '+labels[type]+': '+existing.error.message);
+      let error=null;
+      if(existing.data){const q=await sb.from('finance_other_expenses').update(payload).eq('id',existing.data.id);error=q.error;}
+      else{const q=await sb.from('finance_other_expenses').insert(payload);error=q.error;}
+      if(error)return alert('No se pudo guardar '+labels[type]+': '+error.message);
     }
   }
   toast('💸 Gastos fijos guardados');await loadFinanceQuickRows();await renderFinance();
@@ -1553,7 +1582,7 @@ async function loadFinanceCategories(){
 async function loadFinanceFixedRows(){
   const tbody=document.getElementById('financeFixedRows');if(!tbody)return;
   tbody.innerHTML=Array.from({length:7},(_,i)=>`<tr data-fixed-round="${i+1}"><td><b>J${i+1}</b></td><td><input class="fx-fields" type="number" min="1" max="5" step="1" value="4" style="width:72px"></td><td><input class="fx-hours" type="number" min="0" step="0.5" value="1" style="width:78px"></td><td><input class="fx-field-rate" type="number" min="0" step="0.01" placeholder="$0"></td><td><input class="fx-refs" type="number" min="0" step="1" value="2" style="width:72px"></td><td><input class="fx-ref-rate" type="number" min="0" step="0.01" placeholder="$0"></td><td><input class="fx-photo" type="number" min="0" step="0.01" placeholder="$0"></td><td><input class="fx-param" type="number" min="0" step="0.01" placeholder="$0"></td><td><input class="fx-watch" type="number" min="0" step="0.01" placeholder="$0"></td><td><div style="display:flex;gap:4px;align-items:center"><input class="fx-other-concept" type="text" placeholder="Concepto" style="min-width:120px"><input class="fx-other" type="number" min="0" step="0.01" placeholder="$0" style="width:90px"><button type="button" title="Editar otros" onclick="this.previousElementSibling.previousElementSibling.focus()">✏️</button></div></td><td class="fx-total">$0.00</td><td><button type="button" onclick="saveFinanceFixedRow(${i+1})">💾</button></td></tr>`).join('');
-  const recalc=tr=>{const fields=Number(tr.querySelector('.fx-fields')?.value||0),hours=Number(tr.querySelector('.fx-hours')?.value||0),fieldRate=Number(tr.querySelector('.fx-field-rate')?.value||0),refs=Number(tr.querySelector('.fx-refs')?.value||0),refRate=Number(tr.querySelector('.fx-ref-rate')?.value||0),photo=Number(tr.querySelector('.fx-photo')?.value||0),param=Number(tr.querySelector('.fx-param')?.value||0),watch=Number(tr.querySelector('.fx-watch')?.value||0),other=Number(tr.querySelector('.fx-other')?.value||0);const total=(fields*hours*fieldRate)+(fields*refs*refRate)+photo+param+watch+other;tr.querySelector('.fx-total').textContent='$'+total.toFixed(2)};
+  const recalc=tr=>{const fields=Number(tr.querySelector('.fx-fields')?.value||0),hours=Number(tr.querySelector('.fx-hours')?.value||0),fieldRate=Number(tr.querySelector('.fx-field-rate')?.value||0),refs=Number(tr.querySelector('.fx-refs')?.value||0),refRate=Number(tr.querySelector('.fx-ref-rate')?.value||0),photo=Number(tr.querySelector('.fx-photo')?.value||0),param=Number(tr.querySelector('.fx-param')?.value||0),watch=Number(tr.querySelector('.fx-watch')?.value||0),other=Number(tr.querySelector('.fx-other')?.value||0);const total=(hours*fieldRate)+(fields*refs*refRate)+photo+param+watch+other;tr.querySelector('.fx-total').textContent='$'+total.toFixed(2)};
   tbody.querySelectorAll('input').forEach(x=>x.addEventListener('input',()=>recalc(x.closest('tr'))));
   tbody.querySelectorAll('tr').forEach(recalc);
 }

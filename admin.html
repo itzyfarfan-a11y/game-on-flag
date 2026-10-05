@@ -1850,10 +1850,8 @@ async function initAdminSession(){
     msg.textContent=e?.message||'No se pudo verificar el acceso.';
   }
 }
-if(location.pathname.endsWith('/admin.html')){
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initAdminSession);
-  else initAdminSession();
-}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initAdminSession);
+else initAdminSession();
 // Solo una recuperación real debe abrir "Nueva contraseña".
 // Un login normal también puede contener refresh_token, por lo que NO se considera recuperación.
 (function(){

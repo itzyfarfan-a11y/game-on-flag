@@ -919,8 +919,9 @@ body.home-screen .admin-home-stats{display:none!important;}
 <script id="gof-publicacion-directa-js">
 (function(){
 const FN='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/direct-publication';
-const sections=[['calendario','📅 CALENDARIO','Se publicará en Calendario del Portal Público.'],['enfrentamientos','⚔️ ENFRENTAMIENTOS','Se publicará en Enfrentamientos del Portal Público.'],['resultados','🏈 RESULTADOS','Se publicará en Resultados del Portal Público.'],['tablas','📊 TABLA GENERAL','Se publicará en Tabla General del Portal Público.']];
-const st={token:'',leagueId:'',tournamentId:'',leagueName:'',tournamentName:''};const $=id=>document.getElementById(id);
+const sections=[['calendario','📅 CALENDARIO','Se publicará en Calendario del Portal Público.'],['enfrentamientos','⚔️ ENFRENTAMIENTOS','Se publicará en Enfrentamientos del Portal Público.'],['resultados','🏈 RESULTADOS','Se publicará en Resultados del Portal Público.'],['tablas','📊 TABLA GENERAL','Se publicará en Tabla General del Portal Público.'],['galeria','📸 GALERÍA','Sube una fotografía ocasional de la jornada. Aparecerá dentro de Publicaciones del Portal Público.']];
+const st={token:'',leagueId:'',tournamentId:'',leagueName:'',tournamentName:''};
+const sectionForApi=key=>key==='galeria'?'galeria':key;const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 async function getToken(){
  if(st.token)return st.token;

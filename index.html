@@ -594,7 +594,7 @@ async function playoffs(){
 }
 async function publicAnnouncementsSection(){
   const s=document.getElementById('anuncios');
-  s.innerHTML='<h2>📢 Anuncios</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Las publicaciones directas realizadas por la administración aparecerán aquí.</div></div>';
+  s.innerHTML='<h2>📱 Publicaciones</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Las publicaciones directas realizadas por la administración aparecerán aquí.</div></div>';
   if(typeof window.gofRenderDirectAnnouncements==='function') await window.gofRenderDirectAnnouncements();
 }
 function publicNotices(){const s=document.getElementById('avisos');s.innerHTML='<h2>📣 Avisos</h2>'+(notices.length?notices.map(n=>'<div class="card"><span class="badge">'+esc(n.type||'Aviso')+'</span><h3 style="margin:8px 0 5px">'+esc(n.title||'Aviso')+'</h3>'+(n.team?'<div class="muted">Equipo: '+esc(n.team)+'</div>':'')+(n.person?'<div class="muted">Persona: '+esc(n.person)+'</div>':'')+(n.notice_date?'<div class="muted">Fecha: '+esc(n.notice_date)+'</div>':'')+(n.valid_until?'<div class="muted">Vigencia: '+esc(n.valid_until)+'</div>':'')+(n.description?'<p>'+esc(n.description)+'</p>':'')+'</div>').join(''):'<div class="empty">No hay avisos publicados.</div>')}
@@ -1216,7 +1216,7 @@ window.setCalendarMode=function(mode){
   }
 
   function sectionLabel(section){
-    return ({calendario:'Calendario',enfrentamientos:'Enfrentamientos',resultados:'Resultados',tabla:'Tabla',tablas:'Tabla',avisos:'Avisos',anuncios:'Anuncios'}[section]||section||'Publicación');
+    return ({calendario:'Calendario',enfrentamientos:'Enfrentamientos',resultados:'Resultados',tabla:'Tabla',tablas:'Tabla',avisos:'Avisos',anuncios:'Publicaciones',galeria:'Galería'}[section]||section||'Publicación');
   }
 
   function announcementsHtml(){
@@ -1237,9 +1237,9 @@ window.setCalendarMode=function(mode){
   async function renderDirectAnnouncements(){
     const el=document.getElementById('anuncios');
     if(!el)return;
-    el.innerHTML='<h2>📢 Anuncios</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Cargando publicaciones directas...</div></div>';
+    el.innerHTML='<h2>📱 Publicaciones</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Cargando publicaciones directas...</div></div>';
     await loadDirectPublications();
-    el.innerHTML='<h2>📢 Anuncios</h2>'+announcementsHtml();
+    el.innerHTML='<h2>📱 Publicaciones</h2>'+announcementsHtml();
   }
 
   window.gofRenderDirectAnnouncements=renderDirectAnnouncements;

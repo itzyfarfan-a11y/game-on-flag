@@ -564,14 +564,37 @@ async function results(){
  h+=rounds.map(r=>{const games=groups[r];return '<details class="gof-results-week" data-round="'+r+'" open><summary><span><b>📋 Resultados Semana '+r+'</b><small>Jornada '+r+' · '+games.length+' partido(s)</small></span><span class="gof-week-chevron">▾</span></summary><div class="gof-results-week-body"><div class="gof-results-table-wrap"><table class="gof-results-table"><thead><tr><th>HORA</th><th>CAMPO</th><th>CATEGORÍA</th><th>LOCAL</th><th>MARCADOR</th><th>VISITANTE</th></tr></thead><tbody>'+games.map(m=>{const dot=m.status==='incomparecencia'?'<span class="gof-forfeit-dot" title="FORFEIT">•</span>':'';const score=(m.home_score!==null&&m.away_score!==null)?m.home_score+' - '+m.away_score:'—';return '<tr><td>'+esc(publicResultValue(m,'hora'))+'</td><td>'+esc(publicResultValue(m,'campo'))+'</td><td>'+esc(publicResultValue(m,'categoria'))+'</td><td><b>'+esc(publicResultValue(m,'local'))+'</b></td><td class="gof-score-cell">'+esc(score)+' '+dot+'</td><td><b>'+esc(publicResultValue(m,'visitante'))+'</b></td></tr>'}).join('')+'</tbody></table></div></div></details>'}).join('');
  s.innerHTML=h;
 }
+function publicABPair(catId){
+ const selected=data.categories.find(x=>String(x.id)===String(catId));
+ if(!selected)return null;
+ const m=String(selected.name||'').trim().match(/^(.*)\s+([AB])$/i);if(!m)return null;
+ const base=m[1].trim(),role=m[2].toUpperCase();
+ const other=data.categories.find(x=>String(x.id)!==String(catId)&&String(x.name||'').trim().replace(/\s+[AB]$/i,'').toLowerCase()===base.toLowerCase()&&String(x.name||'').trim().match(/\s+([AB])$/i)?.[1].toUpperCase()===(role==='A'?'B':'A'));
+ return other?{base,role,selected,other}:null;
+}
+function publicCategoryRows(catIds){
+ const ids=new Set(catIds.map(String)),m={};
+ data.teams.filter(tm=>(tm.category_ids||[]).some(id=>ids.has(String(id)))).forEach(tm=>{m[tm.id]={id:tm.id,jj:0,jg:0,pa:0,pc:0,forfeit:false,category_id:(tm.category_ids||[]).find(id=>ids.has(String(id)))};});
+ data.matches.filter(x=>ids.has(String(x.category_id))&&(x.status==='jugado'||x.status==='incomparecencia')).forEach(x=>{if(!m[x.home_team_id]||!m[x.away_team_id])return;const excluded=x.stats_exclude_team_id||null,a=m[x.home_team_id],b=m[x.away_team_id],hs=Number(x.home_score)||0,as=Number(x.away_score)||0;if(x.home_team_id!==excluded){a.jj++;a.pa+=hs;a.pc+=as;if(hs>as)a.jg++;if(x.status==='incomparecencia'&&x.absent_team_id===x.home_team_id)a.forfeit=true}if(x.away_team_id!==excluded){b.jj++;b.pa+=as;b.pc+=hs;if(as>hs)b.jg++;if(x.status==='incomparecencia'&&x.absent_team_id===x.away_team_id)b.forfeit=true}});
+ return Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.dif-a.dif||b.pa-a.pa||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));
+}
 async function table(){
  const s=document.getElementById('tabla');
  if(!c.value){s.innerHTML='<h2>📊 Tabla de posiciones</h2><div class="empty">Selecciona una categoría para mostrar su tabla.</div>';return}
- const m={};
- data.teams.filter(tm=>(tm.category_ids||[]).includes(c.value)).forEach(tm=>{m[tm.id]={id:tm.id,jj:0,jg:0,pa:0,pc:0,forfeit:false}});
- data.matches.filter(x=>x.category_id===c.value&&(x.status==='jugado'||x.status==='incomparecencia')).forEach(x=>{if(!m[x.home_team_id]||!m[x.away_team_id])return;const excluded=x.stats_exclude_team_id||null;const a=m[x.home_team_id],b=m[x.away_team_id],hs=Number(x.home_score)||0,as=Number(x.away_score)||0;if(x.home_team_id!==excluded){a.jj++;a.pa+=hs;a.pc+=as;if(hs>as)a.jg++;if(x.status==='incomparecencia'&&x.absent_team_id===x.home_team_id)a.forfeit=true}if(x.away_team_id!==excluded){b.jj++;b.pa+=as;b.pc+=hs;if(as>hs)b.jg++;if(x.status==='incomparecencia'&&x.absent_team_id===x.away_team_id)b.forfeit=true}});
- const rows=Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.dif-a.dif||b.pa-a.pa||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));
- s.innerHTML=`<h2>📊 Tabla de posiciones · ${esc(cat(c.value))}</h2><div class="card"><button type="button" class="primary" onclick="downloadPublicTableImage()">🖼️ Descargar tabla</button><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>${rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td><b>${x.forfeit?'<span class="gof-forfeit-dot" title="FORFEIT" aria-label="FORFEIT"></span>':''}${esc(team(x.id).name)}</b></td><td>${x.jj}</td><td>${x.jg}</td><td>${x.pa}</td><td>${x.pc}</td><td>${x.dif}</td></tr>`).join(''):'<tr><td colspan="7">No hay equipos registrados para esta categoría.</td></tr>'}</tbody></table></div></div><div class="notice">Orden: <b>JG → DIF → PA → menor PE</b>.</div>`;
+ const pair=publicABPair(c.value);
+ let rows=publicCategoryRows([c.value]),reclassified=false,complete=false,splitAt=0;
+ if(pair){
+   const ids=[String(pair.selected.id),String(pair.other.id)];
+   const allTeams=data.teams.filter(tm=>(tm.category_ids||[]).some(id=>ids.includes(String(id))));
+   const counts={};allTeams.forEach(tm=>counts[tm.id]=0);
+   data.matches.filter(x=>ids.includes(String(x.category_id))&&(x.status==='jugado'||x.status==='incomparecencia')).forEach(x=>{if(counts[x.home_team_id]!=null)counts[x.home_team_id]++;if(counts[x.away_team_id]!=null)counts[x.away_team_id]++;});
+   const required=data.tournament?.tournament_type==='relampago'?3:Number(data.tournament?.regular_rounds)||7;
+   complete=allTeams.length>0&&allTeams.every(tm=>(counts[tm.id]||0)>=required);
+   if(complete){const all=publicCategoryRows(ids);splitAt=Math.ceil(all.length/2);rows=pair.role==='A'?all.slice(0,splitAt):all.slice(splitAt);reclassified=true;}
+ }
+ const title=reclassified?`<h2>📊 Reclasificación · ${esc(pair.base)} ${pair.role}</h2>`:`<h2>📊 Tabla de posiciones · ${esc(cat(c.value))}</h2>`;
+ const note=reclassified?`<div class="notice"><b>Reclasificación A/B completada:</b> se juntaron ${esc(pair.selected.name)} + ${esc(pair.other.name)} con todos los resultados acumulados. Los lugares 1–${splitAt} forman la nueva <b>${esc(pair.base)} A</b> y los restantes la nueva <b>${esc(pair.base)} B</b>. Cada grupo tiene playoffs independientes.</div>`:`<div class="notice">Orden: <b>JG → DIF → PA → menor PE</b>.${pair?` Cuando se completen todos los partidos requeridos (${data.tournament?.tournament_type==='relampago'?3:Number(data.tournament?.regular_rounds)||7} por equipo), esta categoría A/B se reclasificará automáticamente junto con su contraparte.`:''}</div>`;
+ s.innerHTML=`${title}<div class="card"><button type="button" class="primary" onclick="downloadPublicTableImage()">🖼️ Descargar tabla</button><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th>${reclassified?'<th>Origen</th>':''}<th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>${rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td><b>${x.forfeit?'<span class="gof-forfeit-dot" title="FORFEIT" aria-label="FORFEIT"></span>':''}${esc(team(x.id).name)}</b></td>${reclassified?`<td>${esc(cat(x.category_id))}</td>`:''}<td>${x.jj}</td><td>${x.jg}</td><td>${x.pa}</td><td>${x.pc}</td><td>${x.dif}</td></tr>`).join(''):'<tr><td colspan="8">No hay equipos registrados para esta categoría.</td></tr>'}</tbody></table></div></div>${note}`;
 }
 async function playoffs(){
  const s=document.getElementById('playoffs'),activeIds=new Set(visibleCategories().map(x=>String(x.id)));

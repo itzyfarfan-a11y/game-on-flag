@@ -409,7 +409,7 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   <section id="playoffs"></section>
   <section id="campeones"></section>
   <section id="avisos"></section>
-  <section id="anuncios"></section>
+  <section id="publicaciones"></section>
 </main>
 
 <footer>
@@ -419,7 +419,7 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
 </footer>
 <script id="gof-supabase-js" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const U='https://picivrqgmckrwutarhyw.supabase.co',K='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl',H={apikey:K,'Content-Type':'application/json',Accept:'application/json'},t=document.getElementById('t'),c=document.getElementById('c'),status=document.getElementById('status'),nav=document.getElementById('nav');const GOF_PUBLIC_LEAGUE_SLUG=(new URLSearchParams(location.search).get('liga')||new URLSearchParams(location.search).get('league')||'').trim();let league={},data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]},matchupMatches=[],notices=[],tab='calendario';const sec=['inicio','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones','avisos','anuncios'];function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}async function rpc(n,b={}){const r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b),cache:'no-store'}),x=await r.text();if(!r.ok)throw Error('HTTP '+r.status);return JSON.parse(x)}function team(id){return data.teams.find(x=>x.id===id)||{name:'Por definir'}}function cat(id){return data.categories.find(x=>x.id===id)?.name||'Categoría'}
+const U='https://picivrqgmckrwutarhyw.supabase.co',K='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl',H={apikey:K,'Content-Type':'application/json',Accept:'application/json'},t=document.getElementById('t'),c=document.getElementById('c'),status=document.getElementById('status'),nav=document.getElementById('nav');const GOF_PUBLIC_LEAGUE_SLUG=(new URLSearchParams(location.search).get('liga')||new URLSearchParams(location.search).get('league')||'').trim();let league={},data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]},matchupMatches=[],notices=[],tab='calendario';const sec=['inicio','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones','avisos','publicaciones'];function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}async function rpc(n,b={}){const r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b),cache:'no-store'}),x=await r.text();if(!r.ok)throw Error('HTTP '+r.status);return JSON.parse(x)}function team(id){return data.teams.find(x=>x.id===id)||{name:'Por definir'}}function cat(id){return data.categories.find(x=>x.id===id)?.name||'Categoría'}
 function visibleCategories(){const ids=new Set();(data.teams||[]).forEach(tm=>(tm.category_ids||[]).forEach(id=>ids.add(id)));return (data.categories||[]).filter(x=>ids.has(x.id))}
 function isPublicActiveCategory(id){return visibleCategories().some(x=>String(x.id)===String(id))}function field(v){const m=String(v||'').match(/(?:campo|cancha)\s*(\d+)/i);return m?+m[1]:99}function cclass(n){n=String(n||'').toLowerCase();return n.includes('mixto')?'mixto':n.includes('bronce')?'bronce':n.includes('silver femenil')?'sf':n.includes('silver varonil')?'sv':n.includes('35')?'g35':n.includes('golden')?'golden':''}
 function savePublicAppLogo(input){const f=input?.files?.[0];if(!f)return;if(!/^image\/(png|jpeg|webp)$/.test(f.type))return alert('Selecciona una imagen PNG, JPG o WEBP.');const r=new FileReader();r.onload=()=>{try{localStorage.setItem('gof_app_logo',r.result)}catch(e){}applyPublicAppLogo(r.result)};r.readAsDataURL(f)}
@@ -444,10 +444,10 @@ document.addEventListener('click',function(ev){
 });
 function render(){
   document.body.classList.toggle('home-screen',tab==='inicio');
-  nav.innerHTML=[['calendario','📅','Calendario|Jornadas y campos'],['enfrentamientos','🏈','Enfrentamientos|Todos los partidos'],['equipos','👥','Equipos|Conoce los equipos'],['jugadores','👕','Jugadores|Plantillas y rosters'],['resultados','📊','Resultados|Marcadores y estadísticas'],['tabla','📈','Tabla|Clasificaciones'],['playoffs','🏆','Playoffs|Fase final'],['campeones','🥇','Campeones|Campeones'],['avisos','📣','Avisos|Información oficial'],['anuncios','📱','Publicaciones|Contenido publicado']].map(x=>{const q=x[2].split('|');return '<button type="button" data-tab="'+x[0]+'" class="'+(tab===x[0]?'active':'')+'"><span aria-hidden="true">'+x[1]+'</span><span><b>'+q[0]+'</b><small>'+q[1]+'</small></span></button>'}).join('');
+  nav.innerHTML=[['calendario','📅','Calendario|Jornadas y campos'],['enfrentamientos','🏈','Enfrentamientos|Todos los partidos'],['equipos','👥','Equipos|Conoce los equipos'],['jugadores','👕','Jugadores|Plantillas y rosters'],['resultados','📊','Resultados|Marcadores y estadísticas'],['tabla','📈','Tabla|Clasificaciones'],['playoffs','🏆','Playoffs|Fase final'],['campeones','🥇','Campeones|Campeones'],['avisos','📣','Avisos|Información oficial'],['publicaciones','📱','Publicaciones|Fotografías y publicaciones']].map(x=>{const q=x[2].split('|');return '<button type="button" data-tab="'+x[0]+'" class="'+(tab===x[0]?'active':'')+'"><span aria-hidden="true">'+x[1]+'</span><span><b>'+q[0]+'</b><small>'+q[1]+'</small></span></button>'}).join('');
   sec.forEach(x=>{const el=document.getElementById(x);el.classList.toggle('public-open',x===tab);el.style.display=x===tab?'block':'none'});
   if(tab==='inicio')home();
-  if(tab==='equipos')teams();if(tab==='jugadores')players();if(tab==='calendario')calendar();if(tab==='enfrentamientos')matchups();if(tab==='resultados')results();if(tab==='tabla')table();if(tab==='playoffs')playoffs();if(tab==='campeones')champions();if(tab==='avisos')publicNotices();if(tab==='anuncios')publicAnnouncementsSection();
+  if(tab==='equipos')teams();if(tab==='jugadores')players();if(tab==='calendario')calendar();if(tab==='enfrentamientos')matchups();if(tab==='resultados')results();if(tab==='tabla')table();if(tab==='playoffs')playoffs();if(tab==='campeones')champions();if(tab==='avisos')publicNotices();if(tab==='publicaciones')publicPublicationsSection();
 }
 function home(){document.getElementById('inicio').innerHTML='';}
 {const n=data.matches.filter(m=>m.status==='jugado'||m.status==='incomparecencia').length;document.getElementById('inicio').innerHTML='<div class="card"><h2>'+esc(data.tournament?.name||'Torneo')+'</h2><p class="muted">Temporada '+esc(data.tournament?.season||'')+'</p><div class="grid"><div class="stat"><b>'+data.teams.length+'</b><br>Equipos</div><div class="stat"><b>'+n+'</b><br>Juegos registrados</div><div class="stat"><b>'+data.playoffs.length+'</b><br>Playoffs</div></div></div>'}async function teams(){const list=c.value?data.teams.filter(tm=>(tm.category_ids||[]).includes(c.value)):data.teams;document.getElementById('equipos').innerHTML='<h2>👥 Equipos'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><div id="publicTeamList">'+(list.length?list.map(x=>'<div class="card"><div class="row"><div style="display:flex;align-items:center;gap:12px">'+(x.logo_url?'<img src="'+esc(x.logo_url)+'" alt="" style="width:58px;height:58px;object-fit:contain;border-radius:10px;background:#222">':'')+'<div><b>'+esc(x.name)+'</b><span class="tag">'+(x.club_name?'Club/Coach: '+esc(x.club_name):'Club/Coach pendiente')+'</span></div></div></div></div>').join(''):'<div class="empty">Sin equipos.</div>')+'</div>'}async function players(){
@@ -492,7 +492,19 @@ async function downloadPublicRosterImage(teamId){
  x.fillStyle='#5d6877';x.font='800 15px Arial';x.fillText('GAME ON FLAG · '+String(league?.name||'Liga')+' · '+String(data.tournament?.name||'Torneo'),pad,H-35);
  gofPublicSaveCanvas(cv,'Roster_'+String(tm.name||'Equipo').replace(/[^a-z0-9áéíóúñ]+/gi,'_')+'.png');
 }
-function champions(){const s=document.getElementById('campeones');s.innerHTML='<h2>🏆 Campeones</h2><div class="empty">Los campeones publicados por la administración aparecerán aquí.</div>'}function cell(m){if(!m)return'<div class="empty">—</div>';const p=m.kind==='playoff',cn=p?(m.stage||'Playoff'):cat(m.category_id),a=p?team(m.team_a_id).name:team(m.home_team_id).name,b=p?team(m.team_b_id).name:team(m.away_team_id).name;return'<div class="game '+cclass(cn)+'"><div class="cat">'+esc(cn)+(m.round_number?' · Semana '+m.round_number:'')+'</div><div class="teams">'+esc(a)+' <span>vs</span> '+esc(b)+'</div><div class="meta">'+(p?'🏆':'🏈')+' '+esc(m.match_time?String(m.match_time).slice(0,5):'Hora por definir')+' · '+esc(m.field_name||'Campo por definir')+'</div></div>'}
+function champions(){
+ const s=document.getElementById('campeones');
+ const cats=visibleCategories();
+ const rows=[];
+ cats.forEach(ct=>{
+   const finals=(data.playoffs||[]).filter(p=>String(p.category_id)===String(ct.id) && String(p.stage||'').toLowerCase().includes('final') && p.winner_team_id);
+   if(!finals.length)return;
+   const f=[...finals].sort((a,b)=>Number(b.match_order||0)-Number(a.match_order||0))[0];
+   const winner=team(f.winner_team_id);
+   if(winner?.name && winner.name!=='Por definir') rows.push({cat:ct.name,team:winner.name});
+ });
+ s.innerHTML='<h2>🏆 Campeones</h2>'+(rows.length?'<div class="grid">'+rows.map(x=>'<div class="card" style="text-align:center"><div style="font-size:36px">🏆</div><h3>'+esc(x.cat)+'</h3><strong style="font-size:22px">'+esc(x.team)+'</strong><div class="muted small">Campeón</div></div>').join('')+'</div>':'<div class="empty">Los campeones aparecerán aquí cuando exista una Final publicada con ganador.</div>')
+}function cell(m){if(!m)return'<div class="empty">—</div>';const p=m.kind==='playoff',cn=p?(m.stage||'Playoff'):cat(m.category_id),a=p?team(m.team_a_id).name:team(m.home_team_id).name,b=p?team(m.team_b_id).name:team(m.away_team_id).name;return'<div class="game '+cclass(cn)+'"><div class="cat">'+esc(cn)+(m.round_number?' · Semana '+m.round_number:'')+'</div><div class="teams">'+esc(a)+' <span>vs</span> '+esc(b)+'</div><div class="meta">'+(p?'🏆':'🏈')+' '+esc(m.match_time?String(m.match_time).slice(0,5):'Hora por definir')+' · '+esc(m.field_name||'Campo por definir')+'</div></div>'}
 
 function matchups(){
   const s=document.getElementById('enfrentamientos');
@@ -616,8 +628,8 @@ async function playoffs(){
  h+='<div class="card"><h3>Bracket · '+(list.some(p=>p.playoff_mode==='manual')?'✋ Manual':'🤖 Automático')+'</h3><div class="mut">Consulta pública · mismo formato de bracket de Administración.</div><div class="bracket">'+stageHtml+'</div></div>';
  s.innerHTML=h;
 }
-async function publicAnnouncementsSection(){
-  const s=document.getElementById('anuncios');
+async function legacyPublicAnnouncementsSection(){
+  const s=document.getElementById('publicaciones');
   s.innerHTML='<h2>📱 Publicaciones</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Las publicaciones directas realizadas por la administración aparecerán aquí.</div></div>';
   if(typeof window.gofRenderDirectAnnouncements==='function') await window.gofRenderDirectAnnouncements();
 }
@@ -1259,7 +1271,7 @@ window.setCalendarMode=function(mode){
   }
 
   async function renderDirectAnnouncements(){
-    const el=document.getElementById('anuncios');
+    const el=document.getElementById('publicaciones');
     if(!el)return;
     el.innerHTML='<h2>📱 Publicaciones</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Cargando publicaciones directas...</div></div>';
     await loadDirectPublications();

@@ -1150,9 +1150,9 @@ const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?ol
 </div></details>
 
 <details><summary>🟢 <b>2. COBROS DE CADA EQUIPO</b><span>›</span></summary><div class="finance-panel">
-<div class="notice">Esta es la tabla que vas a usar en el campo. <b>Escribe cuánto te entregaron</b>: 150, 350, 500… 🔴 pendiente · 🟡 parcial · 🟢 pagado. La tabla queda separada por categoría y se puede mover de izquierda a derecha en celular.</div>
-<div class="toolbar"><button type="button" class="gold" onclick="downloadFinanceTeamMatrixImage()">🖼️ Descargar tabla / imagen</button><button type="button" onclick="renderFinanceTeamMatrix()">🔄 Actualizar</button></div>
-<div class="finance-table-scroll" id="financeTeamMatrixBox"></div>
+<div class="notice">Esta es la tabla que vas a usar en el campo. <b>Escribe cuánto te entregaron</b>: 150, 350, 500… 🔴 pendiente · 🟡 parcial · 🟢 pagado.</div><div class="finance-matrix-capture-note">📱 Desliza la tabla de izquierda a derecha para capturar todos los cobros.</div>
+<div class="toolbar"><button type="button" class="gold" onclick="saveAllFinanceMatrixAmounts()">💾 Guardar cobros</button><button type="button" class="gold" onclick="downloadFinanceTeamMatrixImage()">🖼️ Descargar tabla / imagen</button><button type="button" onclick="renderFinanceTeamMatrix()">🔄 Actualizar</button></div>
+<div class="finance-table-scroll" id="financeTeamMatrixBox"></div><div class="finance-matrix-save-bottom"><button type="button" class="gold" onclick="saveAllFinanceMatrixAmounts()">💾 GUARDAR COBROS</button></div>
 </div></details>
 
 <details><summary>💸 <b>3. GASTOS</b><span>›</span></summary><div class="finance-panel">
@@ -1177,7 +1177,17 @@ const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?ol
 .finance-table-scroll table.finance-team-matrix th,.finance-table-scroll table.finance-team-matrix td{white-space:nowrap;}
 .finance-team-matrix th:first-child,.finance-team-matrix td:first-child{min-width:150px;}
 @media(max-width:700px){.finance-table-scroll{touch-action:pan-x pan-y;}.finance-table-scroll .cg-scroll{overflow-x:auto!important;}.finance-table-scroll table.finance-team-matrix{min-width:1180px;}}
-.finance-table-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;border:1px solid #3d3148;border-radius:10px}.cg-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;border:0}.cg-scroll table{display:table}.finance-fixed-simple{min-width:1180px;width:100%;border-collapse:collapse;font-size:12px}.finance-fixed-simple th,.finance-fixed-simple td{border:1px solid #3d3543;padding:7px 6px;white-space:nowrap;text-align:center}.finance-fixed-simple th{background:#211b2b;color:#f0c94a}.finance-fixed-simple input{width:76px;box-sizing:border-box}.finance-team-matrix{min-width:1180px;width:100%;border-collapse:collapse;font-size:12px}.finance-team-matrix th,.finance-team-matrix td{border:1px solid #3d3543;padding:6px 5px;text-align:center;white-space:nowrap}.finance-team-matrix th{background:#211b2b;color:#f0c94a}.finance-team-matrix th:first-child,.finance-team-matrix td:first-child{position:sticky;left:0;z-index:3;background:#17131f}.finance-team-name{text-align:left!important;min-width:170px}.finance-payment-input{width:62px;box-sizing:border-box;border:2px solid #4a315c;border-radius:7px;padding:7px 4px;text-align:center;font-weight:800;background:#100d16;color:#fff}.finance-payment-input.finance-pending{background:#6b2535;border-color:#ff5c78}.finance-payment-input.finance-partial{background:#9a7b20;border-color:#f0c94a;color:#fff}.finance-payment-input.finance-paid{background:#17633c;border-color:#42e28a;color:#fff}.finance-observation-input{width:130px;box-sizing:border-box;background:#100d16;color:#fff;border:1px solid #4a315c;border-radius:7px;padding:7px}.finance-category-block{margin:0 0 12px;border:1px solid #3d3148;border-radius:10px;overflow:hidden}.finance-category-label{padding:9px 12px;background:#211b2b;color:#f0c94a;font-weight:800}.finance-matrix-help{padding:9px 10px;font-size:13px}.finance-blank-cell{color:#777}.finance-paid-total{color:#42e28a;font-weight:800}.finance-pending-total{color:#ff5c78;font-weight:800}.finance-budget-row .q-total{font-weight:800}.finance-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.finance-result-box{border:1px solid #3d3148;border-radius:10px;padding:12px;background:#17131f}.finance-result-box b{display:block;font-size:12px;color:#aaa}.finance-result-box strong{font-size:23px}.finance-result-positive strong{color:#42e28a}.finance-result-negative strong{color:#ff5c78}@media(max-width:700px){.finance-summary-card .grid,.finance-result-grid{grid-template-columns:1fr}.finance-budget-row{grid-template-columns:1fr 1fr}.finance-budget-row button{grid-column:1/-1}.finance-simple-accordion summary{font-size:16px}.finance-fixed-simple{font-size:11px}}
+.finance-table-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;border:1px solid #3d3148;border-radius:10px}.cg-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;border:0}.cg-scroll table{display:table}.finance-fixed-simple{min-width:1180px;width:100%;border-collapse:collapse;font-size:12px}.finance-fixed-simple th,.finance-fixed-simple td{border:1px solid #3d3543;padding:7px 6px;white-space:nowrap;text-align:center}.finance-fixed-simple th{background:#211b2b;color:#f0c94a}.finance-fixed-simple input{width:76px;box-sizing:border-box}.finance-team-matrix{min-width:920px;width:max-content;border-collapse:collapse;font-size:12px}.finance-team-matrix th,.finance-team-matrix td{border:1px solid #3d3543;padding:5px 4px;text-align:center;white-space:nowrap}.finance-team-matrix th{background:#211b2b;color:#f0c94a}.finance-team-matrix th:first-child,.finance-team-matrix td:first-child{position:sticky;left:0;z-index:3;background:#17131f}.finance-team-name{text-align:left!important;width:118px;min-width:118px;max-width:118px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.finance-payment-input{width:58px;box-sizing:border-box;border:2px solid #4a315c;border-radius:7px;padding:6px 3px;text-align:center;font-weight:800;background:#100d16;color:#fff}.finance-payment-input.finance-pending{background:#6b2535;border-color:#ff5c78}.finance-payment-input.finance-partial{background:#9a7b20;border-color:#f0c94a;color:#fff}.finance-payment-input.finance-paid{background:#17633c;border-color:#42e28a;color:#fff}.finance-observation-input{width:130px;box-sizing:border-box;background:#100d16;color:#fff;border:1px solid #4a315c;border-radius:7px;padding:7px}.finance-category-block{margin:0 0 12px;border:1px solid #3d3148;border-radius:10px;overflow:hidden}.finance-category-label{padding:9px 12px;background:#211b2b;color:#f0c94a;font-weight:800}.finance-matrix-help{padding:9px 10px;font-size:13px}.finance-blank-cell{color:#777}.finance-paid-total{color:#42e28a;font-weight:800}.finance-pending-total{color:#ff5c78;font-weight:800}.finance-budget-row .q-total{font-weight:800}.finance-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.finance-result-box{border:1px solid #3d3148;border-radius:10px;padding:12px;background:#17131f}.finance-result-box b{display:block;font-size:12px;color:#aaa}.finance-result-box strong{font-size:23px}.finance-result-positive strong{color:#42e28a}.finance-result-negative strong{color:#ff5c78}@media(max-width:700px){.finance-summary-card .grid,.finance-result-grid{grid-template-columns:1fr}.finance-budget-row{grid-template-columns:1fr 1fr}.finance-budget-row button{grid-column:1/-1}.finance-simple-accordion summary{font-size:16px}.finance-fixed-simple{font-size:11px}.finance-table-scroll{overflow-x:auto!important;touch-action:pan-x pan-y}.finance-team-matrix{min-width:920px;font-size:11px}.finance-team-matrix th,.finance-team-matrix td{padding:4px 3px}.finance-team-name{width:108px;min-width:108px;max-width:108px}.finance-payment-input{width:54px;padding:6px 2px}.finance-matrix-save-bottom{position:sticky;bottom:8px;z-index:10;margin-top:10px}.finance-matrix-save-bottom button{width:100%;box-shadow:0 5px 18px rgba(0,0,0,.35)}}
+/* CONTABILIDAD · matriz compacta para captura móvil */
+.finance-table-scroll{overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;scrollbar-width:auto;}
+.finance-table-scroll table.finance-team-matrix{min-width:900px!important;width:max-content!important;table-layout:fixed;border-collapse:collapse;font-size:12px;}
+.finance-table-scroll table.finance-team-matrix th,.finance-table-scroll table.finance-team-matrix td{padding:4px 3px;height:38px;white-space:nowrap;text-align:center;}
+.finance-table-scroll table.finance-team-matrix th:first-child,.finance-table-scroll table.finance-team-matrix td:first-child{position:sticky;left:0;z-index:4;background:#17131f;width:145px;min-width:145px;max-width:145px;overflow:hidden;text-overflow:ellipsis;}
+.finance-table-scroll table.finance-team-matrix th:not(:first-child),.finance-table-scroll table.finance-team-matrix td:not(:first-child){width:75px;min-width:75px;max-width:75px;}
+.finance-payment-input{width:62px!important;min-width:62px!important;padding:5px 2px!important;height:30px!important;}
+.finance-matrix-capture-note{font-size:12px;color:#cbbfd4;margin:6px 0 8px;text-align:center;}
+@media(max-width:700px){.finance-table-scroll table.finance-team-matrix{min-width:900px!important}.finance-table-scroll table.finance-team-matrix th:first-child,.finance-table-scroll table.finance-team-matrix td:first-child{width:125px;min-width:125px;max-width:125px}.finance-table-scroll table.finance-team-matrix th:not(:first-child),.finance-table-scroll table.finance-team-matrix td:not(:first-child){width:68px;min-width:68px;max-width:68px}.finance-payment-input{width:56px!important;min-width:56px!important}}
+
 </style>
 <section class="view" id="credenciales">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
@@ -1436,8 +1446,8 @@ async function applyFinanceCategoryPrice(tr){
   const tid=val('finT'),cat=tr?.dataset?.categoryId,ins=Number(tr?.querySelector('.cat-ins')?.value||0),arb=Number(tr?.querySelector('.cat-arb')?.value||0);if(!tid||!cat)return;if(!(ins>0||arb>0))return alert('Captura inscripción o arbitraje.');
   const {data:teams,error}=await sb.from('tournament_teams').select('id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(error)return alert(error.message);const user=(await sb.auth.getUser()).data.user?.id||null;
   for(const t of (teams||[])){
-    const charges=[{tournament_id:tid,tournament_team_id:t.id,concept_type:'inscripcion',round_number:null,description:'Inscripción',amount_due:ins,charge_key:'inscripcion'}];
-    for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:t.id,concept_type:'arbitraje_regular',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r});
+    const charges=[{tournament_id:tid,tournament_team_id:t.id,concept_type:'inscripcion',round_number:null,description:'Inscripción',amount_due:ins,charge_key:'inscripcion',playoff_stage:null}];
+    for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:t.id,concept_type:'arbitraje_regular',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r,playoff_stage:null});
     for(const payload of charges){
       const q=await sb.from('finance_charges').select('id').eq('tournament_id',tid).eq('tournament_team_id',t.id).eq('charge_key',payload.charge_key).maybeSingle();
       if(q.error)return alert('No se pudo consultar el cargo: '+q.error.message);
@@ -1451,8 +1461,8 @@ async function applyFinanceCategoryPrice(tr){
 }
 async function saveFinanceException(){
   const tid=val('finT'),ttid=val('financeExceptionTeam'),ins=Number(val('financeExceptionIns')||0),arb=Number(val('financeExceptionArb')||0);if(!tid||!ttid)return alert('Selecciona el equipo.');if(!(ins>0||arb>0))return alert('Captura al menos un precio.');const user=(await sb.auth.getUser()).data.user?.id||null;
-  const charges=[{tournament_id:tid,tournament_team_id:ttid,concept_type:'inscripcion',round_number:null,description:'Inscripción',amount_due:ins,charge_key:'inscripcion'}];
-  for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:ttid,concept_type:'arbitraje_regular',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r});
+  const charges=[{tournament_id:tid,tournament_team_id:ttid,concept_type:'inscripcion',round_number:null,description:'Inscripción',amount_due:ins,charge_key:'inscripcion',playoff_stage:null}];
+  for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:ttid,concept_type:'arbitraje_regular',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r,playoff_stage:null});
   for(const payload of charges){
     const q=await sb.from('finance_charges').select('id').eq('tournament_id',tid).eq('tournament_team_id',ttid).eq('charge_key',payload.charge_key).maybeSingle();
     if(q.error)return alert('No se pudo consultar el precio especial: '+q.error.message);
@@ -1462,26 +1472,36 @@ async function saveFinanceException(){
     if(error){ const msg=String(error.message||error); if(/finance_charges_check|check constraint/i.test(msg)) return alert('No se pudo guardar el precio especial porque el tipo de cargo no es válido. Se debe usar inscripción o arbitraje regular por jornada.'); return alert('No se pudo guardar el precio especial: '+msg); }
   }toast('💵 Precio especial guardado');document.getElementById('financeExceptionIns').value='';document.getElementById('financeExceptionArb').value='';await loadFinanceCategoryPrices();await renderFinanceTeamMatrix();await renderFinance();
 }
-async function saveFinanceMatrixAmount(input){
+async function saveFinanceMatrixAmount(input,silent=false){
   const chargeId=input?.dataset?.chargeId,due=Number(input?.dataset?.due||0),newTotal=Math.max(0,Number(input?.value||0));
-  if(!chargeId)return;
-  if(newTotal>due){input.value=input.dataset.paid||'';return alert(`El pago no puede superar $${due.toFixed(0)}.`)}
+  if(!chargeId)return false;
+  if(newTotal>due){input.value=input.dataset.paid||'';if(!silent)alert(`El pago no puede superar $${due.toFixed(0)}.`);return false}
   const {data:rows,error:qerr}=await sb.from('finance_payments').select('id,amount').eq('charge_id',chargeId);
-  if(qerr)return alert('No se pudo consultar el pago: '+qerr.message);
+  if(qerr){if(!silent)alert('No se pudo consultar el pago: '+qerr.message);return false}
   const current=(rows||[]).reduce((a,x)=>a+Number(x.amount||0),0);
-  if(newTotal===current){return}
-  if(rows?.length){const {error:delErr}=await sb.from('finance_payments').delete().eq('charge_id',chargeId);if(delErr)return alert('No se pudo actualizar el pago: '+delErr.message)}
-  if(newTotal>0){const {error:insErr}=await sb.from('finance_payments').insert({charge_id:chargeId,amount:newTotal,paid_at:new Date().toISOString(),created_by:(await sb.auth.getUser()).data.user?.id||null});if(insErr)return alert('No se pudo guardar el pago: '+insErr.message)}
-  toast(newTotal>=due?'🟢 Pagado completo':'🟡 Pago actualizado');await renderFinanceTeamMatrix();await renderFinance();
+  if(newTotal===current)return true;
+  if(rows?.length){const {error:delErr}=await sb.from('finance_payments').delete().eq('charge_id',chargeId);if(delErr){if(!silent)alert('No se pudo actualizar el pago: '+delErr.message);return false}}
+  if(newTotal>0){const {error:insErr}=await sb.from('finance_payments').insert({charge_id:chargeId,amount:newTotal,paid_at:new Date().toISOString(),created_by:(await sb.auth.getUser()).data.user?.id||null});if(insErr){if(!silent)alert('No se pudo guardar el pago: '+insErr.message);return false}}
+  input.dataset.paid=String(newTotal);
+  return true;
+}
+async function saveAllFinanceMatrixAmounts(){
+  const inputs=[...document.querySelectorAll('#financeTeamMatrixBox .finance-payment-input[data-charge-id]')];
+  if(!inputs.length)return toast('No hay cobros para guardar.');
+  for(const input of inputs){const ok=await saveFinanceMatrixAmount(input,true);if(!ok)return;}
+  toast('💾 Cobros guardados correctamente');
+  await renderFinanceTeamMatrix();
+  await renderFinance();
 }
 async function downloadFinanceTeamMatrixImage(){
   const matrixBox=document.getElementById('financeTeamMatrixBox');
   if(!matrixBox)return;
   const tables=[...matrixBox.querySelectorAll('table.finance-team-matrix')];
   if(!tables.length)return alert('Primero carga los equipos y sus cargos.');
-  /* Hoja vertical: formato tipo carta, pensado para imprimir y escribir a mano. */
-  const W=816,pad=28,blockW=W-pad*2,headerH=72,catH=42,teamH=230,gap=12;
-  let totalH=pad+headerH;
+  // CARTA VERTICAL: la tabla conserva formato horizontal, pero la hoja es retrato.
+  // Solo se imprimen: EQUIPO, INSCRIPCIÓN, J1...J7 y DEBE.
+  const W=2550,H=3300,pad=75,blockW=W-pad*2,titleH=135,catH=78,headH=70,rowH=58,gap=28;
+  const teamW=430,otherW=(blockW-teamW)/9;
   const blocks=[];
   for(const table of tables){
     const cat=table.closest('.finance-category-block')?.querySelector('.finance-category-label')?.textContent?.trim()||'Categoría';
@@ -1489,43 +1509,39 @@ async function downloadFinanceTeamMatrixImage(){
       const cells=[...tr.children];
       const name=cells[0]?.textContent?.trim()||'Equipo';
       const inputs=cells.slice(1,9).map(td=>td.querySelector('input')?.value||'');
-      const totals=cells.slice(10,13).map(td=>td.textContent.trim()||'$0');
-      return {name,inputs,totals};
+      const debe=cells[9]?.textContent?.trim()||'$0';
+      return {name,inputs,debe};
     });
     blocks.push({cat,teams});
-    totalH+=catH+teams.length*(teamH+gap)+24;
   }
-  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=totalH;
-  const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,W,totalH);
-  const drawBox=(x,y,w,h,fill='#fff',stroke='#222',lw=1)=>{ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.strokeRect(x,y,w,h)};
-  const text=(txt,x,y,size=16,weight='700',align='left',fill='#111')=>{ctx.fillStyle=fill;ctx.font=`${weight} ${size}px Arial`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(String(txt??''),x,y)};
-  text('GAME ON FLAG · CONTABILIDAD',W/2,27,22,'900','center');
-  text('Cobros por equipo · Formato vertical para imprimir',W/2,52,13,'700','center');
-  let y=pad+headerH;
+  let required=pad+titleH;
+  for(const g of blocks)required+=catH+headH+g.teams.length*rowH+gap;
+  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=Math.min(H,Math.max(1650,required));
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+  const box=(x,y,w,h,fill='#fff',stroke='#222',lw=2)=>{ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.strokeRect(x,y,w,h)};
+  const text=(txt,x,y,size=24,weight='700',align='left',fill='#111')=>{ctx.fillStyle=fill;ctx.font=`${weight} ${size}px Arial`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(String(txt??''),x,y)};
+  text('GAME ON FLAG · CONTABILIDAD',W/2,42,38,'900','center');
+  text('Cobros por equipo · Formato carta vertical · Para imprimir y anotar',W/2,88,22,'700','center');
+  const headers=['EQUIPO','INSCRIPCIÓN','J1','J2','J3','J4','J5','J6','J7','DEBE'];
+  let y=pad+titleH;
   for(const group of blocks){
-    drawBox(pad,y,blockW,catH,'#f1f1f1','#222',1);text(group.cat,pad+10,y+catH/2,17,'900','left');y+=catH+8;
+    box(pad,y,blockW,catH,'#eeeeee','#222',2);text(group.cat,pad+16,y+catH/2,25,'900','left');y+=catH;
+    const xs=[pad,pad+teamW];for(let i=1;i<9;i++)xs.push(pad+teamW+otherW*i);
+    for(let i=0;i<10;i++){const x=xs[i],w=i===0?teamW:otherW;box(x,y,w,headH,'#e5e5e5','#333',2);text(headers[i],x+w/2,y+headH/2,20,'900','center');}
+    y+=headH;
     for(const team of group.teams){
-      drawBox(pad,y,blockW,teamH,'#fff','#333',1);
-      text(team.name,pad+12,y+18,16,'900','left');
-      const labels=['INSCRIPCIÓN','J1','J2','J3','J4','J5','J6','J7'];
-      const cols=4,gapx=8,cw=(blockW-gapx*(cols-1)-20)/cols,x0=pad+10,top=y+34,cellH=48;
-      for(let i=0;i<8;i++){
-        const row=Math.floor(i/cols),col=i%cols,x=x0+col*(cw+gapx),yy=top+row*(cellH+7);
-        drawBox(x,yy,cw,cellH,'#fafafa','#555',1);
-        text(labels[i],x+7,yy+12,9,'800','left','#333');
-        text(team.inputs[i]||'$',x+cw/2,yy+31,14,'700','center','#111');
+      for(let i=0;i<10;i++){
+        const x=xs[i],w=i===0?teamW:otherW;box(x,y,w,rowH,'#fff','#777',2);
+        const value=i===0?team.name:(i<=8?(team.inputs[i-1]||''):(team.debe||'$0'));
+        text(value||'—',i===0?x+12:x+w/2,y+rowH/2,i===0?21:20,'700',i===0?'left':'center','#111');
       }
-      const obsY=top+2*(cellH+7),obsW=blockW-20;
-      drawBox(x0,obsY,obsW,34,'#fff','#555',1);text('OBSERVACIONES',x0+7,obsY+11,9,'800','left','#333');
-      const [debe,pagado,falta]=team.totals;
-      const sumY=obsY+42,sumGap=8,sumW=(obsW-sumGap*2)/3;
-      [['DEBE',debe],['PAGADO',pagado],['FALTA',falta]].forEach((item,i)=>{const x=x0+i*(sumW+sumGap);drawBox(x,sumY,sumW,34,'#f4f4f4','#555',1);text(item[0],x+7,sumY+10,9,'800','left','#333');text(item[1],x+sumW/2,sumY+24,13,'800','center','#111');});
-      y+=teamH+gap;
+      y+=rowH;
     }
-    y+=12;
+    y+=gap;
   }
-  const a=document.createElement('a');a.download='GameOnFlag_Contabilidad_Cobros_Vertical_Para_Imprimir.png';a.href=canvas.toDataURL('image/png');a.click();toast('🖨️ Hoja vertical en blanco descargada para imprimir');
+  const a=document.createElement('a');a.download='GameOnFlag_Contabilidad_Cobros_Carta_Vertical.png';a.href=canvas.toDataURL('image/png');a.click();toast('🖨️ Tabla carta vertical descargada');
 }
+
 async function renderFinanceTeamMatrix(){
   const tid=val('finT'),box=document.getElementById('financeTeamMatrixBox');if(!box||!tid||!sb){if(box)box.innerHTML='';return;}
   const [{data:teams,error:te},{data:charges,error:ce}]=await Promise.all([sb.from('tournament_teams').select('id,category_id,team_id').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id'),sb.from('finance_charges').select('id,tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid)]);
@@ -1542,8 +1558,8 @@ async function renderFinanceTeamMatrix(){
   (teams||[]).forEach(t=>{t.teams={name:teamNames.get(t.team_id)||'Equipo'};t.categories={name:catNames.get(t.category_id)||'Categoría'};});
   const ids=(charges||[]).map(c=>c.id);let pays=[];if(ids.length){const q=await sb.from('finance_payments').select('charge_id,amount').in('charge_id',ids);if(q.error){box.innerHTML='<div class="empty">No se pudieron consultar los pagos.</div>';return;}pays=q.data||[];}
   const paid={};(pays||[]).forEach(x=>paid[x.charge_id]=(paid[x.charge_id]||0)+Number(x.amount||0));const byKey=new Map((charges||[]).map(c=>[`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`,c]));const groups={};(teams||[]).forEach(t=>(groups[t.categories?.name||'Categoría']??=[]).push(t));
-  const cell=(tt,key,round)=>{const c=byKey.get(`${tt.id}|${key}|${round??''}`),due=Number(c?.amount_due||0),p=Number(c?paid[c.id]||0:0);if(!c||due<=0)return '<span class="finance-blank-cell">—</span>';const pending=Math.max(0,due-p),full=p>=due,cls=full?'finance-paid':p>0?'finance-partial':'finance-pending',value=full?'':String(p);return `<input class="finance-payment-input ${cls}" type="number" min="0" max="${due}" step="1" value="${value}" placeholder="${full?'✓':'$0'}" data-charge-id="${c.id}" data-due="${due}" data-paid="${p}" onchange="saveFinanceMatrixAmount(this)" onfocus="this.select()" title="Debe $${due.toFixed(0)} · Pagado $${p.toFixed(0)} · Falta $${pending.toFixed(0)}">`};
-  let html='';for(const [cat,rows] of Object.entries(groups)){html+=`<div class="finance-category-block"><div class="finance-category-label">${esc(cat)} · ${rows.length} equipos</div><table class="finance-team-matrix"><thead><tr><th>EQUIPO</th><th>INSCRIPCIÓN</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th><th>OBSERVACIONES</th><th>DEBE</th><th>PAGADO</th><th>FALTA</th></tr></thead><tbody>`;for(const t of rows){let totalDue=0,totalPaid=0;const vals=[];for(const [k,r] of [['inscripcion',null],...Array.from({length:7},(_,i)=>['arbitraje_regular',i+1])]){const c=byKey.get(`${t.id}|${k}|${r??''}`),d=Number(c?.amount_due||0),p=Number(c?paid[c.id]||0:0);totalDue+=d;totalPaid+=p;vals.push(cell(t,k,r))}html+=`<tr><td class="finance-team-name"><b>${esc(t.teams?.name||'Equipo')}</b></td>${vals.map(v=>`<td>${v}</td>`).join('')}<td><span class="finance-status-note">$${totalDue.toFixed(0)}</span></td><td><span class="finance-status-note">$${totalPaid.toFixed(0)}</span></td><td><b class="finance-matrix-total" style="color:${totalDue-totalPaid>0?'#ff5c78':'#42e28a'}">$${Math.max(0,totalDue-totalPaid).toFixed(0)}</b></td></tr>`}html+='</tbody></table></div>'}
+  const cell=(tt,key,round)=>{const c=byKey.get(`${tt.id}|${key}|${round??''}`),due=Number(c?.amount_due||0),p=Number(c?paid[c.id]||0:0);if(!c||due<=0)return '<span class="finance-blank-cell">—</span>';const pending=Math.max(0,due-p),full=p>=due,cls=full?'finance-paid':p>0?'finance-partial':'finance-pending',value=p>0?String(p):'';return `<input class="finance-payment-input ${cls}" type="number" min="0" max="${due}" step="1" value="${value}" placeholder="${full?'✓':'$0'}" data-charge-id="${c.id}" data-due="${due}" data-paid="${p}" onchange="saveFinanceMatrixAmount(this)" onfocus="this.select()" title="Debe $${due.toFixed(0)} · Pagado $${p.toFixed(0)} · Falta $${pending.toFixed(0)}">`};
+  let html='';for(const [cat,rows] of Object.entries(groups)){html+=`<div class="finance-category-block"><div class="finance-category-label">${esc(cat)} · ${rows.length} equipos</div><table class="finance-team-matrix"><thead><tr><th>EQUIPO</th><th>INSCRIPCIÓN</th><th>J1</th><th>J2</th><th>J3</th><th>J4</th><th>J5</th><th>J6</th><th>J7</th><th>DEBE</th></tr></thead><tbody>`;for(const t of rows){let totalDue=0,totalPaid=0;const vals=[];for(const [k,r] of [['inscripcion',null],...Array.from({length:7},(_,i)=>['arbitraje_regular',i+1])]){const c=byKey.get(`${t.id}|${k}|${r??''}`),d=Number(c?.amount_due||0),p=Number(c?paid[c.id]||0:0);totalDue+=d;totalPaid+=p;vals.push(cell(t,k,r))}html+=`<tr><td class="finance-team-name"><b title="${esc(t.teams?.name||'Equipo')}">${esc(t.teams?.name||'Equipo')}</b></td>${vals.map(v=>`<td>${v}</td>`).join('')}<td><b class="finance-matrix-total" style="color:${totalDue-totalPaid>0?'#ff5c78':'#42e28a'}">$${Math.max(0,totalDue-totalPaid).toFixed(0)}</b></td></tr>`}html+='</tbody></table></div>'}
   box.innerHTML=html||'<div class="mut">No hay equipos activos en este torneo.</div>';
 }
 async function saveQuickFinanceExpenses(){

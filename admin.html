@@ -3602,6 +3602,20 @@ async function loadLeagueContextFinal(preferredLeagueId=null){
    const {data:l,error}=await sb.from('leagues').select('id,name,slug,logo_url,primary_color,owner_id,status').eq('id',selectedId).eq('status','active').maybeSingle();
    if(error||!l){gofCurrentOrganizationId=null;gofCurrentOrganization=null;document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent='Selecciona una organización');return null;}
    gofCurrentOrganizationId=l.id;gofCurrentOrganization=l;
+   // Al cambiar de liga, invalida cualquier torneo/categoría que pertenezca a la liga anterior.
+   // Esto evita que una liga nueva muestre por accidente calendario, resultados o credenciales de otra liga.
+   if(window.gofTournamentContextLeagueId!==l.id){
+     window.gofTournamentContextLeagueId=l.id;
+     window.gofSingleTournamentId='';
+     window.gofSingleTournament=null;
+     try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');}catch(_){}
+   }else if(window.gofSingleTournamentId){
+     const vr=await sb.from('tournaments').select('id').eq('id',window.gofSingleTournamentId).eq('league_id',l.id).maybeSingle();
+     if(vr.error||!vr.data){
+       window.gofSingleTournamentId='';window.gofSingleTournament=null;
+       try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');}catch(_){}
+     }
+   }
    await gofEnsureDefaultCategories(l.id);
    document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent=l.name||'Organización activa');
    restoreHomeLeagueLogo();
@@ -3611,9 +3625,29 @@ async function loadLeagueContextFinal(preferredLeagueId=null){
  const {data:m}=await sb.from('league_members').select('league_id,role,is_current,active').eq('user_id',u.id).eq('active',true).eq('is_current',true).maybeSingle();
  if(!m){gofCurrentOrganizationId=null;gofCurrentOrganization=null;document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent='Selecciona una organización');return null;}
  const {data:l}=await sb.from('leagues').select('id,name,slug,logo_url,primary_color,owner_id,status').eq('id',m.league_id).maybeSingle();
- gofCurrentOrganizationId=m.league_id;gofCurrentOrganization=l||null; await gofEnsureDefaultCategories(gofCurrentOrganizationId); document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent=l?.name||'Organización activa'); restoreHomeLeagueLogo(); return l;
+ gofCurrentOrganizationId=m.league_id;gofCurrentOrganization=l||null;
+ if(l && window.gofTournamentContextLeagueId!==l.id){
+   window.gofTournamentContextLeagueId=l.id; window.gofSingleTournamentId=''; window.gofSingleTournament=null;
+   try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');}catch(_){}
+ }
+ await gofEnsureDefaultCategories(gofCurrentOrganizationId); document.querySelectorAll('[data-current-league-name]').forEach(x=>x.textContent=l?.name||'Organización activa'); restoreHomeLeagueLogo(); return l;
 }
-async function selectLeagueFinal(id){if(!id)return;const {error}=await sb.rpc('set_active_league',{p_league_id:id});if(error)return alert(error.message);await loadLeagueContextFinal();toast('Organización activa: '+(gofCurrentOrganization?.name||''));await refreshAllSelectors();await loadMisLigas();}
+async function selectLeagueFinal(id){
+ if(!id)return;
+ const {error}=await sb.rpc('set_active_league',{p_league_id:id});
+ if(error)return alert(error.message);
+ // Al cambiar de liga nunca conservamos el torneo de la liga anterior.
+ // Esto evita que una liga nueva muestre accidentalmente datos de otra liga por localStorage.
+ try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');}catch(_){ }
+ window.gofSingleTournamentId='';
+ window.gofSingleTournament=null;
+ window.GOF_ACTIVE_LEAGUE_ID=id;
+ try{localStorage.setItem('gameOnFlagActiveLeagueId',id)}catch(_){ }
+ await loadLeagueContextFinal(id);
+ toast('Organización activa: '+(gofCurrentOrganization?.name||''));
+ await refreshAllSelectors();
+ await loadMisLigas();
+}
 async function ensurePlatformMaster(){
  if(!window.GOF_PLATFORM_MASTER){ alert('Esta sección es exclusiva de la administradora principal de GAME ON FLAG.'); return false; }
  return true;
@@ -3693,6 +3727,11 @@ window.gofOwnerEnterLeague=async function(id){
     if(anon.error)throw anon.error;
   }
   window.GOF_ACTIVE_LEAGUE_ID=id;
+  // Entrada directa a una liga desde el panel maestro: borrar primero cualquier contexto de la liga anterior.
+  window.gofTournamentContextLeagueId='';
+  window.gofSingleTournamentId='';
+  window.gofSingleTournament=null;
+  try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');localStorage.setItem('gameOnFlagActiveLeagueId',id)}catch(_){}
   const league=await loadLeagueContextFinal(id);
   if(!league)throw new Error('La liga no está disponible o no está activa.');
   // La administradora principal entra directamente a la liga seleccionada.
@@ -3830,12 +3869,18 @@ async function loadCredentialSelectorsFinal(){
  const t=document.getElementById('crTournament'),c=document.getElementById('crCategory'),tm=document.getElementById('crTeam'),pl=document.getElementById('crPlayer');
  if(!t||!c||!tm||!pl||!sb)return;
  try{
-   // Credenciales debe funcionar con el torneo activo aunque el contexto de liga aún no esté cargado.
+   // Credenciales solo puede reutilizar un torneo que pertenezca a la liga actualmente activa.
    let tid=window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
    let tour=null;
    if(tid){
      const q=await sb.from('tournaments').select('id,name,league_id,created_at').eq('id',tid).maybeSingle();
      tour=q.data||null;
+     if(tour && gofCurrentOrganizationId && tour.league_id!==gofCurrentOrganizationId){
+       tour=null;
+       tid='';
+       window.gofSingleTournamentId='';
+       try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament')}catch(_){ }
+     }
    }
    if(!tour){
      let q=sb.from('tournaments').select('id,name,league_id,created_at').order('created_at',{ascending:false}).limit(1);
@@ -5500,6 +5545,12 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
       ]);
       const rows=ts||[];
       const current=rows.find(x=>['proximo','activo'].includes(x.status))||rows[0]||null;
+      // Si la liga es nueva y todavía no tiene torneo, no heredamos el torneo guardado de otra liga.
+      if(!current){
+        window.gofSingleTournamentId='';
+        window.gofSingleTournament=null;
+        try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament')}catch(_){ }
+      }
       return {leagueId:lid,leagueName:league?.name||'Liga',tournament:current};
     }catch(e){console.warn('GAME ON FLAG single tournament:',e);return null;}
   }

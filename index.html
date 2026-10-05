@@ -504,13 +504,15 @@ function matchups(){
   /* FUENTE OFICIAL: public_get_tournament_matchups lee directamente los partidos de Administración (tabla matches), incluyendo J1-J7 aunque todavía no estén publicados en el calendario. */
   const activeIds=new Set(visibleCategories().map(x=>String(x.id)));
   const source=Array.isArray(matchupMatches)&&matchupMatches.length?matchupMatches:(Array.isArray(data.matches)?data.matches:[]);
-  const ms=source.filter(m=>activeIds.has(String(m.category_id))&&String(m.category_id)===String(sel)&&Number(m.round_number)>=1&&Number(m.round_number)<=7&&!m.is_makeup);
+  // En esta RPC, matchup_round_number es la jornada ORIGINAL de Enfrentamientos.
+  // round_number es la jornada real del Calendario y puede cambiar al mover un partido.
+  const ms=source.filter(m=>activeIds.has(String(m.category_id))&&String(m.category_id)===String(sel)&&Number(m.matchup_round_number||m.round_number)>=1&&Number(m.matchup_round_number||m.round_number)<=7&&!m.is_makeup);
   const selectedTeams=data.teams.filter(tm=>(tm.category_ids||[]).map(String).includes(String(sel)));
   const ids=[...new Set([...selectedTeams.map(x=>x.id),...ms.flatMap(m=>[m.home_team_id,m.away_team_id]).filter(Boolean)])];
   const rows=ids.map(id=>{
     const tm=team(id);
     const rounds={};
-    ms.forEach(m=>{const r=Number(m.round_number);if(m.home_team_id===id) rounds[r]=team(m.away_team_id).name;else if(m.away_team_id===id) rounds[r]=team(m.home_team_id).name;});
+    ms.forEach(m=>{const r=Number(m.matchup_round_number||m.round_number);if(m.home_team_id===id) rounds[r]=team(m.away_team_id).name;else if(m.away_team_id===id) rounds[r]=team(m.home_team_id).name;});
     return {id,name:tm.name,rounds};
   }).sort((a,b)=>a.name.localeCompare(b.name,'es'));
 

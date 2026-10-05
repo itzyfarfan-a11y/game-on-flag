@@ -4491,13 +4491,13 @@ window.addEventListener('load',async function(){
     if(error)throw error;return (data||[]).map(x=>x.teams).filter(Boolean);
   }
   async function getRows(tid,cat){
-    let q=sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name),categories(name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('round_number').order('id');
+    let q=sb.from('matches').select('id,category_id,round_number,matchup_round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name),categories(name)').eq('tournament_id',tid).eq('category_id',cat).eq('status','programado').order('matchup_round_number').order('id');
     const {data,error}=await q;if(error)throw error;return data||[];
   }
   function analyze(rows,teams,requiredRounds){
     const issues=[];const byRound=new Map();const pairSeen=new Map();
     for(const r of rows){
-      const round=Number(r.round_number||0);if(!byRound.has(round))byRound.set(round,[]);byRound.get(round).push(r);
+      const round=Number(r.matchup_round_number||r.round_number||0);if(!byRound.has(round))byRound.set(round,[]);byRound.get(round).push(r);
       if(!r.home_team_id||!r.away_team_id||r.home_team_id===r.away_team_id){issues.push(`J${round}: hay un partido sin dos equipos diferentes.`);continue}
       const pair=[r.home_team_id,r.away_team_id].sort().join(':');const pk=pair;
       if(!pairSeen.has(pk))pairSeen.set(pk,[]);pairSeen.get(pk).push(round);
@@ -4509,7 +4509,7 @@ window.addEventListener('load',async function(){
     // If there are enough teams, every team must face a different opponent in each of the required rounds.
     if(teams.length>requiredRounds){
       const name=new Map(teams.map(t=>[t.id,t.name]));const seen=new Map();
-      for(const r of rows){const a=r.home_team_id,b=r.away_team_id;if(!a||!b)continue;for(const [t,o] of [[a,b],[b,a]]){const k=t+'|'+o;if(!seen.has(k))seen.set(k,[]);seen.get(k).push(Number(r.round_number));}}
+      for(const r of rows){const a=r.home_team_id,b=r.away_team_id;if(!a||!b)continue;for(const [t,o] of [[a,b],[b,a]]){const k=t+'|'+o;if(!seen.has(k))seen.set(k,[]);seen.get(k).push(Number(r.matchup_round_number||r.round_number));}}
       for(const [k,rs] of seen){if(rs.length>1){const [t,o]=k.split('|');issues.push(`${name.get(t)||'Equipo'} vuelve a enfrentar a ${name.get(o)||'otro equipo'} en J${rs.join(', J')}.`);}}
     }
     return [...new Set(issues)];
@@ -4706,9 +4706,9 @@ window.addEventListener('load',async function(){
   }
   async function fetchMatchups(){
     const tid=gVal('gofMatchupTournament'),cat=gVal('gofMatchupCategory');if(!tid)return [];
-    let q=sb.from('matches').select('id,category_id,round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,categories(name),home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('status','programado');
+    let q=sb.from('matches').select('id,category_id,round_number,matchup_round_number,home_team_id,away_team_id,status,match_date,match_time,field_name,published,categories(name),home:teams!matches_home_team_id_fkey(id,name),away:teams!matches_away_team_id_fkey(id,name)').eq('tournament_id',tid).eq('status','programado');
     if(cat)q=q.eq('category_id',cat);
-    const {data,error}=await q.order('category_id').order('round_number').order('id');if(error){alert(error.message);return []}return data||[];
+    const {data,error}=await q.order('category_id').order('matchup_round_number').order('id');if(error){alert(error.message);return []}return data||[];
   }
   function gofDisplayCategoryName(name){
     const n=String(name||'').trim();
@@ -4785,11 +4785,11 @@ window.addEventListener('load',async function(){
     const byTeam=new Map(teams.map(t=>[t.id,{team:t,rounds:{}}]));
     for(const r of rows){
       const h=byTeam.get(r.home_team_id),a=byTeam.get(r.away_team_id);
-      if(h)h.rounds[Number(r.round_number)]={match:r,opponent:a?.team||{id:r.away_team_id,name:r.away?.name||'Por definir'},side:'home'};
-      if(a)a.rounds[Number(r.round_number)]={match:r,opponent:h?.team||{id:r.home_team_id,name:r.home?.name||'Por definir'},side:'away'};
+      if(h)h.rounds[Number(r.matchup_round_number||r.round_number)]={match:r,opponent:a?.team||{id:r.away_team_id,name:r.away?.name||'Por definir'},side:'home'};
+      if(a)a.rounds[Number(r.matchup_round_number||r.round_number)]={match:r,opponent:h?.team||{id:r.home_team_id,name:r.home?.name||'Por definir'},side:'away'};
     }
     const rounds=[1,2,3,4,5,6,7];
-    const lockedRounds=new Set(rows.filter(r=>r.match_date||r.published||r.status!=='programado').map(r=>Number(r.round_number)));
+    const lockedRounds=new Set(rows.filter(r=>r.match_date||r.published||r.status!=='programado').map(r=>Number(r.matchup_round_number||r.round_number)));
     const scheduledCount=rows.length;
     if(info)info.innerHTML=`<b>${gEsc(teams.length)} equipos</b> · ${gEsc(scheduledCount)} partidos · <b>7 jornadas</b>. <span class="mut">La tabla se lee de izquierda a derecha: J1 → J7.</span>`;
     const cell=(entry,teamId,round)=>{
@@ -4908,7 +4908,7 @@ window.addEventListener('load',async function(){
         return alert(`No se pudo cuadrar la Jornada ${r} de ${catName} sin empalmes. No se guardó una jornada incompleta.`);
       }
       for(const [a,b] of result.pairs){
-        generated.push({tournament_id:tid,category_id:cat,round_number:r,home_team_id:a,away_team_id:b,status:'programado',published:false,is_makeup:false,referee_fee_due:true});
+        generated.push({tournament_id:tid,category_id:cat,round_number:r,matchup_round_number:r,home_team_id:a,away_team_id:b,status:'programado',published:false,is_makeup:false,referee_fee_due:true});
         const k=pairKey(a,b);workingHistory.set(k,(workingHistory.get(k)||0)+1);
       }
       if(result.bye)byeCounts.set(result.bye,(byeCounts.get(result.bye)||0)+1);
@@ -4957,7 +4957,7 @@ window.addEventListener('load',async function(){
   async function gofSaveMatchup(id){
     const m=matchupRows.find(x=>x.id===id);if(!m)return;
     const a=gVal('gma_'+id),b=gVal('gmb_'+id);if(!a||!b||a===b)return alert('Selecciona dos equipos diferentes.');
-    const dup=matchupRows.some(x=>x.id!==id&&x.category_id===m.category_id&&Number(x.round_number)===Number(m.round_number)&&((x.home_team_id===a&&x.away_team_id===b)||(x.home_team_id===b&&x.away_team_id===a)));if(dup)return alert('Ese enfrentamiento ya existe en la misma jornada.');
+    const dup=matchupRows.some(x=>x.id!==id&&x.category_id===m.category_id&&Number(x.matchup_round_number||x.round_number)===Number(m.matchup_round_number||m.round_number)&&((x.home_team_id===a&&x.away_team_id===b)||(x.home_team_id===b&&x.away_team_id===a)));if(dup)return alert('Ese enfrentamiento ya existe en la misma jornada.');
     const {error}=await sb.from('matches').update({home_team_id:a,away_team_id:b}).eq('id',id);if(error)return alert(error.message);toast('Enfrentamiento actualizado');await gofLoadMatchups();
   }
   function gofSwapMatchup(id){const a=document.getElementById('gma_'+id),b=document.getElementById('gmb_'+id);if(!a||!b)return;const x=a.value;a.value=b.value;b.value=x}
@@ -4966,12 +4966,12 @@ window.addEventListener('load',async function(){
     const rows=await fetchMatchups();if(!rows.length)return alert('No hay enfrentamientos pendientes.');
     const bad=[];const seen=new Set();const pairRounds=new Map();
     rows.forEach(r=>{
-      if(!r.home_team_id||!r.away_team_id||r.home_team_id===r.away_team_id)bad.push(`J${r.round_number}: equipo faltante o repetido`);
+      if(!r.home_team_id||!r.away_team_id||r.home_team_id===r.away_team_id)bad.push(`J${r.matchup_round_number||r.round_number}: equipo faltante o repetido`);
       const pair=[r.home_team_id,r.away_team_id].sort().join(':');
-      const key=[r.category_id,r.round_number,pair].join('|');
-      if(seen.has(key))bad.push(`J${r.round_number}: enfrentamiento repetido`);
+      const key=[r.category_id,r.matchup_round_number||r.round_number,pair].join('|');
+      if(seen.has(key))bad.push(`J${r.matchup_round_number||r.round_number}: enfrentamiento repetido`);
       seen.add(key);
-      if(r.home_team_id&&r.away_team_id){if(!pairRounds.has(pair))pairRounds.set(pair,[]);pairRounds.get(pair).push(Number(r.round_number));}
+      if(r.home_team_id&&r.away_team_id){if(!pairRounds.has(pair))pairRounds.set(pair,[]);pairRounds.get(pair).push(Number(r.matchup_round_number||r.round_number));}
     });
     for(const [pair,rs] of pairRounds){const unique=[...new Set(rs)];if(unique.length>1)bad.push(`Rival repetido en J${unique.join(', J')}.`);}
     if(bad.length)return alert('Corrige antes de aprobar:\n\n'+bad.slice(0,12).join('\n'));
@@ -5397,13 +5397,14 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     const hidden=document.getElementById('gofMatchupCategory');
     const old=hidden?.value||window.__gofMatrixSelectedCategory||localStorage.getItem('gof_enf_category')||'';
     const selected=cats.some(c=>c.id===old)?old:'';
-    bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button><button type="button" class="primary" id="gofMatrixApprove">💾 Aprobar y guardar</button><button type="button" class="primary" id="gofMatrixPublish">📢 Publicar</button><button type="button" id="gofMatrixDownload">🖼️ Descargar tabla</button></div><div id="gofMatrixStatus" class="mut small gof-v2-status"></div>';
+    bar.innerHTML='<div class="gof-v2-title">🏷️ Selecciona la categoría</div><select id="gofMatrixCategorySelect"><option value="">Selecciona una categoría</option>'+cats.map(c=>`<option value="${escV(c.id)}" ${c.id===selected?'selected':''}>${escV(c.name)}</option>`).join('')+'</select><div class="gof-v2-actions"><button type="button" class="gold" id="gofMatrixGenerate">🎲 Generar enfrentamientos</button><button type="button" id="gofMatrixRefresh">🔄 Actualizar tabla</button><button type="button" class="primary" id="gofMatrixApprove">✅ Aprobar y bloquear</button><button type="button" class="primary" id="gofMatrixPublish">🌐 Publicar en portal</button><button type="button" id="gofMatrixUnpublish">🚫 Quitar del público</button><button type="button" id="gofMatrixDownload">🖼️ Descargar tabla</button></div><div id="gofMatrixStatus" class="mut small gof-v2-status"></div>';
     const sel=document.getElementById('gofMatrixCategorySelect');
     const sync=async()=>{if(hidden)hidden.value=sel.value;window.__gofMatrixSelectedCategory=sel.value||'';window.__gofMatrixSelectedTournament=tid;localStorage.setItem('gof_enf_category',sel.value||'');v2Status('');await window.gofLoadMatchupsV2()};
     sel.onchange=sync;
     document.getElementById('gofMatrixRefresh').onclick=async()=>{try{await window.gofLoadMatchupsV2();v2Status('Tabla actualizada.',true)}catch(e){v2Status('No se pudo actualizar: '+(e?.message||e))}};
     document.getElementById('gofMatrixApprove').onclick=async()=>{try{await approveV2()}catch(e){v2Status('No se pudo guardar: '+(e?.message||e))}};
     document.getElementById('gofMatrixPublish').onclick=async()=>{try{await publishV2()}catch(e){v2Status('No se pudo publicar: '+(e?.message||e))}};
+    document.getElementById('gofMatrixUnpublish').onclick=async()=>{try{await unpublishV2()}catch(e){v2Status('No se pudo quitar del público: '+(e?.message||e))}};
     document.getElementById('gofMatrixDownload').onclick=async()=>{try{await downloadV2()}catch(e){v2Status('No se pudo descargar: '+(e?.message||e))}};
     document.getElementById('gofMatrixGenerate').onclick=async()=>{
       const chosen=sel.value;if(!chosen){v2Status('Selecciona una categoría.');return;}
@@ -5565,19 +5566,28 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
       const rk=`${(r.matchup_round_number||r.round_number)}|${r.home_team_id}|${r.away_team_id}`;if(seenRound.has(rk))bad.push(`J${(r.matchup_round_number||r.round_number)}: enfrentamiento duplicado.`);seenRound.add(rk);
       for(const [t,o] of [[r.home_team_id,r.away_team_id],[r.away_team_id,r.home_team_id]]){const k=t+'|'+o;const arr=pairs.get(k)||[];arr.push(Number((r.matchup_round_number||r.round_number)));pairs.set(k,arr);}
     }
-    // Un equipo solo puede tener un partido por jornada en Enfrentamientos.
-    for(const t of teams){for(let rr=1;rr<=rounds;rr++){const c=rows.filter(m=>Number(m.round_number)===rr&&(m.home_team_id===t.id||m.away_team_id===t.id));if(c.length>1)bad.push(`${t.name}: tiene más de un partido en J${rr}.`);}}
+    // La validación de Enfrentamientos usa SIEMPRE la jornada original.
+    // round_number pertenece al calendario y puede cambiar cuando se mueve un partido.
+    for(const t of teams){for(let rr=1;rr<=rounds;rr++){const c=rows.filter(m=>Number(m.matchup_round_number||m.round_number)===rr&&(m.home_team_id===t.id||m.away_team_id===t.id));if(c.length>1)bad.push(`${t.name}: tiene más de un partido en J${rr} de enfrentamientos.`);}}
     // No repetir rival únicamente cuando hay más equipos que jornadas (>7).
     if(teams.length>rounds){for(const [k,rs] of pairs){const u=[...new Set(rs)];if(u.length>1){const [a,b]=k.split('|');const names=new Map(teams.map(t=>[t.id,t.name]));bad.push(`${names.get(a)||'Equipo'} repite rival con ${names.get(b)||'otro equipo'} en J${u.join(', J')}.`);}}}
     if(bad.length){v2Status('Corrige la tabla antes de aprobar: '+bad.slice(0,4).join(' · '));return;}
-    try{await client().from('tournament_matchup_approvals').upsert({tournament_id:tid},{onConflict:'tournament_id'});}catch(_){/* La aprobación visual sigue siendo válida aunque la tabla no tenga RLS de escritura. */}
+    const {data,error}=await client().rpc('admin_approve_matchups',{p_tournament_id:tid});
+    if(error)throw error;
     localStorage.setItem('gof_matchups_approved_'+tid+'_'+cat,'1');
-    v2Status('✓ Enfrentamientos guardados y aprobados.',true);
+    v2Status('✓ Enfrentamientos aprobados y bloqueados. Ahora puedes publicarlos.',true);
   }
   async function publishV2(){
     const {tid,cat,rows}=await currentV2();if(!rows.length)throw new Error('No hay enfrentamientos guardados.');
-    const {error}=await client().from('matches').update({published:true}).eq('tournament_id',tid).eq('category_id',cat).eq('status','programado');
-    if(error)throw error;v2Status('📢 Enfrentamientos publicados.',true);await gofLoadMatchupsV2();
+    const {data,error}=await client().rpc('admin_set_matchup_public_visibility',{p_tournament_id:tid,p_public_visible:true});
+    if(error)throw error;
+    v2Status('📢 Enfrentamientos publicados en el portal público.',true);await gofLoadMatchupsV2();
+  }
+  async function unpublishV2(){
+    const {tid,rows}=await currentV2();if(!rows.length)throw new Error('No hay enfrentamientos guardados.');
+    const {data,error}=await client().rpc('admin_set_matchup_public_visibility',{p_tournament_id:tid,p_public_visible:false});
+    if(error)throw error;
+    v2Status('🚫 Enfrentamientos retirados del portal público.',true);await gofLoadMatchupsV2();
   }
   async function downloadV2(){
     const {cat,rows,teams}=await currentV2();

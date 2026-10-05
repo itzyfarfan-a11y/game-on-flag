@@ -417,6 +417,7 @@ footer{background:#fff!important;border-top:1px solid var(--gof-line)!important;
   <span id="publicFooterLeague">Portal público</span><br><br>
   📷 Game On Flag &nbsp;|&nbsp; 🔵 Game On Flag
 </footer>
+<script id="gof-supabase-js" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const U='https://picivrqgmckrwutarhyw.supabase.co',K='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl',H={apikey:K,'Content-Type':'application/json',Accept:'application/json'},t=document.getElementById('t'),c=document.getElementById('c'),status=document.getElementById('status'),nav=document.getElementById('nav');const GOF_PUBLIC_LEAGUE_SLUG=(new URLSearchParams(location.search).get('liga')||new URLSearchParams(location.search).get('league')||'').trim();let league={},data={tournament:{},categories:[],teams:[],matches:[],playoffs:[]},matchupMatches=[],notices=[],tab='calendario';const sec=['inicio','equipos','jugadores','calendario','enfrentamientos','resultados','tabla','playoffs','campeones','avisos','anuncios'];function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}async function rpc(n,b={}){const r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b),cache:'no-store'}),x=await r.text();if(!r.ok)throw Error('HTTP '+r.status);return JSON.parse(x)}function team(id){return data.teams.find(x=>x.id===id)||{name:'Por definir'}}function cat(id){return data.categories.find(x=>x.id===id)?.name||'Categoría'}
 function visibleCategories(){const ids=new Set();(data.teams||[]).forEach(tm=>(tm.category_ids||[]).forEach(id=>ids.add(id)));return (data.categories||[]).filter(x=>ids.has(x.id))}
@@ -1312,5 +1313,26 @@ window.setCalendarMode=function(mode){
 })();
 </script>
 
+<script id="gof-public-results-realtime">
+(function(){
+ let channel=null,tid='';
+ async function setup(){
+  try{
+   const current=String(data?.tournament?.id||'');
+   if(!current||!window.supabase?.createClient)return;
+   if(channel&&tid===current)return;
+   if(channel){try{channel.unsubscribe()}catch(_){} channel=null;}
+   tid=current;
+   const client=window.supabase.createClient('https://picivrqgmckrwutarhyw.supabase.co','sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl');
+   channel=client.channel('gof-public-results-'+tid)
+    .on('postgres_changes',{event:'*',schema:'public',table:'matches',filter:'tournament_id=eq.'+tid},async()=>{
+      try{await refresh();}catch(e){console.warn('GAME ON FLAG actualización pública:',e)}
+    }).subscribe();
+  }catch(e){console.warn('GAME ON FLAG Realtime público:',e)}
+ }
+ setInterval(setup,1500);setup();
+ window.addEventListener('beforeunload',()=>{try{if(channel)channel.unsubscribe()}catch(_){} });
+})();
+</script>
 </body>
 </html>

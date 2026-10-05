@@ -1367,28 +1367,32 @@ async function loadFinanceQuickRows(){
   recalcQuickFinance();
 }
 async function loadFinanceCategoryPrices(){
-  const tid=val('finT'),body=document.getElementById('financeCategoryPriceRows'),exSel=document.getElementById('financeExceptionTeam');if(!tid||!body)return;
-  const [{data:cats},{data:teams},{data:charges}]=await Promise.all([
-    sb.from('tournament_categories').select('category_id,categories(name)').eq('tournament_id',tid),
-    sb.from('tournament_teams').select('id,category_id,team_id,teams(name)').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id'),
-    sb.from('finance_charges').select('tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid)
-  ]);
-  const chargeMap=new Map((charges||[]).map(c=>[`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`,Number(c.amount_due||0)]));
-  const groups={};(teams||[]).forEach(t=>(groups[t.category_id]??=[]).push(t));
-  // Solo mostrar categorías que realmente tienen equipos activos inscritos.
-  // La categoría se obtiene del registro de cada equipo, así Contabilidad nunca pide capturar manualmente la cantidad.
-  const catNames=new Map((cats||[]).map(c=>[c.category_id,c.categories?.name||'Categoría']));
+  const tid=val('finT'),body=document.getElementById('financeCategoryPriceRows'),exSel=document.getElementById('financeExceptionTeam');
+  if(!tid||!body)return;
+  body.innerHTML='<tr><td colspan="5" class="mut">Cargando equipos…</td></tr>';
+  const catQ=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);
+  const teamQ=await sb.from('tournament_teams').select('id,category_id,team_id,teams(id,name)').eq('tournament_id',tid).eq('is_active',true).order('category_id').order('team_id');
+  if(teamQ.error){
+    body.innerHTML=`<tr><td colspan="5" class="mut">No se pudieron cargar los equipos: ${esc(teamQ.error.message)}</td></tr>`;
+    if(exSel)exSel.innerHTML='<option value="">No se pudieron cargar equipos</option>';
+    return;
+  }
+  const chargeQ=await sb.from('finance_charges').select('tournament_team_id,concept_type,round_number,amount_due').eq('tournament_id',tid);
+  const cats=catQ.data||[],teams=teamQ.data||[],charges=chargeQ.data||[];
+  const chargeMap=new Map(charges.map(c=>[`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`,Number(c.amount_due||0)]));
+  const groups={};teams.forEach(t=>(groups[t.category_id]??=[]).push(t));
+  const catNames=new Map(cats.map(c=>[c.category_id,c.categories?.name||'Categoría']));
   const catList=Object.keys(groups).filter(id=>(groups[id]||[]).length>0).map(id=>({id,name:catNames.get(id)||'Categoría'}));
   window.__financeCats=catList;
-  body.innerHTML=catList.map(c=>{const ts=groups[c.id]||[];let ins=0,arb=0;
+  body.innerHTML=catList.map(c=>{
+    const ts=groups[c.id]||[];
     const insVals=ts.map(t=>chargeMap.get(`${t.id}|inscripcion|`)||0).filter(v=>v>0);
     const arbVals=ts.map(t=>chargeMap.get(`${t.id}|arbitraje|1`)||0).filter(v=>v>0);
-    if(insVals.length)ins=insVals[0]; if(arbVals.length)arb=arbVals[0];
-    const sameIns=insVals.length>0 && insVals.every(v=>v===ins);
-    const sameArb=arbVals.length>0 && arbVals.every(v=>v===arb);
-    return `<tr data-category-id="${esc(c.id)}"><td><b>${esc(c.name)}</b></td><td class="finance-category-count">${ts.length}</td><td><input class="cat-ins" type="number" min="0" step="1" value="${sameIns&&ins?ins:''}" placeholder="$1,500"></td><td><input class="cat-arb" type="number" min="0" step="1" value="${sameArb&&arb?arb:''}" placeholder="$550"></td><td><button class="gold finance-save-price" type="button" onclick="applyFinanceCategoryPrice(this.closest('tr'))">💾 Aplicar a ${ts.length}</button></td></tr>`
+    const ins=insVals[0]||0,arb=arbVals[0]||0;
+    const sameIns=insVals.length>0&&insVals.every(v=>v===ins),sameArb=arbVals.length>0&&arbVals.every(v=>v===arb);
+    return `<tr data-category-id="${esc(c.id)}"><td><b>${esc(c.name)}</b></td><td class="finance-category-count">${ts.length}</td><td><input class="cat-ins" type="number" min="0" step="1" value="${sameIns&&ins?ins:''}" placeholder="$1,500"></td><td><input class="cat-arb" type="number" min="0" step="1" value="${sameArb&&arb?arb:''}" placeholder="$550"></td><td><button class="gold finance-save-price" type="button" onclick="applyFinanceCategoryPrice(this.closest('tr'))">💾 Aplicar a ${ts.length}</button></td></tr>`;
   }).join('')||'<tr><td colspan="5" class="mut">No hay equipos activos inscritos en este torneo.</td></tr>';
-  if(exSel){exSel.innerHTML='<option value="">Selecciona equipo</option>'+(teams||[]).map(t=>`<option value="${esc(t.id)}">${esc(t.teams?.name||'Equipo')} · ${esc(catList.find(c=>c.id===t.category_id)?.name||'Categoría')}</option>`).join('');}
+  if(exSel)exSel.innerHTML='<option value="">Selecciona equipo</option>'+teams.map(t=>`<option value="${esc(t.id)}">${esc(t.teams?.name||'Equipo')} · ${esc(catList.find(c=>c.id===t.category_id)?.name||'Categoría')}</option>`).join('');
 }
 function toggleFinanceExceptions(){const p=document.getElementById('financeExceptionsPanel');if(p)p.style.display=p.style.display==='none'?'block':'none'}
 async function applyFinanceCategoryPrice(tr){
@@ -1470,12 +1474,15 @@ async function saveQuickFinanceExpenses(){
 }
 async function loadFinance(){
   const sel=document.getElementById('finT'); if(!sel||!sb)return;
-  const {data:tournaments,error:te}=await sb.from('tournaments').select('id,name,season,tournament_type').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});
+  const {data:tournaments,error:te}=await sb.from('tournaments').select('id,name,season,tournament_type,status,created_at').eq('league_id',gofCurrentOrganizationId).order('created_at',{ascending:false});
   if(te){document.getElementById('financeSummary').textContent='No se pudo cargar contabilidad: '+te.message;return;}
-  const current=sel.value; sel.innerHTML='<option value="">Usa el torneo actual</option>'+(tournaments||[]).map(t=>`<option value="${t.id}">${t.name} · ${t.season||''}</option>`).join('');
-  if(current&&(tournaments||[]).some(t=>t.id===current))sel.value=current; else if(tournaments?.[0])sel.value=tournaments[0].id;
+  const current=window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||sel.value||'';
+  sel.innerHTML='<option value="">Usa el torneo actual</option>'+(tournaments||[]).map(t=>`<option value="${t.id}">${t.name} · ${t.season||''}</option>`).join('');
+  if(current&&(tournaments||[]).some(t=>String(t.id)===String(current))) sel.value=current;
+  else if(tournaments?.[0]) sel.value=tournaments[0].id;
+  if(sel.value){ try{localStorage.setItem('gof_finance_tournament',sel.value)}catch(_){} }
   await loadFinanceQuickRows(); await renderFinance();
-  sel.onchange=async()=>{await loadFinanceQuickRows(); await renderFinance();};
+  sel.onchange=async()=>{try{localStorage.setItem('gof_finance_tournament',sel.value||'')}catch(_){};await loadFinanceQuickRows();await renderFinance();};
 }
 async function renderFinance(){
   const tid=val('finT'),out=document.getElementById('financeSummary'),list=document.getElementById('financeList'); if(!tid||!sb){if(out)out.textContent='Selecciona un torneo para consultar su contabilidad.';return;}

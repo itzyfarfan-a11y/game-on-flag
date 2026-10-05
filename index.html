@@ -1150,17 +1150,48 @@ window.setCalendarMode=function(mode){
 <script id="gof-direct-publication-public-final">
 (function(){
   'use strict';
-  const PUB_REST='https://picivrqgmckrwutarhyw.supabase.co/rest/v1/publication_images';
+  const PUB_BASE='https://picivrqgmckrwutarhyw.supabase.co';
+  const PUB_REST=PUB_BASE+'/rest/v1/publication_images';
+  const PUB_RPC=PUB_BASE+'/rest/v1/rpc/';
   const PUB_KEY='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl';
   let directPublications=[];
   let pubsLoadedFor='';
 
+  function localEsc(v){
+    return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  async function publicRpc(name,body){
+    const r=await fetch(PUB_RPC+name,{
+      method:'POST',
+      headers:{apikey:PUB_KEY,'Content-Type':'application/json',Accept:'application/json'},
+      body:JSON.stringify(body||{}),
+      cache:'no-store'
+    });
+    if(!r.ok)throw new Error('RPC HTTP '+r.status);
+    return r.json();
+  }
+
   async function loadDirectPublications(force){
-    const tid=window.t?.value;
-    const lid=window.league?.id;
-    if(!tid||!lid){directPublications=[];return []}
+    const tournamentEl=document.getElementById('t');
+    const tid=tournamentEl?.value;
+    if(!tid){directPublications=[];return []}
+
+    let lid='';
+    try{
+      const slug=(new URLSearchParams(location.search).get('liga')||new URLSearchParams(location.search).get('league')||'').trim();
+      if(slug){
+        const league=await publicRpc('public_get_league_by_slug',{p_league_slug:slug});
+        lid=league?.id||'';
+      }
+    }catch(e){
+      console.error('GAME ON FLAG: no se pudo obtener la liga pública',e);
+    }
+    if(!lid){directPublications=[];return []}
+
     const key=String(lid)+'|'+String(tid);
     if(!force && pubsLoadedFor===key)return directPublications;
+
     const qs=new URLSearchParams({
       league_id:'eq.'+lid,
       tournament_id:'eq.'+tid,
@@ -1174,7 +1205,8 @@ window.setCalendarMode=function(mode){
         cache:'no-store'
       });
       if(!r.ok)throw new Error('HTTP '+r.status);
-      directPublications=await r.json();
+      const rows=await r.json();
+      directPublications=Array.isArray(rows)?rows:[];
       pubsLoadedFor=key;
     }catch(e){
       console.error('GAME ON FLAG Publicación Directa pública:',e);
@@ -1193,10 +1225,10 @@ window.setCalendarMode=function(mode){
     }
     return directPublications.map((p,i)=>{
       const label=sectionLabel(p.section);
-      const title=esc(p.title||('Publicación '+(i+1)));
+      const title=localEsc(p.title||('Publicación '+(i+1)));
       return '<div class="gof-direct-publication-card">'
-        +'<div class="gof-direct-publication-head"><b>📌 PUBLICACIÓN OFICIAL</b><span>'+label+'</span></div>'
-        +'<img class="gof-direct-publication-image" src="'+esc(p.image_url)+'" alt="'+title+'" loading="lazy">'
+        +'<div class="gof-direct-publication-head"><b>📌 PUBLICACIÓN OFICIAL</b><span>'+localEsc(label)+'</span></div>'
+        +'<img class="gof-direct-publication-image" src="'+localEsc(p.image_url)+'" alt="'+title+'" loading="lazy">'
         +'<div class="gof-direct-publication-caption">'+title+'</div>'
         +'</div>';
     }).join('');
@@ -1205,6 +1237,7 @@ window.setCalendarMode=function(mode){
   async function renderDirectAnnouncements(){
     const el=document.getElementById('anuncios');
     if(!el)return;
+    el.innerHTML='<h2>📢 Anuncios</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Cargando publicaciones directas...</div></div>';
     await loadDirectPublications();
     el.innerHTML='<h2>📢 Anuncios</h2>'+announcementsHtml();
   }
@@ -1212,13 +1245,18 @@ window.setCalendarMode=function(mode){
   window.gofRenderDirectAnnouncements=renderDirectAnnouncements;
   window.gofReloadDirectPublications=async function(){
     pubsLoadedFor='';
-    await loadDirectPublications(true);
-    if(document.getElementById('anuncios')) await renderDirectAnnouncements();
+    await renderDirectAnnouncements();
   };
 
   const css=document.createElement('style');
   css.textContent='.gof-direct-publication-card{margin:0 0 14px;padding:12px;background:#fff;border:2px solid #8b27ff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18)}.gof-direct-publication-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px;color:#12355b;font-size:12px}.gof-direct-publication-head span{font-weight:700;color:#667085;overflow-wrap:anywhere}.gof-direct-publication-image{display:block;width:100%;height:auto;max-height:none;object-fit:contain;border-radius:10px;background:#fff}.gof-direct-publication-caption{margin-top:8px;font-size:12px;color:#667085;overflow-wrap:anywhere}';
   document.head.appendChild(css);
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',renderDirectAnnouncements,{once:true});
+  }else{
+    renderDirectAnnouncements();
+  }
 })();
 </script>
 

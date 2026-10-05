@@ -922,7 +922,22 @@ const FN='https://picivrqgmckrwutarhyw.supabase.co/functions/v1/direct-publicati
 const sections=[['calendario','📅 CALENDARIO','Se publicará en Calendario del Portal Público.'],['enfrentamientos','⚔️ ENFRENTAMIENTOS','Se publicará en Enfrentamientos del Portal Público.'],['resultados','🏈 RESULTADOS','Se publicará en Resultados del Portal Público.'],['tablas','📊 TABLA GENERAL','Se publicará en Tabla General del Portal Público.']];
 const st={token:'',leagueId:'',tournamentId:'',leagueName:'',tournamentName:''};const $=id=>document.getElementById(id);
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-async function getToken(){if(st.token)return st.token;if(!window.sb)throw new Error('No se pudo conectar con la sesión de administración.');let {data,error}=await sb.auth.getSession();if(error)throw error;let session=data?.session||null;if(!session){try{const r=await sb.auth.refreshSession();if(!r.error)session=r.data?.session||null;}catch(_){}}st.token=session?.access_token||'';if(!st.token)throw new Error('Sesión de administración no disponible. Vuelve a entrar a tu liga y prueba nuevamente.');return st.token}
+async function getToken(){
+ if(st.token)return st.token;
+ if(!window.sb)throw new Error('No se pudo conectar con la sesión de administración.');
+ let session=null,authError=null;
+ try{const r=await sb.auth.getSession();authError=r.error||null;session=r.data?.session||null}catch(e){authError=e}
+ if(!session?.access_token){
+   try{const r=await sb.auth.refreshSession();if(r.data?.session)session=r.data.session;else if(r.error)authError=authError||r.error}catch(e){authError=authError||e}
+ }
+ if(!session?.access_token){
+   try{await new Promise(r=>setTimeout(r,300));session=(await sb.auth.getSession()).data?.session||null}catch(e){authError=authError||e}
+ }
+ st.token=session?.access_token||'';
+ if(!st.token)throw new Error(authError?.message||'Sesión de administración no disponible. Vuelve a entrar a tu liga y prueba nuevamente.');
+ return st.token;
+} 
+try{sb?.auth?.onAuthStateChange?.((_event,session)=>{st.token=session?.access_token||''})}catch(_){}
 async function api(path,options={}){const token=await getToken();const headers=new Headers(options.headers||{});headers.set('Authorization','Bearer '+token);const r=await fetch(FN+path,{...options,headers});const txt=await r.text();let data;try{data=JSON.parse(txt)}catch{data={error:txt}}if(!r.ok)throw new Error(data.error||data.message||'Error de conexión con Publicación Directa.');return data}
 function status(key,msg,type=''){const e=$('gofPubStatus-'+key);if(e){e.textContent=msg;e.className='gof-pub-status '+type}}
 function render(){const box=$('gofPubSections');if(!box)return;box.innerHTML=sections.map(([key,label,dest])=>`<div class="gof-pub-card"><h3>${label}</h3><small>${dest}</small><input class="gof-pub-file" type="file" accept="image/png,image/jpeg,image/webp" id="gofPubFile-${key}"><img class="gof-pub-preview" id="gofPubPreview-${key}" alt="Vista previa"><div class="gof-pub-destination">Cargar imagen → Publicar</div><button class="gof-pub-publish" type="button" onclick="gofPubPublish('${key}')">📤 PUBLICAR</button><div class="gof-pub-status" id="gofPubStatus-${key}"></div></div>`).join('');sections.forEach(([key])=>{const input=$('gofPubFile-'+key),preview=$('gofPubPreview-'+key);input?.addEventListener('change',()=>{const f=input.files?.[0];if(!f){preview.style.display='none';return}if(!/^image\/(png|jpeg|webp)$/.test(f.type)){status(key,'Solo se permiten PNG, JPG o WEBP.','err');input.value='';preview.style.display='none';return}preview.src=URL.createObjectURL(f);preview.style.display='block';status(key,'Imagen lista para publicar.')})})}

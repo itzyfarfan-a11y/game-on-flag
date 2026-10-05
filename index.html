@@ -592,7 +592,11 @@ async function playoffs(){
  h+='<div class="card"><h3>Bracket · '+(list.some(p=>p.playoff_mode==='manual')?'✋ Manual':'🤖 Automático')+'</h3><div class="mut">Consulta pública · mismo formato de bracket de Administración.</div><div class="bracket">'+stageHtml+'</div></div>';
  s.innerHTML=h;
 }
-function publicAnnouncementsSection(){const s=document.getElementById('anuncios');s.innerHTML='<h2>📢 Anuncios</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Las novedades y anuncios publicados por la administración aparecerán aquí.</div></div>'}
+async function publicAnnouncementsSection(){
+  const s=document.getElementById('anuncios');
+  s.innerHTML='<h2>📢 Anuncios</h2><div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Las publicaciones directas realizadas por la administración aparecerán aquí.</div></div>';
+  if(typeof window.gofRenderDirectAnnouncements==='function') await window.gofRenderDirectAnnouncements();
+}
 function publicNotices(){const s=document.getElementById('avisos');s.innerHTML='<h2>📣 Avisos</h2>'+(notices.length?notices.map(n=>'<div class="card"><span class="badge">'+esc(n.type||'Aviso')+'</span><h3 style="margin:8px 0 5px">'+esc(n.title||'Aviso')+'</h3>'+(n.team?'<div class="muted">Equipo: '+esc(n.team)+'</div>':'')+(n.person?'<div class="muted">Persona: '+esc(n.person)+'</div>':'')+(n.notice_date?'<div class="muted">Fecha: '+esc(n.notice_date)+'</div>':'')+(n.valid_until?'<div class="muted">Vigencia: '+esc(n.valid_until)+'</div>':'')+(n.description?'<p>'+esc(n.description)+'</p>':'')+'</div>').join(''):'<div class="empty">No hay avisos publicados.</div>')}
 async function loadPublicLeague(){const x=await rpc('public_get_league_by_slug',{p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});league=x||{};const name=document.getElementById('publicLeagueName');if(name)name.textContent=league.name||'Liga';const identity=document.getElementById('publicLeagueIdentityName');if(identity)identity.textContent='Liga: '+(league.name||'Liga');const foot=document.getElementById('publicFooterLeague');if(foot)foot.textContent=(league.name?league.name+' · ':'')+'Portal público';const img=document.getElementById('publicLeagueLogoPreview'),tx=document.getElementById('publicLeagueLogoText');if(league.logo_url&&img){img.src=league.logo_url;img.style.display='block';if(tx)tx.style.display='none'}}
 
@@ -1143,5 +1147,80 @@ window.setCalendarMode=function(mode){
   .calendar-download-row{text-align:center;margin:10px 0 16px}
   .calendar-download-row .primary{font-size:12px!important;padding:8px 12px!important}
 </style>
+<script id="gof-direct-publication-public-final">
+(function(){
+  'use strict';
+  const PUB_REST='https://picivrqgmckrwutarhyw.supabase.co/rest/v1/publication_images';
+  const PUB_KEY='sb_publishable_SK8XBpzn3b5Dr-qa2rO7Nw_un7KbvCl';
+  let directPublications=[];
+  let pubsLoadedFor='';
+
+  async function loadDirectPublications(force){
+    const tid=window.t?.value;
+    const lid=window.league?.id;
+    if(!tid||!lid){directPublications=[];return []}
+    const key=String(lid)+'|'+String(tid);
+    if(!force && pubsLoadedFor===key)return directPublications;
+    const qs=new URLSearchParams({
+      league_id:'eq.'+lid,
+      tournament_id:'eq.'+tid,
+      is_published:'eq.true',
+      select:'section,title,image_url,category_id,created_at',
+      order:'created_at.desc'
+    });
+    try{
+      const r=await fetch(PUB_REST+'?'+qs.toString(),{
+        headers:{apikey:PUB_KEY,Authorization:'Bearer '+PUB_KEY,Accept:'application/json'},
+        cache:'no-store'
+      });
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      directPublications=await r.json();
+      pubsLoadedFor=key;
+    }catch(e){
+      console.error('GAME ON FLAG Publicación Directa pública:',e);
+      directPublications=[];
+    }
+    return directPublications;
+  }
+
+  function sectionLabel(section){
+    return ({calendario:'Calendario',enfrentamientos:'Enfrentamientos',resultados:'Resultados',tabla:'Tabla',tablas:'Tabla',avisos:'Avisos',anuncios:'Anuncios'}[section]||section||'Publicación');
+  }
+
+  function announcementsHtml(){
+    if(!directPublications.length){
+      return '<div class="card"><b>Novedades</b><div class="mut small" style="margin-top:6px">Las publicaciones directas realizadas por la administración aparecerán aquí.</div></div>';
+    }
+    return directPublications.map((p,i)=>{
+      const label=sectionLabel(p.section);
+      const title=esc(p.title||('Publicación '+(i+1)));
+      return '<div class="gof-direct-publication-card">'
+        +'<div class="gof-direct-publication-head"><b>📌 PUBLICACIÓN OFICIAL</b><span>'+label+'</span></div>'
+        +'<img class="gof-direct-publication-image" src="'+esc(p.image_url)+'" alt="'+title+'" loading="lazy">'
+        +'<div class="gof-direct-publication-caption">'+title+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  async function renderDirectAnnouncements(){
+    const el=document.getElementById('anuncios');
+    if(!el)return;
+    await loadDirectPublications();
+    el.innerHTML='<h2>📢 Anuncios</h2>'+announcementsHtml();
+  }
+
+  window.gofRenderDirectAnnouncements=renderDirectAnnouncements;
+  window.gofReloadDirectPublications=async function(){
+    pubsLoadedFor='';
+    await loadDirectPublications(true);
+    if(document.getElementById('anuncios')) await renderDirectAnnouncements();
+  };
+
+  const css=document.createElement('style');
+  css.textContent='.gof-direct-publication-card{margin:0 0 14px;padding:12px;background:#fff;border:2px solid #8b27ff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18)}.gof-direct-publication-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px;color:#12355b;font-size:12px}.gof-direct-publication-head span{font-weight:700;color:#667085;overflow-wrap:anywhere}.gof-direct-publication-image{display:block;width:100%;height:auto;max-height:none;object-fit:contain;border-radius:10px;background:#fff}.gof-direct-publication-caption{margin-top:8px;font-size:12px;color:#667085;overflow-wrap:anywhere}';
+  document.head.appendChild(css);
+})();
+</script>
+
 </body>
 </html>

@@ -1252,10 +1252,39 @@ window.setCalendarMode=function(mode){
   css.textContent='.gof-direct-publication-card{margin:0 0 14px;padding:12px;background:#fff;border:2px solid #8b27ff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.18)}.gof-direct-publication-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px;color:#12355b;font-size:12px}.gof-direct-publication-head span{font-weight:700;color:#667085;overflow-wrap:anywhere}.gof-direct-publication-image{display:block;width:100%;height:auto;max-height:none;object-fit:contain;border-radius:10px;background:#fff}.gof-direct-publication-caption{margin-top:8px;font-size:12px;color:#667085;overflow-wrap:anywhere}';
   document.head.appendChild(css);
 
+  // El torneo se carga de forma asíncrona; no intentes consultar publication_images
+  // antes de que #t tenga seleccionado el torneo. Reintentamos hasta que exista.
+  function renderWhenTournamentReady(){
+    const sel=document.getElementById('t');
+    if(sel && sel.value){
+      renderDirectAnnouncements();
+      return true;
+    }
+    return false;
+  }
+
+  // También actualizar cuando el usuario cambie de torneo.
+  const tournamentSelect=document.getElementById('t');
+  if(tournamentSelect){
+    tournamentSelect.addEventListener('change',function(){
+      setTimeout(renderDirectAnnouncements,50);
+    });
+  }
+
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',renderDirectAnnouncements,{once:true});
+    document.addEventListener('DOMContentLoaded',function(){
+      let tries=0;
+      const timer=setInterval(function(){
+        tries++;
+        if(renderWhenTournamentReady() || tries>=80) clearInterval(timer);
+      },250);
+    },{once:true});
   }else{
-    renderDirectAnnouncements();
+    let tries=0;
+    const timer=setInterval(function(){
+      tries++;
+      if(renderWhenTournamentReady() || tries>=80) clearInterval(timer);
+    },250);
   }
 })();
 </script>

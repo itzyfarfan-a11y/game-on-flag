@@ -1170,7 +1170,14 @@ const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?ol
 </section>
 <style id="gof-finance-simple-ui-style">
 .finance-simple-intro{border-left:4px solid #f0c94a}.finance-price-table{min-width:720px;width:100%;border-collapse:collapse}.finance-price-table th,.finance-price-table td{border:1px solid #3d3543;padding:9px 7px;text-align:center;white-space:nowrap}.finance-price-table th{background:#211b2b;color:#f0c94a}.finance-price-table input{width:95px;box-sizing:border-box}.finance-price-action{display:flex;gap:5px;justify-content:center}.finance-exception-box{margin-top:10px;padding:10px;border:1px solid #3d3148;border-radius:10px}.finance-exception-box button{width:100%}.finance-category-count{font-weight:900;color:#fff}.finance-team-matrix{min-width:1250px}.finance-team-matrix th:first-child,.finance-team-matrix td:first-child{position:sticky;left:0;z-index:3;background:#17131f}.finance-payment-input{min-width:64px}.finance-matrix-total{font-weight:900}.finance-category-label{font-size:16px;font-weight:900}.finance-status-note{font-size:11px;color:#cbbfd4;margin-top:3px}.finance-save-price{padding:7px 9px}.finance-exception-box .form{gap:7px}.finance-exception-box select,.finance-exception-box input{min-width:0}
-.finance-main-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.finance-summary-card .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.finance-summary-card .grid .card{margin:0}.finance-simple-accordion{display:flex;flex-direction:column;gap:10px}.finance-simple-accordion details{border:1px solid #3d3148;border-radius:14px;background:#15111c;overflow:hidden}.finance-simple-accordion summary{list-style:none;cursor:pointer;padding:16px 14px;font-size:18px;display:flex;align-items:center;gap:8px;background:#211b2b}.finance-simple-accordion summary::-webkit-details-marker{display:none}.finance-simple-accordion summary span{margin-left:auto;font-size:24px;color:#caa6ff}.finance-panel{padding:12px}.finance-budget-list{display:flex;flex-direction:column;gap:9px;margin-top:10px}.finance-budget-row{display:grid;grid-template-columns:1.1fr .8fr .8fr .8fr auto;gap:7px;align-items:center}.finance-budget-row input,.finance-budget-row select{min-width:0}.finance-table-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;border:1px solid #3d3148;border-radius:10px}.cg-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;border:0}.cg-scroll table{display:table}.finance-fixed-simple{min-width:1180px;width:100%;border-collapse:collapse;font-size:12px}.finance-fixed-simple th,.finance-fixed-simple td{border:1px solid #3d3543;padding:7px 6px;white-space:nowrap;text-align:center}.finance-fixed-simple th{background:#211b2b;color:#f0c94a}.finance-fixed-simple input{width:76px;box-sizing:border-box}.finance-team-matrix{min-width:1180px;width:100%;border-collapse:collapse;font-size:12px}.finance-team-matrix th,.finance-team-matrix td{border:1px solid #3d3543;padding:6px 5px;text-align:center;white-space:nowrap}.finance-team-matrix th{background:#211b2b;color:#f0c94a}.finance-team-matrix th:first-child,.finance-team-matrix td:first-child{position:sticky;left:0;z-index:3;background:#17131f}.finance-team-name{text-align:left!important;min-width:170px}.finance-payment-input{width:62px;box-sizing:border-box;border:2px solid #4a315c;border-radius:7px;padding:7px 4px;text-align:center;font-weight:800;background:#100d16;color:#fff}.finance-payment-input.finance-pending{background:#6b2535;border-color:#ff5c78}.finance-payment-input.finance-partial{background:#9a7b20;border-color:#f0c94a;color:#fff}.finance-payment-input.finance-paid{background:#17633c;border-color:#42e28a;color:#fff}.finance-observation-input{width:130px;box-sizing:border-box;background:#100d16;color:#fff;border:1px solid #4a315c;border-radius:7px;padding:7px}.finance-category-block{margin:0 0 12px;border:1px solid #3d3148;border-radius:10px;overflow:hidden}.finance-category-label{padding:9px 12px;background:#211b2b;color:#f0c94a;font-weight:800}.finance-matrix-help{padding:9px 10px;font-size:13px}.finance-blank-cell{color:#777}.finance-paid-total{color:#42e28a;font-weight:800}.finance-pending-total{color:#ff5c78;font-weight:800}.finance-budget-row .q-total{font-weight:800}.finance-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.finance-result-box{border:1px solid #3d3148;border-radius:10px;padding:12px;background:#17131f}.finance-result-box b{display:block;font-size:12px;color:#aaa}.finance-result-box strong{font-size:23px}.finance-result-positive strong{color:#42e28a}.finance-result-negative strong{color:#ff5c78}@media(max-width:700px){.finance-summary-card .grid,.finance-result-grid{grid-template-columns:1fr}.finance-budget-row{grid-template-columns:1fr 1fr}.finance-budget-row button{grid-column:1/-1}.finance-simple-accordion summary{font-size:16px}.finance-fixed-simple{font-size:11px}}
+.finance-main-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.finance-summary-card .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.finance-summary-card .grid .card{margin:0}.finance-simple-accordion{display:flex;flex-direction:column;gap:10px}.finance-simple-accordion details{border:1px solid #3d3148;border-radius:14px;background:#15111c;overflow:hidden}.finance-simple-accordion summary{list-style:none;cursor:pointer;padding:16px 14px;font-size:18px;display:flex;align-items:center;gap:8px;background:#211b2b}.finance-simple-accordion summary::-webkit-details-marker{display:none}.finance-simple-accordion summary span{margin-left:auto;font-size:24px;color:#caa6ff}.finance-panel{padding:12px}.finance-budget-list{display:flex;flex-direction:column;gap:9px;margin-top:10px}.finance-budget-row{display:grid;grid-template-columns:1.1fr .8fr .8fr .8fr auto;gap:7px;align-items:center}.finance-budget-row input,.finance-budget-row select{min-width:0}/* CONTABILIDAD · desplazamiento horizontal real en móvil */
+.finance-table-scroll{overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;}
+.finance-table-scroll .cg-scroll{overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;}
+.finance-table-scroll table.finance-team-matrix{min-width:1180px;width:max-content;table-layout:auto;}
+.finance-table-scroll table.finance-team-matrix th,.finance-table-scroll table.finance-team-matrix td{white-space:nowrap;}
+.finance-team-matrix th:first-child,.finance-team-matrix td:first-child{min-width:150px;}
+@media(max-width:700px){.finance-table-scroll{touch-action:pan-x pan-y;}.finance-table-scroll .cg-scroll{overflow-x:auto!important;}.finance-table-scroll table.finance-team-matrix{min-width:1180px;}}
+.finance-table-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;border:1px solid #3d3148;border-radius:10px}.cg-scroll{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;border:0}.cg-scroll table{display:table}.finance-fixed-simple{min-width:1180px;width:100%;border-collapse:collapse;font-size:12px}.finance-fixed-simple th,.finance-fixed-simple td{border:1px solid #3d3543;padding:7px 6px;white-space:nowrap;text-align:center}.finance-fixed-simple th{background:#211b2b;color:#f0c94a}.finance-fixed-simple input{width:76px;box-sizing:border-box}.finance-team-matrix{min-width:1180px;width:100%;border-collapse:collapse;font-size:12px}.finance-team-matrix th,.finance-team-matrix td{border:1px solid #3d3543;padding:6px 5px;text-align:center;white-space:nowrap}.finance-team-matrix th{background:#211b2b;color:#f0c94a}.finance-team-matrix th:first-child,.finance-team-matrix td:first-child{position:sticky;left:0;z-index:3;background:#17131f}.finance-team-name{text-align:left!important;min-width:170px}.finance-payment-input{width:62px;box-sizing:border-box;border:2px solid #4a315c;border-radius:7px;padding:7px 4px;text-align:center;font-weight:800;background:#100d16;color:#fff}.finance-payment-input.finance-pending{background:#6b2535;border-color:#ff5c78}.finance-payment-input.finance-partial{background:#9a7b20;border-color:#f0c94a;color:#fff}.finance-payment-input.finance-paid{background:#17633c;border-color:#42e28a;color:#fff}.finance-observation-input{width:130px;box-sizing:border-box;background:#100d16;color:#fff;border:1px solid #4a315c;border-radius:7px;padding:7px}.finance-category-block{margin:0 0 12px;border:1px solid #3d3148;border-radius:10px;overflow:hidden}.finance-category-label{padding:9px 12px;background:#211b2b;color:#f0c94a;font-weight:800}.finance-matrix-help{padding:9px 10px;font-size:13px}.finance-blank-cell{color:#777}.finance-paid-total{color:#42e28a;font-weight:800}.finance-pending-total{color:#ff5c78;font-weight:800}.finance-budget-row .q-total{font-weight:800}.finance-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.finance-result-box{border:1px solid #3d3148;border-radius:10px;padding:12px;background:#17131f}.finance-result-box b{display:block;font-size:12px;color:#aaa}.finance-result-box strong{font-size:23px}.finance-result-positive strong{color:#42e28a}.finance-result-negative strong{color:#ff5c78}@media(max-width:700px){.finance-summary-card .grid,.finance-result-grid{grid-template-columns:1fr}.finance-budget-row{grid-template-columns:1fr 1fr}.finance-budget-row button{grid-column:1/-1}.finance-simple-accordion summary{font-size:16px}.finance-fixed-simple{font-size:11px}}
 </style>
 <section class="view" id="credenciales">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
@@ -1412,7 +1419,7 @@ async function loadFinanceCategoryPrices(){
     body.innerHTML=catList.map(c=>{
       const ts=groups[c.id]||[];
       const insVals=ts.map(t=>chargeMap.get(`${t.id}|inscripcion|`)||0).filter(v=>v>0);
-      const arbVals=ts.map(t=>chargeMap.get(`${t.id}|arbitraje|1`)||0).filter(v=>v>0);
+      const arbVals=ts.map(t=>chargeMap.get(`${t.id}|arbitraje_regular|1`)||0).filter(v=>v>0);
       const ins=insVals[0]||0,arb=arbVals[0]||0;
       const sameIns=insVals.length>0&&insVals.every(v=>v===ins),sameArb=arbVals.length>0&&arbVals.every(v=>v===arb);
       return `<tr data-category-id="${esc(c.id)}"><td><b>${esc(c.name)}</b></td><td class="finance-category-count">${ts.length}</td><td><input class="cat-ins" type="number" min="0" step="1" value="${sameIns&&ins?ins:''}" placeholder="$1,500"></td><td><input class="cat-arb" type="number" min="0" step="1" value="${sameArb&&arb?arb:''}" placeholder="$550"></td><td><button class="gold finance-save-price" type="button" onclick="applyFinanceCategoryPrice(this.closest('tr'))">💾 Aplicar a ${ts.length}</button></td></tr>`;
@@ -1430,7 +1437,7 @@ async function applyFinanceCategoryPrice(tr){
   const {data:teams,error}=await sb.from('tournament_teams').select('id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(error)return alert(error.message);const user=(await sb.auth.getUser()).data.user?.id||null;
   for(const t of (teams||[])){
     const charges=[{tournament_id:tid,tournament_team_id:t.id,concept_type:'inscripcion',round_number:null,description:'Inscripción',amount_due:ins,charge_key:'inscripcion'}];
-    for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:t.id,concept_type:'arbitraje',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r});
+    for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:t.id,concept_type:'arbitraje_regular',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r});
     for(const payload of charges){
       const q=await sb.from('finance_charges').select('id').eq('tournament_id',tid).eq('tournament_team_id',t.id).eq('charge_key',payload.charge_key).maybeSingle();
       if(q.error)return alert('No se pudo consultar el cargo: '+q.error.message);
@@ -1445,7 +1452,7 @@ async function applyFinanceCategoryPrice(tr){
 async function saveFinanceException(){
   const tid=val('finT'),ttid=val('financeExceptionTeam'),ins=Number(val('financeExceptionIns')||0),arb=Number(val('financeExceptionArb')||0);if(!tid||!ttid)return alert('Selecciona el equipo.');if(!(ins>0||arb>0))return alert('Captura al menos un precio.');const user=(await sb.auth.getUser()).data.user?.id||null;
   const charges=[{tournament_id:tid,tournament_team_id:ttid,concept_type:'inscripcion',round_number:null,description:'Inscripción',amount_due:ins,charge_key:'inscripcion'}];
-  for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:ttid,concept_type:'arbitraje',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r});
+  for(let r=1;r<=7;r++)charges.push({tournament_id:tid,tournament_team_id:ttid,concept_type:'arbitraje_regular',round_number:r,description:'Arbitraje Jornada '+r,amount_due:arb,charge_key:'arbitraje_j'+r});
   for(const payload of charges){
     const q=await sb.from('finance_charges').select('id').eq('tournament_id',tid).eq('tournament_team_id',ttid).eq('charge_key',payload.charge_key).maybeSingle();
     if(q.error)return alert('No se pudo consultar el precio especial: '+q.error.message);
@@ -1468,32 +1475,57 @@ async function saveFinanceMatrixAmount(input){
   toast(newTotal>=due?'🟢 Pagado completo':'🟡 Pago actualizado');await renderFinanceTeamMatrix();await renderFinance();
 }
 async function downloadFinanceTeamMatrixImage(){
-  const box=document.getElementById('financeTeamMatrixBox');
-  if(!box)return;
-  const tables=[...box.querySelectorAll('table.finance-team-matrix')];
+  const matrixBox=document.getElementById('financeTeamMatrixBox');
+  if(!matrixBox)return;
+  const tables=[...matrixBox.querySelectorAll('table.finance-team-matrix')];
   if(!tables.length)return alert('Primero carga los equipos y sus cargos.');
-  const rows=tables.map(table=>({cat:table.closest('.finance-category-block')?.querySelector('.finance-category-label')?.textContent?.trim()||'Categoría',table}));
-  /* Hoja blanca pensada para imprimir y llenar a mano. */
-  const W=2200,rowH=52,headH=96,catH=64,pad=36;
-  let totalH=pad+headH+20;
-  rows.forEach(({table})=>{totalH+=catH+Math.max(1,table.tBodies[0]?.rows.length||0)*rowH+28;});
-  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=totalH;
-  const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,totalH);
-  const cellText=(txt,x,yy,w,align='center',font='700 16px Arial',fill='#111111')=>{ctx.fillStyle=fill;ctx.font=font;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(String(txt??''),align==='left'?x+10:x+w/2,yy+rowH/2);};
-  ctx.fillStyle='#111111';ctx.font='900 34px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('GAME ON FLAG · CONTABILIDAD',W/2,38);
-  ctx.font='700 21px Arial';ctx.fillText('Cobros por equipo',W/2,76);
-  let y=pad+headH;
-  for(const {cat,table} of rows){
-    ctx.fillStyle='#eeeeee';ctx.fillRect(pad,y,W-pad*2,catH);ctx.strokeStyle='#222222';ctx.lineWidth=2;ctx.strokeRect(pad,y,W-pad*2,catH);
-    ctx.fillStyle='#111111';ctx.font='900 22px Arial';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(cat,pad+12,y+catH/2);y+=catH;
-    const headers=[...table.querySelectorAll('thead tr:first-child th')].map(th=>th.textContent.trim());const cols=headers.length;const cw=(W-pad*2)/cols;
-    headers.forEach((h,i)=>{ctx.fillStyle='#f2f2f2';ctx.fillRect(pad+i*cw,y,cw,rowH);ctx.strokeStyle='#444444';ctx.lineWidth=1.5;ctx.strokeRect(pad+i*cw,y,cw,rowH);cellText(h,pad+i*cw,y,cw,'center','800 14px Arial','#111111');});y+=rowH;
-    for(const tr of [...table.tBodies[0].rows]){
-      const cells=[...tr.children];cells.forEach((td,i)=>{ctx.fillStyle='#ffffff';ctx.fillRect(pad+i*cw,y,cw,rowH);ctx.strokeStyle='#777777';ctx.lineWidth=1;ctx.strokeRect(pad+i*cw,y,cw,rowH);const input=td.querySelector('input');let v=input?.value||td.textContent.trim();if(input?.classList.contains('finance-paid'))v='PAGADO';cellText(v,pad+i*cw,y,cw,i===0?'left':'center','700 14px Arial','#111111');});y+=rowH;
-    }
-    y+=28;
+  /* Formato VERTICAL para imprimir y llenar a mano. Cada equipo ocupa un bloque. */
+  const W=1240,pad=55,blockW=W-pad*2,headerH=110,catH=70,teamH=245,gap=22;
+  let totalH=pad+headerH;
+  const blocks=[];
+  for(const table of tables){
+    const cat=table.closest('.finance-category-block')?.querySelector('.finance-category-label')?.textContent?.trim()||'Categoría';
+    const teams=[...table.tBodies[0].rows].map(tr=>{
+      const cells=[...tr.children];
+      const name=cells[0]?.textContent?.trim()||'Equipo';
+      const inputs=cells.slice(1,9).map(td=>td.querySelector('input')?.value||'');
+      const totals=cells.slice(10,13).map(td=>td.textContent.trim()||'$0');
+      return {name,inputs,totals};
+    });
+    blocks.push({cat,teams});
+    totalH+=catH+teams.length*(teamH+gap)+35;
   }
-  const a=document.createElement('a');a.download='GameOnFlag_Contabilidad_Equipos_Para_Imprimir.png';a.href=canvas.toDataURL('image/png');a.click();toast('🖨️ Tabla blanca para imprimir descargada');
+  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=totalH;
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,W,totalH);
+  const drawBox=(x,y,w,h,fill='#fff',stroke='#222',lw=2)=>{ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.strokeRect(x,y,w,h)};
+  const text=(txt,x,y,size=22,weight='700',align='left',fill='#111')=>{ctx.fillStyle=fill;ctx.font=`${weight} ${size}px Arial`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(String(txt??''),x,y)};
+  text('GAME ON FLAG · CONTABILIDAD',W/2,35,34,'900','center');
+  text('Cobros por equipo · Formato para imprimir y anotar pagos',W/2,76,19,'700','center');
+  let y=pad+headerH;
+  for(const group of blocks){
+    drawBox(pad,y,blockW,catH,'#f0f0f0','#222',2);text(group.cat,pad+16,y+catH/2,25,'900','left');y+=catH+16;
+    for(const team of group.teams){
+      drawBox(pad,y,blockW,teamH,'#fff','#333',2);
+      text(team.name,pad+18,y+27,24,'900','left');
+      const labels=['INSCRIPCIÓN','J1','J2','J3','J4','J5','J6','J7'];
+      const values=team.inputs;
+      const cols=4,gapx=12,cw=(blockW-gapx*(cols-1)-32)/cols,x0=pad+16,top=y+55,cellH=70;
+      for(let i=0;i<8;i++){
+        const row=Math.floor(i/cols),col=i%cols,x=x0+col*(cw+gapx),yy=top+row*(cellH+10);
+        drawBox(x,yy,cw,cellH,'#fafafa','#555',1.5);
+        text(labels[i],x+10,yy+17,13,'800','left','#333');
+        const v=values[i];text(v||'$',x+cw/2,yy+46,22,'700','center','#111');
+      }
+      const obsY=top+2*(cellH+10),obsW=blockW-32;
+      drawBox(x0,obsY,obsW,52,'#fff','#555',1.5);text('OBSERVACIONES',x0+10,obsY+16,12,'800','left','#333');
+      const [debe,pagado,falta]=team.totals;
+      const sumY=obsY+64,sumGap=12,sumW=(obsW-sumGap*2)/3;
+      [['DEBE',debe],['PAGADO',pagado],['FALTA',falta]].forEach((item,i)=>{const x=x0+i*(sumW+sumGap);drawBox(x,sumY,sumW,52,'#f4f4f4','#555',1.5);text(item[0],x+10,sumY+16,12,'800','left','#333');text(item[1],x+sumW/2,sumY+37,18,'800','center','#111');});
+      y+=teamH+gap;
+    }
+    y+=15;
+  }
+  const a=document.createElement('a');a.download='GameOnFlag_Contabilidad_Cobros_Vertical_Para_Imprimir.png';a.href=canvas.toDataURL('image/png');a.click();toast('🖨️ Formato vertical blanco descargado para imprimir');
 }
 async function renderFinanceTeamMatrix(){
   const tid=val('finT'),box=document.getElementById('financeTeamMatrixBox');if(!box||!tid||!sb){if(box)box.innerHTML='';return;}
@@ -1630,7 +1662,7 @@ async function renderFinanceChargesBreakdown(){
   const chargeMap={};(charges||[]).forEach(c=>{const k=`${c.tournament_team_id}|${c.concept_type}|${c.round_number??''}`;chargeMap[k]=c});
   tbody.innerHTML=(ins||[]).map(t=>{
     const vals=[];let total=0,paid=0;const c0=chargeMap[`${t.id}|inscripcion|`];const insAmt=Number(c0?.amount_due||0);total+=insAmt;paid+=Number(c0?paidMap[c0.id]||0:0);vals.push(insAmt);
-    for(let r=1;r<=7;r++){const c=chargeMap[`${t.id}|arbitraje|${r}`];const a=Number(c?.amount_due||0);total+=a;paid+=Number(c?paidMap[c.id]||0:0);vals.push(a)}
+    for(let r=1;r<=7;r++){const c=chargeMap[`${t.id}|arbitraje_regular|${r}`];const a=Number(c?.amount_due||0);total+=a;paid+=Number(c?paidMap[c.id]||0:0);vals.push(a)}
     return `<tr><td>${esc(catMap[t.category_id]||'Categoría')}</td><td>${esc(t.teams?.name||'Equipo')}</td>${vals.map(v=>`<td>$${v.toFixed(2)}</td>`).join('')}<td>$${total.toFixed(2)}</td><td>$${paid.toFixed(2)}</td><td>$${Math.max(0,total-paid).toFixed(2)}</td></tr>`;
   }).join('')||'<tr><td colspan="13" class="mut">No hay equipos activos en este torneo.</td></tr>';
 }

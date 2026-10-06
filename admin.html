@@ -3644,9 +3644,12 @@ async function selectLeagueFinal(id){
  window.GOF_ACTIVE_LEAGUE_ID=id;
  try{localStorage.setItem('gameOnFlagActiveLeagueId',id)}catch(_){ }
  await loadLeagueContextFinal(id);
+ // Cambio de liga: recargar la aplicación para destruir cualquier DOM/cache
+ // de la liga anterior. Así ningún módulo (resultados, calendario, roster,
+ // credenciales, enfrentamientos, etc.) puede conservar datos visuales viejos.
+ try{sessionStorage.removeItem('gof_module_state');}catch(_){}
  toast('Organización activa: '+(gofCurrentOrganization?.name||''));
- await refreshAllSelectors();
- await loadMisLigas();
+ setTimeout(()=>location.reload(),80);
 }
 async function ensurePlatformMaster(){
  if(!window.GOF_PLATFORM_MASTER){ alert('Esta sección es exclusiva de la administradora principal de GAME ON FLAG.'); return false; }
@@ -3713,7 +3716,7 @@ window.gofCreateLeagueFromDashboard=async function(){
   await loadMisLigas();
 };
 async function generateLeagueCodeFinal(){if(!(await ensurePlatformMaster()))return;const id=val('leagueCodeLeague')||gofCurrentOrganizationId;if(!id)return alert('Selecciona una organización.');const {data,error}=await sb.rpc('generate_league_access_code',{p_league_id:id});if(error)return alert(error.message);toast('Código generado: '+(data?.code||''));await loadMisLigas();}
-async function redeemLeagueCodeFinal(){const code=val('redeemLeagueCode').trim();if(!code)return alert('Escribe el código de acceso.');const {data,error}=await sb.rpc('redeem_league_access_code',{p_code:code});if(error)return alert(error.message);await loadLeagueContextFinal();toast('Acceso concedido a '+(data?.league_name||'la organización'));document.getElementById('redeemLeagueCode').value='';await refreshAllSelectors();await loadMisLigas();}
+async function redeemLeagueCodeFinal(){const code=val('redeemLeagueCode').trim();if(!code)return alert('Escribe el código de acceso.');const {data,error}=await sb.rpc('redeem_league_access_code',{p_code:code});if(error)return alert(error.message);try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');}catch(_){} await loadLeagueContextFinal(data?.league_id||null);toast('Acceso concedido a '+(data?.league_name||'la organización'));document.getElementById('redeemLeagueCode').value='';setTimeout(()=>location.reload(),80);}
 async function revokeLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;if(!confirm('¿Revocar este código? La información de la organización NO se eliminará.'))return;const {error}=await sb.rpc('revoke_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 async function reactivateLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;const {error}=await sb.rpc('reactivate_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 window.gofOwnerEnterLeague=async function(id){
@@ -3734,6 +3737,11 @@ window.gofOwnerEnterLeague=async function(id){
   try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');localStorage.setItem('gameOnFlagActiveLeagueId',id)}catch(_){}
   const league=await loadLeagueContextFinal(id);
   if(!league)throw new Error('La liga no está disponible o no está activa.');
+  // Recarga limpia: evita que el DOM de la liga anterior sobreviva al cambio.
+  // El ID de la liga ya quedó persistido, por lo que al iniciar se reconstruye
+  // todo exclusivamente con datos de esta liga.
+  location.reload();
+  return;
   // La administradora principal entra directamente a la liga seleccionada.
   // No ejecutamos aquí refreshAllSelectors(): algunos módulos tienen selectores
   // que solo existen cuando su vista está abierta y pueden intentar escribir

@@ -3747,7 +3747,7 @@ async function loadCredentialSelectorsFinal(){
    let tid=window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
    let tour=null;
    if(tid){
-     const q=await sb.from('tournaments').select('id,name,league_id,created_at').eq('id',tid).maybeSingle();
+     const q=await sb.from('tournaments').select('id,name,league_id,created_at').eq('id',tid).eq('league_id',window.gofCurrentOrganizationId).maybeSingle();
      tour=q.data||null;
    }
    if(!tour){
@@ -3888,24 +3888,7 @@ window.downloadCredentialImage=async function(){
 window.printCredentialCard=function(){
  const card=document.getElementById('credentialPrintCard');if(!card)return alert('Primero genera una credencial.');
  const clean=card.cloneNode(true);clean.querySelectorAll('.gof-credential-export-actions').forEach(x=>x.remove());
- const html='<!doctype html><html><head><meta charset="utf-8"><title>Credencial</title><style>@page{size:50mm 80mm;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;width:50mm;height:80mm;background:#fff;font-family:Arial,sans-serif}.gof-final-doc-card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;position:relative;color:#102a43;background:#fff}.gof-cred-head{height:13mm;padding:2.2mm 2.5mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.6mm solid #1769c2}.gof-cred-brand{font-size:3.2mm;font-weight:900}.gof-cred-brand small{display:block;font-size:1.4mm;color:#52677e}.gof-cred-logo{height:6mm;max-width:10mm;object-fit:contain}.gof-cred-title{font-size:2.3mm;font-weight:900;color:#1769c2}.gof-cred-photo-wrap{padding:2.2mm 2.5mm 0}.gof-cred-photo-wrap img,.gof-cred-photo-empty{width:46mm;height:41mm;border:.6mm solid #1769c2;border-radius:2mm;object-fit:contain;background:#eef2f6}.gof-cred-name{margin:.8mm 2.5mm 0;padding:1.1mm 1mm;background:#1769c2;color:#fff;text-align:center;font-size:3.8mm;line-height:1.05;font-weight:900;text-transform:uppercase}.gof-cred-info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.gof-cred-number{border:.3mm solid #d6dde5;border-radius:1.5mm;text-align:center;background:#f7f9fc;grid-row:span 3}.gof-cred-number span{display:block;font-size:1.6mm;font-weight:900;color:#52677e;padding-top:1mm}.gof-cred-number b{display:block;font-size:10mm;color:#1769c2}.gof-cred-row{display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1.1mm;overflow:hidden}.gof-cred-row span{background:#eef2f6;padding:1.2mm;font-size:1.6mm;font-weight:900;color:#52677e}.gof-cred-row b{padding:1.2mm;font-size:2.2mm;white-space:nowrap;overflow:hidden}.gof-cred-foot{text-align:center;padding:2mm;color:#1769c2;font-size:2.1mm;font-weight:900}</style></head><body>'+clean.outerHTML+'\n<script id="gof-calendar-authoritative-final-2026-10-06">
-(function(){
-  async function sync(){
-    try{
-      if(typeof window.gofResolveTournamentMode!=='function')return;
-      const sel=document.getElementById('ct');
-      await window.gofResolveTournamentMode(sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'');
-    }catch(e){console.warn('GOF calendar sync',e);}
-  }
-  window.addEventListener('load',()=>setTimeout(sync,900));
-  document.addEventListener('click',e=>{
-    const b=e.target.closest?.('[onclick*="setView"],[data-v]');
-    if(b)setTimeout(sync,500);
-  });
-  setInterval(()=>{if(document.getElementById('calendario')?.classList.contains('active'))sync();},2000);
-})();
-</script>
-</body></html>';
+ const html='<!doctype html><html><head><meta charset="utf-8"><title>Credencial</title><style>@page{size:50mm 80mm;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;width:50mm;height:80mm;background:#fff;font-family:Arial,sans-serif}.gof-final-doc-card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;position:relative;color:#102a43;background:#fff}.gof-cred-head{height:13mm;padding:2.2mm 2.5mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.6mm solid #1769c2}.gof-cred-brand{font-size:3.2mm;font-weight:900}.gof-cred-brand small{display:block;font-size:1.4mm;color:#52677e}.gof-cred-logo{height:6mm;max-width:10mm;object-fit:contain}.gof-cred-title{font-size:2.3mm;font-weight:900;color:#1769c2}.gof-cred-photo-wrap{padding:2.2mm 2.5mm 0}.gof-cred-photo-wrap img,.gof-cred-photo-empty{width:46mm;height:41mm;border:.6mm solid #1769c2;border-radius:2mm;object-fit:contain;background:#eef2f6}.gof-cred-name{margin:.8mm 2.5mm 0;padding:1.1mm 1mm;background:#1769c2;color:#fff;text-align:center;font-size:3.8mm;line-height:1.05;font-weight:900;text-transform:uppercase}.gof-cred-info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.gof-cred-number{border:.3mm solid #d6dde5;border-radius:1.5mm;text-align:center;background:#f7f9fc;grid-row:span 3}.gof-cred-number span{display:block;font-size:1.6mm;font-weight:900;color:#52677e;padding-top:1mm}.gof-cred-number b{display:block;font-size:10mm;color:#1769c2}.gof-cred-row{display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1.1mm;overflow:hidden}.gof-cred-row span{background:#eef2f6;padding:1.2mm;font-size:1.6mm;font-weight:900;color:#52677e}.gof-cred-row b{padding:1.2mm;font-size:2.2mm;white-space:nowrap;overflow:hidden}.gof-cred-foot{text-align:center;padding:2mm;color:#1769c2;font-size:2.1mm;font-weight:900}</style></head><body>'+clean.outerHTML+'</body></html>';
  const w=window.open('','_blank');
  if(w){try{w.document.open();w.document.write(html);w.document.close();setTimeout(function(){try{w.focus();w.print()}catch(e){}},350);return;}catch(e){try{w.close()}catch(_){}}}
  const old=document.body.innerHTML;const overlay=document.createElement('div');overlay.id='gofPrintFallback';overlay.innerHTML=clean.outerHTML;document.body.appendChild(overlay);const st=document.createElement('style');st.id='gofPrintFallbackStyle';st.textContent='@page{size:50mm 80mm;margin:0}@media print{body>*:not(#gofPrintFallback){display:none!important}#gofPrintFallback{display:block!important;width:50mm;height:80mm;margin:0;padding:0}}@media screen{#gofPrintFallback{position:fixed;inset:0;background:#fff;z-index:999999;padding:10px;overflow:auto}}';document.head.appendChild(st);window.addEventListener('afterprint',function restore(){st.remove();overlay.remove();window.removeEventListener('afterprint',restore)});setTimeout(function(){window.print()},150);
@@ -3977,24 +3960,7 @@ window.printAllCredentials=async function(){
   popup=window.open('','_blank');await loadLeagueContextFinal();
   const [{data:regs,error:re},{data:t},{data:c},{data:tm},{data:lg}]=await Promise.all([sb.from('roster_registrations').select('player_id,status,players(full_name,jersey_number,photo_url)').eq('tournament_id',tid).eq('category_id',cid).eq('team_id',team),sb.from('tournaments').select('name,season').eq('id',tid).maybeSingle(),sb.from('categories').select('name').eq('id',cid).maybeSingle(),sb.from('teams').select('name').eq('id',team).maybeSingle(),sb.from('leagues').select('name,logo_url').eq('id',gofCurrentOrganizationId).maybeSingle()]);if(re)throw re;const approved=(regs||[]).filter(r=>r.status==='aprobado'||r.status==='approved').map(r=>r.players).filter(Boolean);if(!approved.length){if(popup)popup.close();return alert('No hay jugadores aprobados en este roster.');}
   const cards=approved.map(function(p){return '<div class="card"><div class="head"><b>'+esc(lg?.name||'GAME ON FLAG')+'</b><strong>ACREDITACIÓN</strong></div><div class="photo">'+(p.photo_url?'<img src="'+esc(p.photo_url)+'">':'📷')+'</div><div class="name">'+esc(p.full_name)+'</div><div class="info"><div class="num"><span>NÚMERO</span><b>'+esc(p.jersey_number??'')+'</b></div><div><label>EQUIPO</label><b>'+esc(tm?.name||'')+'</b></div><div><label>CATEGORÍA</label><b>'+esc(c?.name||'')+'</b></div><div><label>TORNEO</label><b>'+esc(t?.name||'')+'</b></div></div><div class="foot">GAME ON FLAG · TEMPORADA '+esc(t?.season||'2026')+'</div></div>';}).join('');
-  const html='<!doctype html><html><head><meta charset="utf-8"><title>Credenciales</title><style>@page{size:A4;margin:10mm}body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#102a43}.grid{display:grid;grid-template-columns:repeat(3,50mm);gap:5mm}.card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;background:#fff;break-inside:avoid}.head{height:13mm;padding:2mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.5mm solid #1769c2}.head b{font-size:2.8mm}.head strong{font-size:1.9mm;color:#1769c2}.photo{margin:2mm 2.5mm 0;height:29mm;border:.6mm solid #1769c2;border-radius:2mm;overflow:hidden;display:grid;place-items:center;background:#eef2f6}.photo img{width:100%;height:100%;object-fit:cover}.name{margin:1.4mm 2.5mm 0;padding:1.8mm .5mm;background:#1769c2;color:#fff;text-align:center;font-size:4.2mm;font-weight:900;text-transform:uppercase}.info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.num{grid-row:span 3;border:.3mm solid #d6dde5;border-radius:1.2mm;background:#f7f9fc;text-align:center}.num span{display:block;font-size:1.5mm;color:#52677e;font-weight:900;padding-top:1mm}.num b{font-size:9mm;color:#1769c2}.info>div:not(.num){display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1mm;overflow:hidden}.info label{background:#eef2f6;padding:1mm;font-size:1.4mm;font-weight:900;color:#52677e}.info>div:not(.num)>b{padding:1mm;font-size:1.9mm;white-space:nowrap;overflow:hidden}.foot{text-align:center;color:#1769c2;font-size:1.7mm;font-weight:900;padding-top:2mm}</style></head><body><div class="grid">'+cards+'</div><script id="gof-calendar-authoritative-final-2026-10-06">
-(function(){
-  async function sync(){
-    try{
-      if(typeof window.gofResolveTournamentMode!=='function')return;
-      const sel=document.getElementById('ct');
-      await window.gofResolveTournamentMode(sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'');
-    }catch(e){console.warn('GOF calendar sync',e);}
-  }
-  window.addEventListener('load',()=>setTimeout(sync,900));
-  document.addEventListener('click',e=>{
-    const b=e.target.closest?.('[onclick*="setView"],[data-v]');
-    if(b)setTimeout(sync,500);
-  });
-  setInterval(()=>{if(document.getElementById('calendario')?.classList.contains('active'))sync();},2000);
-})();
-</script>
-</body></html>';
+  const html='<!doctype html><html><head><meta charset="utf-8"><title>Credenciales</title><style>@page{size:A4;margin:10mm}body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#102a43}.grid{display:grid;grid-template-columns:repeat(3,50mm);gap:5mm}.card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;background:#fff;break-inside:avoid}.head{height:13mm;padding:2mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.5mm solid #1769c2}.head b{font-size:2.8mm}.head strong{font-size:1.9mm;color:#1769c2}.photo{margin:2mm 2.5mm 0;height:29mm;border:.6mm solid #1769c2;border-radius:2mm;overflow:hidden;display:grid;place-items:center;background:#eef2f6}.photo img{width:100%;height:100%;object-fit:cover}.name{margin:1.4mm 2.5mm 0;padding:1.8mm .5mm;background:#1769c2;color:#fff;text-align:center;font-size:4.2mm;font-weight:900;text-transform:uppercase}.info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.num{grid-row:span 3;border:.3mm solid #d6dde5;border-radius:1.2mm;background:#f7f9fc;text-align:center}.num span{display:block;font-size:1.5mm;color:#52677e;font-weight:900;padding-top:1mm}.num b{font-size:9mm;color:#1769c2}.info>div:not(.num){display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1mm;overflow:hidden}.info label{background:#eef2f6;padding:1mm;font-size:1.4mm;font-weight:900;color:#52677e}.info>div:not(.num)>b{padding:1mm;font-size:1.9mm;white-space:nowrap;overflow:hidden}.foot{text-align:center;color:#1769c2;font-size:1.7mm;font-weight:900;padding-top:2mm}</style></head><body><div class="grid">'+cards+'</div></body></html>';
   if(popup){popup.document.open();popup.document.write(html);popup.document.close();setTimeout(function(){try{popup.focus();popup.print()}catch(e){}},500);}else{const holder=document.createElement('div');holder.id='gofPrintAllFallback';holder.innerHTML=cards;const style=document.createElement('style');style.textContent='@media print{body>*:not(#gofPrintAllFallback){display:none!important}#gofPrintAllFallback{display:grid!important;grid-template-columns:repeat(3,50mm);gap:5mm}}';document.head.appendChild(style);document.body.appendChild(holder);window.addEventListener('afterprint',function restore(){style.remove();holder.remove();window.removeEventListener('afterprint',restore)});window.print();}
  }catch(e){if(popup)try{popup.close()}catch(_){ }alert('No se pudieron imprimir las credenciales: '+(e?.message||e));}
 };
@@ -6111,7 +6077,7 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
     try{
       const leagueId=(typeof gofCurrentOrganizationId!=='undefined'&&gofCurrentOrganizationId)||window.GOF_ACTIVE_LEAGUE_ID||'';
       if(tournamentId){
-        const q=await sb.from('tournaments').select('id,name,tournament_type,regular_rounds,league_id').eq('id',tournamentId).maybeSingle();
+        const q=await sb.from('tournaments').select('id,name,tournament_type,regular_rounds,league_id').eq('id',tournamentId).eq('league_id',leagueId).maybeSingle();
         if(q.data){type=q.data.tournament_type==='relampago'?'relampago':(q.data.tournament_type==='regular'?'regular':null);rounds=type==='relampago'?3:Number(q.data.regular_rounds||7);name=q.data.name||'';}
       }
       if(!type&&leagueId){
@@ -6120,7 +6086,7 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
       }
       if(!type&&leagueId){
         const q=await sb.from('leagues').select('default_tournament_type').eq('id',leagueId).maybeSingle();
-        if(q.data?.default_tournament_type){type=q.data.default_tournament_type==='relampago'?'relampago':'regular';rounds=type==='relampago'?3:7;}
+        if(q.data?.default_tournament_type&&['relampago','regular'].includes(q.data.default_tournament_type)){type=q.data.default_tournament_type;rounds=type==='relampago'?3:7;}
       }
     }catch(e){console.warn('GOF mode resolve',e);}
     if(!type){
@@ -6159,12 +6125,12 @@ window.addEventListener('load',function(){setTimeout(async function(){try{const 
       const tid=sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'';
       let type='';
       if(tid&&window.sb){
-        const q=await sb.from('tournaments').select('tournament_type,regular_rounds').eq('id',tid).maybeSingle();
-        if(!q.error&&q.data) type=q.data.tournament_type==='relampago'?'relampago':'regular';
+        const q=await sb.from('tournaments').select('tournament_type,regular_rounds').eq('id',tid).eq('league_id',window.gofCurrentOrganizationId).maybeSingle();
+        if(!q.error&&q.data&&['relampago','regular'].includes(q.data.tournament_type)) type=q.data.tournament_type;
       }
       if(!type&&window.gofCurrentOrganizationId&&window.sb){
         const q=await sb.from('leagues').select('default_tournament_type').eq('id',window.gofCurrentOrganizationId).maybeSingle();
-        if(!q.error&&q.data) type=q.data.default_tournament_type==='relampago'?'relampago':'regular';
+        if(!q.error&&q.data&&['relampago','regular'].includes(q.data.default_tournament_type)) type=q.data.default_tournament_type;
       }
       window.gofCalendarActualType=type||null;
       window.gofResolvedTournamentType=type||null;
@@ -6177,7 +6143,8 @@ window.addEventListener('load',function(){setTimeout(async function(){try{const 
   window.gofUpdateCalendarModeUI=function(){
     const sel=document.getElementById('ct');
     const opt=sel?.selectedOptions?.[0];
-    const type=(opt?.dataset?.type==='relampago'||window.gofCalendarActualType==='relampago')?'relampago':'regular';
+    const type=(opt?.dataset?.type==='relampago'||opt?.dataset?.type==='regular')?opt.dataset.type:(window.gofCalendarActualType==='relampago'||window.gofCalendarActualType==='regular'?window.gofCalendarActualType:null);
+    if(!type)return;
     if(opt)opt.dataset.type=type;
     const rel=type==='relampago';
     const title=document.getElementById('gofCalendarBuilderTitle');
@@ -6193,23 +6160,6 @@ window.addEventListener('load',function(){setTimeout(async function(){try{const 
   const oldLoad=window.loadScheduleSelectors;
   if(typeof oldLoad==='function') window.loadScheduleSelectors=async function(){const r=await oldLoad.apply(this,arguments);await resolveRealTournamentMode();return r;};
   document.addEventListener('DOMContentLoaded',()=>setTimeout(resolveRealTournamentMode,500));
-})();
-</script>
-<script id="gof-calendar-authoritative-final-2026-10-06">
-(function(){
-  async function sync(){
-    try{
-      if(typeof window.gofResolveTournamentMode!=='function')return;
-      const sel=document.getElementById('ct');
-      await window.gofResolveTournamentMode(sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'');
-    }catch(e){console.warn('GOF calendar sync',e);}
-  }
-  window.addEventListener('load',()=>setTimeout(sync,900));
-  document.addEventListener('click',e=>{
-    const b=e.target.closest?.('[onclick*="setView"],[data-v]');
-    if(b)setTimeout(sync,500);
-  });
-  setInterval(()=>{if(document.getElementById('calendario')?.classList.contains('active'))sync();},2000);
 })();
 </script>
 </body></html>

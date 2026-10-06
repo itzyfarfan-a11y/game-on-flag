@@ -3725,41 +3725,29 @@ window.gofOwnerEnterLeague=async function(id){
   if(!id)return;
   if(!sb)sb=makeClient();
   const session=(await sb.auth.getSession()).data?.session;
-  if(!session){
-    const anon=await sb.auth.signInAnonymously();
-    if(anon.error)throw anon.error;
-  }
+  if(!session)throw new Error('La sesión de administradora principal ya no está activa. Vuelve a entrar como Administradora.');
+  // Mantener la sesión maestra: NO crear una sesión anónima al cambiar de liga.
   window.GOF_ACTIVE_LEAGUE_ID=id;
-  // Entrada directa a una liga desde el panel maestro: borrar primero cualquier contexto de la liga anterior.
-  window.gofTournamentContextLeagueId='';
+  window.gofV2Authenticated=true;
+  try{localStorage.setItem('gameOnFlagActiveLeagueId',id)}catch(_){}
+  // Nunca conservar selecciones de la liga anterior.
+  try{['gof_home_tournament','gof_active_tournament','gof_home_category','gof_enf_category','gof_active_category','selectedTournamentId','activeTournamentId'].forEach(k=>localStorage.removeItem(k))}catch(_){}
   window.gofSingleTournamentId='';
-  window.gofSingleTournament=null;
-  try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');localStorage.setItem('gameOnFlagActiveLeagueId',id)}catch(_){}
+  window.__gofMatrixSelectedCategory='';
   const league=await loadLeagueContextFinal(id);
   if(!league)throw new Error('La liga no está disponible o no está activa.');
-  // Recarga limpia: evita que el DOM de la liga anterior sobreviva al cambio.
-  // El ID de la liga ya quedó persistido, por lo que al iniciar se reconstruye
-  // todo exclusivamente con datos de esta liga.
-  location.reload();
-  return;
-  // La administradora principal entra directamente a la liga seleccionada.
-  // No ejecutamos aquí refreshAllSelectors(): algunos módulos tienen selectores
-  // que solo existen cuando su vista está abierta y pueden intentar escribir
-  // innerHTML sobre un elemento inexistente.
+  if(typeof window.gofHardUnlockV3==='function')window.gofHardUnlockV3();
   hideEntryV2();
   gofCloseMasterV2();
   document.getElementById('nav')?.classList.remove('hidden');
-  // Entrada segura: primero mostramos Inicio sin ejecutar cargadores que puedan
-  // depender de elementos de otras vistas. Después intentamos cargar el panel.
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  const home=document.getElementById('inicio');
-  if(home) home.classList.add('active');
+  const home=document.getElementById('inicio');if(home)home.classList.add('active');
   document.body.classList.add('home-screen');
   document.querySelectorAll('.nav button[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v==='inicio'));
-  const sn=document.getElementById('sessionName');
-  if(sn) sn.textContent=league.name||'Administradora';
+  const sn=document.getElementById('sessionName');if(sn)sn.textContent=league.name||'Administradora';
   toast('Liga activa: '+league.name);
-  try{ await refreshDashboard(); }catch(err){ console.warn('Dashboard posterior omitido:',err); }
+  try{await refreshDashboard()}catch(err){console.warn('Dashboard posterior omitido:',err)}
+  try{await refreshAllSelectors()}catch(err){console.warn('Selectores posteriores omitidos:',err)}
  }catch(e){alert('No fue posible abrir esta liga: '+(e?.message||e));}
 }
 function gofUpdateMasterCreateCard(){ return; }

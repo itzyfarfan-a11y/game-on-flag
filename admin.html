@@ -979,7 +979,7 @@ window.gofInitPublicacionDirecta=async function(){render();try{await getToken();
 const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?oldSetView.apply(this,arguments):undefined;if(v==='publicacion')setTimeout(()=>gofInitPublicacionDirecta(),50);return r};render();
 })();
 </script>
-<section class="view" id="organizaciones"><div id="gofOwnerLeaguePanel" data-gof-admin-version="2026-09-26-owner-controls-v4" class="card" style="display:none"><h2>🏟️ Ligas activas de GAME ON FLAG</h2><p class="mut small">Administradora principal: crea, administra, consulta códigos y elimina tus ligas.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0"><button class="primary" style="width:100%;font-size:18px;padding:14px" type="button" onclick="gofOpenCreateLeaguePanel()">➕ CREAR LIGA NUEVA</button></div><div id="gofCreateLeagueInline" style="display:none;margin:12px 0;padding:14px;border:1px solid #6d28d9;border-radius:14px"><h3 style="margin:0 0 8px">➕ Crear liga para otro administrador</h3><p class="mut small">Escribe el nombre. Al crearla se generará automáticamente su código de acceso.</p><div class="form"><input id="gofMasterCreateName" placeholder="Nombre de la nueva liga"><input id="gofMasterCreateSlug" placeholder="Identificador (opcional)"><input id="gofMasterCreateColor" type="text" value="#6d28d9" placeholder="Color principal"><button class="gold" type="button" onclick="gofCreateLeagueFromDashboard()">CREAR Y GENERAR CÓDIGO</button></div></div><div id="gofOwnerCreateFallback" style="margin-top:10px"></div><div id="gofOwnerActiveList" style="margin-top:10px">Cargando ligas...</div></div><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏟️ Organizaciones</h2><div class="card gof-organization-manager"><h3>➕ Crear una organización independiente</h3><div class="form"><input id="newLeagueName" placeholder="Nombre de la organización"/><input id="newLeagueSlug" placeholder="Identificador (opcional)"/><input id="newLeagueColor" type="text" value="#6d28d9" placeholder="Color principal"/><button class="primary" type="button" onclick="createLeagueFinal()">Crear liga</button></div><p class="mut small">Cada liga tiene sus propios torneos, equipos, categorías, rosters, calendario y resultados.</p></div><div class="card"><h3>🔑 Acceso para otro administrador</h3><div class="form"><select id="leagueCodeLeague"><option value="">Selecciona una liga</option></select><button class="gold" type="button" onclick="generateLeagueCodeFinal()">Generar código</button><input id="redeemLeagueCode" placeholder="Código recibido de otra liga"/><button class="secondary" type="button" onclick="redeemLeagueCodeFinal()">Entrar con código</button></div><div id="leagueCodesList" class="league-code-list"></div></div><div class="card"><div class="row"><div><h3 style="margin:0">Mis Organizaciones propias</h3><p class="mut small" style="margin:5px 0 0">Solo puedes eliminar definitivamente las organizaciones/torneos creados por tu cuenta.</p></div><button type="button" onclick="loadMisLigas()">🔄 Actualizar enfrentamientos</button></div><div class="grid" id="ownLeagues" style="margin-top:10px"></div></div><div class="card"><h3>🔑 Organizaciones de otros administradores</h3><p class="mut">Los accesos por código se reservan para ligas externas que utilicen Game On Flag Application. Desactivar un código nunca elimina la información de la organización.</p><div class="empty" id="externalLeagues">La gestión de códigos se mostrará aquí cuando se conecte el módulo de accesos externos.</div></div></section>
+<section class="view" id="organizaciones"><div id="gofOwnerLeaguePanel" data-gof-admin-version="2026-09-26-owner-controls-v4" class="card" style="display:none"><h2>🏟️ Ligas activas de GAME ON FLAG</h2><p class="mut small">Administradora principal: crea, administra, consulta códigos y elimina tus ligas.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0"><button class="primary" style="width:100%;font-size:18px;padding:14px" type="button" onclick="gofOpenCreateLeaguePanel()">➕ CREAR LIGA NUEVA</button></div><div id="gofCreateLeagueInline" style="display:none;margin:12px 0;padding:14px;border:1px solid #6d28d9;border-radius:14px"><h3 style="margin:0 0 8px">➕ Crear liga para otro administrador</h3><p class="mut small">Escribe el nombre. Al crearla se generará automáticamente su código de acceso.</p><div class="form"><input id="gofMasterCreateName" placeholder="Nombre de la nueva liga"><input id="gofMasterCreateSlug" placeholder="Identificador (opcional)"><input id="gofMasterCreateColor" type="text" value="#6d28d9" placeholder="Color principal"><select id="gofMasterCreateType"><option value="regular">🏆 Torneo regular</option><option value="relampago">⚡ Torneo relámpago</option></select><button class="gold" type="button" onclick="gofCreateLeagueFromDashboard()">CREAR Y GENERAR CÓDIGO</button></div></div><div id="gofOwnerCreateFallback" style="margin-top:10px"></div><div id="gofOwnerActiveList" style="margin-top:10px">Cargando ligas...</div></div><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏟️ Organizaciones</h2><div class="card gof-organization-manager"><h3>➕ Crear una organización independiente</h3><div class="form"><input id="newLeagueName" placeholder="Nombre de la organización"/><input id="newLeagueSlug" placeholder="Identificador (opcional)"/><input id="newLeagueColor" type="text" value="#6d28d9" placeholder="Color principal"/><select id="newLeagueTournamentType"><option value="regular">🏆 Torneo regular</option><option value="relampago">⚡ Torneo relámpago</option></select><button class="primary" type="button" onclick="createLeagueFinal()">Crear liga</button></div><p class="mut small">Cada liga tiene sus propios torneos, equipos, categorías, rosters, calendario y resultados.</p></div><div class="card"><h3>🔑 Acceso para otro administrador</h3><div class="form"><select id="leagueCodeLeague"><option value="">Selecciona una liga</option></select><button class="gold" type="button" onclick="generateLeagueCodeFinal()">Generar código</button><input id="redeemLeagueCode" placeholder="Código recibido de otra liga"/><button class="secondary" type="button" onclick="redeemLeagueCodeFinal()">Entrar con código</button></div><div id="leagueCodesList" class="league-code-list"></div></div><div class="card"><div class="row"><div><h3 style="margin:0">Mis Organizaciones propias</h3><p class="mut small" style="margin:5px 0 0">Solo puedes eliminar definitivamente las organizaciones/torneos creados por tu cuenta.</p></div><button type="button" onclick="loadMisLigas()">🔄 Actualizar enfrentamientos</button></div><div class="grid" id="ownLeagues" style="margin-top:10px"></div></div><div class="card"><h3>🔑 Organizaciones de otros administradores</h3><p class="mut">Los accesos por código se reservan para ligas externas que utilicen Game On Flag Application. Desactivar un código nunca elimina la información de la organización.</p><div class="empty" id="externalLeagues">La gestión de códigos se mostrará aquí cuando se conecte el módulo de accesos externos.</div></div></section>
 <section class="view" id="torneos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏆 Torneos</h2><div class="workflow-kicker" style="margin-top:6px">PASO 1 DE 7 · TORNEOS</div><div class="card"><div class="form"><input id="tn" placeholder="Nombre del torneo"/><input id="tseason" placeholder="Temporada (ej. 2026)"/><input id="ts" type="date"/><select id="ttype"><option selected="" value="regular">🏆 Torneo regular · 7 juegos</option><option value="relampago">⚡ Torneo relámpago · 3 juegos</option></select><button class="primary" onclick="createTournament()">+ Crear torneo</button></div><details class="gof-info-accordion"><summary>ℹ️ ¿Cómo funciona el torneo?</summary><div class="notice"><b>Torneo regular:</b> 7 jornadas de fase regular por equipo.<br/><b>Torneo relámpago:</b> 3 partidos garantizados por equipo. El administrador decide qué categorías juegan viernes, sábado y domingo; no hay categorías predeterminadas.<br/><b>Bloque relámpago:</b> 50 minutos por partido (40 minutos reales de juego + 10 minutos operativos).<br/><b>Domingo:</b> se completan partidos pendientes y se juegan playoffs. Si una categoría tiene más de 12 equipos, se habilitan cuartos de final antes de semifinal y final.<br/><br/>Los playoffs se configuran manualmente por categoría: <b>Cuartos de final → Semifinal → Final</b> o <b>Semifinal → Final</b>.<br/><br/>Al activar el torneo, los enlaces de roster de los coaches dejan de permitir cambios. Administración sí puede editar el roster desde <b>Rosters</b>.</div></details></div><div id="tlist"></div><div class="gof-step-nav gof-step-1"><button type="button" onclick="setView('inicio')">← Menú principal</button><div class="step-current">Paso 1 de 7</div><button class="primary" type="button" onclick="openEnrollmentStep()">Siguiente: Inscribir equipos →</button></div></section>
 <section class="view" id="inscripciones">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
@@ -2066,7 +2066,7 @@ async function loadEnrollmentSelectors(){
   const tourEl=document.getElementById('at'),catEl=document.getElementById('ac'),typeEl=document.getElementById('gofEnrollmentTournamentType');
   if(tourEl)tourEl.innerHTML='<option value="">Selecciona primero el torneo</option>';
   if(catEl)catEl.innerHTML='<option value="">Después selecciona la categoría</option>';
-  if(typeEl)typeEl.textContent='Selecciona primero el torneo. Aquí se indicará si es 🏆 Regular o ⚡ Relámpago.';
+  if(typeEl)typeEl.textContent='Selecciona el torneo e identifica claramente si es 🏆 REGULAR o ⚡ RELÁMPAGO.';
   const {data:t,error:te}=await sb.from('tournaments').select('id,name,status,tournament_type,season').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
   if(te){console.error('GAME ON FLAG torneos:',te);if(tourEl)tourEl.innerHTML='<option value="">Error al cargar torneos</option>';return;}
   const tournaments=t||[];
@@ -2075,17 +2075,17 @@ async function loadEnrollmentSelectors(){
     if(catEl)catEl.innerHTML='<option value="">Sin categorías disponibles</option>';
     renderEnrollmentEmpty(); return;
   }
-  fill('at',tournaments,'id','name','Selecciona primero el torneo');
+  if(tourEl)tourEl.innerHTML='<option value="">Selecciona el tipo de torneo</option>'+tournaments.map(t=>`<option value="${t.id}">${t.tournament_type==='relampago'?'⚡ RELÁMPAGO':'🏆 REGULAR'} · ${esc(t.name)}${t.season?' · '+esc(t.season):''}</option>`).join('');
   const updateTournamentType=async()=>{
     const tid=tourEl?.value||'';
     clearTeamEntry();
     if(!tid){
       if(catEl)catEl.innerHTML='<option value="">Después selecciona la categoría</option>';
-      if(typeEl)typeEl.textContent='Selecciona primero el torneo. Aquí se indicará si es 🏆 Regular o ⚡ Relámpago.';
+      if(typeEl)typeEl.textContent='Selecciona el torneo e identifica claramente si es 🏆 REGULAR o ⚡ RELÁMPAGO.';
       renderEnrollmentEmpty();syncOtrosRenameButton();return;
     }
     const selected=tournaments.find(x=>String(x.id)===String(tid));
-    const type=selected?.tournament_type==='relampago'?'⚡ Torneo relámpago · 3 partidos garantizados por equipo':'🏆 Torneo regular · 7 jornadas por equipo';
+    const type=selected?.tournament_type==='relampago'?'⚡ RELÁMPAGO · 3 partidos garantizados por equipo':'🏆 REGULAR · 7 jornadas por equipo';
     if(typeEl)typeEl.textContent=type+(selected?.season?` · Temporada ${selected.season}`:'');
     try{localStorage.setItem('gof_home_tournament',tid);localStorage.removeItem('gof_enrollment_category');}catch(_){ }
     await loadEnrollmentCategories(tid);
@@ -3522,32 +3522,40 @@ window.gofGenerateOwnerCode=async function(id){
 }
 window.gofDeleteOwnerLeague=async function(id,name){
   if(!id)return;
-  const ok=confirm('¿Seguro que quieres eliminar definitivamente la liga "'+String(name||'')+'"?\n\nSe eliminarán sus torneos, equipos, rosters, partidos, resultados, contabilidad y código de acceso. Esta acción no se puede deshacer.');
-  if(!ok)return;
-  const btns=[...document.querySelectorAll('.gof-delete-league-btn')];
-  btns.forEach(b=>{b.disabled=true;b.style.opacity='.55';});
+  if(!window.GOF_PLATFORM_MASTER)return alert('Esta opción es exclusiva de la administradora principal.');
+  if(!confirm('¿Seguro que quieres eliminar definitivamente la liga \"'+String(name||'')+'\"?\n\nSe eliminarán sus torneos, equipos, rosters, partidos, resultados, contabilidad y código de acceso. Esta acción no se puede deshacer.'))return;
   try{
     if(!sb)sb=makeClient();
+    const session=(await sb.auth.getSession()).data?.session;
+    if(!session)throw new Error('La sesión de administración no está disponible.');
+    const {data:league,error:le}=await sb.from('leagues').select('id,name').eq('id',id).maybeSingle();
+    if(le)throw le; if(!league)throw new Error('La liga ya no existe.');
     const {data,error}=await sb.rpc('delete_league_as_platform_owner',{p_league_id:id});
     if(error)throw new Error(error.message||'No fue posible eliminar la liga.');
     if(!data?.ok)throw new Error('El servidor no confirmó la eliminación.');
     if(window.GOF_ACTIVE_LEAGUE_ID===id)window.GOF_ACTIVE_LEAGUE_ID=null;
+    if(window.gofCurrentOrganizationId===id)window.gofCurrentOrganizationId=null;
+    localStorage.removeItem('gameOnFlagActiveLeagueId');
+    localStorage.removeItem('activeLeagueId');
+    localStorage.removeItem('gof_active_league');
+    localStorage.removeItem('gof_home_tournament');
+    localStorage.removeItem('gof_active_tournament');
     toast('Liga eliminada correctamente');
     await loadMisLigas();
   }catch(e){
     alert('No fue posible eliminar la liga: '+(e?.message||e));
-  }finally{
-    btns.forEach(b=>{b.disabled=false;b.style.opacity='';});
   }
 }
+
 async function createLeagueFinal(){
   if(!(await ensurePlatformMaster()))return;
-  const name=val('newLeagueName').trim(),slug=val('newLeagueSlug').trim(),color=val('newLeagueColor').trim()||'#6d28d9';
+  const name=val('newLeagueName').trim(),slug=val('newLeagueSlug').trim(),color=val('newLeagueColor').trim()||'#6d28d9',tournamentType=val('newLeagueTournamentType')==='relampago'?'relampago':'regular';
   if(!name)return alert('Escribe el nombre de la organización.');
   const {data,error}=await sb.rpc('create_league',{p_name:name,p_slug:slug||null,p_logo_url:null,p_primary_color:color});
   if(error)return alert(error.message);
   document.getElementById('newLeagueName').value='';document.getElementById('newLeagueSlug').value='';
   if(data?.league_id){
+    await sb.from('leagues').update({default_tournament_type:tournamentType}).eq('id',data.league_id);
     toast('Liga creada correctamente');
     alert('Liga creada: '+(data.league_name||name)+'\n\nCódigo para su administrador:\n'+(data.access_code||'No disponible'));
     await loadMisLigas();
@@ -3562,9 +3570,11 @@ window.gofCreateLeagueFromDashboard=async function(){
   const name=val('gofMasterCreateName').trim();
   const slug=val('gofMasterCreateSlug').trim();
   const color=val('gofMasterCreateColor').trim()||'#6d28d9';
+  const tournamentType=val('gofMasterCreateType')==='relampago'?'relampago':'regular';
   if(!name)return alert('Escribe el nombre de la nueva liga.');
   const {data,error}=await sb.rpc('create_league',{p_name:name,p_slug:slug||null,p_logo_url:null,p_primary_color:color});
   if(error)return alert(error.message);
+  if(data?.league_id) await sb.from('leagues').update({default_tournament_type:tournamentType}).eq('id',data.league_id);
   document.getElementById('gofMasterCreateName').value='';
   document.getElementById('gofMasterCreateSlug').value='';
   const code=data?.access_code||'';
@@ -3641,7 +3651,7 @@ async function loadMisLigas(){
  const codes=await sb.from('league_access_codes').select('id,league_id,code,active,created_at,last_access_at').order('created_at',{ascending:false});
  const lc=document.getElementById('leagueCodesList'); if(lc)lc.innerHTML=(codes.data||[]).map(c=>`<div class="card"><b>${esc(c.code)}</b> · ${c.active?'Activo':'Revocado'}<div class="mut small">Organización: ${esc(all.find(x=>x.id===c.league_id)?.name||c.league_id)}</div><div class="toolbar"><button class="secondary" type="button" onclick="${c.active?`revokeLeagueCodeFinal('${c.id}')`:`reactivateLeagueCodeFinal('${c.id}')`}">${c.active?'Revocar':'Reactivar'}</button></div></div>`).join('')||'<div class="empty">Aún no hay códigos.</div>';
 }
-async function createTournament(){const name=val('tn').trim(),start=val('ts');if(!name||!start)return alert('Completa nombre y fecha.');await loadLeagueContextFinal();if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');const type=val('ttype')==='relampago'?'relampago':'regular',rounds=type==='relampago'?3:7,u=(await sb.auth.getUser()).data.user;const {data:created,error}=await sb.from('tournaments').insert({name,season:val('tseason').trim()||null,start_date:start,tournament_type:type,regular_rounds:rounds,status:'proximo',created_by:u.id,league_id:gofCurrentOrganizationId}).select('id').single();if(error)return alert(error.message);const {data:cats,error:catError}=await sb.from('categories').select('id').eq('league_id',gofCurrentOrganizationId);if(catError)return alert('Torneo creado, pero no se pudieron cargar sus categorías: '+catError.message);if((cats||[]).length){const rows=cats.map(c=>({tournament_id:created.id,category_id:c.id}));const {error:tcError}=await sb.from('tournament_categories').upsert(rows,{onConflict:'tournament_id,category_id'});if(tcError)return alert('Torneo creado, pero no se pudieron asociar las categorías: '+tcError.message);}toast('Torneo creado con sus categorías');document.getElementById('tn').value='';document.getElementById('tseason').value='';document.getElementById('ttype').value='regular';await loadT();refreshDashboard()}
+async function createTournament(){const name=val('tn').trim(),start=val('ts');if(!name||!start)return alert('Completa nombre y fecha.');await loadLeagueContextFinal();if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');let type=val('ttype')==='relampago'?'relampago':'regular'; try{const q=await sb.from('leagues').select('default_tournament_type').eq('id',gofCurrentOrganizationId).maybeSingle(); if(q.data?.default_tournament_type) type=q.data.default_tournament_type==='relampago'?'relampago':'regular';}catch(_){ } const sel=document.getElementById('ttype'); if(sel)sel.value=type; const rounds=type==='relampago'?3:7,u=(await sb.auth.getUser()).data.user;const {data:created,error}=await sb.from('tournaments').insert({name,season:val('tseason').trim()||null,start_date:start,tournament_type:type,regular_rounds:rounds,status:'proximo',created_by:u.id,league_id:gofCurrentOrganizationId}).select('id').single();if(error)return alert(error.message);const {data:cats,error:catError}=await sb.from('categories').select('id').eq('league_id',gofCurrentOrganizationId);if(catError)return alert('Torneo creado, pero no se pudieron cargar sus categorías: '+catError.message);if((cats||[]).length){const rows=cats.map(c=>({tournament_id:created.id,category_id:c.id}));const {error:tcError}=await sb.from('tournament_categories').upsert(rows,{onConflict:'tournament_id,category_id'});if(tcError)return alert('Torneo creado, pero no se pudieron asociar las categorías: '+tcError.message);}toast('Torneo creado con sus categorías');document.getElementById('tn').value='';document.getElementById('tseason').value='';document.getElementById('ttype').value='regular';await loadT();refreshDashboard()}
 async function createTeam(){await loadLeagueContextFinal();const name=val('en').trim(),club=val('eclub').trim()||null;if(!name)return alert('Escribe el nombre del equipo.');if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');const {error}=await sb.from('teams').insert({name,club_name:club,league_id:gofCurrentOrganizationId});if(error)alert(error.message);else{toast('Equipo creado');document.getElementById('en').value='';document.getElementById('eclub').value='';await loadE();await refreshAllSelectors()}}
 async function login(){
  const msg=document.getElementById('msg'); msg.textContent='';

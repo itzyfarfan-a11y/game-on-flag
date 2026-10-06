@@ -985,7 +985,7 @@ const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?ol
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
 <h2>📝 Inscribir equipos en categorías</h2><div class="card" style="margin:10px 0;border:1px solid #6d28d9"><h3 style="margin:0 0 8px">🏷️ Catálogo de categorías</h3><div class="mut small" style="margin-bottom:8px">Estas son las categorías disponibles para este espacio de GAME ON FLAG:</div><div id="gofCategoryCatalog" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
 <div class="workflow-kicker" style="margin-top:6px">PASO 2 DE 7 · INSCRIPCIÓN DE EQUIPOS</div>
-<div class="gof-accordion-list"><details id="gofEnrollmentAccordion" class="gof-action-accordion"><summary><span class="gof-action-number">1</span><span class="gof-action-icon">📝</span><span class="gof-action-copy"><b>Inscribir equipo en categoría</b><small>Usa el torneo actual → categoría → escribe equipo y Coach</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice"><b>Instrucciones:</b> usa el torneo actual y la categoría. Después escribe directamente el <b>nombre del equipo</b> y su <b>Coach</b>. Si el equipo ya existe, GAME ON FLAG lo reutiliza; si es nuevo, lo crea automáticamente.</div><div class="form"><select id="at"></select><div class="category-edit-wrap"><select id="ac"></select><button type="button" id="btnRenameOtros" onclick="renameOtrosCategory()" style="display:none">✏️ OTROS</button></div><label class="field-label">Nombre del equipo<input id="aeName" placeholder="Ej. Buhos"></label><label class="field-label">Coach<input id="aeCoach" placeholder="Nombre del coach"></label><button class="gold" onclick="enrollTeam()">+ Inscribir equipo</button></div><div class="mut" id="enrolled"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">2</span><span class="gof-action-icon">🔄</span><span class="gof-action-copy"><b>Sustitución / baja de equipo</b><small>Retira un equipo y conserva su historial</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Si un equipo se da de baja antes de terminar el torneo, puedes sustituirlo por otro. Los partidos ya jugados se conservan y los partidos pendientes se reasignan al nuevo equipo.</div><div class="form"><select id="rtour"></select><select id="rcat"></select><select id="roldteam"></select><label class="field-label">Equipo que entra<input id="rnewteamName" placeholder="Escribe el nombre del equipo que entra"></label><label class="field-label">Coach del equipo que entra<input id="rnewteamCoach" placeholder="Escribe el nombre del Coach"></label><input id="rnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="replaceTournamentTeam()" style="margin-top:9px">🔄 Dar de baja y sustituir equipo</button><div class="mut small" id="replacementStatus" style="margin-top:8px"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">3</span><span class="gof-action-icon">🗑️</span><span class="gof-action-copy"><b>Dar de baja sin sustitución</b><small>Retira la inscripción de ese torneo/categoría</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Úsalo cuando un equipo se retire <b>antes de que comience el torneo</b> y no habrá otro equipo en su lugar. La baja afecta únicamente su inscripción en ese torneo/categoría; el equipo seguirá existiendo en el catálogo general.</div><div class="form"><select id="deltour"></select><select id="delcat"></select><select id="delteam"></select><input id="delnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="deactivateTournamentTeam()" style="margin-top:9px">🗑️ Dar de baja equipo</button><div class="mut small" id="deactivateStatus" style="margin-top:8px"></div></div></details></div>
+<div class="gof-accordion-list"><details id="gofEnrollmentAccordion" class="gof-action-accordion"><summary><span class="gof-action-number">1</span><span class="gof-action-icon">📝</span><span class="gof-action-copy"><b>Inscribir equipo en categoría</b><small>Usa el torneo actual → categoría → escribe equipo y Coach</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice"><b>Instrucciones:</b> usa el torneo actual y la categoría. Después escribe directamente el <b>nombre del equipo</b> y su <b>Coach</b>. Si el equipo ya existe, GAME ON FLAG lo reutiliza; si es nuevo, lo crea automáticamente.</div><div class="form"><label class="field-label">🏆 Torneo<select id="at"></select></label><div id="gofEnrollmentTournamentType" class="mut small" style="margin-top:-4px">Selecciona primero el torneo. Aquí se indicará si es 🏆 Regular o ⚡ Relámpago.</div><div class="category-edit-wrap"><label class="field-label">🏷️ Categoría<select id="ac"></select></label><button type="button" id="btnRenameOtros" onclick="renameOtrosCategory()" style="display:none">✏️ OTROS</button></div><label class="field-label">Nombre del equipo<input id="aeName" placeholder="Ej. Buhos"></label><label class="field-label">Coach<input id="aeCoach" placeholder="Nombre del coach"></label><button class="gold" onclick="enrollTeam()">+ Inscribir equipo</button></div><div class="mut" id="enrolled"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">2</span><span class="gof-action-icon">🔄</span><span class="gof-action-copy"><b>Sustitución / baja de equipo</b><small>Retira un equipo y conserva su historial</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Si un equipo se da de baja antes de terminar el torneo, puedes sustituirlo por otro. Los partidos ya jugados se conservan y los partidos pendientes se reasignan al nuevo equipo.</div><div class="form"><select id="rtour"></select><select id="rcat"></select><select id="roldteam"></select><label class="field-label">Equipo que entra<input id="rnewteamName" placeholder="Escribe el nombre del equipo que entra"></label><label class="field-label">Coach del equipo que entra<input id="rnewteamCoach" placeholder="Escribe el nombre del Coach"></label><input id="rnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="replaceTournamentTeam()" style="margin-top:9px">🔄 Dar de baja y sustituir equipo</button><div class="mut small" id="replacementStatus" style="margin-top:8px"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">3</span><span class="gof-action-icon">🗑️</span><span class="gof-action-copy"><b>Dar de baja sin sustitución</b><small>Retira la inscripción de ese torneo/categoría</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Úsalo cuando un equipo se retire <b>antes de que comience el torneo</b> y no habrá otro equipo en su lugar. La baja afecta únicamente su inscripción en ese torneo/categoría; el equipo seguirá existiendo en el catálogo general.</div><div class="form"><select id="deltour"></select><select id="delcat"></select><select id="delteam"></select><input id="delnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="deactivateTournamentTeam()" style="margin-top:9px">🗑️ Dar de baja equipo</button><div class="mut small" id="deactivateStatus" style="margin-top:8px"></div></div></details></div>
 <div class="gof-step-nav gof-step-2">
 <button type="button" onclick="setView('torneos')">← Torneos</button>
 <div class="step-current">Paso 2 de 7</div>
@@ -2063,10 +2063,11 @@ function openEnrollmentStep(){
 }
 async function loadEnrollmentSelectors(){
   if(!sb||!gofCurrentOrganizationId)return;
-  const tourEl=document.getElementById('at'),catEl=document.getElementById('ac');
-  if(tourEl)tourEl.innerHTML='<option value="">Usa el torneo actual</option>';
-  if(catEl)catEl.innerHTML='<option value="">Selecciona categoría</option>';
-  const {data:t,error:te}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
+  const tourEl=document.getElementById('at'),catEl=document.getElementById('ac'),typeEl=document.getElementById('gofEnrollmentTournamentType');
+  if(tourEl)tourEl.innerHTML='<option value="">Selecciona primero el torneo</option>';
+  if(catEl)catEl.innerHTML='<option value="">Después selecciona la categoría</option>';
+  if(typeEl)typeEl.textContent='Selecciona primero el torneo. Aquí se indicará si es 🏆 Regular o ⚡ Relámpago.';
+  const {data:t,error:te}=await sb.from('tournaments').select('id,name,status,tournament_type,season').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
   if(te){console.error('GAME ON FLAG torneos:',te);if(tourEl)tourEl.innerHTML='<option value="">Error al cargar torneos</option>';return;}
   const tournaments=t||[];
   if(!tournaments.length){
@@ -2074,193 +2075,50 @@ async function loadEnrollmentSelectors(){
     if(catEl)catEl.innerHTML='<option value="">Sin categorías disponibles</option>';
     renderEnrollmentEmpty(); return;
   }
-  fill('at',tournaments,'id','name','Usa el torneo actual');
-  if(tourEl)tourEl.onchange=async()=>{const tid=tourEl.value;if(!tid){catEl.innerHTML='<option value="">Selecciona categoría</option>';clearTeamEntry();renderEnrollmentEmpty();syncOtrosRenameButton();return;}localStorage.setItem('gof_home_tournament',tid);await loadEnrollmentCategories(tid);};
-  if(catEl)catEl.onchange=async()=>{localStorage.setItem('gof_enrollment_category',catEl.value||'');syncOtrosRenameButton();clearTeamEntry();await loadEnrolled();};
-  const saved=localStorage.getItem('gof_home_tournament');
-  const tid=(saved&&tournaments.some(x=>x.id===saved))?saved:tournaments[0].id;
-  if(tourEl)tourEl.value=tid;
-  await loadEnrollmentCategories(tid);
+  fill('at',tournaments,'id','name','Selecciona primero el torneo');
+  const updateTournamentType=async()=>{
+    const tid=tourEl?.value||'';
+    clearTeamEntry();
+    if(!tid){
+      if(catEl)catEl.innerHTML='<option value="">Después selecciona la categoría</option>';
+      if(typeEl)typeEl.textContent='Selecciona primero el torneo. Aquí se indicará si es 🏆 Regular o ⚡ Relámpago.';
+      renderEnrollmentEmpty();syncOtrosRenameButton();return;
+    }
+    const selected=tournaments.find(x=>String(x.id)===String(tid));
+    const type=selected?.tournament_type==='relampago'?'⚡ Torneo relámpago · 3 partidos garantizados por equipo':'🏆 Torneo regular · 7 jornadas por equipo';
+    if(typeEl)typeEl.textContent=type+(selected?.season?` · Temporada ${selected.season}`:'');
+    try{localStorage.setItem('gof_home_tournament',tid);localStorage.removeItem('gof_enrollment_category');}catch(_){ }
+    await loadEnrollmentCategories(tid);
+  };
+  if(tourEl)tourEl.onchange=updateTournamentType;
+  if(catEl)catEl.onchange=async()=>{try{localStorage.setItem('gof_enrollment_category',catEl.value||'')}catch(_){}syncOtrosRenameButton();clearTeamEntry();await loadEnrolled();};
+  // Nunca seleccionar automáticamente el torneo anterior o el primero: el administrador debe elegirlo.
+  if(tourEl)tourEl.value='';
+  if(catEl)catEl.value='';
+  renderEnrollmentEmpty();syncOtrosRenameButton();
 }
 function clearTeamEntry(){const n=document.getElementById('aeName'),c=document.getElementById('aeCoach');if(n)n.value='';if(c)c.value='';}
 function renderEnrollmentEmpty(){const out=document.getElementById('enrolled');if(out)out.innerHTML='<div class="mut">📋 Selecciona un torneo y una categoría para ver los equipos inscritos.</div>';}
 async function loadEnrollmentCategories(tournamentId){
-  await gofEnsureDefaultCategories(gofCurrentOrganizationId);
   const catEl=document.getElementById('ac');
   if(!catEl||!sb)return;
-  const {data,error}=await sb.from('categories').select('id,name').eq('league_id',gofCurrentOrganizationId);
-  if(error){
-    console.error('GAME ON FLAG categorías de la liga:',error);
-    catEl.innerHTML='<option value="">No se pudieron cargar las categorías</option>';
-    renderEnrollmentEmpty(); syncOtrosRenameButton(); return;
-  }
+  if(!tournamentId){catEl.innerHTML='<option value="">Después selecciona la categoría</option>';renderEnrollmentEmpty();syncOtrosRenameButton();return;}
+  const {data:links,error:le}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tournamentId);
+  if(le){console.error('GAME ON FLAG categorías del torneo:',le);catEl.innerHTML='<option value="">No se pudieron cargar las categorías</option>';renderEnrollmentEmpty();syncOtrosRenameButton();return;}
+  const ids=[...new Set((links||[]).map(x=>x.category_id).filter(Boolean))];
+  if(!ids.length){catEl.innerHTML='<option value="">Este torneo aún no tiene categorías</option>';renderEnrollmentEmpty();syncOtrosRenameButton();return;}
+  const {data,error}=await sb.from('categories').select('id,name').eq('league_id',gofCurrentOrganizationId).in('id',ids);
+  if(error){console.error('GAME ON FLAG categorías:',error);catEl.innerHTML='<option value="">No se pudieron cargar las categorías</option>';renderEnrollmentEmpty();syncOtrosRenameButton();return;}
   const order=['Golden Femenil','Golden Varonil','Silver Femenil A','Silver Femenil B','Silver Varonil A','Silver Varonil B','Bronce A','Bronce B','Mixto','Escolar','30+','35+','Moms','Otros'];
   const rank=n=>{const i=order.indexOf(n);return i<0?999:i};
   const cats=(data||[]).map(x=>({id:x.id,name:x.name})).filter(x=>x.id&&x.name).sort((a,b)=>(rank(a.name)-rank(b.name))||a.name.localeCompare(b.name,'es'));
-  if(!cats.length){catEl.innerHTML='<option value="">No hay categorías creadas</option>';renderEnrollmentEmpty();syncOtrosRenameButton();return;}
+  if(!cats.length){catEl.innerHTML='<option value="">Este torneo aún no tiene categorías</option>';renderEnrollmentEmpty();syncOtrosRenameButton();return;}
   catEl.innerHTML='<option value="">Selecciona categoría</option>'+cats.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('');
-  const saved=localStorage.getItem('gof_enrollment_category');
-  catEl.value=saved&&cats.some(x=>x.id===saved)?saved:'';
-  catEl.onchange=async()=>{localStorage.setItem('gof_enrollment_category',catEl.value||'');syncOtrosRenameButton();clearTeamEntry();await loadEnrolled();};
-  if(catEl.value)await loadEnrolled();else renderEnrollmentEmpty();
+  // No seleccionar categoría automáticamente: depende del torneo elegido.
+  catEl.value='';
   syncOtrosRenameButton();
+  renderEnrollmentEmpty();
 }
-function syncOtrosRenameButton(){const sel=document.getElementById('ac'),btn=document.getElementById('btnRenameOtros');if(!sel||!btn)return;const opt=sel.options[sel.selectedIndex];const isOtros=String(opt?.textContent||'').trim().toUpperCase()==='OTROS';btn.style.display=isOtros?'inline-block':'none';btn.textContent=isOtros?'✏️ Renombrar OTROS':'✏️';}
-async function renameOtrosCategory(){const sel=document.getElementById('ac');if(!sel?.value)return;const opt=sel.options[sel.selectedIndex];const current=String(opt?.textContent||'').trim();if(current.toUpperCase()!=='OTROS')return alert('El lápiz solo está disponible para la categoría OTROS.');const next=prompt('Nuevo nombre para la categoría OTROS:', '');if(next===null)return;const name=next.trim();if(!name)return alert('El nombre no puede quedar vacío.');if(name.toUpperCase()==='OTROS')return alert('Escribe un nombre diferente de OTROS.');const {error}=await sb.from('categories').update({name}).eq('id',sel.value).eq('league_id',gofCurrentOrganizationId);if(error)return alert(error.message);toast('Categoría renombrada correctamente');await loadEnrollmentSelectors();await refreshAllSelectors();}
-
-async function loadReplacementSelectors(){await loadLeagueContextFinal();const {data:t,error}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});const el=document.getElementById('rtour');if(!el)return;if(error){el.innerHTML='<option value="">No se pudieron cargar torneos</option>';return}fill('rtour',t||[],'id','name');await loadReplacementCats()}
-async function loadReplacementCats(){const tid=val('rtour'),el=document.getElementById('rcat');if(!el)return;if(!tid){el.innerHTML='<option value="">Selecciona categoría</option>';document.getElementById('roldteam').innerHTML='<option value="">Selecciona equipo que sale</option>';return}const {data,error}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);if(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}const ids=(data||[]).map(x=>x.category_id).filter(Boolean);if(!ids.length){el.innerHTML='<option value="">Sin categorías inscritas</option>';await loadReplacementTeams();return}const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',ids).order('name');if(ce){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}fill('rcat',cats||[],'id','name');await loadReplacementTeams()}
-async function loadReplacementTeams(){const tid=val('rtour'),cat=val('rcat'),oldEl=document.getElementById('roldteam');if(!oldEl)return;if(!tid||!cat){oldEl.innerHTML='<option value="">Selecciona equipo que sale</option>';return}const {data:ins,error:ie}=await sb.from('tournament_teams').select('id,team_id,is_active').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(ie){oldEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const rows=(ins||[]).filter(x=>x.team_id),teamIds=rows.map(x=>x.team_id);const {data:teams,error:te}=teamIds.length?await sb.from('teams').select('id,name').in('id',teamIds).order('name'):{data:[],error:null};if(te){oldEl.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const teamMap=Object.fromEntries((teams||[]).map(x=>[x.id,x]));const active=rows.filter(x=>teamMap[x.team_id]);oldEl.innerHTML='<option value="">Selecciona equipo que sale</option>'+active.map(x=>`<option value="${esc(x.id)}">${esc(teamMap[x.team_id].name)}</option>`).join('');if(!active.length)oldEl.innerHTML='<option value="">No hay equipos activos en esta categoría</option>'}
-
-async function replaceTournamentTeam(){
-  const tt=val('roldteam'),name=val('rnewteamName').trim(),coach=val('rnewteamCoach').trim(),note=val('rnote').trim();
-  if(!tt)return alert('Selecciona el equipo que sale.');
-  if(!name)return alert('Escribe el nombre del equipo que entra.');
-  if(!coach)return alert('Escribe el nombre del Coach del equipo que entra.');
-  await loadLeagueContextFinal();
-  if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');
-
-  const {data:oldIns,error:oldErr}=await sb.from('tournament_teams').select('id,tournament_id,category_id,team_id,is_active').eq('id',tt).single();
-  if(oldErr||!oldIns)return alert('No se pudo identificar el equipo que sale.');
-  const tid=oldIns.tournament_id,cat=oldIns.category_id,oldTeam=oldIns.team_id;
-  const {data:oldTeamRow}=await sb.from('teams').select('name').eq('id',oldTeam).maybeSingle();
-  const oldName=oldTeamRow?.name||'equipo actual';
-
-  if(!confirm(`¿Confirmas la sustitución?\n\nSale: ${oldName}\nEntra: ${name}\nCoach: ${coach}\n\nIMPORTANTE:\n• Los partidos ya jugados del equipo que sale se conservan como historial.\n• Los enfrentamientos originales de las jornadas NO se regeneran.\n• El equipo nuevo toma el lugar del equipo que sale en las jornadas futuras.\n• Si perdió jornadas anteriores, se crean reposiciones para el nuevo equipo cuando corresponda.\n• La jornada original de cada enfrentamiento se conserva.`))return;
-
-  // Buscar el equipo existente; si no existe, crearlo dentro de la liga actual.
-  let newTeam=null;
-  const {data:existing,error:findError}=await sb.from('teams').select('id,name,club_name').eq('league_id',gofCurrentOrganizationId).ilike('name',name).ilike('club_name',coach).limit(1);
-  if(findError)return alert('No se pudo buscar el equipo nuevo: '+findError.message);
-  newTeam=existing?.[0]||null;
-  if(!newTeam){
-    const {data:created,error:createError}=await sb.from('teams').insert({name,club_name:coach,league_id:gofCurrentOrganizationId}).select('id,name,club_name').single();
-    if(createError)return alert('No se pudo crear el equipo nuevo: '+createError.message);
-    newTeam=created;
-  }
-
-  // La sustitución real se ejecuta en una sola función segura de Supabase.
-  // Esa función conserva el historial, mantiene round_number y reasigna solo lo futuro.
-  const {data:result,error:rpcError}=await sb.rpc('gof_replace_team_in_category',{
-    p_tournament_id:tid,
-    p_category_id:cat,
-    p_team_id:oldTeam,
-    p_replacement_team_id:newTeam.id,
-    p_replacement_note:note||`Sustitución de ${oldName} por ${newTeam.name}`
-  });
-  if(rpcError)return alert('No se pudo realizar la sustitución: '+rpcError.message);
-  if(!result?.ok)return alert('Supabase no confirmó la sustitución.');
-
-  const updated=Number(result.future_matches_updated||0);
-  const makeups=Number(result.makeup_matches_created||0);
-  const startRound=result.start_round?`Jornada ${result.start_round}`:'las jornadas pendientes';
-  document.getElementById('replacementStatus').textContent=`✅ Sustitución realizada. ${oldName} sale y ${newTeam.name} entra desde ${startRound}. ${updated} enfrentamiento(s) futuro(s) reasignado(s) y ${makeups} reposición(es) creada(s). El historial anterior se conserva.`;
-  document.getElementById('rnewteamName').value='';
-  document.getElementById('rnewteamCoach').value='';
-  document.getElementById('rnote').value='';
-  toast('Sustitución realizada y sincronizada con Supabase');
-  window.__gofNewTeamId=String(newTeam.id);
-  await loadEnrollmentSelectors();
-  await loadReplacementSelectors();
-  await loadDeactivateSelectors();
-  await refreshAllSelectors();
-  await loadScheduleSelectors();
-  await gofRefreshEnfrentamientosAfterTeamChange(tid,cat,newTeam.id);
-}
-async function loadDeactivateSelectors(){await loadLeagueContextFinal();const el=document.getElementById('deltour');if(!el)return;const {data:t,error}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).eq('status','proximo').order('created_at',{ascending:false});if(error){el.innerHTML='<option value="">No se pudieron cargar torneos</option>';return}fill('deltour',t||[],'id','name');await loadDeactivateCats()}
-async function loadDeactivateCats(){const tid=val('deltour'),el=document.getElementById('delcat');if(!el)return;if(!tid){el.innerHTML='<option value="">Selecciona categoría</option>';await loadDeactivateTeams();return}const {data,error}=await sb.from('tournament_categories').select('category_id').eq('tournament_id',tid);if(error){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}const ids=(data||[]).map(x=>x.category_id).filter(Boolean);if(!ids.length){el.innerHTML='<option value="">Sin categorías inscritas</option>';await loadDeactivateTeams();return}const {data:cats,error:ce}=await sb.from('categories').select('id,name').in('id',ids).order('name');if(ce){el.innerHTML='<option value="">No se pudieron cargar categorías</option>';return}fill('delcat',cats||[],'id','name');await loadDeactivateTeams()}
-async function loadDeactivateTeams(){const tid=val('deltour'),cat=val('delcat'),el=document.getElementById('delteam');if(!el)return;if(!tid||!cat){el.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:ins,error}=await sb.from('tournament_teams').select('id,team_id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(error){el.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);if(!ids.length){el.innerHTML='<option value="">No hay equipos activos en esta categoría</option>';return}const {data:teams,error:te}=await sb.from('teams').select('id,name').in('id',ids).order('name');if(te){el.innerHTML='<option value="">No se pudieron cargar equipos</option>';return}const tm=Object.fromEntries((teams||[]).map(x=>[x.id,x.name]));el.innerHTML='<option value="">Selecciona equipo</option>'+(ins||[]).filter(x=>tm[x.team_id]).map(x=>`<option value="${esc(x.id)}">${esc(tm[x.team_id])}</option>`).join('')}
-async function deactivateTournamentTeam(){const tt=val('delteam'),note=val('delnote').trim();if(!tt)return alert('Usa el torneo actual, categoría y equipo.');const selected=document.getElementById('delteam')?.selectedOptions?.[0]?.textContent||'este equipo';if(!confirm(`¿Dar de baja a "${selected}" de este torneo/categoría?\n\nEl equipo no se borrará del catálogo general.`))return;const {error}=await sb.rpc('gof_deactivate_tournament_team',{p_tournament_team_id:tt,p_note:note||null});if(error)return alert('No se pudo dar de baja el equipo: '+error.message);document.getElementById('deactivateStatus').textContent=`Equipo "${selected}" dado de baja correctamente.`;toast('Equipo dado de baja');await loadEnrollmentSelectors();await loadDeactivateSelectors();await loadReplacementSelectors();await refreshAllSelectors();await gofRefreshEnfrentamientosAfterTeamChange(val('deltour'),val('delcat'), '')}
-async function gofRefreshEnfrentamientosAfterTeamChange(tid,cat,newTeamId=''){
-  try{
-    window.__gofMatrixSelectedTournament=tid||window.__gofMatrixSelectedTournament||'';
-    window.__gofMatrixSelectedCategory=cat||window.__gofMatrixSelectedCategory||'';
-    if(newTeamId) window.__gofNewTeamId=String(newTeamId);
-    const hidden=document.getElementById('gofMatchupCategory');
-    if(hidden && cat) hidden.value=cat;
-    if(cat) localStorage.setItem('gof_enf_category',cat);
-    if(String(val('at')||'')===String(tid||'') && String(val('ac')||'')===String(cat||'')){
-      if(typeof window.gofLoadMatchupsV2==='function') await window.gofLoadMatchupsV2();
-    }else if(String(window.__gofMatrixSelectedTournament||'')===String(tid||'') && String(window.__gofMatrixSelectedCategory||'')===String(cat||'')){
-      if(typeof window.gofLoadMatchupsV2==='function') await window.gofLoadMatchupsV2();
-    }
-  }catch(e){console.warn('GAME ON FLAG: no se pudo actualizar la matriz de enfrentamientos',e)}
-}
-
-async function enrollTeam(){
-  const tournament_id=val('at'),category_id=val('ac'),name=val('aeName').trim(),coach=val('aeCoach').trim();
-  if(!tournament_id||!category_id)return alert('Selecciona primero torneo y categoría.');
-  if(!name)return alert('Escribe el nombre del equipo.');
-  if(!coach)return alert('Escribe el nombre del Coach.');
-  await loadLeagueContextFinal();
-  if(!gofCurrentOrganizationId)return alert('Selecciona una organización activa.');
-
-  // El nombre NO es único: puede haber varios equipos con el mismo nombre,
-  // incluso con el mismo Coach o con Coaches/instituciones diferentes.
-  const {data:team,error:createError}=await sb.from('teams')
-    .insert({name,club_name:coach,league_id:gofCurrentOrganizationId})
-    .select('id,name,club_name')
-    .single();
-
-  if(createError)return alert('No se pudo crear el equipo: '+createError.message);
-
-  // Solo advertimos si el mismo Coach ya dirige otro equipo en este torneo.
-  // La advertencia nunca bloquea por el nombre del equipo.
-  const {data:coachTeams}=await sb.from('teams')
-    .select('id,name')
-    .eq('league_id',gofCurrentOrganizationId)
-    .ilike('club_name',coach);
-
-  const coachIds=(coachTeams||[]).map(x=>x.id).filter(id=>id!==team.id);
-
-  if(coachIds.length){
-    const {data:coachIns}=await sb.from('tournament_teams')
-      .select('team_id,category_id')
-      .eq('tournament_id',tournament_id)
-      .in('team_id',coachIds);
-
-    if((coachIns||[]).length){
-      const names=(coachTeams||[])
-        .filter(x=>coachIds.includes(x.id))
-        .map(x=>x.name)
-        .join(', ');
-
-      if(!confirm(`⚠️ Este Coach ya tiene otro equipo en este torneo: ${names}.
-
-Esto puede provocar empalmes de horario.
-
-¿Quieres inscribirlo de todos modos?`)){
-        await sb.from('teams').delete().eq('id',team.id);
-        return;
-      }
-    }
-  }
-
-  const {error:ce}=await sb.from('tournament_categories')
-    .upsert({tournament_id,category_id},{onConflict:'tournament_id,category_id'});
-
-  if(ce){
-    await sb.from('teams').delete().eq('id',team.id);
-    return alert('No se pudo asociar la categoría al torneo: '+ce.message);
-  }
-
-  const {error}=await sb.from('tournament_teams')
-    .insert({tournament_id,category_id,team_id:team.id,is_active:true});
-
-  if(error){
-    await sb.from('teams').delete().eq('id',team.id);
-    return alert('No se pudo inscribir el equipo: '+error.message);
-  }
-
-  toast(`Equipo ${team.name} inscrito`);
-  clearTeamEntry();
-  window.__gofNewTeamId=String(team.id);
-  await loadEnrolled();
-  // El equipo nuevo aparece inmediatamente en la matriz, al final, con sus 7 jornadas vacías.
-  // Sus rivales se asignan manualmente arrastrando; NO se regeneran automáticamente.
-  await gofRefreshEnfrentamientosAfterTeamChange(tournament_id,category_id,team.id);
-}
-
 async function loadEnrolled(){
   const tid=val('at'),cat=val('ac'),out=document.getElementById('enrolled');
   if(!out)return;

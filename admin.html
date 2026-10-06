@@ -985,7 +985,7 @@ const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?ol
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
 <h2>📝 Inscribir equipos en categorías</h2><div class="card" style="margin:10px 0;border:1px solid #6d28d9"><h3 style="margin:0 0 8px">🏷️ Catálogo de categorías</h3><div class="mut small" style="margin-bottom:8px">Estas son las categorías disponibles para este espacio de GAME ON FLAG:</div><div id="gofCategoryCatalog" style="display:flex;flex-wrap:wrap;gap:7px"></div></div>
 <div class="workflow-kicker" style="margin-top:6px">PASO 2 DE 7 · INSCRIPCIÓN DE EQUIPOS</div>
-<div class="gof-accordion-list"><details id="gofEnrollmentAccordion" class="gof-action-accordion"><summary><span class="gof-action-number">1</span><span class="gof-action-icon">📝</span><span class="gof-action-copy"><b>Inscribir equipo en categoría</b><small>Usa el torneo actual → categoría → escribe equipo y Coach</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice"><b>Instrucciones:</b> usa el torneo actual y la categoría. Después escribe directamente el <b>nombre del equipo</b> y su <b>Coach</b>. Si el equipo ya existe, GAME ON FLAG lo reutiliza; si es nuevo, lo crea automáticamente.</div><div class="form"><label class="field-label">🏆 Torneo<select id="at"></select></label><div id="gofEnrollmentTournamentType" class="mut small" style="margin-top:-4px">Selecciona primero el torneo. Aquí se indicará si es 🏆 Regular o ⚡ Relámpago.</div><div class="category-edit-wrap"><label class="field-label">🏷️ Categoría<select id="ac"></select></label><button type="button" id="btnRenameOtros" onclick="renameOtrosCategory()" style="display:none">✏️ OTROS</button></div><label class="field-label">Nombre del equipo<input id="aeName" placeholder="Ej. Buhos"></label><label class="field-label">Coach<input id="aeCoach" placeholder="Nombre del coach"></label><button class="gold" onclick="enrollTeam()">+ Inscribir equipo</button></div><div class="mut" id="enrolled"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">2</span><span class="gof-action-icon">🔄</span><span class="gof-action-copy"><b>Sustitución / baja de equipo</b><small>Retira un equipo y conserva su historial</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Si un equipo se da de baja antes de terminar el torneo, puedes sustituirlo por otro. Los partidos ya jugados se conservan y los partidos pendientes se reasignan al nuevo equipo.</div><div class="form"><select id="rtour"></select><select id="rcat"></select><select id="roldteam"></select><label class="field-label">Equipo que entra<input id="rnewteamName" placeholder="Escribe el nombre del equipo que entra"></label><label class="field-label">Coach del equipo que entra<input id="rnewteamCoach" placeholder="Escribe el nombre del Coach"></label><input id="rnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="replaceTournamentTeam()" style="margin-top:9px">🔄 Dar de baja y sustituir equipo</button><div class="mut small" id="replacementStatus" style="margin-top:8px"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">3</span><span class="gof-action-icon">🗑️</span><span class="gof-action-copy"><b>Dar de baja sin sustitución</b><small>Retira la inscripción de ese torneo/categoría</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Úsalo cuando un equipo se retire <b>antes de que comience el torneo</b> y no habrá otro equipo en su lugar. La baja afecta únicamente su inscripción en ese torneo/categoría; el equipo seguirá existiendo en el catálogo general.</div><div class="form"><select id="deltour"></select><select id="delcat"></select><select id="delteam"></select><input id="delnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="deactivateTournamentTeam()" style="margin-top:9px">🗑️ Dar de baja equipo</button><div class="mut small" id="deactivateStatus" style="margin-top:8px"></div></div></details></div>
+<div class="gof-accordion-list"><details id="gofEnrollmentAccordion" class="gof-action-accordion"><summary><span class="gof-action-number">1</span><span class="gof-action-icon">📝</span><span class="gof-action-copy"><b>Inscribir equipo en categoría</b><small>Usa el torneo actual → categoría → escribe equipo y Coach</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice"><b>Instrucciones:</b> usa el torneo actual y la categoría. Después escribe directamente el <b>nombre del equipo</b> y su <b>Coach</b>. Si el equipo ya existe, GAME ON FLAG lo reutiliza; si es nuevo, lo crea automáticamente.</div><div class="form"><input type="hidden" id="at" value=""><div id="gofEnrollmentTournamentType" class="mut small" style="margin-top:-4px">El torneo actual se toma automáticamente de esta liga.</div><div class="category-edit-wrap"><label class="field-label">🏷️ Categoría<select id="ac"></select></label><button type="button" id="btnRenameOtros" onclick="renameOtrosCategory()" style="display:none">✏️ OTROS</button></div><label class="field-label">Nombre del equipo<input id="aeName" placeholder="Ej. Buhos"></label><label class="field-label">Coach<input id="aeCoach" placeholder="Nombre del coach"></label><button class="gold" onclick="enrollTeam()">+ Inscribir equipo</button></div><div class="mut" id="enrolled"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">2</span><span class="gof-action-icon">🔄</span><span class="gof-action-copy"><b>Sustitución / baja de equipo</b><small>Retira un equipo y conserva su historial</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Si un equipo se da de baja antes de terminar el torneo, puedes sustituirlo por otro. Los partidos ya jugados se conservan y los partidos pendientes se reasignan al nuevo equipo.</div><div class="form"><select id="rtour"></select><select id="rcat"></select><select id="roldteam"></select><label class="field-label">Equipo que entra<input id="rnewteamName" placeholder="Escribe el nombre del equipo que entra"></label><label class="field-label">Coach del equipo que entra<input id="rnewteamCoach" placeholder="Escribe el nombre del Coach"></label><input id="rnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="replaceTournamentTeam()" style="margin-top:9px">🔄 Dar de baja y sustituir equipo</button><div class="mut small" id="replacementStatus" style="margin-top:8px"></div></div></details><details class="gof-action-accordion"><summary><span class="gof-action-number">3</span><span class="gof-action-icon">🗑️</span><span class="gof-action-copy"><b>Dar de baja sin sustitución</b><small>Retira la inscripción de ese torneo/categoría</small></span><span class="gof-action-arrow">›</span></summary><div class="gof-action-body"><div class="notice">Úsalo cuando un equipo se retire <b>antes de que comience el torneo</b> y no habrá otro equipo en su lugar. La baja afecta únicamente su inscripción en ese torneo/categoría; el equipo seguirá existiendo en el catálogo general.</div><div class="form"><select id="deltour"></select><select id="delcat"></select><select id="delteam"></select><input id="delnote" placeholder="Motivo / observación (opcional)"/></div><button class="danger" onclick="deactivateTournamentTeam()" style="margin-top:9px">🗑️ Dar de baja equipo</button><div class="mut small" id="deactivateStatus" style="margin-top:8px"></div></div></details></div>
 <div class="gof-step-nav gof-step-2">
 <button type="button" onclick="setView('torneos')">← Torneos</button>
 <div class="step-current">Paso 2 de 7</div>
@@ -2064,38 +2064,28 @@ function openEnrollmentStep(){
 async function loadEnrollmentSelectors(){
   if(!sb||!gofCurrentOrganizationId)return;
   const tourEl=document.getElementById('at'),catEl=document.getElementById('ac'),typeEl=document.getElementById('gofEnrollmentTournamentType');
-  if(tourEl)tourEl.innerHTML='<option value="">Selecciona primero el torneo</option>';
-  if(catEl)catEl.innerHTML='<option value="">Después selecciona la categoría</option>';
-  if(typeEl)typeEl.textContent='Selecciona el torneo e identifica claramente si es 🏆 REGULAR o ⚡ RELÁMPAGO.';
-  const {data:t,error:te}=await sb.from('tournaments').select('id,name,status,tournament_type,season').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
-  if(te){console.error('GAME ON FLAG torneos:',te);if(tourEl)tourEl.innerHTML='<option value="">Error al cargar torneos</option>';return;}
+  if(tourEl)tourEl.value='';
+  if(catEl)catEl.innerHTML='<option value="">Cargando categorías…</option>';
+  if(typeEl)typeEl.textContent='El torneo actual se toma automáticamente de esta liga.';
+  const {data:t,error:te}=await sb.from('tournaments').select('id,name,status,tournament_type,season,created_at,start_date').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
+  if(te){console.error('GAME ON FLAG torneos:',te);if(catEl)catEl.innerHTML='<option value="">Error al cargar categorías</option>';return;}
   const tournaments=t||[];
   if(!tournaments.length){
-    if(tourEl)tourEl.innerHTML='<option value="">Primero crea un torneo</option>';
+    if(tourEl)tourEl.value='';
     if(catEl)catEl.innerHTML='<option value="">Sin categorías disponibles</option>';
-    renderEnrollmentEmpty(); return;
+    if(typeEl)typeEl.textContent='Esta liga todavía no tiene un torneo creado.';
+    renderEnrollmentEmpty();syncOtrosRenameButton();return;
   }
-  if(tourEl)tourEl.innerHTML='<option value="">Selecciona el tipo de torneo</option>'+tournaments.map(t=>`<option value="${t.id}">${t.tournament_type==='relampago'?'⚡ RELÁMPAGO':'🏆 REGULAR'} · ${esc(t.name)}${t.season?' · '+esc(t.season):''}</option>`).join('');
-  const updateTournamentType=async()=>{
-    const tid=tourEl?.value||'';
-    clearTeamEntry();
-    if(!tid){
-      if(catEl)catEl.innerHTML='<option value="">Después selecciona la categoría</option>';
-      if(typeEl)typeEl.textContent='Selecciona el torneo e identifica claramente si es 🏆 REGULAR o ⚡ RELÁMPAGO.';
-      renderEnrollmentEmpty();syncOtrosRenameButton();return;
-    }
-    const selected=tournaments.find(x=>String(x.id)===String(tid));
-    const type=selected?.tournament_type==='relampago'?'⚡ RELÁMPAGO · 3 partidos garantizados por equipo':'🏆 REGULAR · 7 jornadas por equipo';
-    if(typeEl)typeEl.textContent=type+(selected?.season?` · Temporada ${selected.season}`:'');
-    try{localStorage.setItem('gof_home_tournament',tid);localStorage.removeItem('gof_enrollment_category');}catch(_){ }
-    await loadEnrollmentCategories(tid);
-  };
-  if(tourEl)tourEl.onchange=updateTournamentType;
+  // No mostramos un selector de torneo: se usa el torneo actual de la liga.
+  // Preferimos el torneo activo; si no existe, el próximo más reciente.
+  const selected=tournaments.find(x=>x.status==='activo')||tournaments[0];
+  if(tourEl)tourEl.value=selected.id;
+  const type=selected?.tournament_type==='relampago'?'⚡ RELÁMPAGO · 3 partidos garantizados por equipo':'🏆 REGULAR · 7 jornadas por equipo';
+  if(typeEl)typeEl.textContent=type+(selected?.season?` · Temporada ${selected.season}`:'')+` · ${selected.name||'Torneo actual'}`;
+  try{localStorage.setItem('gof_home_tournament',selected.id);localStorage.removeItem('gof_enrollment_category');}catch(_){ }
+  await loadEnrollmentCategories(selected.id);
   if(catEl)catEl.onchange=async()=>{try{localStorage.setItem('gof_enrollment_category',catEl.value||'')}catch(_){}syncOtrosRenameButton();clearTeamEntry();await loadEnrolled();};
-  // Nunca seleccionar automáticamente el torneo anterior o el primero: el administrador debe elegirlo.
-  if(tourEl)tourEl.value='';
-  if(catEl)catEl.value='';
-  renderEnrollmentEmpty();syncOtrosRenameButton();
+  syncOtrosRenameButton();
 }
 function clearTeamEntry(){const n=document.getElementById('aeName'),c=document.getElementById('aeCoach');if(n)n.value='';if(c)c.value='';}
 function renderEnrollmentEmpty(){const out=document.getElementById('enrolled');if(out)out.innerHTML='<div class="mut">📋 Selecciona un torneo y una categoría para ver los equipos inscritos.</div>';}
@@ -3541,7 +3531,9 @@ window.gofDeleteOwnerLeague=async function(id,name){
     localStorage.removeItem('gof_home_tournament');
     localStorage.removeItem('gof_active_tournament');
     toast('Liga eliminada correctamente');
+    if(typeof refreshAllSelectors==='function'){try{await refreshAllSelectors()}catch(_){} }
     await loadMisLigas();
+    if(window.GOF_ACTIVE_LEAGUE_ID===id){setView('organizaciones');location.reload();}
   }catch(e){
     alert('No fue posible eliminar la liga: '+(e?.message||e));
   }
@@ -4142,7 +4134,7 @@ window.GOF_ACTIVE_ORGANIZATION_KEY = 'gof_active_organization_id';
         <div class="row"><b>Panel maestro</b><button type="button" onclick="gofCloseMasterV2()">Cerrar</button></div>
         <p class="mut small">Desde aquí puedes crear ligas y administrar sus códigos de acceso.</p>
         <div class="form">
-          <input id="gofNewLeagueNameV2" placeholder="Nombre de la liga">
+          <input id="gofNewLeagueNameV2" placeholder="Nombre de la liga"><select id="gofNewLeagueTypeV2"><option value="regular">🏆 Torneo regular</option><option value="relampago">⚡ Torneo relámpago</option></select>
           <input id="gofNewLeagueSlugV2" placeholder="Slug (opcional)">
           <input id="gofNewLeagueColorV2" placeholder="Color principal" value="#6d28d9">
         </div>
@@ -4240,10 +4232,11 @@ window.gofSubmitModalV2=async function(){
 }
 window.gofCreateLeagueV2=async function(){
  if(!window.GOF_PLATFORM_MASTER)return gofOpenMasterV2();
- const name=document.getElementById('gofNewLeagueNameV2').value.trim(),slug=document.getElementById('gofNewLeagueSlugV2').value.trim(),color=document.getElementById('gofNewLeagueColorV2').value.trim()||'#6d28d9';
+ const name=document.getElementById('gofNewLeagueNameV2').value.trim(),slug=document.getElementById('gofNewLeagueSlugV2').value.trim(),color=document.getElementById('gofNewLeagueColorV2').value.trim()||'#6d28d9',tournamentType=document.getElementById('gofNewLeagueTypeV2')?.value==='relampago'?'relampago':'regular';
  if(!name)return alert('Escribe el nombre de la liga.');
  const {data,error}=await sb.rpc('create_league',{p_name:name,p_slug:slug||null,p_logo_url:null,p_primary_color:color});
  if(error)return alert(error.message);
+ if(data?.league_id){const {error:te}=await sb.from('leagues').update({default_tournament_type:tournamentType}).eq('id',data.league_id);if(te)return alert(te.message);}
  document.getElementById('gofNewLeagueNameV2').value='';document.getElementById('gofNewLeagueSlugV2').value='';
  await refreshAllSelectors();await loadMisLigas();await gofLoadMasterV2();alert('Liga creada correctamente.');
 }

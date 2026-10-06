@@ -965,7 +965,7 @@ window.gofInitPublicacionDirecta=async function(){render();try{await getToken();
 const oldSetView=window.setView;window.setView=function(v){const r=oldSetView?oldSetView.apply(this,arguments):undefined;if(v==='publicacion')setTimeout(()=>gofInitPublicacionDirecta(),50);return r};render();
 })();
 </script>
-<section class="view" id="organizaciones"><div id="gofOwnerLeaguePanel" data-gof-admin-version="2026-09-26-owner-controls-v4" class="card" style="display:none"><h2>🏟️ Ligas activas de GAME ON FLAG</h2><p class="mut small">Administradora principal: crea, administra, consulta códigos y elimina tus ligas.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0"><button class="primary" style="width:100%;font-size:18px;padding:14px" type="button" onclick="gofOpenCreateLeaguePanel()">➕ CREAR LIGA NUEVA</button></div><div id="gofCreateLeagueInline" style="display:none;margin:12px 0;padding:14px;border:1px solid #6d28d9;border-radius:14px"><h3 style="margin:0 0 8px">➕ Crear liga para otro administrador</h3><p class="mut small">Escribe el nombre. Al crearla se generará automáticamente su código de acceso.</p><div class="form"><input id="gofMasterCreateName" placeholder="Nombre de la nueva liga"><input id="gofMasterCreateSlug" placeholder="Identificador (opcional)"><input id="gofMasterCreateColor" type="text" value="#6d28d9" placeholder="Color principal"><button class="gold" type="button" onclick="gofCreateLeagueFromDashboard()">CREAR Y GENERAR CÓDIGO</button></div></div><div id="gofOwnerCreateFallback" style="margin-top:10px"></div><div id="gofOwnerActiveList" style="margin-top:10px">Cargando ligas...</div></div><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏟️ Organizaciones</h2><div class="card gof-organization-manager"><h3>➕ Crear una organización independiente</h3><div class="form"><input id="newLeagueName" placeholder="Nombre de la organización"/><input id="newLeagueSlug" placeholder="Identificador (opcional)"/><input id="newLeagueColor" type="text" value="#6d28d9" placeholder="Color principal"/><button class="primary" type="button" onclick="createLeagueFinal()">Crear liga</button></div><p class="mut small">Cada liga tiene sus propios torneos, equipos, categorías, rosters, calendario y resultados.</p></div><div class="card"><h3>🔑 Acceso para otro administrador</h3><div class="form"><select id="leagueCodeLeague"><option value="">Selecciona una liga</option></select><button class="gold" type="button" onclick="generateLeagueCodeFinal()">Generar código</button><input id="redeemLeagueCode" placeholder="Código recibido de otra liga"/><button class="secondary" type="button" onclick="redeemLeagueCodeFinal()">Entrar con código</button></div><div id="leagueCodesList" class="league-code-list"></div></div><div class="card"><div class="row"><div><h3 style="margin:0">Mis Organizaciones propias</h3><p class="mut small" style="margin:5px 0 0">Solo puedes eliminar definitivamente las organizaciones/torneos creados por tu cuenta.</p></div><button type="button" onclick="loadMisLigas()">🔄 Actualizar enfrentamientos</button></div><div class="grid" id="ownLeagues" style="margin-top:10px"></div></div><div class="card"><h3>🔑 Organizaciones de otros administradores</h3><p class="mut">Los accesos por código se reservan para ligas externas que utilicen Game On Flag Application. Desactivar un código nunca elimina la información de la organización.</p><div class="empty" id="externalLeagues">La gestión de códigos se mostrará aquí cuando se conecte el módulo de accesos externos.</div></div></section>
+<section class="view" id="organizaciones"><div id="gofOwnerLeaguePanel" data-gof-admin-version="2026-09-26-owner-controls-v4" class="card" style="display:none"><h2>🏟️ Ligas activas de GAME ON FLAG</h2><p class="mut small">Administradora principal: crea, administra, consulta códigos y elimina tus ligas.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0"><button class="primary" style="width:100%;font-size:18px;padding:14px" type="button" onclick="gofOpenCreateLeaguePanel()">➕ CREAR LIGA NUEVA</button></div><div id="gofCreateLeagueInline" style="display:none;margin:12px 0;padding:14px;border:1px solid #6d28d9;border-radius:14px"><h3 style="margin:0 0 8px">➕ Crear liga para otro administrador</h3><p class="mut small">Escribe el nombre. Al crearla se generará automáticamente su código de acceso.</p><div class="form"><input id="gofMasterCreateName" placeholder="Nombre de la nueva liga"><input id="gofMasterCreateSlug" placeholder="Identificador (opcional)"><input id="gofMasterCreateColor" type="text" value="#6d28d9" placeholder="Color principal"><select id="gofMasterCreateType"><option value="regular">🏆 Liga / torneo regular · 7 jornadas</option><option value="relampago">⚡ Liga / torneo relámpago · 3 partidos</option></select><button class="gold" type="button" onclick="gofCreateLeagueFromDashboard()">CREAR Y GENERAR CÓDIGO</button></div></div><div id="gofOwnerCreateFallback" style="margin-top:10px"></div><div id="gofOwnerActiveList" style="margin-top:10px">Cargando ligas...</div></div><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏟️ Organizaciones</h2><div class="card gof-organization-manager"><h3>➕ Crear una organización independiente</h3><div class="form"><input id="newLeagueName" placeholder="Nombre de la organización"/><input id="newLeagueSlug" placeholder="Identificador (opcional)"/><input id="newLeagueColor" type="text" value="#6d28d9" placeholder="Color principal"/><select id="newLeagueType"><option value="regular">🏆 Liga / torneo regular · 7 jornadas</option><option value="relampago">⚡ Liga / torneo relámpago · 3 partidos</option></select><button class="primary" type="button" onclick="createLeagueFinal()">Crear liga</button></div><p class="mut small">Cada liga tiene sus propios torneos, equipos, categorías, rosters, calendario y resultados.</p></div><div class="card"><h3>🔑 Acceso para otro administrador</h3><div class="form"><select id="leagueCodeLeague"><option value="">Selecciona una liga</option></select><button class="gold" type="button" onclick="generateLeagueCodeFinal()">Generar código</button><input id="redeemLeagueCode" placeholder="Código recibido de otra liga"/><button class="secondary" type="button" onclick="redeemLeagueCodeFinal()">Entrar con código</button></div><div id="leagueCodesList" class="league-code-list"></div></div><div class="card"><div class="row"><div><h3 style="margin:0">Mis Organizaciones propias</h3><p class="mut small" style="margin:5px 0 0">Solo puedes eliminar definitivamente las organizaciones/torneos creados por tu cuenta.</p></div><button type="button" onclick="loadMisLigas()">🔄 Actualizar enfrentamientos</button></div><div class="grid" id="ownLeagues" style="margin-top:10px"></div></div><div class="card"><h3>🔑 Organizaciones de otros administradores</h3><p class="mut">Los accesos por código se reservan para ligas externas que utilicen Game On Flag Application. Desactivar un código nunca elimina la información de la organización.</p><div class="empty" id="externalLeagues">La gestión de códigos se mostrará aquí cuando se conecte el módulo de accesos externos.</div></div></section>
 <section class="view" id="torneos"><button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button><h2>🏆 Torneos</h2><div class="workflow-kicker" style="margin-top:6px">PASO 1 DE 7 · TORNEOS</div><div class="card"><div class="form"><input id="tn" placeholder="Nombre del torneo"/><input id="tseason" placeholder="Temporada (ej. 2026)"/><input id="ts" type="date"/><select id="ttype"><option selected="" value="regular">🏆 Torneo regular · 7 juegos</option><option value="relampago">⚡ Torneo relámpago · 3 juegos</option></select><button class="primary" onclick="createTournament()">+ Crear torneo</button></div><details class="gof-info-accordion"><summary>ℹ️ ¿Cómo funciona el torneo?</summary><div class="notice"><b>Torneo regular:</b> 7 jornadas de fase regular por equipo.<br/><b>Torneo relámpago:</b> 3 partidos garantizados por equipo. El administrador decide qué categorías juegan viernes, sábado y domingo; no hay categorías predeterminadas.<br/><b>Bloque relámpago:</b> 50 minutos por partido (40 minutos reales de juego + 10 minutos operativos).<br/><b>Domingo:</b> se completan partidos pendientes y se juegan playoffs. Si una categoría tiene más de 12 equipos, se habilitan cuartos de final antes de semifinal y final.<br/><br/>Los playoffs se configuran manualmente por categoría: <b>Cuartos de final → Semifinal → Final</b> o <b>Semifinal → Final</b>.<br/><br/>Al activar el torneo, los enlaces de roster de los coaches dejan de permitir cambios. Administración sí puede editar el roster desde <b>Rosters</b>.</div></details></div><div id="tlist"></div><div class="gof-step-nav gof-step-1"><button type="button" onclick="setView('inicio')">← Menú principal</button><div class="step-current">Paso 1 de 7</div><button class="primary" type="button" onclick="openEnrollmentStep()">Siguiente: Inscribir equipos →</button></div></section>
 <section class="view" id="inscripciones">
 <button class="back-menu" onclick="setView('inicio')"><span>←</span> Menú principal</button>
@@ -2543,12 +2543,26 @@ async function loadMakeupTeams(){const tid=val('mt'),cat=val('mc');if(!tid||!cat
 function syncMakeupOpponent(){const make=document.getElementById('mmake'),opp=document.getElementById('mopp');if(!make||!opp)return;const selected=make.value;[...opp.options].forEach(o=>{o.disabled=!!selected&&o.value===selected});if(selected&&opp.value===selected){opp.value='';}if(selected){opp.title='El rival debe ser diferente al equipo que repone.';}else{opp.title='';}}
 async function createMakeupMatch(){const tid=val('mt'),cat=val('mc'),make=val('mmake'),opp=val('mopp');const round=Number(val('mround'));if(!tid||!cat||!make||!opp||make===opp||!round)return alert('Selecciona categoría, equipo que repone, rival y semana.');const date=val('mdate')||null,time=val('mtime')||null,field=val('mfield').trim()||null,note=val('mnote').trim()||'Reposición por sustitución';if(date&&time){const conflicts=await getUnifiedConflicts(tid,date,time,field,null,'regular',make,opp);if(conflicts.length){const errors=conflicts.filter(x=>x.type==='error');if(errors.length)return alert(errors.map(x=>x.text).join('\n'));if(!confirm('Hay avisos de empalme:\n\n'+conflicts.map(x=>'• '+x.text).join('\n')+'\n\n¿Crear de todos modos?'))return;}}const {data,error}=await sb.from('matches').insert({tournament_id:tid,category_id:cat,round_number:round,match_date:date,match_time:time,field_name:field,home_team_id:make,away_team_id:opp,status:'programado',published:false,is_makeup:true,stats_exclude_team_id:opp,replacement_note:note}).select('id').single();if(error)return alert(error.message);document.getElementById('makeupStatus').textContent='Partido de reposición creado. El rival quedará excluido de las estadísticas de este partido.';toast('Reposición creada');await loadSchedule()}
 async function loadScheduleSelectors(){
- const {data:t}=await sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
+ const {data:t,error:tError}=await sb.from('tournaments').select('id,name,status,tournament_type,regular_rounds').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});
+ if(tError)return alert('No se pudieron cargar los torneos: '+tError.message);
  fill('ct',t,'id','name'); fill('mt',t,'id','name');
- const ctType=document.getElementById('ct'); if(ctType){[...ctType.options].forEach(o=>{const x=(t||[]).find(z=>String(z.id)===String(o.value));if(x){o.dataset.type=x.tournament_type||'regular';o.dataset.rounds=x.tournament_type==='relampago'?3:Number(x.regular_rounds||7)}});const preferred=window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';if(preferred&&[...ctType.options].some(o=>String(o.value)===String(preferred)))ctType.value=preferred;else if((t||[])[0])ctType.value=t[0].id;}
- const ct=document.getElementById('ct'); if(ct)ct.onchange=async()=>{window.gofSingleTournamentId=ct.value;try{localStorage.setItem('gof_home_tournament',ct.value);localStorage.setItem('gof_active_tournament',ct.value)}catch(_){}await scheduleCats();await loadMakeupSelectors();};
+ window.gofResolvedTournamentType=null;
+ const ctType=document.getElementById('ct');
+ if(ctType){
+   [...ctType.options].forEach(o=>{const x=(t||[]).find(z=>String(z.id)===String(o.value));if(x){o.dataset.type=x.tournament_type||'regular';o.dataset.rounds=x.tournament_type==='relampago'?3:Number(x.regular_rounds||7)}});
+   const preferred=window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||localStorage.getItem('gof_active_tournament')||'';
+   if(preferred&&[...ctType.options].some(o=>String(o.value)===String(preferred)))ctType.value=preferred;else if((t||[])[0])ctType.value=t[0].id;
+   const selected=(t||[]).find(x=>String(x.id)===String(ctType.value));
+   if(selected)window.gofResolvedTournamentType=selected.tournament_type==='relampago'?'relampago':'regular';
+ }
+ if(!window.gofResolvedTournamentType){
+   const {data:league,error:leagueError}=await sb.from('leagues').select('default_tournament_type').eq('id',gofCurrentOrganizationId).maybeSingle();
+   if(!leagueError&&league?.default_tournament_type)window.gofResolvedTournamentType=league.default_tournament_type==='relampago'?'relampago':'regular';
+ }
+ const ct=document.getElementById('ct'); if(ct)ct.onchange=async()=>{window.gofSingleTournamentId=ct.value;const opt=ct.options[ct.selectedIndex];window.gofResolvedTournamentType=opt?.dataset?.type==='relampago'?'relampago':'regular';try{localStorage.setItem('gof_home_tournament',ct.value);localStorage.setItem('gof_active_tournament',ct.value)}catch(_){}await scheduleCats();await loadMakeupSelectors();window.gofUpdateCalendarModeUI?.();};
  const cc=document.getElementById('cc'); if(cc)cc.onchange=loadSchedule;
  await scheduleCats(); await loadMakeupSelectors();
+ window.gofUpdateCalendarModeUI?.();
 }
 async function scheduleCats(){
  const tid=val('ct'),el=document.getElementById('cc'); if(!el)return;
@@ -2563,10 +2577,17 @@ async function scheduleCats(){
 }
 async function loadScheduleSettings(){
  const tid=val('ct'),out=document.getElementById('scheduleRoundSettings'); if(!out)return;
- if(!tid){out.innerHTML='<div class="empty">Selecciona un torneo para configurar las jornadas.</div>';return;}
+ if(!tid){
+   const {data:league}=await sb.from('leagues').select('default_tournament_type').eq('id',gofCurrentOrganizationId).maybeSingle();
+   window.gofResolvedTournamentType=league?.default_tournament_type==='relampago'?'relampago':league?.default_tournament_type==='regular'?'regular':null;
+   const rel=window.gofResolvedTournamentType==='relampago';
+   out.innerHTML='<div class="notice"><b>'+ (rel?'⚡ Torneo relámpago':'🏆 Torneo regular') +':</b> '+(rel?'la liga está configurada para 3 partidos garantizados por equipo. Crea o selecciona un torneo para generar el calendario.':'la liga está configurada para 7 jornadas. Crea o selecciona un torneo para generar el calendario.')+'</div>';
+   return;
+ }
  const {data,error}=await sb.from('tournaments').select('regular_rounds,tournament_type,schedule_settings').eq('id',tid).single();
  if(error)return alert(error.message);
  const isRelampago=data?.tournament_type==='relampago';
+ window.gofResolvedTournamentType=isRelampago?'relampago':'regular';
  const rounds=isRelampago?3:Number(data?.regular_rounds||7)||7;
  const defaultInterval=isRelampago?50:60;
  const saved=data?.schedule_settings&&typeof data.schedule_settings==='object'?data.schedule_settings:{};
@@ -3534,14 +3555,18 @@ window.gofDeleteOwnerLeague=async function(id,name){
 }
 async function createLeagueFinal(){
   if(!(await ensurePlatformMaster()))return;
-  const name=val('newLeagueName').trim(),slug=val('newLeagueSlug').trim(),color=val('newLeagueColor').trim()||'#6d28d9';
+  const name=val('newLeagueName').trim(),slug=val('newLeagueSlug').trim(),color=val('newLeagueColor').trim()||'#6d28d9',type=val('newLeagueType')==='relampago'?'relampago':'regular';
   if(!name)return alert('Escribe el nombre de la organización.');
   const {data,error}=await sb.rpc('create_league',{p_name:name,p_slug:slug||null,p_logo_url:null,p_primary_color:color});
   if(error)return alert(error.message);
+  if(data?.league_id){
+    const {error:typeError}=await sb.from('leagues').update({default_tournament_type:type}).eq('id',data.league_id);
+    if(typeError)return alert('La liga se creó, pero no se pudo guardar su modalidad: '+typeError.message);
+  }
   document.getElementById('newLeagueName').value='';document.getElementById('newLeagueSlug').value='';
   if(data?.league_id){
-    toast('Liga creada correctamente');
-    alert('Liga creada: '+(data.league_name||name)+'\n\nCódigo para su administrador:\n'+(data.access_code||'No disponible'));
+    toast(type==='relampago'?'⚡ Liga creada como RELÁMPAGO':'🏆 Liga creada como REGULAR');
+    alert('Liga creada: '+(data.league_name||name)+'\n\nModalidad: '+(type==='relampago'?'RELÁMPAGO · 3 partidos':'REGULAR · 7 jornadas')+'\n\nCódigo para su administrador:\n'+(data.access_code||'No disponible'));
     await loadMisLigas();
   }
 }
@@ -3551,17 +3576,18 @@ window.gofOpenCreateLeaguePanel=function(){
 };
 window.gofCreateLeagueFromDashboard=async function(){
   if(!(await ensurePlatformMaster()))return;
-  const name=val('gofMasterCreateName').trim();
-  const slug=val('gofMasterCreateSlug').trim();
-  const color=val('gofMasterCreateColor').trim()||'#6d28d9';
+  const name=val('gofMasterCreateName').trim(),slug=val('gofMasterCreateSlug').trim(),color=val('gofMasterCreateColor').trim()||'#6d28d9',type=val('gofMasterCreateType')==='relampago'?'relampago':'regular';
   if(!name)return alert('Escribe el nombre de la nueva liga.');
   const {data,error}=await sb.rpc('create_league',{p_name:name,p_slug:slug||null,p_logo_url:null,p_primary_color:color});
   if(error)return alert(error.message);
-  document.getElementById('gofMasterCreateName').value='';
-  document.getElementById('gofMasterCreateSlug').value='';
+  if(data?.league_id){
+    const {error:typeError}=await sb.from('leagues').update({default_tournament_type:type}).eq('id',data.league_id);
+    if(typeError)return alert('La liga se creó, pero no se pudo guardar su modalidad: '+typeError.message);
+  }
+  document.getElementById('gofMasterCreateName').value='';document.getElementById('gofMasterCreateSlug').value='';
   const code=data?.access_code||'';
-  toast('Liga creada correctamente');
-  alert('Liga creada: '+(data?.league_name||name)+'\n\nCódigo para el administrador de esta liga:\n'+(code||'No disponible'));
+  toast(type==='relampago'?'⚡ Liga creada como RELÁMPAGO':'🏆 Liga creada como REGULAR');
+  alert('Liga creada: '+(data?.league_name||name)+'\n\nModalidad: '+(type==='relampago'?'RELÁMPAGO · 3 partidos':'REGULAR · 7 jornadas')+'\n\nCódigo para el administrador de esta liga:\n'+(code||'No disponible'));
   const inline=document.getElementById('gofCreateLeagueInline');if(inline)inline.style.display='none';
   await loadMisLigas();
 };
@@ -3862,7 +3888,24 @@ window.downloadCredentialImage=async function(){
 window.printCredentialCard=function(){
  const card=document.getElementById('credentialPrintCard');if(!card)return alert('Primero genera una credencial.');
  const clean=card.cloneNode(true);clean.querySelectorAll('.gof-credential-export-actions').forEach(x=>x.remove());
- const html='<!doctype html><html><head><meta charset="utf-8"><title>Credencial</title><style>@page{size:50mm 80mm;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;width:50mm;height:80mm;background:#fff;font-family:Arial,sans-serif}.gof-final-doc-card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;position:relative;color:#102a43;background:#fff}.gof-cred-head{height:13mm;padding:2.2mm 2.5mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.6mm solid #1769c2}.gof-cred-brand{font-size:3.2mm;font-weight:900}.gof-cred-brand small{display:block;font-size:1.4mm;color:#52677e}.gof-cred-logo{height:6mm;max-width:10mm;object-fit:contain}.gof-cred-title{font-size:2.3mm;font-weight:900;color:#1769c2}.gof-cred-photo-wrap{padding:2.2mm 2.5mm 0}.gof-cred-photo-wrap img,.gof-cred-photo-empty{width:46mm;height:41mm;border:.6mm solid #1769c2;border-radius:2mm;object-fit:contain;background:#eef2f6}.gof-cred-name{margin:.8mm 2.5mm 0;padding:1.1mm 1mm;background:#1769c2;color:#fff;text-align:center;font-size:3.8mm;line-height:1.05;font-weight:900;text-transform:uppercase}.gof-cred-info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.gof-cred-number{border:.3mm solid #d6dde5;border-radius:1.5mm;text-align:center;background:#f7f9fc;grid-row:span 3}.gof-cred-number span{display:block;font-size:1.6mm;font-weight:900;color:#52677e;padding-top:1mm}.gof-cred-number b{display:block;font-size:10mm;color:#1769c2}.gof-cred-row{display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1.1mm;overflow:hidden}.gof-cred-row span{background:#eef2f6;padding:1.2mm;font-size:1.6mm;font-weight:900;color:#52677e}.gof-cred-row b{padding:1.2mm;font-size:2.2mm;white-space:nowrap;overflow:hidden}.gof-cred-foot{text-align:center;padding:2mm;color:#1769c2;font-size:2.1mm;font-weight:900}</style></head><body>'+clean.outerHTML+'\n</body></html>';
+ const html='<!doctype html><html><head><meta charset="utf-8"><title>Credencial</title><style>@page{size:50mm 80mm;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;width:50mm;height:80mm;background:#fff;font-family:Arial,sans-serif}.gof-final-doc-card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;position:relative;color:#102a43;background:#fff}.gof-cred-head{height:13mm;padding:2.2mm 2.5mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.6mm solid #1769c2}.gof-cred-brand{font-size:3.2mm;font-weight:900}.gof-cred-brand small{display:block;font-size:1.4mm;color:#52677e}.gof-cred-logo{height:6mm;max-width:10mm;object-fit:contain}.gof-cred-title{font-size:2.3mm;font-weight:900;color:#1769c2}.gof-cred-photo-wrap{padding:2.2mm 2.5mm 0}.gof-cred-photo-wrap img,.gof-cred-photo-empty{width:46mm;height:41mm;border:.6mm solid #1769c2;border-radius:2mm;object-fit:contain;background:#eef2f6}.gof-cred-name{margin:.8mm 2.5mm 0;padding:1.1mm 1mm;background:#1769c2;color:#fff;text-align:center;font-size:3.8mm;line-height:1.05;font-weight:900;text-transform:uppercase}.gof-cred-info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.gof-cred-number{border:.3mm solid #d6dde5;border-radius:1.5mm;text-align:center;background:#f7f9fc;grid-row:span 3}.gof-cred-number span{display:block;font-size:1.6mm;font-weight:900;color:#52677e;padding-top:1mm}.gof-cred-number b{display:block;font-size:10mm;color:#1769c2}.gof-cred-row{display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1.1mm;overflow:hidden}.gof-cred-row span{background:#eef2f6;padding:1.2mm;font-size:1.6mm;font-weight:900;color:#52677e}.gof-cred-row b{padding:1.2mm;font-size:2.2mm;white-space:nowrap;overflow:hidden}.gof-cred-foot{text-align:center;padding:2mm;color:#1769c2;font-size:2.1mm;font-weight:900}</style></head><body>'+clean.outerHTML+'\n<script id="gof-calendar-authoritative-final-2026-10-06">
+(function(){
+  async function sync(){
+    try{
+      if(typeof window.gofResolveTournamentMode!=='function')return;
+      const sel=document.getElementById('ct');
+      await window.gofResolveTournamentMode(sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'');
+    }catch(e){console.warn('GOF calendar sync',e);}
+  }
+  window.addEventListener('load',()=>setTimeout(sync,900));
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?.('[onclick*="setView"],[data-v]');
+    if(b)setTimeout(sync,500);
+  });
+  setInterval(()=>{if(document.getElementById('calendario')?.classList.contains('active'))sync();},2000);
+})();
+</script>
+</body></html>';
  const w=window.open('','_blank');
  if(w){try{w.document.open();w.document.write(html);w.document.close();setTimeout(function(){try{w.focus();w.print()}catch(e){}},350);return;}catch(e){try{w.close()}catch(_){}}}
  const old=document.body.innerHTML;const overlay=document.createElement('div');overlay.id='gofPrintFallback';overlay.innerHTML=clean.outerHTML;document.body.appendChild(overlay);const st=document.createElement('style');st.id='gofPrintFallbackStyle';st.textContent='@page{size:50mm 80mm;margin:0}@media print{body>*:not(#gofPrintFallback){display:none!important}#gofPrintFallback{display:block!important;width:50mm;height:80mm;margin:0;padding:0}}@media screen{#gofPrintFallback{position:fixed;inset:0;background:#fff;z-index:999999;padding:10px;overflow:auto}}';document.head.appendChild(st);window.addEventListener('afterprint',function restore(){st.remove();overlay.remove();window.removeEventListener('afterprint',restore)});setTimeout(function(){window.print()},150);
@@ -3934,7 +3977,24 @@ window.printAllCredentials=async function(){
   popup=window.open('','_blank');await loadLeagueContextFinal();
   const [{data:regs,error:re},{data:t},{data:c},{data:tm},{data:lg}]=await Promise.all([sb.from('roster_registrations').select('player_id,status,players(full_name,jersey_number,photo_url)').eq('tournament_id',tid).eq('category_id',cid).eq('team_id',team),sb.from('tournaments').select('name,season').eq('id',tid).maybeSingle(),sb.from('categories').select('name').eq('id',cid).maybeSingle(),sb.from('teams').select('name').eq('id',team).maybeSingle(),sb.from('leagues').select('name,logo_url').eq('id',gofCurrentOrganizationId).maybeSingle()]);if(re)throw re;const approved=(regs||[]).filter(r=>r.status==='aprobado'||r.status==='approved').map(r=>r.players).filter(Boolean);if(!approved.length){if(popup)popup.close();return alert('No hay jugadores aprobados en este roster.');}
   const cards=approved.map(function(p){return '<div class="card"><div class="head"><b>'+esc(lg?.name||'GAME ON FLAG')+'</b><strong>ACREDITACIÓN</strong></div><div class="photo">'+(p.photo_url?'<img src="'+esc(p.photo_url)+'">':'📷')+'</div><div class="name">'+esc(p.full_name)+'</div><div class="info"><div class="num"><span>NÚMERO</span><b>'+esc(p.jersey_number??'')+'</b></div><div><label>EQUIPO</label><b>'+esc(tm?.name||'')+'</b></div><div><label>CATEGORÍA</label><b>'+esc(c?.name||'')+'</b></div><div><label>TORNEO</label><b>'+esc(t?.name||'')+'</b></div></div><div class="foot">GAME ON FLAG · TEMPORADA '+esc(t?.season||'2026')+'</div></div>';}).join('');
-  const html='<!doctype html><html><head><meta charset="utf-8"><title>Credenciales</title><style>@page{size:A4;margin:10mm}body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#102a43}.grid{display:grid;grid-template-columns:repeat(3,50mm);gap:5mm}.card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;background:#fff;break-inside:avoid}.head{height:13mm;padding:2mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.5mm solid #1769c2}.head b{font-size:2.8mm}.head strong{font-size:1.9mm;color:#1769c2}.photo{margin:2mm 2.5mm 0;height:29mm;border:.6mm solid #1769c2;border-radius:2mm;overflow:hidden;display:grid;place-items:center;background:#eef2f6}.photo img{width:100%;height:100%;object-fit:cover}.name{margin:1.4mm 2.5mm 0;padding:1.8mm .5mm;background:#1769c2;color:#fff;text-align:center;font-size:4.2mm;font-weight:900;text-transform:uppercase}.info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.num{grid-row:span 3;border:.3mm solid #d6dde5;border-radius:1.2mm;background:#f7f9fc;text-align:center}.num span{display:block;font-size:1.5mm;color:#52677e;font-weight:900;padding-top:1mm}.num b{font-size:9mm;color:#1769c2}.info>div:not(.num){display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1mm;overflow:hidden}.info label{background:#eef2f6;padding:1mm;font-size:1.4mm;font-weight:900;color:#52677e}.info>div:not(.num)>b{padding:1mm;font-size:1.9mm;white-space:nowrap;overflow:hidden}.foot{text-align:center;color:#1769c2;font-size:1.7mm;font-weight:900;padding-top:2mm}</style></head><body><div class="grid">'+cards+'</div></body></html>';
+  const html='<!doctype html><html><head><meta charset="utf-8"><title>Credenciales</title><style>@page{size:A4;margin:10mm}body{font-family:Arial,sans-serif;margin:0;background:#fff;color:#102a43}.grid{display:grid;grid-template-columns:repeat(3,50mm);gap:5mm}.card{width:50mm;height:80mm;border:1px solid #1769c2;border-radius:3mm;overflow:hidden;background:#fff;break-inside:avoid}.head{height:13mm;padding:2mm;display:flex;align-items:center;justify-content:space-between;background:#edf2f7;border-bottom:.5mm solid #1769c2}.head b{font-size:2.8mm}.head strong{font-size:1.9mm;color:#1769c2}.photo{margin:2mm 2.5mm 0;height:29mm;border:.6mm solid #1769c2;border-radius:2mm;overflow:hidden;display:grid;place-items:center;background:#eef2f6}.photo img{width:100%;height:100%;object-fit:cover}.name{margin:1.4mm 2.5mm 0;padding:1.8mm .5mm;background:#1769c2;color:#fff;text-align:center;font-size:4.2mm;font-weight:900;text-transform:uppercase}.info{padding:2mm 2.5mm 0;display:grid;grid-template-columns:12mm 1fr;gap:1mm}.num{grid-row:span 3;border:.3mm solid #d6dde5;border-radius:1.2mm;background:#f7f9fc;text-align:center}.num span{display:block;font-size:1.5mm;color:#52677e;font-weight:900;padding-top:1mm}.num b{font-size:9mm;color:#1769c2}.info>div:not(.num){display:grid;grid-template-columns:15mm 1fr;border:.3mm solid #d6dde5;border-radius:1mm;overflow:hidden}.info label{background:#eef2f6;padding:1mm;font-size:1.4mm;font-weight:900;color:#52677e}.info>div:not(.num)>b{padding:1mm;font-size:1.9mm;white-space:nowrap;overflow:hidden}.foot{text-align:center;color:#1769c2;font-size:1.7mm;font-weight:900;padding-top:2mm}</style></head><body><div class="grid">'+cards+'</div><script id="gof-calendar-authoritative-final-2026-10-06">
+(function(){
+  async function sync(){
+    try{
+      if(typeof window.gofResolveTournamentMode!=='function')return;
+      const sel=document.getElementById('ct');
+      await window.gofResolveTournamentMode(sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'');
+    }catch(e){console.warn('GOF calendar sync',e);}
+  }
+  window.addEventListener('load',()=>setTimeout(sync,900));
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?.('[onclick*="setView"],[data-v]');
+    if(b)setTimeout(sync,500);
+  });
+  setInterval(()=>{if(document.getElementById('calendario')?.classList.contains('active'))sync();},2000);
+})();
+</script>
+</body></html>';
   if(popup){popup.document.open();popup.document.write(html);popup.document.close();setTimeout(function(){try{popup.focus();popup.print()}catch(e){}},500);}else{const holder=document.createElement('div');holder.id='gofPrintAllFallback';holder.innerHTML=cards;const style=document.createElement('style');style.textContent='@media print{body>*:not(#gofPrintAllFallback){display:none!important}#gofPrintAllFallback{display:grid!important;grid-template-columns:repeat(3,50mm);gap:5mm}}';document.head.appendChild(style);document.body.appendChild(holder);window.addEventListener('afterprint',function restore(){style.remove();holder.remove();window.removeEventListener('afterprint',restore)});window.print();}
  }catch(e){if(popup)try{popup.close()}catch(_){ }alert('No se pudieron imprimir las credenciales: '+(e?.message||e));}
 };
@@ -4455,6 +4515,7 @@ window.addEventListener('load',async function(){
 <script id="gof-calendar-mode-final">
 (function(){
   function gofCalendarMode(){
+    if(window.gofResolvedTournamentType==='relampago'||window.gofResolvedTournamentType==='regular')return window.gofResolvedTournamentType;
     const sel=document.getElementById('ct');
     if(!sel)return 'regular';
     const opt=sel.options[sel.selectedIndex];
@@ -6048,25 +6109,39 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
   window.gofResolveTournamentMode = async function(tournamentId){
     let type=null, rounds=null, name='';
     try{
+      const leagueId=(typeof gofCurrentOrganizationId!=='undefined'&&gofCurrentOrganizationId)||window.GOF_ACTIVE_LEAGUE_ID||'';
       if(tournamentId){
         const q=await sb.from('tournaments').select('id,name,tournament_type,regular_rounds,league_id').eq('id',tournamentId).maybeSingle();
-        if(q.data){ type=q.data.tournament_type==='relampago'?'relampago':'regular'; rounds=type==='relampago'?3:Number(q.data.regular_rounds||7); name=q.data.name||''; }
+        if(q.data){type=q.data.tournament_type==='relampago'?'relampago':(q.data.tournament_type==='regular'?'regular':null);rounds=type==='relampago'?3:Number(q.data.regular_rounds||7);name=q.data.name||'';}
       }
-      if(!type && typeof gofCurrentOrganizationId!=='undefined' && gofCurrentOrganizationId){
-        const q=await sb.from('leagues').select('default_tournament_type').eq('id',gofCurrentOrganizationId).maybeSingle();
-        if(q.data?.default_tournament_type){ type=q.data.default_tournament_type==='relampago'?'relampago':'regular'; rounds=type==='relampago'?3:7; }
+      if(!type&&leagueId){
+        const q=await sb.from('tournaments').select('id,name,tournament_type,regular_rounds').eq('league_id',leagueId).in('status',['proximo','activo']).order('created_at',{ascending:false}).limit(1).maybeSingle();
+        if(q.data){type=q.data.tournament_type==='relampago'?'relampago':(q.data.tournament_type==='regular'?'regular':null);rounds=type==='relampago'?3:Number(q.data.regular_rounds||7);name=q.data.name||'';if(!tournamentId&&q.data.id){const sel=document.getElementById('ct');if(sel&&[...sel.options].some(o=>String(o.value)===String(q.data.id)))sel.value=q.data.id;window.gofSingleTournamentId=q.data.id;try{localStorage.setItem('gof_active_tournament',q.data.id);localStorage.setItem('gof_home_tournament',q.data.id)}catch(_){} }}
       }
-    }catch(e){ console.warn('GOF mode resolve',e); }
-    if(!type) return null;
+      if(!type&&leagueId){
+        const q=await sb.from('leagues').select('default_tournament_type').eq('id',leagueId).maybeSingle();
+        if(q.data?.default_tournament_type){type=q.data.default_tournament_type==='relampago'?'relampago':'regular';rounds=type==='relampago'?3:7;}
+      }
+    }catch(e){console.warn('GOF mode resolve',e);}
+    if(!type){
+      window.gofCalendarActualType=null;
+      window.gofResolvedTournamentType=null;
+      const badge=document.getElementById('gofCalendarActualMode');if(badge)badge.textContent='⚠️ MODALIDAD NO IDENTIFICADA — SELECCIONA O CREA UN TORNEO';
+      return null;
+    }
     const rel=type==='relampago';
-    const title=document.getElementById('gofCalendarModeNotice');
     const badge=document.getElementById('gofCalendarActualMode');
-    const heading=document.getElementById('gofCalendarSettingsRowTitle');
+    const heading=document.getElementById('gofCalendarBuilderTitle');
+    const intro=document.getElementById('gofCalendarBuilderIntro');
+    const title=document.getElementById('gofCalendarModeNotice');
     if(badge){badge.textContent=rel?'⚡ MODALIDAD REAL: RELÁMPAGO · 3 PARTIDOS GARANTIZADOS':'🏆 MODALIDAD REAL: REGULAR · 7 JORNADAS';badge.style.display='block';}
-    if(heading) heading.textContent=rel?'⚡ Constructor de torneo relámpago':'🏆 Constructor de torneo regular';
-    if(title) title.innerHTML=rel?'⚡ <b>Torneo relámpago:</b> 3 partidos garantizados por equipo.':'🏆 <b>Torneo regular:</b> 7 jornadas de fase regular por equipo.';
+    if(heading)heading.textContent=rel?'⚡ Constructor de torneo relámpago':'🏆 Constructor de torneo regular';
+    if(intro)intro.textContent=rel?'Elige viernes, sábado o domingo, categoría, partido garantizado, hora y campo.':'Define manualmente el orden de las 7 jornadas: día, categoría, jornada, hora y campo.';
+    if(title)title.innerHTML=rel?'⚡ <b>Torneo relámpago:</b> 3 partidos garantizados por equipo.':'🏆 <b>Torneo regular:</b> 7 jornadas de fase regular por equipo.';
     document.documentElement.dataset.gofTournamentType=type;
     document.documentElement.dataset.gofTournamentRounds=String(rounds);
+    window.gofCalendarActualType=type;
+    window.gofResolvedTournamentType=type;
     return {type,rounds,name};
   };
 })();
@@ -6091,11 +6166,12 @@ window.addEventListener('load',function(){setTimeout(async function(){try{const 
         const q=await sb.from('leagues').select('default_tournament_type').eq('id',window.gofCurrentOrganizationId).maybeSingle();
         if(!q.error&&q.data) type=q.data.default_tournament_type==='relampago'?'relampago':'regular';
       }
-      window.gofCalendarActualType=type||'regular';
-      if(sel&&sel.selectedOptions[0]) sel.selectedOptions[0].dataset.type=window.gofCalendarActualType;
+      window.gofCalendarActualType=type||null;
+      window.gofResolvedTournamentType=type||null;
+      if(sel&&sel.selectedOptions[0]&&type) sel.selectedOptions[0].dataset.type=type;
       if(typeof window.gofUpdateCalendarModeUI==='function') window.gofUpdateCalendarModeUI();
       return window.gofCalendarActualType;
-    }catch(e){window.gofCalendarActualType='regular';return 'regular';}
+    }catch(e){window.gofCalendarActualType=null;window.gofResolvedTournamentType=null;return null;}
   }
   const oldMode=window.gofUpdateCalendarModeUI;
   window.gofUpdateCalendarModeUI=function(){
@@ -6117,6 +6193,23 @@ window.addEventListener('load',function(){setTimeout(async function(){try{const 
   const oldLoad=window.loadScheduleSelectors;
   if(typeof oldLoad==='function') window.loadScheduleSelectors=async function(){const r=await oldLoad.apply(this,arguments);await resolveRealTournamentMode();return r;};
   document.addEventListener('DOMContentLoaded',()=>setTimeout(resolveRealTournamentMode,500));
+})();
+</script>
+<script id="gof-calendar-authoritative-final-2026-10-06">
+(function(){
+  async function sync(){
+    try{
+      if(typeof window.gofResolveTournamentMode!=='function')return;
+      const sel=document.getElementById('ct');
+      await window.gofResolveTournamentMode(sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'');
+    }catch(e){console.warn('GOF calendar sync',e);}
+  }
+  window.addEventListener('load',()=>setTimeout(sync,900));
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?.('[onclick*="setView"],[data-v]');
+    if(b)setTimeout(sync,500);
+  });
+  setInterval(()=>{if(document.getElementById('calendario')?.classList.contains('active'))sync();},2000);
 })();
 </script>
 </body></html>

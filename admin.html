@@ -6042,6 +6042,83 @@ label.field-label:has(select[id*="tour"]) { display:none!important; }
 .finance-paid-check{display:inline-flex;align-items:center;justify-content:center;width:56px;min-width:56px;height:34px;border:2px solid #42e28a;border-radius:7px;background:#17633c;color:#fff;font-weight:900;font-size:24px;line-height:1}
 @media(max-width:700px){.finance-matrix-scroll-controls{position:sticky;left:0;z-index:6}.finance-paid-check{width:52px;min-width:52px;height:34px}}
 </style>
+
+<script id="gof-relampago-authoritative-fix">
+(function(){
+  window.gofResolveTournamentMode = async function(tournamentId){
+    let type=null, rounds=null, name='';
+    try{
+      if(tournamentId){
+        const q=await sb.from('tournaments').select('id,name,tournament_type,regular_rounds,league_id').eq('id',tournamentId).maybeSingle();
+        if(q.data){ type=q.data.tournament_type==='relampago'?'relampago':'regular'; rounds=type==='relampago'?3:Number(q.data.regular_rounds||7); name=q.data.name||''; }
+      }
+      if(!type && typeof gofCurrentOrganizationId!=='undefined' && gofCurrentOrganizationId){
+        const q=await sb.from('leagues').select('default_tournament_type').eq('id',gofCurrentOrganizationId).maybeSingle();
+        if(q.data?.default_tournament_type){ type=q.data.default_tournament_type==='relampago'?'relampago':'regular'; rounds=type==='relampago'?3:7; }
+      }
+    }catch(e){ console.warn('GOF mode resolve',e); }
+    if(!type) return null;
+    const rel=type==='relampago';
+    const title=document.getElementById('gofCalendarModeNotice');
+    const badge=document.getElementById('gofCalendarActualMode');
+    const heading=document.getElementById('gofCalendarSettingsRowTitle');
+    if(badge){badge.textContent=rel?'⚡ MODALIDAD REAL: RELÁMPAGO · 3 PARTIDOS GARANTIZADOS':'🏆 MODALIDAD REAL: REGULAR · 7 JORNADAS';badge.style.display='block';}
+    if(heading) heading.textContent=rel?'⚡ Constructor de torneo relámpago':'🏆 Constructor de torneo regular';
+    if(title) title.innerHTML=rel?'⚡ <b>Torneo relámpago:</b> 3 partidos garantizados por equipo.':'🏆 <b>Torneo regular:</b> 7 jornadas de fase regular por equipo.';
+    document.documentElement.dataset.gofTournamentType=type;
+    document.documentElement.dataset.gofTournamentRounds=String(rounds);
+    return {type,rounds,name};
+  };
+})();
+</script>
+
+<script id="gof-relampago-authoritative-hook">
+window.addEventListener('load',function(){setTimeout(async function(){try{const ct=document.getElementById('ct');if(ct&&ct.value&&window.gofResolveTournamentMode)await window.gofResolveTournamentMode(ct.value);else if(window.gofResolveTournamentMode)await window.gofResolveTournamentMode(null);}catch(e){}},700);});
+</script>
+
+<script id="gof-relampago-league-fallback-2026-10-06">
+(function(){
+  async function resolveRealTournamentMode(){
+    try{
+      const sel=document.getElementById('ct');
+      const tid=sel?.value||window.gofSingleTournamentId||localStorage.getItem('gof_active_tournament')||localStorage.getItem('gof_home_tournament')||'';
+      let type='';
+      if(tid&&window.sb){
+        const q=await sb.from('tournaments').select('tournament_type,regular_rounds').eq('id',tid).maybeSingle();
+        if(!q.error&&q.data) type=q.data.tournament_type==='relampago'?'relampago':'regular';
+      }
+      if(!type&&window.gofCurrentOrganizationId&&window.sb){
+        const q=await sb.from('leagues').select('default_tournament_type').eq('id',window.gofCurrentOrganizationId).maybeSingle();
+        if(!q.error&&q.data) type=q.data.default_tournament_type==='relampago'?'relampago':'regular';
+      }
+      window.gofCalendarActualType=type||'regular';
+      if(sel&&sel.selectedOptions[0]) sel.selectedOptions[0].dataset.type=window.gofCalendarActualType;
+      if(typeof window.gofUpdateCalendarModeUI==='function') window.gofUpdateCalendarModeUI();
+      return window.gofCalendarActualType;
+    }catch(e){window.gofCalendarActualType='regular';return 'regular';}
+  }
+  const oldMode=window.gofUpdateCalendarModeUI;
+  window.gofUpdateCalendarModeUI=function(){
+    const sel=document.getElementById('ct');
+    const opt=sel?.selectedOptions?.[0];
+    const type=(opt?.dataset?.type==='relampago'||window.gofCalendarActualType==='relampago')?'relampago':'regular';
+    if(opt)opt.dataset.type=type;
+    const rel=type==='relampago';
+    const title=document.getElementById('gofCalendarBuilderTitle');
+    const intro=document.getElementById('gofCalendarBuilderIntro');
+    const note=document.getElementById('gofCalendarModeNotice');
+    const badge=document.getElementById('gofCalendarActualMode');
+    if(badge){badge.textContent=rel?'⚡ MODALIDAD REAL: RELÁMPAGO · 3 PARTIDOS GARANTIZADOS':'🏆 MODALIDAD REAL: REGULAR · 7 JORNADAS';}
+    if(title)title.textContent=rel?'⚡ Constructor de torneo relámpago':'🏆 Constructor de torneo regular';
+    if(intro)intro.textContent=rel?'Elige libremente viernes, sábado o domingo, categoría, partido garantizado, hora y campos. Después el sistema acomoda los enfrentamientos aprobados.':'Define manualmente el orden de las 7 jornadas: día, categoría, jornada, hora y campos. Después el sistema acomoda los enfrentamientos aprobados.';
+    if(note)note.innerHTML=rel?'<b>⚡ Torneo relámpago:</b> cada equipo tiene <b>3 partidos garantizados</b>. Cada bloque ocupa <b>50 minutos</b>. Tú decides categorías, días, horarios y campos.':'<b>🏆 Torneo regular:</b> son <b>7 jornadas</b> de fase regular por equipo.';
+    if(typeof oldMode==='function'&&oldMode!==window.gofUpdateCalendarModeUI){try{oldMode();}catch(_){}}
+  };
+  const oldLoad=window.loadScheduleSelectors;
+  if(typeof oldLoad==='function') window.loadScheduleSelectors=async function(){const r=await oldLoad.apply(this,arguments);await resolveRealTournamentMode();return r;};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(resolveRealTournamentMode,500));
+})();
+</script>
 </body></html>
 
 <!-- GAME ON FLAG FINAL ACTIVE-CATEGORY RULE INTERESCOLAR -->

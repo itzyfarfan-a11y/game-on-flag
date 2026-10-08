@@ -3499,9 +3499,17 @@ async function selectLeagueFinal(id){
  if(!id)return;
  const {error}=await sb.rpc('set_active_league',{p_league_id:id});
  if(error)return alert(error.message);
+ window.GOF_ACTIVE_LEAGUE_ID=id;
  window.gofSingleTournamentId='';window.gofSingleTournament=null;
- try{localStorage.removeItem('gof_home_tournament');localStorage.removeItem('gof_active_tournament');localStorage.removeItem('gof_home_category');}catch(_){}
- await loadLeagueContextFinal();
+ try{
+   localStorage.setItem('gameOnFlagActiveLeagueId',id);
+   localStorage.setItem('gof_active_organization_id',id);
+   localStorage.setItem('gof_active_league_id',id);
+   localStorage.removeItem('gof_home_tournament');
+   localStorage.removeItem('gof_active_tournament');
+   localStorage.removeItem('gof_home_category');
+ }catch(_){}
+ await loadLeagueContextFinal(id);
  toast('Organización activa: '+(gofCurrentOrganization?.name||''));
  await refreshAllSelectors();await loadMisLigas();
 }
@@ -3536,6 +3544,24 @@ window.gofDeleteOwnerLeague=async function(id,name){
     btns.forEach(b=>{b.disabled=false;b.style.opacity='';});
   }
 }
+async function gofActivateNewLeagueAfterCreation(leagueId){
+  if(!leagueId)return null;
+  window.GOF_ACTIVE_LEAGUE_ID=leagueId;
+  window.gofSingleTournamentId='';
+  window.gofSingleTournament=null;
+  try{
+    localStorage.setItem('gameOnFlagActiveLeagueId',leagueId);
+    localStorage.setItem('gof_active_organization_id',leagueId);
+    localStorage.setItem('gof_active_league_id',leagueId);
+    localStorage.removeItem('gof_home_tournament');
+    localStorage.removeItem('gof_active_tournament');
+    localStorage.removeItem('gof_home_category');
+  }catch(_){}
+  const league=await loadLeagueContextFinal(leagueId);
+  if(!league)throw new Error('La nueva liga no está disponible o no quedó activa.');
+  await refreshAllSelectors();
+  return league;
+}
 async function createLeagueFinal(){
   if(!(await ensurePlatformMaster()))return;
   const name=val('newLeagueName').trim(),slug=val('newLeagueSlug').trim(),color=val('newLeagueColor').trim()||'#6d28d9',type=val('newLeagueType')==='relampago'?'relampago':'regular';
@@ -3560,6 +3586,7 @@ async function createLeagueFinal(){
   }
   document.getElementById('newLeagueName').value='';document.getElementById('newLeagueSlug').value='';
   if(data?.league_id){
+    await gofActivateNewLeagueAfterCreation(data.league_id);
     toast(type==='relampago'?'⚡ Liga creada como RELÁMPAGO':'🏆 Liga creada como REGULAR');
     alert('Liga creada: '+(data.league_name||name)+'\n\nModalidad: '+(type==='relampago'?'RELÁMPAGO · 3 partidos':'REGULAR · 7 jornadas')+'\n\nEl torneo ya fue creado automáticamente.\n\nCódigo para su administrador:\n'+(data.access_code||'No disponible'));
     await loadMisLigas();
@@ -3591,13 +3618,14 @@ window.gofCreateLeagueFromDashboard=async function(){
   }
   document.getElementById('gofMasterCreateName').value='';document.getElementById('gofMasterCreateSlug').value='';
   const code=data?.access_code||'';
+  if(data?.league_id)await gofActivateNewLeagueAfterCreation(data.league_id);
   toast(type==='relampago'?'⚡ Liga creada como RELÁMPAGO':'🏆 Liga creada como REGULAR');
   alert('Liga creada: '+(data?.league_name||name)+'\n\nModalidad: '+(type==='relampago'?'RELÁMPAGO · 3 partidos':'REGULAR · 7 jornadas')+'\n\nEl torneo ya fue creado automáticamente.\n\nCódigo para el administrador de esta liga:\n'+(code||'No disponible'));
   const inline=document.getElementById('gofCreateLeagueInline');if(inline)inline.style.display='none';
   await loadMisLigas();
 };
 async function generateLeagueCodeFinal(){if(!(await ensurePlatformMaster()))return;const id=val('leagueCodeLeague')||gofCurrentOrganizationId;if(!id)return alert('Selecciona una organización.');const {data,error}=await sb.rpc('generate_league_access_code',{p_league_id:id});if(error)return alert(error.message);toast('Código generado: '+(data?.code||''));await loadMisLigas();}
-async function redeemLeagueCodeFinal(){const code=val('redeemLeagueCode').trim();if(!code)return alert('Escribe el código de acceso.');const {data,error}=await sb.rpc('redeem_league_access_code',{p_code:code});if(error)return alert(error.message);await loadLeagueContextFinal();toast('Acceso concedido a '+(data?.league_name||'la organización'));document.getElementById('redeemLeagueCode').value='';await refreshAllSelectors();await loadMisLigas();}
+async function redeemLeagueCodeFinal(){const code=val('redeemLeagueCode').trim();if(!code)return alert('Escribe el código de acceso.');const {data,error}=await sb.rpc('redeem_league_access_code',{p_code:code});if(error)return alert(error.message);const newLeagueId=data?.league_id||data?.id||'';if(newLeagueId)await gofActivateNewLeagueAfterCreation(newLeagueId);else await loadLeagueContextFinal();toast('Acceso concedido a '+(data?.league_name||'la organización'));document.getElementById('redeemLeagueCode').value='';await refreshAllSelectors();await loadMisLigas();}
 async function revokeLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;if(!confirm('¿Revocar este código? La información de la organización NO se eliminará.'))return;const {error}=await sb.rpc('revoke_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 async function reactivateLeagueCodeFinal(id){if(!(await ensurePlatformMaster()))return;const {error}=await sb.rpc('reactivate_league_access_code',{p_code_id:id});if(error)return alert(error.message);await loadMisLigas();}
 window.gofOwnerEnterLeague=async function(id){
@@ -4253,7 +4281,7 @@ window.gofCreateLeagueV2=async function(){
  if(!name)return alert('Escribe el nombre de la liga.');
  const {data,error}=await sb.rpc('create_league',{p_name:name,p_slug:slug||null,p_logo_url:null,p_primary_color:color});
  if(error)return alert(error.message);
- if(data?.league_id){const {error:typeError}=await sb.from('leagues').update({default_tournament_type:type}).eq('id',data.league_id);if(typeError)return alert('La liga se creó, pero no se pudo guardar su modalidad: '+typeError.message);}
+ if(data?.league_id){const {error:typeError}=await sb.from('leagues').update({default_tournament_type:type}).eq('id',data.league_id);if(typeError)return alert('La liga se creó, pero no se pudo guardar su modalidad: '+typeError.message);await gofActivateNewLeagueAfterCreation(data.league_id);}
  document.getElementById('gofNewLeagueNameV2').value='';document.getElementById('gofNewLeagueSlugV2').value='';
  await refreshAllSelectors();await loadMisLigas();await gofLoadMasterV2();alert('Liga creada correctamente.\n\nModalidad: '+(type==='relampago'?'RELÁMPAGO · 3 partidos':'REGULAR · 7 jornadas'));
 }

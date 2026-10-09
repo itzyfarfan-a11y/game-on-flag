@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GAME ON FLAG — Abriendo roster</title>
+  <script>
+    (function () {
+      const query = window.location.search || "";
+      const hash = window.location.hash || "";
+      window.location.replace("/roster.html" + query + hash);
+    })();
+  </script>
+</head>
+<body>
+  <p>Abriendo el formulario del roster…</p>
+  <p>Si no abre automáticamente, <a id="manual" href="/roster.html">toca aquí</a>.</p>
+  <script>
+    document.getElementById("manual").href = "/roster.html" + (window.location.search || "") + (window.location.hash || "");
+  </script>
+</body>
+</html>

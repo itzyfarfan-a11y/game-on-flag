@@ -2622,6 +2622,43 @@ async function saveWeekDate(){
   await loadSchedule();
 }
 
+let __gofCalendarDragInstalled=false, __gofCalendarPointerDrag=null, __gofCalendarPointerTimer=null;
+function gofInstallCalendarDragDrop(){
+  if(__gofCalendarDragInstalled)return;__gofCalendarDragInstalled=true;
+  document.addEventListener('dragstart',e=>{const card=e.target.closest?.('.cg-draggable-match');if(!card)return;const payload={id:card.dataset.matchId,tournament:card.dataset.tournamentId,round:Number(card.dataset.matchRound),date:card.dataset.matchDate||'',time:card.dataset.matchTime||'',field:card.dataset.matchField||''};e.dataTransfer.setData('text/plain',JSON.stringify(payload));e.dataTransfer.effectAllowed='move';card.classList.add('cg-match-dragging');});
+  document.addEventListener('dragend',e=>{e.target.closest?.('.cg-draggable-match')?.classList.remove('cg-match-dragging');document.querySelectorAll('.cg-drop-hover').forEach(x=>x.classList.remove('cg-drop-hover'));});
+  document.addEventListener('dragover',e=>{const td=e.target.closest?.('td.cg-drop-cell');if(!td)return;e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect='move';td.classList.add('cg-drop-hover');});
+  document.addEventListener('dragleave',e=>{const td=e.target.closest?.('td.cg-drop-cell');if(td&&!td.contains(e.relatedTarget))td.classList.remove('cg-drop-hover');});
+  document.addEventListener('drop',async e=>{const td=e.target.closest?.('td.cg-drop-cell');if(!td)return;e.preventDefault();document.querySelectorAll('.cg-drop-hover').forEach(x=>x.classList.remove('cg-drop-hover'));let src;try{src=JSON.parse(e.dataTransfer.getData('text/plain')||'{}')}catch(_){return}await gofDropCalendarMatch(src,td);});
+  // Compatibilidad táctil en Android/iPhone: pulsación breve sostenida + arrastre por pointer.
+  document.addEventListener('pointerdown',e=>{const card=e.target.closest?.('.cg-draggable-match');if(!card||e.target.closest('button')||e.pointerType==='mouse')return;clearTimeout(__gofCalendarPointerTimer);__gofCalendarPointerDrag={card,startX:e.clientX,startY:e.clientY,active:false};__gofCalendarPointerTimer=setTimeout(()=>{if(!__gofCalendarPointerDrag)return;__gofCalendarPointerDrag.active=true;card.classList.add('cg-match-dragging');if(navigator.vibrate)try{navigator.vibrate(25)}catch(_){}},280);},{passive:true});
+  document.addEventListener('pointermove',e=>{const d=__gofCalendarPointerDrag;if(!d)return;if(!d.active&&Math.hypot(e.clientX-d.startX,e.clientY-d.startY)>12){clearTimeout(__gofCalendarPointerTimer);__gofCalendarPointerDrag=null;return;}if(!d.active)return;e.preventDefault();document.querySelectorAll('.cg-drop-hover').forEach(x=>x.classList.remove('cg-drop-hover'));const el=document.elementFromPoint(e.clientX,e.clientY),td=el?.closest?.('td.cg-drop-cell');if(td)td.classList.add('cg-drop-hover');},{passive:false});
+  document.addEventListener('pointerup',async e=>{clearTimeout(__gofCalendarPointerTimer);const d=__gofCalendarPointerDrag;__gofCalendarPointerDrag=null;if(!d?.active)return;d.card.classList.remove('cg-match-dragging');const el=document.elementFromPoint(e.clientX,e.clientY),td=el?.closest?.('td.cg-drop-cell');document.querySelectorAll('.cg-drop-hover').forEach(x=>x.classList.remove('cg-drop-hover'));if(!td)return;await gofDropCalendarMatch({id:d.card.dataset.matchId,tournament:d.card.dataset.tournamentId,round:Number(d.card.dataset.matchRound),date:d.card.dataset.matchDate||'',time:d.card.dataset.matchTime||'',field:d.card.dataset.matchField||''},td);},{passive:true});
+  document.addEventListener('pointercancel',()=>{clearTimeout(__gofCalendarPointerTimer);__gofCalendarPointerDrag?.card?.classList.remove('cg-match-dragging');__gofCalendarPointerDrag=null;document.querySelectorAll('.cg-drop-hover').forEach(x=>x.classList.remove('cg-drop-hover'));});
+}
+async function gofDropCalendarMatch(src,td){
+  if(!src?.id||!td||src.tournament!==td.dataset.dropTournament)return;
+  const targetRound=Number(td.dataset.dropRound),targetDate=td.dataset.dropDate||'',targetTime=td.dataset.dropTime||'',targetField=td.dataset.dropField||'';
+  if(!targetRound||!targetDate||!targetTime||!targetField)return alert('Ese espacio no tiene fecha u horario definido.');
+  if(Number(src.round)===targetRound&&src.date===targetDate&&src.time===targetTime&&src.field===targetField)return;
+  const destCard=td.querySelector('.cg-draggable-match');
+  const destId=destCard?.dataset.matchId||'';
+  if(destId===src.id)return;
+  const tid=src.tournament;
+  if(!tid||tid!==(val('ct')||window.gofSingleTournamentId||localStorage.getItem('gof_home_tournament')||''))return alert('El partido no pertenece al torneo activo. No se realizó ningún cambio.');
+  const srcRound=Number(src.round||targetRound),srcDate=src.date||targetDate,srcTime=src.time||targetTime,srcField=src.field||targetField;
+  if(destId){
+    // El arrastre debe ser directo, sin tener que confirmar en un diálogo.
+    const {error:e1}=await sb.from('matches').update({round_number:targetRound,match_date:targetDate,match_time:targetTime,field_name:targetField,schedule_manual_override:true,schedule_override_note:'Movido por arrastrar y soltar en Calendario General',schedule_override_at:new Date().toISOString()}).eq('id',src.id).eq('tournament_id',tid);
+    if(e1)return alert('No se pudo mover el primer partido: '+e1.message);
+    const {error:e2}=await sb.from('matches').update({round_number:srcRound,match_date:srcDate,match_time:srcTime,field_name:srcField,schedule_manual_override:true,schedule_override_note:'Intercambio por arrastrar y soltar en Calendario General',schedule_override_at:new Date().toISOString()}).eq('id',destId).eq('tournament_id',tid);
+    if(e2){await sb.from('matches').update({round_number:srcRound,match_date:srcDate,match_time:srcTime,field_name:srcField}).eq('id',src.id).eq('tournament_id',tid);return alert('No se completó el intercambio; intenté restaurar el primer partido. '+e2.message);}
+  }else{
+    const {error}=await sb.from('matches').update({round_number:targetRound,match_date:targetDate,match_time:targetTime,field_name:targetField,schedule_manual_override:true,schedule_override_note:'Movido por arrastrar y soltar en Calendario General',schedule_override_at:new Date().toISOString()}).eq('id',src.id).eq('tournament_id',tid);
+    if(error)return alert('No se pudo mover el partido: '+error.message);
+  }
+  toast('✅ Partido reubicado');await loadSchedule();
+}
 let scheduleMode='general';
 function setScheduleMode(mode){scheduleMode=mode==='category'?'category':'general';document.getElementById('calModeGeneral')?.classList.toggle('primary',scheduleMode==='general');document.getElementById('calModeCategory')?.classList.toggle('primary',scheduleMode==='category');loadSchedule()}
 async function loadSchedule(){
@@ -2659,7 +2696,8 @@ async function loadSchedule(){
     const a=isPo?(m.a?.name||'Por definir'):(m.home?.name||'Local');
     const b=isPo?(m.b?.name||'Por definir'):(m.away?.name||'Visitante');
     const published=!!m.published;
-    return `<div class="cg-game ${catClass(cname)}"><div class="cg-cat">${esc(cname)}${isPo?' · '+esc(m.stage||''):''}</div><div class="cg-teams">${esc(a)} <span>vs</span> ${esc(b)}</div><div class="cg-meta">${isPo?'🏆':'🏈'} ${m.round_number?'Semana '+m.round_number:''}</div><div class="cg-actions"><button type="button" title="Editar / mover partido" aria-label="Editar / mover partido" onclick="${isPo?`editPlayoffSchedule('${m.id}')`:`editMatch('${m.id}')`}">✏️</button><span class="status-dot ${published?'published':''}" title="${published?'Publicado':'Pendiente de aprobación'}" aria-label="${published?'Publicado':'Pendiente de aprobación'}"></span></div></div>`;
+    const draggable=!isPo&&m.status!=='cancelado'&&!m.is_makeup;
+    return `<div class="cg-game ${catClass(cname)} ${draggable?'cg-draggable-match':''}" ${draggable?`draggable="true" data-match-id="${esc(m.id)}" data-tournament-id="${esc(m.tournament_id||'')}" data-match-round="${Number(m.round_number||1)}" data-match-date="${esc(m._date||'')}" data-match-time="${esc(m._time?String(m._time).slice(0,5):'')}" data-match-field="${esc(m._field||'')}"`:''} title="${draggable?'Arrastra este partido a otro horario o campo; en móvil mantén presionado y arrastra.':''}"><div class="cg-cat">${esc(cname)}${isPo?' · '+esc(m.stage||''):''}</div><div class="cg-teams">${esc(a)} <span>vs</span> ${esc(b)}</div><div class="cg-meta">${isPo?'🏆':'🏈'} ${m.round_number?'Semana '+m.round_number:''}</div><div class="cg-actions"><button type="button" title="Editar / mover partido" aria-label="Editar / mover partido" onclick="${isPo?`editPlayoffSchedule('${m.id}')`:`editMatch('${m.id}')`}">✏️</button><span class="status-dot ${published?'published':''}" title="${published?'Publicado':'Pendiente de aprobación'}" aria-label="${published?'Publicado':'Pendiente de aprobación'}"></span></div></div>`;
   };
   const showField5=all.some(m=>fieldNo(m._field)===5); const fields=showField5?[1,2,3,4,5]:[1,2,3,4];
   let html=`<div class="card"><h3>📊 Calendario General</h3><div class="notice"><b>${all.length} partidos</b> · ${regular.length} fase regular · ${po.length} playoffs · ${cat?'Filtro: '+esc(document.getElementById('cc')?.selectedOptions?.[0]?.textContent||'categoría'):'Todas las categorías'}${showField5?' · 🔐 Campo 5 visible solo en Administración':''}</div><div class="cg-scroll"><table class="calendar-grid"><thead><tr><th>HORARIO</th>${fields.map(f=>`<th>CAMPO ${f}${f===5?' 🔐':''}</th>`).join('')}</tr></thead><tbody>`;
@@ -2678,12 +2716,14 @@ async function loadSchedule(){
       html+=`<tr><th class="cg-time">${esc(tm==='SIN HORA'?'Pendiente':tm)}</th>`;
       for(const f of fields){
         const cell=weekGames.find(m=>fieldNo(m._field)===f && (m._time?String(m._time).slice(0,5):'SIN HORA')===tm);
-        html+=`<td>${renderCell(cell)}</td>`;
+        const dropAttrs=canEditWeek?`class="cg-drop-cell" data-drop-tournament="${esc(tid)}" data-drop-round="${Number(wk)}" data-drop-date="${esc(weekDateValue(weekGames))}" data-drop-time="${esc(tm==='SIN HORA'?'':tm)}" data-drop-field="Campo ${f}"`:'';
+        html+=`<td ${dropAttrs}>${renderCell(cell)}</td>`;
       }
       html+='</tr>';
     }
   }
-  html+='</tbody></table></div><div class="small mut cg-legend">Vista por semana · hora · campo. Los partidos se muestran directamente en su cancha para facilitar la revisión y los cambios manuales.</div></div>';
+  html+='</tbody></table></div><div class="small mut cg-legend">🖐️ Para mover un partido, arrástralo a otra hora o campo. En celular, mantén presionado el partido y arrástralo. Si sueltas sobre otro partido, intercambiarán sus horarios. El lápiz queda como alternativa de edición manual.</div></div>';
+  gofInstallCalendarDragDrop();
   // Tabla de enfrentamientos por equipo: 7 jornadas en regular / 3 partidos en relámpago.
   const selectedTourType=String(document.getElementById('ct')?.selectedOptions?.[0]?.dataset?.type||'regular');
   const teamMaxRound=selectedTourType==='relampago'?3:7;
@@ -6130,6 +6170,10 @@ window.addEventListener('load',function(){setTimeout(async function(){try{const 
   setTimeout(bind,300);setTimeout(bind,1000);
 })();
 </script>
+
+<style id="gof-calendar-drag-drop-2026-10-08">
+.cg-draggable-match{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;position:relative}.cg-draggable-match:active{cursor:grabbing}.cg-draggable-match:before{content:'⠿';position:absolute;right:4px;top:2px;color:#c7a5ff;font-size:15px;line-height:1;opacity:.85;pointer-events:none}.cg-match-dragging{opacity:.42;outline:2px dashed #a56bff;transform:scale(.98)}.calendar-grid td.cg-drop-cell{transition:background .12s,box-shadow .12s}.calendar-grid td.cg-drop-hover{background:#2b1642!important;box-shadow:inset 0 0 0 2px #a56bff}.calendar-grid td.cg-drop-cell .cg-empty{border:1px dashed #514260;border-radius:8px}.cg-legend{line-height:1.5;margin-top:8px}@media(max-width:700px){.cg-draggable-match{touch-action:pan-y}.cg-draggable-match:before{font-size:18px;right:3px;top:1px}}
+</style>
 </body><!-- GAME ON FLAG — HABILITAR ELIMINACIÓN DE LIGAS DESDE EL PANEL PRINCIPAL -->
 <style id="gof-owner-delete-final-fix">
 .gof-delete-league-btn{display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(141,44,255,.25)!important;user-select:none!important}

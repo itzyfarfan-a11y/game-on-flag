@@ -450,18 +450,98 @@ function render(){
   if(tab==='equipos')teams();if(tab==='jugadores')players();if(tab==='calendario')calendar();if(tab==='enfrentamientos')matchups();if(tab==='resultados')results();if(tab==='tabla')table();if(tab==='playoffs')playoffs();if(tab==='campeones')champions();if(tab==='avisos')publicNotices();if(tab==='publicaciones')legacyPublicAnnouncementsSection();
 }
 function home(){document.getElementById('inicio').innerHTML='';}
-{const n=data.matches.filter(m=>m.status==='jugado'||m.status==='incomparecencia').length;document.getElementById('inicio').innerHTML='<div class="card"><h2>'+esc(data.tournament?.name||'Torneo')+'</h2><p class="muted">Temporada '+esc(data.tournament?.season||'')+'</p><div class="grid"><div class="stat"><b>'+data.teams.length+'</b><br>Equipos</div><div class="stat"><b>'+n+'</b><br>Juegos registrados</div><div class="stat"><b>'+data.playoffs.length+'</b><br>Playoffs</div></div></div>'}async function teams(){const list=c.value?data.teams.filter(tm=>(tm.category_ids||[]).includes(c.value)):data.teams;document.getElementById('equipos').innerHTML='<h2>👥 Equipos'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><div id="publicTeamList">'+(list.length?list.map(x=>'<div class="card"><div class="row"><div style="display:flex;align-items:center;gap:12px">'+(x.logo_url?'<img src="'+esc(x.logo_url)+'" alt="" style="width:58px;height:58px;object-fit:contain;border-radius:10px;background:#222">':'')+'<div><b>'+esc(x.name)+'</b><span class="tag">'+(x.club_name?'Club/Coach: '+esc(x.club_name):'Club/Coach pendiente')+'</span></div></div></div></div>').join(''):'<div class="empty">Sin equipos.</div>')+'</div>'}async function players(){
- const s=document.getElementById('jugadores');
- if(!c.value){s.innerHTML='<h2>📋 Roster</h2><div class="empty">Selecciona una categoría para consultar los rosters.</div>';return}
- s.innerHTML='<h2>📋 Roster · '+esc(cat(c.value))+'</h2><div class="card"><div class="mut small">Vista pública del roster · misma estructura de consulta de Administración.</div></div><div id="publicRosterMirror"></div>';
- const out=document.getElementById('publicRosterMirror'); let cards=[];
- const teams=data.teams.filter(tm=>(tm.category_ids||[]).includes(c.value));
- for(const tm of teams){
-   let ps=[]; try{const r=await rpc('public_get_roster',{p_tournament_id:t.value,p_category_id:c.value,p_team_id:tm.id,p_league_slug:GOF_PUBLIC_LEAGUE_SLUG});ps=Array.isArray(r)?r:[]}catch(e){ps=[]}
-   const teamPlayers=ps;
-   cards.push(`<details class="card roster-view-card"><summary><div class="row"><b>${esc(tm.name)}</b><span class="tag">${teamPlayers.length}/18 jugadores</span></div></summary><div style="margin-top:12px">${teamPlayers.length?`<div class="roster-mini-grid">${teamPlayers.map(p=>`<div class="roster-mini-player gof-roster-big-player"><img class="gof-view-roster-photo" src="${esc(p.photo_url||'')}" onerror="this.style.display='none'" alt=""><div class="gof-view-player-info"><b class="gof-view-player-name">${esc(p.full_name||'Jugador')}</b><div class="mut small gof-view-player-meta">#${esc(p.jersey_number??'')} · ${esc(p.status||'pendiente')}</div></div></div>`).join('')}</div>`:'<div class="empty">Roster vacío.</div>'}</div><div class="roster-public-actions"><button type="button" class="primary roster-download-btn" onclick="downloadPublicRosterImage('${esc(tm.id)}')">📥 DESCARGAR ROSTER</button></div></details>`);
- }
- out.innerHTML=cards.length?`<div style="margin-bottom:14px"><div class="section-title" style="margin-bottom:8px"><b>${esc(cat(c.value))}</b><span class="tag">${cards.length} equipo${cards.length===1?'':'s'}</span></div>${cards.join('')}</div>`:'<div class="empty">No hay equipos en esta categoría.</div>';
+{const n=data.matches.filter(m=>m.status==='jugado'||m.status==='incomparecencia').length;document.getElementById('inicio').innerHTML='<div class="card"><h2>'+esc(data.tournament?.name||'Torneo')+'</h2><p class="muted">Temporada '+esc(data.tournament?.season||'')+'</p><div class="grid"><div class="stat"><b>'+data.teams.length+'</b><br>Equipos</div><div class="stat"><b>'+n+'</b><br>Juegos registrados</div><div class="stat"><b>'+data.playoffs.length+'</b><br>Playoffs</div></div></div>'}async function teams(){const list=c.value?data.teams.filter(tm=>(tm.category_ids||[]).includes(c.value)):data.teams;document.getElementById('equipos').innerHTML='<h2>👥 Equipos'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><div id="publicTeamList">'+(list.length?list.map(x=>'<div class="card"><div class="row"><div style="display:flex;align-items:center;gap:12px">'+(x.logo_url?'<img src="'+esc(x.logo_url)+'" alt="" style="width:58px;height:58px;object-fit:contain;border-radius:10px;background:#222">':'')+'<div><b>'+esc(x.name)+'</b><span class="tag">'+(x.club_name?'Club/Coach: '+esc(x.club_name):'Club/Coach pendiente')+'</span></div></div></div></div>').join(''):'<div class="empty">Sin equipos.</div>')+'</div>'}/* Roster público optimizado: consultas paralelas por lotes y caché en memoria. */
+const GOF_PUBLIC_ROSTER_CACHE = window.GOF_PUBLIC_ROSTER_CACHE || (window.GOF_PUBLIC_ROSTER_CACHE = new Map());
+let gofPublicRosterRenderToken = 0;
+
+async function gofGetPublicTeamRoster(teamId){
+  const key = [t.value, c.value, teamId].join("|");
+  if (GOF_PUBLIC_ROSTER_CACHE.has(key)) return GOF_PUBLIC_ROSTER_CACHE.get(key);
+
+  const request = rpc("public_get_roster", {
+    p_tournament_id: t.value,
+    p_category_id: c.value,
+    p_team_id: teamId,
+    p_league_slug: GOF_PUBLIC_LEAGUE_SLUG
+  }).then(result => Array.isArray(result) ? result : [])
+    .catch(error => {
+      console.warn("Roster público: no se pudo cargar el equipo", teamId, error);
+      GOF_PUBLIC_ROSTER_CACHE.delete(key);
+      return [];
+    });
+
+  GOF_PUBLIC_ROSTER_CACHE.set(key, request);
+  return request;
+}
+
+async function players(){
+  const section = document.getElementById("jugadores");
+  const renderToken = ++gofPublicRosterRenderToken;
+
+  if (!c.value) {
+    section.innerHTML = '<h2>📋 Roster</h2><div class="empty">Selecciona una categoría para consultar los rosters.</div>';
+    return;
+  }
+
+  section.innerHTML = '<h2>📋 Roster · ' + esc(cat(c.value)) + '</h2>' +
+    '<div class="card"><div class="mut small">Vista pública del roster · misma estructura de consulta de Administración.</div>' +
+    '<div class="mut small" style="margin-top:6px">Cargando equipos y jugadores…</div></div>' +
+    '<div id="publicRosterMirror"></div>';
+
+  const output = document.getElementById("publicRosterMirror");
+  const teams = data.teams.filter(tm =>
+    (tm.category_ids || []).some(id => String(id) === String(c.value))
+  );
+
+  if (!teams.length) {
+    output.innerHTML = '<div class="empty">No hay equipos en esta categoría.</div>';
+    return;
+  }
+
+  const rosterByTeam = new Map();
+
+  // Consultar hasta 6 equipos a la vez: evita esperar equipo por equipo
+  // y limita la cantidad de peticiones simultáneas al servidor.
+  for (let index = 0; index < teams.length; index += 6) {
+    if (renderToken !== gofPublicRosterRenderToken) return;
+    const batch = teams.slice(index, index + 6);
+    const batchResults = await Promise.all(
+      batch.map(async tm => [tm.id, await gofGetPublicTeamRoster(tm.id)])
+    );
+    batchResults.forEach(([teamId, roster]) => rosterByTeam.set(teamId, roster));
+  }
+
+  // Si el usuario cambió de categoría durante la carga, no pintar datos viejos.
+  if (renderToken !== gofPublicRosterRenderToken) return;
+
+  const cards = teams.map(tm => {
+    const roster = rosterByTeam.get(tm.id) || [];
+    const playersHtml = roster.length
+      ? '<div class="roster-mini-grid">' + roster.map(player =>
+          '<div class="roster-mini-player gof-roster-big-player">' +
+            '<img class="gof-view-roster-photo" loading="lazy" decoding="async" src="' +
+              esc(player.photo_url || '') + '" onerror="this.style.display=\'none\'" alt="">' +
+            '<div class="gof-view-player-info">' +
+              '<b class="gof-view-player-name">' + esc(player.full_name || "Jugador") + '</b>' +
+              '<div class="mut small gof-view-player-meta">#' + esc(player.jersey_number ?? '') +
+                ' · ' + esc(player.status || "pendiente") + '</div>' +
+            '</div>' +
+          '</div>'
+        ).join("") + '</div>'
+      : '<div class="empty">Roster vacío.</div>';
+
+    return '<details class="card roster-view-card">' +
+      '<summary><div class="row"><b>' + esc(tm.name) + '</b><span class="tag">' +
+        roster.length + '/18 jugadores</span></div></summary>' +
+      '<div style="margin-top:12px">' + playersHtml + '</div>' +
+      '<div class="roster-public-actions"><button type="button" class="primary roster-download-btn" ' +
+        'onclick="downloadPublicRosterImage(\'' + esc(tm.id) + '\')">📥 DESCARGAR ROSTER</button></div>' +
+      '</details>';
+  });
+
+  output.innerHTML = '<div style="margin-bottom:14px"><div class="section-title" style="margin-bottom:8px">' +
+    '<b>' + esc(cat(c.value)) + '</b><span class="tag">' + cards.length + ' equipo' +
+    (cards.length === 1 ? '' : 's') + '</span></div>' + cards.join("") + '</div>';
 }
 async function gofPublicBrandCanvas(sectionTitle,sectionSubtitle,W,H){
  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d');

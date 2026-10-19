@@ -812,12 +812,19 @@ async function downloadPublicPlayoffsImage(){
 
   window.table=async function(){
     const s=document.getElementById('tabla');
+    if(data.tournament?.table_published===false){s.innerHTML='<h2>📊 Tabla de posiciones</h2><div class="empty">La tabla general aún no está publicada por la organización.</div>';return}
     if(!c.value){s.innerHTML='<h2>📊 Tabla de posiciones</h2><div class="empty">Selecciona una categoría para mostrar su tabla.</div>';return}
-    const m={};
-    data.teams.filter(tm=>(tm.category_ids||[]).includes(c.value)).forEach(tm=>m[tm.id]={id:tm.id,jj:0,jg:0,pa:0,pc:0});
-    data.matches.filter(x=>x.category_id===c.value&&(x.status==='jugado'||x.status==='incomparecencia')).forEach(x=>{if(!m[x.home_team_id]||!m[x.away_team_id])return;const excluded=x.stats_exclude_team_id||null,hs=Number(x.home_score)||0,as=Number(x.away_score)||0;if(x.home_team_id!==excluded){m[x.home_team_id].jj++;m[x.home_team_id].pa+=hs;m[x.home_team_id].pc+=as;if(hs>as)m[x.home_team_id].jg++}if(x.away_team_id!==excluded){m[x.away_team_id].jj++;m[x.away_team_id].pa+=as;m[x.away_team_id].pc+=hs;if(as>hs)m[x.away_team_id].jg++}});
+    const ids=new Set([String(c.value)]),m={};
+    data.teams.filter(tm=>(tm.category_ids||[]).some(id=>ids.has(String(id)))).forEach(tm=>{m[String(tm.id)]={id:String(tm.id),jj:0,jg:0,pa:0,pc:0,forfeit:false}});
+    const source=Array.isArray(standingsMatches)&&standingsMatches.length?standingsMatches:(Array.isArray(data.matches)?data.matches:[]);
+    source.filter(x=>ids.has(String(x.category_id))&&['jugado','incomparecencia'].includes(String(x.status||'').toLowerCase())).forEach(x=>{
+      const hid=String(x.home_team_id||''),aid=String(x.away_team_id||'');if(!m[hid]||!m[aid])return;
+      const excluded=String(x.stats_exclude_team_id||''),hs=Number(x.home_score)||0,as=Number(x.away_score)||0;
+      if(hid!==excluded){m[hid].jj++;m[hid].pa+=hs;m[hid].pc+=as;if(hs>as)m[hid].jg++;if(String(x.status).toLowerCase()==='incomparecencia'&&String(x.absent_team_id||'')===hid)m[hid].forfeit=true}
+      if(aid!==excluded){m[aid].jj++;m[aid].pa+=as;m[aid].pc+=hs;if(as>hs)m[aid].jg++;if(String(x.status).toLowerCase()==='incomparecencia'&&String(x.absent_team_id||'')===aid)m[aid].forfeit=true}
+    });
     const rows=Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.dif-a.dif||b.pa-a.pa||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));
-    s.innerHTML='<h2>📊 Tabla de posiciones · '+esc(cat(c.value))+'</h2><div class="card"><button type="button" class="primary" onclick="downloadPublicTableImage()">🖼️ Descargar tabla</button><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>'+(rows.length?rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+esc(team(x.id).name)+'</b></td><td>'+x.jj+'</td><td>'+x.jg+'</td><td>'+x.pa+'</td><td>'+x.pc+'</td><td>'+x.dif+'</td></tr>').join(''):'<tr><td colspan="7">No hay partidos registrados para esta categoría.</td></tr>')+'</tbody></table></div></div><div class="notice">Orden: <b>JG → DIF → PA → menor PE</b>.</div>';
+    s.innerHTML='<h2>📊 Tabla de posiciones · '+esc(cat(c.value))+'</h2><div class="card"><button type="button" class="primary" onclick="downloadPublicTableImage()">🖼️ Descargar tabla</button><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>'+(rows.length?rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+(x.forfeit?'<span class="gof-forfeit-dot" title="FORFEIT"></span>':'')+esc(team(x.id).name)+'</b></td><td>'+x.jj+'</td><td>'+x.jg+'</td><td>'+x.pa+'</td><td>'+x.pc+'</td><td>'+x.dif+'</td></tr>').join(''):'<tr><td colspan="7">No hay equipos registrados para esta categoría.</td></tr>')+'</tbody></table></div></div><div class="notice">Orden: <b>JG → DIF → PA → menor PE</b>.</div>';
   };
 
   window.downloadPublicCalendarPNG=async function(){

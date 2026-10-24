@@ -2321,30 +2321,38 @@ async function updateQuickRosterTeams(){
   const previous=teamEl.value;
   teamEl.innerHTML='<option value="">Cargando equipos…</option>';
   try{
-    // Fuente principal: equipos inscritos en la categoría del torneo.
     let links=[], firstError=null;
-    const primary=await sb.from('tournament_teams').select('team_id,is_active,teams(id,name)').eq('tournament_id',tid).eq('category_id',cat);
-    if(primary.error)firstError=primary.error;
-    else links=(primary.data||[]).filter(x=>x.team_id&&x.teams&&x.is_active!==false).map(x=>({id:x.teams.id,name:x.teams.name}));
-    // Respaldo para torneos antiguos: recuperar los equipos que ya tienen roster,
-    // aunque falte la relación tournament_teams o esté marcada inactiva.
+    // Primero consultamos solo las columnas de la tabla de inscripciones. Así no
+    // dependemos de que PostgREST resuelva la relación anidada teams(...).
+    const primary=await sb.from('tournament_teams').select('team_id,is_active').eq('tournament_id',tid).eq('category_id',cat);
+    if(primary.error) firstError=primary.error;
+    else links=(primary.data||[]).filter(x=>x.team_id&&x.is_active!==false).map(x=>String(x.team_id));
+    // Para roster ya existente, también permitimos recuperar equipos aunque falte
+    // la relación de inscripción de torneo-categoría.
     if(!links.length){
-      const rr=await sb.from('roster_registrations').select('team_id,teams(id,name)').eq('tournament_id',tid).eq('category_id',cat);
-      if(!rr.error)links=(rr.data||[]).filter(x=>x.team_id&&x.teams?.id).map(x=>({id:x.teams.id,name:x.teams.name}));
-      else if(!firstError)firstError=rr.error;
+      const rr=await sb.from('roster_registrations').select('team_id').eq('tournament_id',tid).eq('category_id',cat);
+      if(!rr.error) links=(rr.data||[]).map(x=>x.team_id).filter(Boolean).map(String);
+      else if(!firstError) firstError=rr.error;
     }
-    // Último respaldo: consulta directa a relaciones de inscripción sin exigir categoría
-    // exacta y conserva solo equipos realmente asociados al torneo.
+    // Último respaldo: equipos del torneo, por si la categoría fue reasignada o
+    // el registro de inscripción antiguo no coincide con la categoría seleccionada.
     if(!links.length){
-      const rel=await sb.from('tournament_teams').select('team_id,teams(id,name)').eq('tournament_id',tid);
-      if(!rel.error)links=(rel.data||[]).filter(x=>x.team_id&&x.teams?.id).map(x=>({id:x.teams.id,name:x.teams.name}));
-      else if(!firstError)firstError=rel.error;
+      const rel=await sb.from('tournament_teams').select('team_id').eq('tournament_id',tid);
+      if(!rel.error) links=(rel.data||[]).map(x=>x.team_id).filter(Boolean).map(String);
+      else if(!firstError) firstError=rel.error;
     }
-    const map=new Map();links.forEach(x=>map.set(String(x.id),{id:String(x.id),name:x.name||'Equipo'}));
-    const teams=[...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name),'es'));
+    links=[...new Set(links)];
+    let teams=[];
+    if(links.length){
+      const tq=await sb.from('teams').select('id,name').in('id',links);
+      if(!tq.error) teams=(tq.data||[]).map(x=>({id:String(x.id),name:x.name||'Equipo'}));
+      else if(!firstError) firstError=tq.error;
+    }
+    teams.sort((a,b)=>String(a.name).localeCompare(String(b.name),'es'));
     if(!teams.length){
       teamEl.innerHTML='<option value="">No se encontraron equipos para esta categoría</option>';
-      if(firstError)console.warn('No se pudieron cargar equipos de roster:',firstError.message);
+      console.warn('GAME ON FLAG · selector de equipos vacío', {tournament:tid,category:cat,error:firstError?.message||null});
+      if(firstError) console.warn('Consulta de equipos:',firstError.message);
       await loadQuickRoster();
       return;
     }

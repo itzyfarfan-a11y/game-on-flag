@@ -2314,7 +2314,49 @@ let gofRosterLiveTimer=null;function startAdminRosterLive(){if(gofRosterLiveTime
 let quickRosterContext={tid:'',cat:'',team:'',editing:null};
 async function loadQuickRosterSelectors(){const {data:t}=await sb.from('tournaments').select('id,name,status').eq('league_id',gofCurrentOrganizationId).in('status',['proximo','activo']).order('created_at',{ascending:false});fill('qrt',t,'id','name');await updateQuickRosterCats();await loadViewRosterSelectors()}
 async function updateQuickRosterCats(){const tid=val('qrt'),catEl=document.getElementById('qrc'),teamEl=document.getElementById('qre');if(!tid){catEl.innerHTML='<option value="">Selecciona categoría</option>';teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:tc,error}=await sb.from('tournament_categories').select('category_id,categories(id,name)').eq('tournament_id',tid);if(error)return alert(error.message);const cats=(tc||[]).map(x=>({id:x.category_id,name:x.categories?.name||'Categoría'}));fill('qrc',cats,'id','name');if(cats.length)catEl.value=cats[0].id;await updateQuickRosterTeams()}
-async function updateQuickRosterTeams(){const tid=val('qrt'),cat=val('qrc'),teamEl=document.getElementById('qre');if(!tid||!cat){teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}const {data:ins,error}=await sb.from('tournament_teams').select('team_id').eq('tournament_id',tid).eq('category_id',cat).eq('is_active',true);if(error)return alert(error.message);const ids=(ins||[]).map(x=>x.team_id).filter(Boolean);const {data:teams,error:te}=ids.length?await sb.from('teams').select('id,name').in('id',ids).order('name'):{data:[],error:null};if(te)return alert(te.message);fill('qre',teams||[],'id','name');if(teams?.length)teamEl.value=teams[0].id;await loadQuickRoster()}
+async function updateQuickRosterTeams(){
+  const tid=val('qrt'),cat=val('qrc'),teamEl=document.getElementById('qre');
+  if(!teamEl)return;
+  if(!tid||!cat){teamEl.innerHTML='<option value="">Selecciona equipo</option>';return}
+  const previous=teamEl.value;
+  teamEl.innerHTML='<option value="">Cargando equipos…</option>';
+  try{
+    // Fuente principal: equipos inscritos en la categoría del torneo.
+    let links=[], firstError=null;
+    const primary=await sb.from('tournament_teams').select('team_id,is_active,teams(id,name)').eq('tournament_id',tid).eq('category_id',cat);
+    if(primary.error)firstError=primary.error;
+    else links=(primary.data||[]).filter(x=>x.team_id&&x.teams&&x.is_active!==false).map(x=>({id:x.teams.id,name:x.teams.name}));
+    // Respaldo para torneos antiguos: recuperar los equipos que ya tienen roster,
+    // aunque falte la relación tournament_teams o esté marcada inactiva.
+    if(!links.length){
+      const rr=await sb.from('roster_registrations').select('team_id,teams(id,name)').eq('tournament_id',tid).eq('category_id',cat);
+      if(!rr.error)links=(rr.data||[]).filter(x=>x.team_id&&x.teams?.id).map(x=>({id:x.teams.id,name:x.teams.name}));
+      else if(!firstError)firstError=rr.error;
+    }
+    // Último respaldo: consulta directa a relaciones de inscripción sin exigir categoría
+    // exacta y conserva solo equipos realmente asociados al torneo.
+    if(!links.length){
+      const rel=await sb.from('tournament_teams').select('team_id,teams(id,name)').eq('tournament_id',tid);
+      if(!rel.error)links=(rel.data||[]).filter(x=>x.team_id&&x.teams?.id).map(x=>({id:x.teams.id,name:x.teams.name}));
+      else if(!firstError)firstError=rel.error;
+    }
+    const map=new Map();links.forEach(x=>map.set(String(x.id),{id:String(x.id),name:x.name||'Equipo'}));
+    const teams=[...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name),'es'));
+    if(!teams.length){
+      teamEl.innerHTML='<option value="">No se encontraron equipos para esta categoría</option>';
+      if(firstError)console.warn('No se pudieron cargar equipos de roster:',firstError.message);
+      await loadQuickRoster();
+      return;
+    }
+    fill('qre',teams,'id','name');
+    teamEl.value=teams.some(x=>x.id===previous)?previous:teams[0].id;
+    await loadQuickRoster();
+  }catch(err){
+    console.error('GAME ON FLAG · selector de equipo:',err);
+    teamEl.innerHTML='<option value="">Error al cargar equipos; cambia de categoría e inténtalo de nuevo</option>';
+    alert('No se pudieron cargar los equipos: '+(err?.message||err));
+  }
+}
 async function fetchQuickRoster(){
   const tid=val('qrt'),cat=val('qrc'),team=val('qre');
   if(!tid||!cat||!team)return [];

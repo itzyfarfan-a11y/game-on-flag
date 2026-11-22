@@ -705,21 +705,23 @@ async function table(){
 }
 async function playoffs(){
  const s=document.getElementById('playoffs'),activeIds=new Set(visibleCategories().map(x=>String(x.id)));
- const list=data.playoffs.filter(p=>(!p.category_id||activeIds.has(String(p.category_id)))&&(!c.value||!p.category_id||p.category_id===c.value));
- let h='<div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">🏆 Playoffs'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><button type="button" class="primary" onclick="downloadPublicPlayoffsImage()">🖼️ Descargar playoffs</button></div>';
+ const list=data.playoffs.filter(p=>(!p.category_id||activeIds.has(String(p.category_id)))&&(!c.value||!p.category_id||String(p.category_id)===String(c.value))).sort((a,b)=>Number(a.match_order||0)-Number(b.match_order||0));
+ let h='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">🏆 Playoffs'+(c.value?' · '+esc(cat(c.value)):'')+'</h2><button type="button" class="primary" onclick="downloadPublicPlayoffsImage()">🖼️ Descargar playoffs</button></div>';
  if(!list.length){s.innerHTML=h+'<div class="empty">El bracket aún no ha sido publicado.</div>';return}
  const stages=[...new Set(list.map(p=>p.stage||'Playoff'))];
- const stageHtml=stages.map(stage=>{
-   const games=list.filter(p=>(p.stage||'Playoff')===stage).sort((a,b)=>Number(a.match_order||0)-Number(b.match_order||0));
-   const gamesHtml=games.map((p,i)=>{
-     const a=team(p.team_a_id).name,b=team(p.team_b_id).name;
-     const status=p.winner_team_id?'Ganador definido':(p.published?'Publicado':'Publicado');
-     const mode=p.playoff_mode==='manual'?'Manual':'Automático';
-     return '<div class="gamebox"><span class="mut small">Juego '+esc(p.match_order||i+1)+' · '+mode+'</span><b>'+esc(a||'Por definir')+'</b><span>'+(p.score_a??'')+'</span><b>'+esc(b||'Por definir')+'</b><span>'+(p.score_b??'')+'</span><div class="mut small" style="margin-top:8px">'+esc(p.match_date||'Fecha por definir')+' · '+esc(p.match_time?String(p.match_time).slice(0,5):'Hora por definir')+' · '+esc(p.field_name||'Campo por definir')+'</div><span class="tag" style="margin-top:8px">'+status+'</span></div>';
-   }).join('');
-   return '<div class="bracketcol"><h4 style="margin:4px 0">'+esc(stage)+'</h4>'+gamesHtml+'</div>';
+ const stageHtml=stages.map((stage,si)=>{
+  const games=list.filter(p=>(p.stage||'Playoff')===stage).sort((a,b)=>Number(a.match_order||0)-Number(b.match_order||0));
+  const gamesHtml=games.map((p,idx)=>{
+   const a=team(p.team_a_id).name||'Por definir',b=team(p.team_b_id).name||'Por definir';
+   const winner=p.winner_team_id?String(p.winner_team_id):'';
+   const done=!!winner;
+   const row=(id,name,score)=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border-radius:10px;background:'+(winner&&String(id)===winner?'#e8f6ed':'#f3f6fb')+';border:1px solid '+(winner&&String(id)===winner?'#9bd2ad':'#dce4ee')+';margin-top:7px"><span style="font-weight:'+(winner&&String(id)===winner?'900':'700')+';color:#18324b;overflow-wrap:anywhere">'+esc(name)+(winner&&String(id)===winner?' 🏆':'')+'</span><strong style="font-size:24px;min-width:34px;text-align:center;color:#152d49">'+(score==null?'—':esc(score))+'</strong></div>';
+   const schedule='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;color:#617286;font-size:13px"><span>📅 '+esc(p.match_date||'Fecha por definir')+'</span><span>🕒 '+esc(p.match_time?String(p.match_time).slice(0,5):'Hora por definir')+'</span><span>📍 '+esc(p.field_name||'Campo por definir')+'</span></div>';
+   return '<article style="background:#fff;border:1px solid #d8e1ec;border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(20,45,75,.07);min-width:245px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:12px;font-weight:900;color:#5c6f85;text-transform:uppercase">Juego '+esc(p.match_order||idx+1)+'</span><span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:20px;background:'+(done?'#e8f6ed':'#edf2f8')+';color:'+(done?'#17653a':'#52677f')+'">'+(done?'FINALIZADO':'POR JUGAR')+'</span></div>'+row(p.team_a_id,a,p.score_a)+row(p.team_b_id,b,p.score_b)+schedule+'</article>';
+  }).join('');
+  return '<section style="margin-top:18px"><h3 style="margin:0 0 10px;color:#17324d;font-size:20px">'+esc(stage)+'</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px">'+gamesHtml+'</div></section>';
  }).join('');
- h+='<div class="card"><h3>Bracket · '+(list.some(p=>p.playoff_mode==='manual')?'✋ Manual':'🤖 Automático')+'</h3><div class="mut">Consulta pública · mismo formato de bracket de Administración.</div><div class="bracket">'+stageHtml+'</div></div>';
+ h+='<div class="card" style="margin-top:14px;background:#f7f9fc"><div style="font-size:14px;color:#607187;margin-bottom:6px">'+esc(data.tournament?.name||'Torneo')+' · '+esc(cat(c.value)||'Todas las categorías')+'</div><div style="font-size:13px;color:#607187">Resultados oficiales de fase final</div>'+stageHtml+'</div>';
  s.innerHTML=h;
 }
 async function legacyPublicAnnouncementsSection(){
@@ -814,17 +816,24 @@ async function downloadPublicPlayoffsImage(){
     const s=document.getElementById('tabla');
     if(data.tournament?.table_published===false){s.innerHTML='<h2>📊 Tabla de posiciones</h2><div class="empty">La tabla general aún no está publicada por la organización.</div>';return}
     if(!c.value){s.innerHTML='<h2>📊 Tabla de posiciones</h2><div class="empty">Selecciona una categoría para mostrar su tabla.</div>';return}
-    const ids=new Set([String(c.value)]),m={};
-    data.teams.filter(tm=>(tm.category_ids||[]).some(id=>ids.has(String(id)))).forEach(tm=>{m[String(tm.id)]={id:String(tm.id),jj:0,jg:0,pa:0,pc:0,forfeit:false}});
-    const source=Array.isArray(standingsMatches)&&standingsMatches.length?standingsMatches:(Array.isArray(data.matches)?data.matches:[]);
-    source.filter(x=>ids.has(String(x.category_id))&&['jugado','incomparecencia'].includes(String(x.status||'').toLowerCase())).forEach(x=>{
-      const hid=String(x.home_team_id||''),aid=String(x.away_team_id||'');if(!m[hid]||!m[aid])return;
-      const excluded=String(x.stats_exclude_team_id||''),hs=Number(x.home_score)||0,as=Number(x.away_score)||0;
-      if(hid!==excluded){m[hid].jj++;m[hid].pa+=hs;m[hid].pc+=as;if(hs>as)m[hid].jg++;if(String(x.status).toLowerCase()==='incomparecencia'&&String(x.absent_team_id||'')===hid)m[hid].forfeit=true}
-      if(aid!==excluded){m[aid].jj++;m[aid].pa+=as;m[aid].pc+=hs;if(as>hs)m[aid].jg++;if(String(x.status).toLowerCase()==='incomparecencia'&&String(x.absent_team_id||'')===aid)m[aid].forfeit=true}
-    });
-    const rows=Object.values(m).map(x=>({...x,dif:x.pa-x.pc})).sort((a,b)=>b.jg-a.jg||b.dif-a.dif||b.pa-a.pa||a.pc-b.pc||team(a.id).name.localeCompare(team(b.id).name));
-    s.innerHTML='<h2>📊 Tabla de posiciones · '+esc(cat(c.value))+'</h2><div class="card"><button type="button" class="primary" onclick="downloadPublicTableImage()">🖼️ Descargar tabla</button><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th><th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>'+(rows.length?rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+(x.forfeit?'<span class="gof-forfeit-dot" title="FORFEIT"></span>':'')+esc(team(x.id).name)+'</b></td><td>'+x.jj+'</td><td>'+x.jg+'</td><td>'+x.pa+'</td><td>'+x.pc+'</td><td>'+x.dif+'</td></tr>').join(''):'<tr><td colspan="7">No hay equipos registrados para esta categoría.</td></tr>')+'</tbody></table></div></div><div class="notice">Orden: <b>JG → DIF → PA → menor PE</b>.</div>';
+    const pair=publicABPair(c.value);
+    let rows=publicCategoryRows([String(c.value)]),reclassified=false,splitAt=0;
+    if(pair){
+      const ids=[String(pair.selected.id),String(pair.other.id)];
+      const allTeams=data.teams.filter(tm=>(tm.category_ids||[]).some(id=>ids.includes(String(id))));
+      const counts={};allTeams.forEach(tm=>counts[String(tm.id)]=0);
+      standingsMatches.filter(x=>ids.includes(String(x.category_id))&&['jugado','incomparecencia'].includes(String(x.status||'').toLowerCase())).forEach(x=>{
+        const hid=String(x.home_team_id||''),aid=String(x.away_team_id||'');
+        if(counts[hid]!=null)counts[hid]++;if(counts[aid]!=null)counts[aid]++;
+      });
+      const required=data.tournament?.tournament_type==='relampago'?3:Number(data.tournament?.regular_rounds)||7;
+      if(allTeams.length>0&&allTeams.every(tm=>(counts[String(tm.id)]||0)>=required)){
+        const all=publicCategoryRows(ids);splitAt=Math.ceil(all.length/2);rows=pair.role==='A'?all.slice(0,splitAt):all.slice(splitAt);reclassified=true;
+      }
+    }
+    const title=reclassified?'<h2>📊 Reclasificación · '+esc(pair.base)+' '+pair.role+'</h2>':'<h2>📊 Tabla de posiciones · '+esc(cat(c.value))+'</h2>';
+    const note=reclassified?'<div class="notice"><b>Reclasificación A/B completada:</b> resultados acumulados de '+esc(pair.selected.name)+' + '+esc(pair.other.name)+'.</div>':'<div class="notice">Orden: <b>JG → DIF → PA → menor PE</b>.</div>';
+    s.innerHTML=title+'<div class="card"><button type="button" class="primary" onclick="downloadPublicTableImage()">🖼️ Descargar tabla</button><div class="scroll"><table><thead><tr><th>#</th><th>Equipo</th>'+(reclassified?'<th>Origen</th>':'')+'<th>JJ</th><th>JG</th><th>PA</th><th>PE</th><th>DIF</th></tr></thead><tbody>'+(rows.length?rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+(x.forfeit?'<span class="gof-forfeit-dot" title="FORFEIT" aria-label="FORFEIT"></span>':'')+esc(team(x.id).name)+'</b></td>'+(reclassified?'<td>'+esc(cat(x.category_id))+'</td>':'')+'<td>'+x.jj+'</td><td>'+x.jg+'</td><td>'+x.pa+'</td><td>'+x.pc+'</td><td>'+x.dif+'</td></tr>').join(''):'<tr><td colspan="8">No hay equipos registrados para esta categoría.</td></tr>')+'</tbody></table></div></div>'+note;
   };
 
   window.downloadPublicCalendarPNG=async function(){
